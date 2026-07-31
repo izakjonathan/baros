@@ -77,3 +77,7 @@ The app can now be opened before PostgreSQL is configured. In local development,
 This fallback only exposes the existing local-state manager workspace. Database-backed API routes and the employee portal still require PostgreSQL. Once `DATABASE_URL` is configured, the normal database authentication flow takes over automatically.
 
 For a temporary Vercel preview without a database, set `DEV_AUTH_ENABLED=true`, `DEV_AUTH_SECRET` to a long random value, and optionally change `DEV_AUTH_EMAIL` and `DEV_AUTH_PASSWORD`. Remove or disable the flag when the database is connected.
+
+
+## v0.3.4 mobile dialog behavior
+Dialogs scroll independently on iOS Safari and keep their header and action area visible.
