@@ -91,3 +91,12 @@ Copy previous week duplicates the immediately preceding week into the currently 
 
 ## v0.3.9 Time & attendance
 Adds scheduled-versus-worked hour reporting, employee period totals, clock in/out and breaks, manager timesheet approval, and PostgreSQL migration `003_time_attendance.sql`. In database-free development mode the screens use demo state; with PostgreSQL the new APIs provide persistent punches and timesheets.
+
+## v0.4.0 verification
+
+```bash
+npm run test:logic
+npm run build
+```
+
+Overnight shifts belong to the calendar date on which they start. An end time earlier than the start time is displayed as ending the following day and does not move the shift to that day.

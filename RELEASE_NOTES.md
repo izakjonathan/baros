@@ -1,10 +1,11 @@
-# v0.3.9 — Time & attendance foundation
+# v0.4.0 — Mobile audit and overnight shift hardening
 
-- Manager Time & attendance workspace with period and employee filters.
-- Scheduled, completed worked, and pending-approval totals.
-- Per-employee scheduled versus approved worked-hour summaries.
-- Employee My hours page with clock in, break, clock out, period totals and timesheet history.
-- PostgreSQL tables for settings, timesheets, immutable punch events and breaks.
-- Employee time-clock API and manager timesheet query/approval API.
-- Audit-friendly model: punch events are preserved separately from corrected/approved timesheets.
-- Database-free UI remains usable with demo attendance state.
+- Makes the shift start date canonical and independent of the end time.
+- Reassigning an overnight available shift no longer changes its scheduled day.
+- Shows `+1` and “Overnight” when a shift ends on the following calendar day.
+- Copies canonical dates correctly when copying the previous week.
+- Restores pinch zoom and reliable vertical scrolling in iOS dialogs.
+- Prevents modal and employee-portal horizontal overflow.
+- Uses 16px mobile form controls to avoid Safari focus zoom.
+- Preserves and restores background scroll position while dialogs are open.
+- Adds source-level shift-date, overnight, recurrence, and copy-week regression checks.

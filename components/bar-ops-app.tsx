@@ -21,10 +21,14 @@ const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = 
 
 type Employee = { name: string; initials: string; role: string; hours: number; status: string; active: boolean; email?: string; phone?: string };
 type TimeEntry = { id: string; employee: string; date: string; clockIn: string; clockOut?: string; breakMinutes: number; status: "Running" | "Pending" | "Approved"; scheduledHours: number };
-const BASE_MONDAY = new Date(2026, 6, 27);
+const BASE_MONDAY = new Date(2026, 6, 27, 12);
 function toIsoDate(date: Date) { const y = date.getFullYear(); const m = String(date.getMonth()+1).padStart(2,"0"); const d = String(date.getDate()).padStart(2,"0"); return `${y}-${m}-${d}`; }
-function shiftPositionFromDate(value: string) { const date = new Date(`${value}T12:00:00`); const diffDays = Math.round((date.getTime() - BASE_MONDAY.getTime()) / 86400000); return { day: ((diffDays % 7) + 7) % 7, weekOffset: Math.floor(diffDays / 7) }; }
+function dateSerial(value: string) { const [year, month, day] = value.split("-").map(Number); return Date.UTC(year, month - 1, day) / 86400000; }
+const BASE_DATE_SERIAL = dateSerial("2026-07-27");
+function shiftPositionFromDate(value: string) { const diffDays = dateSerial(value) - BASE_DATE_SERIAL; return { day: ((diffDays % 7) + 7) % 7, weekOffset: Math.floor(diffDays / 7) }; }
 function dateFromShift(weekOffset = 0, day = 0) { const date = new Date(BASE_MONDAY); date.setDate(BASE_MONDAY.getDate() + weekOffset * 7 + day); return toIsoDate(date); }
+function canonicalShiftDate(shift: Shift) { return shift.date ?? dateFromShift(shift.weekOffset ?? 0, shift.day); }
+function isOvernight(start: string, end: string) { return end <= start; }
 
 export function BarOpsApp({ userName, userRole, devMode }: { userName: string; userRole: string; devMode: boolean }) {
   const [active, setActive] = useState<NavKey>("dashboard");
@@ -154,7 +158,7 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
     const source = shifts.filter((shift) => (shift.weekOffset ?? 0) === currentWeekOffset - 1);
     if (!source.length) { notify("The previous week has no shifts to copy"); return; }
     if (visibleShifts.length && !window.confirm("This week already contains shifts. Add copies from the previous week as additional drafts?")) return;
-    const copies = source.map((shift) => ({ ...shift, id: crypto.randomUUID(), weekOffset: currentWeekOffset, status: "Draft" as const, recurrenceLabel: undefined }));
+    const copies = source.map((shift) => { const sourceDate = new Date(`${canonicalShiftDate(shift)}T12:00:00`); sourceDate.setDate(sourceDate.getDate() + 7); const date = toIsoDate(sourceDate); const position = shiftPositionFromDate(date); return { ...shift, id: crypto.randomUUID(), date, day: position.day, weekOffset: position.weekOffset, status: "Draft" as const, recurrenceLabel: undefined }; });
     setShifts((current) => [...current, ...copies]);
     notify(`${copies.length} shifts copied as drafts`);
   }
@@ -167,7 +171,7 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
     <div className="legend"><span><i className="manager" /> Manager</span><span><i className="bartender" /> Bartender</span><span><i className="floor" /> Floor</span><span><i className="draft" /> Draft</span></div>
   </>
 }
-function ShiftCard({ shift, onOpen }: { shift: Shift; onOpen: () => void }) { return <button type="button" className={`shift-card shift-card-button role-${shift.role.toLowerCase()} ${shift.status === "Draft" ? "is-draft" : ""}`} onClick={onOpen} aria-label={`Open ${shift.isOpen ? "available" : shift.employee} shift ${shift.start} to ${shift.end}`}><div className="shift-card-top"><span>{shift.start}–{shift.end}</span><ChevronRight size={14} /></div><strong>{shift.isOpen ? "Available shift" : shift.employee}</strong><small>{shift.role}{shift.recurrenceLabel ? ` · ${shift.recurrenceLabel}` : ""}</small>{shift.isOpen && <em>Open</em>}{shift.status === "Draft" && <em>Draft</em>}</button> }
+function ShiftCard({ shift, onOpen }: { shift: Shift; onOpen: () => void }) { const overnight = isOvernight(shift.start, shift.end); return <button type="button" className={`shift-card shift-card-button role-${shift.role.toLowerCase()} ${shift.status === "Draft" ? "is-draft" : ""}`} onClick={onOpen} aria-label={`Open ${shift.isOpen ? "available" : shift.employee} shift ${shift.start} to ${shift.end}${overnight ? " next day" : ""}`}><div className="shift-card-top"><span>{shift.start}–{shift.end}{overnight ? " +1" : ""}</span><ChevronRight size={14} /></div><strong>{shift.isOpen ? "Available shift" : shift.employee}</strong><small>{shift.role}{overnight ? " · Overnight" : ""}{shift.recurrenceLabel ? ` · ${shift.recurrenceLabel}` : ""}</small>{shift.isOpen && <em>Open</em>}{shift.status === "Draft" && <em>Draft</em>}</button> }
 
 function hoursBetween(start: string, end: string) { const [sh,sm]=start.split(":").map(Number); const [eh,em]=end.split(":").map(Number); let mins=(eh*60+em)-(sh*60+sm); if(mins<=0) mins+=1440; return mins/60; }
 function workedHours(entry: TimeEntry) { return entry.clockOut ? Math.max(0, hoursBetween(entry.clockIn, entry.clockOut) - entry.breakMinutes/60) : 0; }
@@ -227,7 +231,7 @@ function ShiftDialog({ onClose, onSave, currentWeekOffset, employees }: { onClos
     const label = repeat ? (frequency === "daily" ? `Daily · ${uniqueOccurrences.length} times` : `Weekly · ${(weekdays.length ? weekdays : [shiftPositionFromDate(shiftDate).day]).map((d) => weekdayNames[d]).join(", ")}`) : undefined;
     const name = assignment === "open" ? "Available shift" : employee;
     const initials = assignment === "open" ? "+" : employee.split(" ").map((word) => word[0]).join("");
-    onSave(uniqueOccurrences.map((occurrence, index) => ({ id: crypto.randomUUID(), day: occurrence.day, weekOffset: occurrence.weekOffset, employee: name, initials, start, end, role, status: "Draft", isOpen: assignment === "open", recurrenceLabel: index === 0 ? label : undefined })));
+    onSave(uniqueOccurrences.map((occurrence, index) => ({ id: crypto.randomUUID(), date: dateFromShift(occurrence.weekOffset, occurrence.day), day: occurrence.day, weekOffset: occurrence.weekOffset, employee: name, initials, start, end, role, status: "Draft", isOpen: assignment === "open", recurrenceLabel: index === 0 ? label : undefined })));
   }
   return <Modal title="Add shift" subtitle="Create one shift or a repeating series." onClose={onClose}>
     <div className="assignment-toggle"><button className={assignment === "employee" ? "selected" : ""} onClick={() => setAssignment("employee")}>Assign employee</button><button className={assignment === "open" ? "selected" : ""} onClick={() => setAssignment("open")}>Available shift</button></div>
@@ -236,7 +240,7 @@ function ShiftDialog({ onClose, onSave, currentWeekOffset, employees }: { onClos
       {assignment === "open" && <div className="open-shift-note full-field"><Users size={18}/><div><strong>Employees can request this shift</strong><span>A manager approves the employee who receives it.</span></div></div>}
       <label>Shift date<input type="date" value={shiftDate} onChange={(e) => { setShiftDate(e.target.value); setWeekdays([shiftPositionFromDate(e.target.value).day]); }} /></label>
       <label>Role<select value={role} onChange={(e) => setRole(e.target.value as ShiftRole)}><option>Manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label>
-      <label>Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} /></label><label>Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /></label>
+      <label>Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} /></label><label>Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /><small className="field-help">{isOvernight(start, end) ? "Ends the following day" : "Ends the same day"}</small></label>
     </div>
     <label className="repeat-switch"><input type="checkbox" checked={repeat} onChange={(e) => setRepeat(e.target.checked)}/><span><strong>Repeat shift</strong><small>Create a daily or weekly series</small></span></label>
     {repeat && <div className="repeat-panel"><div className="frequency-toggle"><button className={frequency === "daily" ? "selected" : ""} onClick={() => setFrequency("daily")}>Daily</button><button className={frequency === "weekly" ? "selected" : ""} onClick={() => setFrequency("weekly")}>Weekly</button></div>
@@ -250,7 +254,7 @@ function EditShiftDialog({ shift, employees, onClose, onSave, onDelete }: { shif
   const [assignment, setAssignment] = useState<"employee" | "open">(shift.isOpen ? "open" : "employee");
   const activeEmployees = employees.filter((person) => person.active);
   const [employee, setEmployee] = useState(shift.isOpen ? activeEmployees[0]?.name ?? "" : shift.employee);
-  const [shiftDate, setShiftDate] = useState(dateFromShift(shift.weekOffset ?? 0, shift.day));
+  const [shiftDate, setShiftDate] = useState(canonicalShiftDate(shift));
   const [role, setRole] = useState<ShiftRole>(shift.role);
   const [start, setStart] = useState(shift.start);
   const [end, setEnd] = useState(shift.end);
@@ -258,7 +262,7 @@ function EditShiftDialog({ shift, employees, onClose, onSave, onDelete }: { shif
   function save() {
     const selectedEmployee = assignment === "open" ? "Available shift" : employee;
     const position = shiftPositionFromDate(shiftDate);
-    onSave({ ...shift, day: position.day, weekOffset: position.weekOffset, employee: selectedEmployee, initials: assignment === "open" ? "+" : employee.split(" ").map((word) => word[0]).join(""), role, start, end, status, isOpen: assignment === "open" });
+    onSave({ ...shift, date: shiftDate, day: position.day, weekOffset: position.weekOffset, employee: selectedEmployee, initials: assignment === "open" ? "+" : employee.split(" ").map((word) => word[0]).join(""), role, start, end, status, isOpen: assignment === "open" });
   }
   return <Modal title="Edit shift" subtitle="Update this shift occurrence, its assignment or availability." onClose={onClose}>
     <div className="assignment-toggle"><button type="button" className={assignment === "employee" ? "selected" : ""} onClick={() => setAssignment("employee")}>Assign employee</button><button type="button" className={assignment === "open" ? "selected" : ""} onClick={() => setAssignment("open")}>Available shift</button></div>
@@ -267,7 +271,7 @@ function EditShiftDialog({ shift, employees, onClose, onSave, onDelete }: { shif
       {assignment === "open" && <div className="open-shift-note full-field"><Users size={18}/><div><strong>Employees can request this shift</strong><span>The current employee is removed. A manager approves the employee who receives it.</span></div></div>}
       <label>Shift date<input type="date" value={shiftDate} onChange={(e) => setShiftDate(e.target.value)} /></label>
       <label>Role<select value={role} onChange={(e) => setRole(e.target.value as ShiftRole)}><option>Manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label>
-      <label>Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} /></label><label>Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /></label>
+      <label>Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} /></label><label>Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /><small className="field-help">{isOvernight(start, end) ? "Ends the following day" : "Ends the same day"}</small></label>
       <label className="full-field">Schedule status<select value={status} onChange={(e) => setStatus(e.target.value as "Draft" | "Published")}><option>Draft</option><option>Published</option></select></label>
     </div>
     {shift.recurrenceLabel && <div className="series-edit-note"><CalendarDays size={17}/><div><strong>Repeating shift</strong><span>This edit changes only this occurrence. Series-wide editing will be added separately.</span></div></div>}
@@ -289,9 +293,14 @@ function ProductDialog({ onClose, onSave }: { onClose: () => void; onSave: (prod
 function OrderDialog({ onClose, onSave }: { onClose: () => void; onSave: () => void }) { return <Modal title="Create purchase order" subtitle="Choose a supplier to begin an order." onClose={onClose}><div className="supplier-options">{["Nordic Drinks", "Vin & Co.", "Bar Supply DK", "City Produce"].map((supplier, i) => <label key={supplier}><input type="radio" name="supplier" defaultChecked={i === 0} /><span className="attention-icon blue"><Truck size={18} /></span><b>{supplier}</b><ChevronRight size={17} /></label>)}</div><ModalActions onClose={onClose} onSave={onSave} label="Continue" /></Modal> }
 function Modal({ title, subtitle, onClose, children }: { title: string; subtitle: string; onClose: () => void; children: React.ReactNode }) {
   useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = previousOverflow; };
+    const scrollY = window.scrollY;
+    const body = document.body;
+    const previous = { overflow: body.style.overflow, position: body.style.position, top: body.style.top, width: body.style.width };
+    body.style.overflow = "hidden";
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.width = "100%";
+    return () => { body.style.overflow = previous.overflow; body.style.position = previous.position; body.style.top = previous.top; body.style.width = previous.width; window.scrollTo(0, scrollY); };
   }, []);
 
   return <div className="modal-layer" role="presentation"><button className="modal-scrim" onClick={onClose} aria-label="Close dialog" /><section className="modal" role="dialog" aria-modal="true" aria-label={title}><div className="modal-head"><div><h2>{title}</h2><p>{subtitle}</p></div><button className="icon-button" onClick={onClose} aria-label="Close"><X size={19} /></button></div>{children}</section></div>

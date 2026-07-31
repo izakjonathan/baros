@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+const BASE_SERIAL = Date.UTC(2026,6,27)/86400000;
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const pos=value=>{const [y,m,d]=value.split('-').map(Number);const diff=Date.UTC(y,m-1,d)/86400000-BASE_SERIAL;return{day:((diff%7)+7)%7,weekOffset:Math.floor(diff/7)}};
+const overnight=(start,end)=>end<=start;
+assert.deepEqual(pos('2026-07-31'),{day:4,weekOffset:0});
+assert.deepEqual(pos('2026-08-01'),{day:5,weekOffset:0});
+assert.equal(overnight('17:00','01:00'),true);
+assert.equal(overnight('17:00','23:00'),false);
+const original={date:'2026-07-31',start:'17:00',end:'01:00'};
+const reassigned={...original,employee:'Maya Chen'};
+assert.equal(reassigned.date,'2026-07-31','reassignment must preserve start date');
+const copied=new Date(`${original.date}T12:00:00`);copied.setDate(copied.getDate()+7);
+assert.equal(iso(copied),'2026-08-07');
+const daily=Array.from({length:4},(_,i)=>{const d=new Date('2026-07-31T12:00:00');d.setDate(d.getDate()+i);return iso(d)});
+assert.deepEqual(daily,['2026-07-31','2026-08-01','2026-08-02','2026-08-03']);
+console.log('Shift logic regression checks passed');

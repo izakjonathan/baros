@@ -6,6 +6,7 @@ export type Shift = {
   id: string;
   day: number;
   weekOffset?: number;
+  date?: string;
   employee: string;
   initials: string;
   start: string;
