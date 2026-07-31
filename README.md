@@ -128,3 +128,19 @@ Read `DEEP_PRODUCT_AUDIT.md` and `RESEARCH_MATRIX.md` for the full product revie
 ## v0.6.1 migration
 
 Run `npm run db:migrate` to apply the production operations schema in `db/migrations/005_production_operations.sql`. See `IMPLEMENTATION_STATUS.md` for the exact implementation boundary.
+
+## v0.7.0 development workflow
+
+Development mode now persists the manager workspace in browser localStorage. Inventory changes, stock counts, operational tasks, and handover notes survive refreshes.
+
+Use **Control centre → Development data** to:
+
+- Export the current workspace as JSON
+- Import a previous JSON backup
+- Reset to the original demo data
+
+Run the new regression suite with:
+
+```bash
+npm run test:inventory
+```

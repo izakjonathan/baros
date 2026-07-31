@@ -1,32 +1,18 @@
-# v0.6.0 implementation status
+# v0.7.0 implementation status
 
-## Implemented end-to-end foundations
+## Implemented in development mode
 
-- Tenant-scoped PostgreSQL bootstrap for manager employees, shifts, products, orders, timesheets, alerts, templates, forecasts and exports.
-- Persistent employee create/update including payroll ID, salary code and cost centre.
-- Persistent shift create/update/delete, recurrence scope API, open shifts, overlap/availability/leave checks.
-- Persistent product creation and inventory update API.
-- Persistent purchase-order creation API.
-- Permanent payroll periods and immutable export ledger with included timesheet IDs and SHA-256 hashes.
-- Closed payroll-period state and guarded state transitions.
-- Kiosk PIN verification, failed-attempt lockout and geofence validation endpoint.
-- Attendance alert store and manager resolution endpoint.
-- Schedule templates, publication versions, notifications and acknowledgement schema.
-- Delivery receipt, invoice discrepancy, waste and stock transfer ledgers.
-- Password reset token, rate-limit, session, GDPR request and health-event foundations.
-- Drag-and-drop schedule interaction in the manager calendar.
+- Product creation and editing
+- Product-level stock, par, reorder level, supplier, SKU, unit, pack size, pricing, notes, and status
+- Reasoned stock adjustments and adjustment history
+- Stock-count workflow and variance review
+- Suggested replenishment
+- Basic delivery receiving and stock update
+- Opening and closing checklists
+- General and maintenance tasks
+- Manager logbook and handover notes
+- Browser persistence with JSON backup/restore/reset
 
-## Infrastructure-dependent or staged
+## Still staged for production integration
 
-These require external services or a later dedicated UI before they are production-complete:
-
-- TOTP enrollment/QR/recovery-code user interface and encrypted secrets provider.
-- Transactional email delivery for password resets and schedule notifications.
-- Push notifications and mobile device registration.
-- Scheduled attendance-alert worker for missed clock-outs and lateness.
-- Managed PostgreSQL backup policy, point-in-time recovery and automated restore drills.
-- External monitoring provider integration and alert routing.
-- Full visual editors for templates, labour forecasts, delivery line matching and stock transfers.
-- Browser geolocation permission UX and venue coordinate configuration screen.
-
-The database schema and API boundaries are included now so these integrations can be added without another data-model rewrite.
+The v0.6 PostgreSQL foundations remain present, but the new v0.7 operational editors are intentionally local-first while the product is being tested. Before production launch, connect stock counts, product metadata, task templates, task completions, and logbook entries to tenant-scoped PostgreSQL APIs and immutable audit records.

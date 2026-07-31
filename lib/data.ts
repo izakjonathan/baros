@@ -1,4 +1,4 @@
-export type NavKey = "dashboard" | "schedule" | "attendance" | "inventory" | "orders" | "team" | "control";
+export type NavKey = "dashboard" | "schedule" | "attendance" | "inventory" | "orders" | "operations" | "team" | "control";
 export type ShiftRole = "Manager" | "Bartender" | "Floor" | "Kitchen";
 export type ShiftStatus = "Published" | "Draft";
 
@@ -27,6 +27,12 @@ export type Product = {
   par: number;
   unit: string;
   price: number;
+  sellingPrice?: number;
+  sku?: string;
+  packSize?: number;
+  reorderLevel?: number;
+  notes?: string;
+  active?: boolean;
 };
 
 export const days = [

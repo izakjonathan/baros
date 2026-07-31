@@ -1,32 +1,19 @@
-# Bar Ops v0.6.0 — Production operations foundation
+# Bar Ops v0.7.0 — Inventory & Daily Operations
 
-This major release connects the manager workspace to a tenant-scoped PostgreSQL bootstrap and introduces production data models and APIs for payroll integrity, kiosk attendance, geofencing, alerts, schedule templates/publications, labour forecasts, delivery receiving, invoice matching, waste, stock transfers, security and GDPR.
+## Added
 
-## Highlights
+- Complete create/edit product workflow with supplier, SKU, category, unit, pack size, purchase/selling prices, active state, notes, stock, par, and reorder level.
+- Audited manual stock adjustments requiring a reason.
+- Stock-count sessions with expected/actual values, variance review, and approval.
+- Suggested replenishment based on par shortage.
+- Development delivery receiving that updates stock.
+- Daily Operations workspace with opening/closing tasks, maintenance tasks, manager logbook, and shift handovers.
+- Browser-local persistence for the development workspace.
+- Development JSON export, import, and reset-to-demo controls.
+- Responsive inventory, count, logbook, and checklist layouts.
 
-- PostgreSQL manager workspace bootstrap and persistent CRUD foundations.
-- Permanent payroll export history with file hashes and included timesheet IDs.
-- Open, locked, exported and closed payroll periods.
-- Employee payroll IDs, salary codes and cost centres.
-- Kiosk PIN authentication with rate limiting and lockout.
-- Venue geofence validation.
-- Attendance alerts and correction-request foundation.
-- Drag-and-drop schedule movement.
-- Recurrence scope updates and availability/leave/overlap checks.
-- Schedule templates, versioned publication, notifications and acknowledgements.
-- Labour forecast records.
-- Goods receipts, invoice discrepancy tracking, waste ledger and stock transfers.
-- MFA/password-reset/session/GDPR/health-event foundations.
-- New Control centre module showing production capability status.
+## Validation
 
-Run `npm run db:migrate` to apply `005_production_operations.sql`.
-Run `npm run test:production` for the new production-foundation assertions.
-
-See `IMPLEMENTATION_STATUS.md` for external-service and dedicated-UI work that remains staged rather than falsely represented as complete.
-
-## v0.6.1 — Employee hours build fix
-
-- Rebuilt `app/employee/hours/page.tsx` as valid, formatted JSX.
-- Fixed the malformed correction-request section that caused Turbopack to report `Expected '</', got 'ident'`.
-- Preserved clock controls, period selection, hour summaries, timesheet history, and correction-request functionality.
-- Re-ran all project regression suites successfully.
+- Existing shift, payroll, audit, integrity, and production-foundation tests pass.
+- New `npm run test:inventory` suite passes.
+- Full Next.js build was not run because dependencies are not installed in the execution workspace.
