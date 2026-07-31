@@ -5,7 +5,7 @@ import {
   ArrowRight, Bell, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight,
   CircleDollarSign, ClipboardList, Clock3, Coffee, LayoutDashboard, Menu, Package, Plus,
   Search, Settings, ShoppingCart, Sparkles, Users, X, AlertTriangle, Truck, MoreHorizontal,
-  Copy, Send, Boxes, Wine, UserRoundPlus, Timer, Play, Square, FileCheck2, FileDown, CheckCheck
+  Copy, Send, Boxes, Wine, UserRoundPlus, Timer, Play, Square, FileCheck2, FileDown, CheckCheck, RotateCcw, Ban, Pencil, ShieldAlert, History, DownloadCloud
 } from "lucide-react";
 import { days, initialProducts, initialShifts, orders, team, type NavKey, type Product, type Shift, type ShiftRole } from "@/lib/data";
 import { DevRoleSwitcher } from "@/components/dev-role-switcher";
@@ -20,7 +20,7 @@ const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = 
 ];
 
 type Employee = { name: string; initials: string; role: string; hours: number; status: string; active: boolean; email?: string; phone?: string };
-type TimeEntry = { id: string; employee: string; date: string; clockIn: string; clockOut?: string; breakMinutes: number; status: "Running" | "Pending" | "Approved"; scheduledHours: number };
+type TimeEntry = { id: string; employee: string; date: string; clockIn: string; clockOut?: string; breakMinutes: number; status: "Running" | "Pending" | "Approved" | "Rejected"; scheduledHours: number; note?: string; edited?: boolean };
 const BASE_MONDAY = new Date(2026, 6, 27, 12);
 function toIsoDate(date: Date) { const y = date.getFullYear(); const m = String(date.getMonth()+1).padStart(2,"0"); const d = String(date.getDate()).padStart(2,"0"); return `${y}-${m}-${d}`; }
 function dateSerial(value: string) { const [year, month, day] = value.split("-").map(Number); return Date.UTC(year, month - 1, day) / 86400000; }
@@ -39,6 +39,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
   const [dialog, setDialog] = useState<"shift" | "product" | "order" | "employee" | null>(null);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [editingShift, setEditingShift] = useState<Shift | null>(null);
+  const [editingTimeEntry, setEditingTimeEntry] = useState<TimeEntry | null>(null);
   const [toast, setToast] = useState("");
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([
@@ -61,7 +62,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
         <div className="page-wrap">
           {active === "dashboard" && <Dashboard shifts={shifts} products={products} onNavigate={setActive} onNewShift={() => setDialog("shift")} />}
           {active === "schedule" && <Schedule shifts={shifts} setShifts={setShifts} employees={employees} onNewShift={() => setDialog("shift")} onEditShift={setEditingShift} notify={notify} currentWeekOffset={currentWeekOffset} setCurrentWeekOffset={setCurrentWeekOffset} />}
-          {active === "attendance" && <Attendance employees={employees} shifts={shifts} entries={timeEntries} setEntries={setTimeEntries} notify={notify} />}
+          {active === "attendance" && <Attendance employees={employees} shifts={shifts} entries={timeEntries} setEntries={setTimeEntries} notify={notify} onEdit={setEditingTimeEntry} />}
           {active === "inventory" && <Inventory products={products} setProducts={setProducts} onNewProduct={() => setDialog("product")} notify={notify} />}
           {active === "orders" && <Orders onNewOrder={() => setDialog("order")} notify={notify} />}
           {active === "team" && <Team employees={employees} onAdd={() => setDialog("employee")} onEdit={setEditingEmployee} />}
@@ -69,6 +70,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       </main>
       {editingShift && <EditShiftDialog shift={editingShift} employees={employees} onClose={() => setEditingShift(null)} onSave={(updated) => { setShifts((current) => current.map((item) => item.id === updated.id ? updated : item)); setEditingShift(null); notify(updated.isOpen ? "Shift changed to available" : `Shift assigned to ${updated.employee}`); }} onDelete={() => { setShifts((current) => current.filter((item) => item.id !== editingShift.id)); setEditingShift(null); notify("Shift removed"); }} />}
       {dialog === "shift" && <ShiftDialog employees={employees} currentWeekOffset={currentWeekOffset} onClose={() => setDialog(null)} onSave={(newShifts) => { setShifts((current) => [...current, ...newShifts]); setDialog(null); notify(newShifts.length > 1 ? `${newShifts.length} repeating shifts added` : "Shift added to the draft schedule"); }} />}
+      {editingTimeEntry && <TimesheetDialog entry={editingTimeEntry} onClose={() => setEditingTimeEntry(null)} onSave={(updated) => { setTimeEntries((current) => current.map((item) => item.id === updated.id ? updated : item)); setEditingTimeEntry(null); notify("Timesheet corrected and returned to pending review"); }} />}
       {editingEmployee && <EmployeeDialog employee={editingEmployee} onClose={() => setEditingEmployee(null)} onSave={(updated) => { setEmployees((current) => current.map((item) => item.name === editingEmployee.name ? updated : item)); setEditingEmployee(null); notify("Employee updated"); }} />}
       {dialog === "employee" && <EmployeeDialog onClose={() => setDialog(null)} onSave={(employee) => { setEmployees((current) => [...current, employee]); setDialog(null); notify("Employee added"); }} />}
       {dialog === "product" && <ProductDialog onClose={() => setDialog(null)} onSave={(product) => { setProducts((current) => [...current, product]); setDialog(null); notify("Product added to inventory"); }} />}
@@ -175,49 +177,45 @@ function ShiftCard({ shift, onOpen }: { shift: Shift; onOpen: () => void }) { co
 
 function hoursBetween(start: string, end: string) { const [sh,sm]=start.split(":").map(Number); const [eh,em]=end.split(":").map(Number); let mins=(eh*60+em)-(sh*60+sm); if(mins<=0) mins+=1440; return mins/60; }
 function workedHours(entry: TimeEntry) { return entry.clockOut ? Math.max(0, hoursBetween(entry.clockIn, entry.clockOut) - entry.breakMinutes/60) : 0; }
-function Attendance({ employees, shifts, entries, setEntries, notify }: { employees: Employee[]; shifts: Shift[]; entries: TimeEntry[]; setEntries: React.Dispatch<React.SetStateAction<TimeEntry[]>>; notify:(s:string)=>void }) {
+function Attendance({ employees, shifts, entries, setEntries, notify, onEdit }: { employees: Employee[]; shifts: Shift[]; entries: TimeEntry[]; setEntries: React.Dispatch<React.SetStateAction<TimeEntry[]>>; notify:(s:string)=>void; onEdit:(entry:TimeEntry)=>void }) {
   const [fromDate, setFromDate] = useState("2026-07-27");
   const [toDate, setToDate] = useState("2026-08-02");
   const [employeeFilter,setEmployeeFilter]=useState("All employees");
+  const [statusFilter,setStatusFilter]=useState("Needs review");
+  const [exportHistory,setExportHistory]=useState<{id:string;period:string;employees:number;hours:number;created:string}[]>([]);
   const withinPeriod = (date: string) => date >= fromDate && date <= toDate;
-  const visible=entries.filter(e=>withinPeriod(e.date) && (employeeFilter==="All employees"||e.employee===employeeFilter));
+  const baseVisible=entries.filter(e=>withinPeriod(e.date) && (employeeFilter==="All employees"||e.employee===employeeFilter));
+  const visible=baseVisible.filter(e=>statusFilter==="All"||(statusFilter==="Needs review"?e.status==="Pending":e.status===statusFilter));
   const visibleShifts=shifts.filter(s=>withinPeriod(canonicalShiftDate(s)) && (employeeFilter==="All employees"||s.employee===employeeFilter));
   const scheduled=visibleShifts.filter(s=>!s.isOpen).reduce((n,s)=>n+hoursBetween(s.start,s.end),0);
-  const worked=visible.filter(e=>e.status==="Approved").reduce((n,e)=>n+workedHours(e),0);
-  const pending=visible.filter(e=>e.status==="Pending").length;
-  const approved=visible.filter(e=>e.status==="Approved");
+  const worked=baseVisible.filter(e=>e.status==="Approved").reduce((n,e)=>n+workedHours(e),0);
+  const pending=baseVisible.filter(e=>e.status==="Pending").length;
+  const approved=baseVisible.filter(e=>e.status==="Approved");
+  const exceptions=baseVisible.filter(e=>e.status!=="Running" && (Math.abs(workedHours(e)-e.scheduledHours)>=0.5 || e.breakMinutes===0 || e.edited));
 
-  function approveTimesheet(id: string) {
-    setEntries(cur=>cur.map(x=>x.id===id?{...x,status:"Approved"}:x));
-    notify("Timesheet approved and included in payroll exports");
-  }
-  function approveAllVisible() {
-    const count=visible.filter(e=>e.status==="Pending").length;
-    if(!count){notify("No pending timesheets in this period");return;}
-    setEntries(cur=>cur.map(x=>withinPeriod(x.date)&&(employeeFilter==="All employees"||x.employee===employeeFilter)&&x.status==="Pending"?{...x,status:"Approved"}:x));
-    notify(`${count} timesheet${count===1?"":"s"} approved`);
-  }
+  function approveTimesheet(id: string) { setEntries(cur=>cur.map(x=>x.id===id?{...x,status:"Approved"}:x)); notify("Timesheet approved and included in payroll exports"); }
+  function rejectTimesheet(id:string){const reason=window.prompt("Reason for rejection or correction request:");if(!reason)return;setEntries(cur=>cur.map(x=>x.id===id?{...x,status:"Rejected",note:reason}:x));notify("Timesheet rejected and excluded from export");}
+  function reopenTimesheet(id:string){setEntries(cur=>cur.map(x=>x.id===id?{...x,status:"Pending"}:x));notify("Timesheet reopened for review");}
+  function approveAllVisible() { const ids=new Set(visible.filter(e=>e.status==="Pending").map(e=>e.id)); if(!ids.size){notify("No pending timesheets in this view");return;} setEntries(cur=>cur.map(x=>ids.has(x.id)?{...x,status:"Approved"}:x)); notify(`${ids.size} timesheet${ids.size===1?"":"s"} approved`); }
   function csvCell(value: string | number) { const text=String(value ?? ""); return /[",\n]/.test(text)?`"${text.replaceAll('"','""')}"`:text; }
   function exportApproved() {
-    const rows=employees.map(emp=>{
-      const records=approved.filter(entry=>entry.employee===emp.name);
-      return {emp,records,total:records.reduce((sum,entry)=>sum+workedHours(entry),0)};
-    }).filter(row=>row.records.length>0);
+    const rows=employees.map(emp=>{ const records=approved.filter(entry=>entry.employee===emp.name); return {emp,records,total:records.reduce((sum,entry)=>sum+workedHours(entry),0)}; }).filter(row=>row.records.length>0);
     if(!rows.length){notify("There are no approved timesheets to export for this period");return;}
     const header=["Employee","Email","Phone","Role","Period start","Period end","Approved timesheets","Approved hours"];
     const lines=[header,...rows.map(({emp,records,total})=>[emp.name,emp.email||"",emp.phone||"",emp.role,fromDate,toDate,records.length,total.toFixed(2)])].map(row=>row.map(csvCell).join(","));
-    const blob=new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"});
-    const url=URL.createObjectURL(blob); const link=document.createElement("a"); link.href=url; link.download=`approved-hours-${fromDate}-to-${toDate}.csv`; document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url);
-    notify(`${rows.length} employee summaries exported`);
+    const blob=new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"}); const url=URL.createObjectURL(blob); const link=document.createElement("a"); link.href=url; link.download=`approved-hours-${fromDate}-to-${toDate}.csv`; document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url);
+    const total=rows.reduce((sum,row)=>sum+row.total,0);setExportHistory(cur=>[{id:crypto.randomUUID(),period:`${fromDate}–${toDate}`,employees:rows.length,hours:total,created:new Date().toLocaleString("en-GB")},...cur]); notify(`${rows.length} employee summaries exported`);
   }
   return <>
-  <PageHeader title="Time & attendance" subtitle="Review clock records, approve worked time, and export payroll-ready employee totals." action={<div className="header-actions"><button className="secondary" onClick={approveAllVisible} disabled={!pending}><CheckCheck size={18}/>Approve all ({pending})</button><button className="primary" onClick={exportApproved} disabled={!approved.length}><FileDown size={18}/>Export approved</button></div>}/>
-  <section className="attendance-workflow"><span><b>1</b> Review punches</span><span><b>2</b> Approve timesheets</span><span><b>3</b> Export approved totals</span></section>
-  <div className="attendance-filters"><label>From<input type="date" value={fromDate} onChange={e=>setFromDate(e.target.value)}/></label><label>To<input type="date" value={toDate} min={fromDate} onChange={e=>setToDate(e.target.value)}/></label><label>Employee<select value={employeeFilter} onChange={e=>setEmployeeFilter(e.target.value)}><option>All employees</option>{employees.map(e=><option key={e.name}>{e.name}</option>)}</select></label></div>
-  <section className="metric-grid attendance-metrics"><Metric icon={CalendarDays} label="Scheduled" value={`${scheduled.toFixed(1)}h`} detail="Assigned shifts in period" trend={`${fromDate}–${toDate}`}/><Metric icon={Clock3} label="Approved worked" value={`${worked.toFixed(1)}h`} detail="Included in export" trend="Payroll ready"/><Metric icon={FileCheck2} label="Awaiting approval" value={String(pending)} detail="Excluded from export" trend={pending?"Action needed":"Clear"}/></section>
-  <section className="panel table-panel"><PanelTitle title="Timesheets" subtitle="Only approved records are included in exports. Running and pending records stay excluded."/><div className="data-table attendance-table"><div className="table-row table-head"><span>Employee</span><span>Date</span><span>Clocked</span><span>Break</span><span>Worked</span><span>Status</span></div>{visible.map(e=><div className="table-row" key={e.id}><span><b>{e.employee}</b></span><span>{e.date}</span><span>{e.clockIn}–{e.clockOut||"Now"}</span><span>{e.breakMinutes} min</span><span><b>{e.clockOut?workedHours(e).toFixed(2)+"h":"Running"}</b></span><span><i className={`status status-${e.status.toLowerCase()}`}>{e.status}</i>{e.status==="Pending"&&<button className="approve-mini" onClick={()=>approveTimesheet(e.id)}>Approve</button>}</span></div>)}{!visible.length&&<div className="attendance-empty">No timesheets match this period and employee filter.</div>}</div></section>
-  <section className="hours-by-employee"><PanelTitle title="Export preview" subtitle="Employee information plus the sum of approved timesheets in the selected period."/><div className="team-grid">{employees.map(emp=>{const scheduledEmp=visibleShifts.filter(s=>s.employee===emp.name).reduce((n,s)=>n+hoursBetween(s.start,s.end),0);const approvedEntries=approved.filter(e=>e.employee===emp.name);const workedEmp=approvedEntries.reduce((n,e)=>n+workedHours(e),0);return <article className="team-card" key={emp.name}><div className="avatar large">{emp.initials}</div><h2>{emp.name}</h2><p>{emp.role}</p><div className="hours-compare"><span>Scheduled<b>{scheduledEmp.toFixed(1)}h</b></span><span>Approved export<b>{workedEmp.toFixed(2)}h</b></span></div><small className="export-count">{approvedEntries.length} approved timesheet{approvedEntries.length===1?"":"s"}</small></article>})}</div></section></>;
+  <PageHeader title="Time & attendance" subtitle="Resolve exceptions, approve accurate time, and export a traceable payroll period." action={<div className="header-actions"><button className="secondary" onClick={approveAllVisible} disabled={!visible.some(e=>e.status==="Pending")}><CheckCheck size={18}/>Approve visible</button><button className="primary" onClick={exportApproved} disabled={!approved.length}><FileDown size={18}/>Export approved</button></div>}/>
+  <section className="attendance-workflow"><span><b>1</b> Resolve exceptions</span><span><b>2</b> Approve time</span><span><b>3</b> Export payroll</span></section>
+  <div className="attendance-filters"><label>From<input type="date" value={fromDate} onChange={e=>setFromDate(e.target.value)}/></label><label>To<input type="date" value={toDate} min={fromDate} onChange={e=>setToDate(e.target.value)}/></label><label>Employee<select value={employeeFilter} onChange={e=>setEmployeeFilter(e.target.value)}><option>All employees</option>{employees.map(e=><option key={e.name}>{e.name}</option>)}</select></label><label>Status<select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option>Needs review</option><option>All</option><option>Pending</option><option>Approved</option><option>Rejected</option><option>Running</option></select></label></div>
+  <section className="metric-grid attendance-metrics"><Metric icon={CalendarDays} label="Scheduled" value={`${scheduled.toFixed(1)}h`} detail="Assigned shifts in period" trend={`${fromDate}–${toDate}`}/><Metric icon={Clock3} label="Approved worked" value={`${worked.toFixed(1)}h`} detail="Included in export" trend="Payroll ready"/><Metric icon={FileCheck2} label="Awaiting approval" value={String(pending)} detail="Excluded from export" trend={pending?"Action needed":"Clear"}/><Metric icon={ShieldAlert} label="Exceptions" value={String(exceptions.length)} detail="Variance, no break, or edited" trend={exceptions.length?"Review":"Clear"} warning={!!exceptions.length}/></section>
+  <section className="panel table-panel"><PanelTitle title="Timesheets" subtitle="Approval is reversible. Corrections return a record to pending and remain visibly marked."/><div className="data-table attendance-table"><div className="table-row table-head"><span>Employee</span><span>Date</span><span>Clocked</span><span>Break</span><span>Variance</span><span>Status & actions</span></div>{visible.map(e=>{const actual=e.clockOut?workedHours(e):0;const variance=actual-e.scheduledHours;const exception=e.status!=="Running"&&(Math.abs(variance)>=.5||e.breakMinutes===0||e.edited);return <div className={`table-row ${exception?"exception-row":""}`} key={e.id}><span><b>{e.employee}</b>{e.edited&&<small>Manager corrected</small>}</span><span>{e.date}</span><span>{e.clockIn}–{e.clockOut||"Now"}<small>{e.clockOut?actual.toFixed(2)+"h":"Running"}</small></span><span>{e.breakMinutes} min</span><span className={Math.abs(variance)>=.5?"variance-alert":""}>{e.clockOut?`${variance>=0?"+":""}${variance.toFixed(2)}h`:"—"}</span><span className="timesheet-actions"><i className={`status status-${e.status.toLowerCase()}`}>{e.status}</i>{e.status==="Pending"&&<><button title="Edit" onClick={()=>onEdit(e)}><Pencil size={14}/></button><button title="Reject" onClick={()=>rejectTimesheet(e.id)}><Ban size={14}/></button><button className="approve-mini" onClick={()=>approveTimesheet(e.id)}>Approve</button></>}{e.status==="Approved"&&<button title="Reopen" onClick={()=>reopenTimesheet(e.id)}><RotateCcw size={14}/></button>}{e.status==="Rejected"&&<button title="Return to review" onClick={()=>reopenTimesheet(e.id)}><RotateCcw size={14}/></button>}</span></div>})}{!visible.length&&<div className="attendance-empty">No timesheets match these filters.</div>}</div></section>
+  <section className="hours-by-employee"><PanelTitle title="Payroll export preview" subtitle="One row per employee; only approved hours in the selected period are counted."/><div className="team-grid">{employees.map(emp=>{const scheduledEmp=visibleShifts.filter(s=>s.employee===emp.name).reduce((n,s)=>n+hoursBetween(s.start,s.end),0);const approvedEntries=approved.filter(e=>e.employee===emp.name);const workedEmp=approvedEntries.reduce((n,e)=>n+workedHours(e),0);return <article className="team-card" key={emp.name}><div className="avatar large">{emp.initials}</div><h2>{emp.name}</h2><p>{emp.role}</p><div className="hours-compare"><span>Scheduled<b>{scheduledEmp.toFixed(1)}h</b></span><span>Approved export<b>{workedEmp.toFixed(2)}h</b></span></div><small className="export-count">{approvedEntries.length} approved timesheet{approvedEntries.length===1?"":"s"}</small></article>})}</div></section>
+  <section className="panel export-history"><PanelTitle title="Export history" subtitle="Development-mode audit trail for payroll files generated in this session." action={<History size={18}/>}/>{exportHistory.length?<div>{exportHistory.map(x=><article key={x.id}><DownloadCloud size={17}/><span><b>{x.period}</b><small>{x.created}</small></span><span>{x.employees} employees</span><strong>{x.hours.toFixed(2)}h</strong></article>)}</div>:<p>No payroll exports generated in this session.</p>}</section></>;
 }
+
 function Inventory({ products, setProducts, onNewProduct, notify }: { products: Product[]; setProducts: React.Dispatch<React.SetStateAction<Product[]>>; onNewProduct: () => void; notify: (s: string) => void }) {
   const [query, setQuery] = useState(""); const [onlyLow, setOnlyLow] = useState(false);
   const filtered = products.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()) && (!onlyLow || p.stock < p.par));
@@ -308,6 +306,11 @@ function EditShiftDialog({ shift, employees, onClose, onSave, onDelete }: { shif
     {shift.recurrenceLabel && <div className="series-edit-note"><CalendarDays size={17}/><div><strong>Repeating shift</strong><span>This edit changes only this occurrence. Series-wide editing will be added separately.</span></div></div>}
     <div className="edit-shift-actions"><button type="button" className="danger-button" onClick={onDelete}>Delete shift</button><div><button type="button" className="secondary" onClick={onClose}>Cancel</button><button type="button" className="primary" onClick={save}>Save changes</button></div></div>
   </Modal>
+}
+
+function TimesheetDialog({ entry, onClose, onSave }: { entry: TimeEntry; onClose:()=>void; onSave:(entry:TimeEntry)=>void }) {
+  const [clockIn,setClockIn]=useState(entry.clockIn); const [clockOut,setClockOut]=useState(entry.clockOut||""); const [breakMinutes,setBreakMinutes]=useState(entry.breakMinutes); const [note,setNote]=useState(entry.note||"");
+  return <Modal title="Correct timesheet" subtitle="All manager corrections return the record to pending review. Add a reason for the audit trail." onClose={onClose}><div className="form-grid"><label>Clock in<input type="time" value={clockIn} onChange={e=>setClockIn(e.target.value)}/></label><label>Clock out<input type="time" value={clockOut} onChange={e=>setClockOut(e.target.value)}/></label><label>Break minutes<input type="number" min="0" step="5" value={breakMinutes} onChange={e=>setBreakMinutes(Number(e.target.value))}/></label><label className="full-field">Correction reason<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Required, e.g. employee forgot to clock out"/></label></div><ModalActions onClose={onClose} onSave={()=>{if(!note.trim()){alert("Add a correction reason");return;}onSave({...entry,clockIn,clockOut:clockOut||undefined,breakMinutes,status:"Pending",note:note.trim(),edited:true})}} label="Save correction"/></Modal>
 }
 
 function EmployeeDialog({ employee, onClose, onSave }: { employee?: Employee; onClose: () => void; onSave: (employee: Employee) => void }) {

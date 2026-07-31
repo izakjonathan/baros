@@ -1,4 +1,4 @@
-# Bar Ops v0.2.0 — Persistent Foundation
+# Bar Ops v0.5.0 v0.2.0 — Persistent Foundation
 
 A Vercel-ready Next.js hospitality operations platform with a PostgreSQL data layer, custom database-backed authentication, multi-organization/location tenancy, manager workspace, and employee self-service portal.
 
@@ -103,3 +103,14 @@ Overnight shifts belong to the calendar date on which they start. An end time ea
 
 ## v0.4.1 payroll workflow
 The manager Time & attendance module now uses a strict review → approve → export flow. Pending/running records are excluded from CSV exports. Choose a From/To period, approve individual records or all pending records in the filtered view, then export employee-level approved-hour totals. With PostgreSQL connected, `GET /api/timesheets/export?from=YYYY-MM-DD&to=YYYY-MM-DD` provides the tenant-scoped CSV export.
+
+
+## v0.5.0 audit commands
+
+```bash
+npm run test:logic
+npm run test:payroll
+npm run test:audit
+```
+
+Read `DEEP_PRODUCT_AUDIT.md` and `RESEARCH_MATRIX.md` for the full product review and prioritised roadmap.
