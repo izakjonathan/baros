@@ -70,3 +70,21 @@ function expandStarts(first: Date, recurrence?: Recurrence) {
   }
   return result;
 }
+
+export async function PATCH(req: Request) {
+  const u = await getSessionUser(); if (!u || u.role === "EMPLOYEE") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const b = await req.json(); const scope = b.scope || "occurrence";
+  const [current] = await db()`select * from shifts where id=${b.id} and organization_id=${u.organizationId}`;
+  if (!current) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const startsAt = b.startsAt || current.starts_at; const endsAt = b.endsAt || current.ends_at; const employeeId = b.isOpen ? null : (b.employeeId ?? current.employee_id);
+  if (employeeId) {
+    const conflicts = await db()`select 'OVERLAP' kind,id from shifts where organization_id=${u.organizationId} and employee_id=${employeeId} and id<>${b.id} and status<>'CANCELLED' and starts_at<${endsAt} and ends_at>${startsAt}
+      union all select 'LEAVE' kind,r.id from requests r where r.organization_id=${u.organizationId} and r.employee_id=${employeeId} and r.status='APPROVED' and r.type='TIME_OFF' and r.starts_at<${endsAt} and r.ends_at>${startsAt}
+      union all select 'UNAVAILABLE' kind,a.id from availability_rules a where a.organization_id=${u.organizationId} and a.employee_id=${employeeId} and a.available=false and (a.valid_from is null or a.valid_from<=${String(startsAt).slice(0,10)}::date) and (a.valid_until is null or a.valid_until>=${String(startsAt).slice(0,10)}::date) and a.weekday=extract(dow from ${startsAt}::timestamptz)::int limit 5`;
+    if (conflicts.length && !b.overrideConflicts) return NextResponse.json({ error: "Employee has scheduling conflicts", conflicts }, { status: 409 });
+  }
+  const filter = scope==='series' && current.recurrence_group_id ? db()`recurrence_group_id=${current.recurrence_group_id}` : scope==='future' && current.recurrence_group_id ? db()`recurrence_group_id=${current.recurrence_group_id} and starts_at>=${current.starts_at}` : db()`id=${b.id}`;
+  const rows = await db()`update shifts set employee_id=${employeeId},is_open=${Boolean(b.isOpen)},role=${b.role||current.role},starts_at=${startsAt},ends_at=${endsAt},status=${b.status||current.status},notes=${b.notes??current.notes},updated_at=now() where organization_id=${u.organizationId} and ${filter} returning *`;
+  await writeAudit({organizationId:u.organizationId,locationId:current.location_id,actorUserId:u.userId,action:'SHIFT_UPDATED',entityType:'shift',entityId:b.id,before:current,after:{scope,count:rows.length,changes:b}}); return NextResponse.json(rows);
+}
+export async function DELETE(req: Request) { const u=await getSessionUser();if(!u||u.role==='EMPLOYEE')return NextResponse.json({error:'Forbidden'},{status:403});const id=new URL(req.url).searchParams.get('id');const rows=await db()`delete from shifts where id=${id} and organization_id=${u.organizationId} returning *`;return rows.length?NextResponse.json({ok:true}):NextResponse.json({error:'Not found'},{status:404}); }

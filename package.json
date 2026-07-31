@@ -1,6 +1,6 @@
 {
   "name": "bar-ops",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -11,7 +11,9 @@
     "db:seed": "node scripts/seed.mjs",
     "test:logic": "node scripts/test-shift-logic.mjs",
     "test:payroll": "node scripts/test-payroll-export.mjs",
-    "test:audit": "node scripts/test-audit.mjs"
+    "test:audit": "node scripts/test-audit.mjs",
+    "test:integrity": "node scripts/test-integrity.mjs",
+    "test:production": "node scripts/test-production-foundation.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

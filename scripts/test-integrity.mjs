@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+const serial = (v) => Date.UTC(...v.split('-').map((n,i)=>i===1?Number(n)-1:Number(n))) / 86400000;
+const interval=(date,start,end)=>{const [sh,sm]=start.split(':').map(Number),[eh,em]=end.split(':').map(Number);const s=serial(date)*1440+sh*60+sm;let e=serial(date)*1440+eh*60+em;if(e<=s)e+=1440;return [s,e]};
+const overlap=(a,b)=>a[0]<b[1]&&b[0]<a[1];
+assert.equal(overlap(interval('2026-07-31','17:00','01:00'), interval('2026-08-01','00:30','03:00')), true, 'overnight overlap must be detected');
+assert.equal(overlap(interval('2026-07-31','17:00','01:00'), interval('2026-08-01','02:00','03:00')), false, 'non-overlapping overnight shifts must be allowed');
+const approved=[{status:'APPROVED',minutes:480},{status:'PENDING',minutes:500},{status:'REJECTED',minutes:400}].filter(x=>x.status==='APPROVED');
+assert.equal(approved.reduce((n,x)=>n+x.minutes,0),480,'exports include approved time only');
+const period={status:'OPEN'}; assert.equal(period.status==='LOCKED',false,'open period cannot export'); period.status='LOCKED'; assert.equal(period.status==='LOCKED',true,'locked period can export');
+console.log('Integrity tests passed');

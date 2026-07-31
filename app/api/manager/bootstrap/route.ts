@@ -1,0 +1,14 @@
+import { NextResponse } from "next/server";import { requireUser } from "@/lib/auth/session";import { db } from "@/lib/db/client";
+export async function GET(){const u=await requireUser(["OWNER","ADMIN","MANAGER","SHIFT_MANAGER"]);const locationClause=u.locationId;
+ const [locations,employees,shifts,products,orders,timesheets,alerts,exports,templates,forecasts]=await Promise.all([
+ db()`select * from locations where organization_id=${u.organizationId} and active order by name`,
+ db()`select e.*,coalesce(json_agg(json_build_object('id',l.id,'name',l.name)) filter(where l.id is not null),'[]') locations from employees e left join employee_locations el on el.employee_id=e.id left join locations l on l.id=el.location_id where e.organization_id=${u.organizationId} group by e.id order by e.first_name,e.last_name`,
+ db()`select s.*,e.first_name||' '||e.last_name employee_name from shifts s left join employees e on e.id=s.employee_id where s.organization_id=${u.organizationId} and (${locationClause}::uuid is null or s.location_id=${locationClause}) and s.starts_at>=now()-interval '60 days' and s.starts_at<now()+interval '180 days' order by s.starts_at`,
+ db()`select p.*,s.name supplier,li.quantity,li.par_level from products p left join suppliers s on s.id=p.supplier_id left join location_inventory li on li.product_id=p.id and li.location_id=${locationClause} where p.organization_id=${u.organizationId} and p.active order by p.name`,
+ db()`select po.*,s.name supplier,coalesce(sum(i.quantity*i.unit_price),0) total,count(i.id)::int items from purchase_orders po join suppliers s on s.id=po.supplier_id left join purchase_order_items i on i.purchase_order_id=po.id where po.organization_id=${u.organizationId} and (${locationClause}::uuid is null or po.location_id=${locationClause}) group by po.id,s.name order by po.created_at desc limit 100`,
+ db()`select t.*,e.first_name||' '||e.last_name employee_name from timesheets t join employees e on e.id=t.employee_id where t.organization_id=${u.organizationId} and (${locationClause}::uuid is null or t.location_id=${locationClause}) order by t.work_date desc limit 500`,
+ db()`select * from attendance_alerts where organization_id=${u.organizationId} and resolved_at is null order by created_at desc limit 100`,
+ db()`select * from payroll_exports where organization_id=${u.organizationId} order by created_at desc limit 50`,
+ db()`select * from schedule_templates where organization_id=${u.organizationId} and (${locationClause}::uuid is null or location_id=${locationClause}) and active order by name`,
+ db()`select * from labour_forecasts where organization_id=${u.organizationId} and (${locationClause}::uuid is null or location_id=${locationClause}) and forecast_date between current_date-14 and current_date+90 order by forecast_date`]);
+ return NextResponse.json({locations,employees,shifts,products,orders,timesheets,alerts,exports,templates,forecasts});}

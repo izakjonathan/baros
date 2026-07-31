@@ -1,4 +1,4 @@
-export type NavKey = "dashboard" | "schedule" | "attendance" | "inventory" | "orders" | "team";
+export type NavKey = "dashboard" | "schedule" | "attendance" | "inventory" | "orders" | "team" | "control";
 export type ShiftRole = "Manager" | "Bartender" | "Floor" | "Kitchen";
 export type ShiftStatus = "Published" | "Draft";
 
@@ -15,6 +15,7 @@ export type Shift = {
   status: ShiftStatus;
   isOpen?: boolean;
   recurrenceLabel?: string;
+  recurrenceGroupId?: string;
 };
 
 export type Product = {

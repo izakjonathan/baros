@@ -1,39 +1,25 @@
-# v0.5.0 — Deep audit and operational hardening
+# Bar Ops v0.6.0 — Production operations foundation
 
-This release is based on v0.4.1 and performs the broadest product, component, design, layout, accessibility, and workflow audit so far.
+This major release connects the manager workspace to a tenant-scoped PostgreSQL bootstrap and introduces production data models and APIs for payroll integrity, kiosk attendance, geofencing, alerts, schedule templates/publications, labour forecasts, delivery receiving, invoice matching, waste, stock transfers, security and GDPR.
 
-## Added
+## Highlights
 
-- Timesheet Needs review queue and status filters
-- Attendance exception detection
-- Manager correction dialog with required reason
-- Reject and reopen workflows
-- Reversible timesheet approval
-- Session export history
-- Fourth attendance metric for exceptions
-- Responsive four/two/one-column filter system
-- Shared layout and interaction tokens
-- Keyboard focus states
-- Reduced-motion support
-- 44px minimum primary interaction targets
-- Deep product audit and research matrix
-- `npm run test:audit`
+- PostgreSQL manager workspace bootstrap and persistent CRUD foundations.
+- Permanent payroll export history with file hashes and included timesheet IDs.
+- Open, locked, exported and closed payroll periods.
+- Employee payroll IDs, salary codes and cost centres.
+- Kiosk PIN authentication with rate limiting and lockout.
+- Venue geofence validation.
+- Attendance alerts and correction-request foundation.
+- Drag-and-drop schedule movement.
+- Recurrence scope updates and availability/leave/overlap checks.
+- Schedule templates, versioned publication, notifications and acknowledgements.
+- Labour forecast records.
+- Goods receipts, invoice discrepancy tracking, waste ledger and stock transfers.
+- MFA/password-reset/session/GDPR/health-event foundations.
+- New Control centre module showing production capability status.
 
-## Improved
+Run `npm run db:migrate` to apply `005_production_operations.sql`.
+Run `npm run test:production` for the new production-foundation assertions.
 
-- Manager page density and hierarchy
-- Header and action wrapping
-- Mobile forms and dialogs
-- Data table readability
-- Calendar tap targets
-- Narrow-screen handling
-- Payroll review clarity
-- Distinction between pending, approved, rejected, corrected, and exported time
-
-## Validation
-
-- Shift logic regression suite passed
-- Payroll export regression suite passed
-- Deep audit assertions passed
-- ZIP archive validation passed
-- Full dependency installation/build could not run because the workspace npm mirror returns 404 for standard scoped packages
+See `IMPLEMENTATION_STATUS.md` for external-service and dedicated-UI work that remains staged rather than falsely represented as complete.
