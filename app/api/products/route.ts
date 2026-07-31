@@ -1,0 +1,2 @@
+import { NextResponse } from "next/server"; import { getSessionUser } from "@/lib/auth/session"; import { db } from "@/lib/db/client";
+export async function GET(){const u=await getSessionUser();if(!u)return NextResponse.json({error:'Unauthorized'},{status:401});return NextResponse.json(await db()`select p.*,s.name supplier,li.quantity,li.par_level from products p left join suppliers s on s.id=p.supplier_id left join location_inventory li on li.product_id=p.id and li.location_id=${u.locationId} where p.organization_id=${u.organizationId} and p.active order by p.name`)}

@@ -1,0 +1,2 @@
+import { NextResponse } from "next/server"; import { getSessionUser } from "@/lib/auth/session"; import { db } from "@/lib/db/client";
+export async function GET(){const u=await getSessionUser();if(!u)return NextResponse.json({error:'Unauthorized'},{status:401});return NextResponse.json(await db()`select * from notifications where organization_id=${u.organizationId} and user_id=${u.userId} order by created_at desc limit 50`)}
