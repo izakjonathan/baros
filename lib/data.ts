@@ -5,6 +5,7 @@ export type ShiftStatus = "Published" | "Draft";
 export type Shift = {
   id: string;
   day: number;
+  weekOffset?: number;
   employee: string;
   initials: string;
   start: string;

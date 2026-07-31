@@ -1,3 +1,12 @@
+# Bar Ops v0.3.5 — Week navigation and recurrence fix
+
+- Week navigation now changes the visible seven-day schedule.
+- Shift records in development state carry a week offset.
+- Daily repeats flow into later weeks instead of wrapping onto the same visible week.
+- Weekly repeats create one occurrence per selected weekday per week.
+- Duplicate dates are removed before a recurring series is saved.
+- Publishing affects only the currently visible week.
+
 # Bar Ops v0.3.4 — Mobile dialog scrolling fix
 
 Based on v0.3.3.

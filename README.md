@@ -79,5 +79,5 @@ This fallback only exposes the existing local-state manager workspace. Database-
 For a temporary Vercel preview without a database, set `DEV_AUTH_ENABLED=true`, `DEV_AUTH_SECRET` to a long random value, and optionally change `DEV_AUTH_EMAIL` and `DEV_AUTH_PASSWORD`. Remove or disable the flag when the database is connected.
 
 
-## v0.3.4 mobile dialog behavior
+## v0.3.5 mobile dialog behavior
 Dialogs scroll independently on iOS Safari and keep their header and action area visible.
