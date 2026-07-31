@@ -2,20 +2,20 @@ import { createHash, randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db/client";
-import { createDevSessionToken, getDevSessionUser, isDevAuthEnabled, verifyDevSessionToken } from "@/lib/auth/dev-auth";
+import { createDevSessionToken, isDevAuthEnabled, verifyDevSessionToken } from "@/lib/auth/dev-auth";
 
 export type AppRole = "OWNER" | "ADMIN" | "MANAGER" | "SHIFT_MANAGER" | "EMPLOYEE";
 export type SessionUser = { userId: string; email: string; name: string; role: AppRole; organizationId: string; locationId: string | null; employeeId: string | null };
 const cookieName = () => process.env.SESSION_COOKIE_NAME || "bar_ops_session";
 const tokenHash = (token: string) => createHash("sha256").update(token).digest("hex");
 
-export async function createSession(userId: string, organizationId: string, locationId: string | null) {
+export async function createSession(userId: string, organizationId: string, locationId: string | null, devRole: AppRole = "OWNER") {
   const store = await cookies();
   const days = Number(process.env.SESSION_TTL_DAYS || 30);
   const expiresAt = new Date(Date.now() + days * 86400000);
 
   if (isDevAuthEnabled() && userId === "dev-user") {
-    store.set(cookieName(), createDevSessionToken(), {
+    store.set(cookieName(), createDevSessionToken(devRole), {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -45,7 +45,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   if (!token) return null;
 
   if (isDevAuthEnabled()) {
-    return verifyDevSessionToken(token) ? getDevSessionUser() : null;
+    return verifyDevSessionToken(token);
   }
 
   const rows = await db()<SessionUser[]>`
