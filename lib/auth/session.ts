@@ -2,12 +2,13 @@ import { createHash, randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db/client";
-import { createDevSessionToken, isDevAuthEnabled, verifyDevSessionToken } from "@/lib/auth/dev-auth";
+import { createDevSessionToken, getDevSessionUser, isDevAuthEnabled, verifyDevSessionToken } from "@/lib/auth/dev-auth";
 
 export type AppRole = "OWNER" | "ADMIN" | "MANAGER" | "SHIFT_MANAGER" | "EMPLOYEE";
 export type SessionUser = { userId: string; email: string; name: string; role: AppRole; organizationId: string; locationId: string | null; employeeId: string | null };
 const cookieName = () => process.env.SESSION_COOKIE_NAME || "bar_ops_session";
 const tokenHash = (token: string) => createHash("sha256").update(token).digest("hex");
+const getAutomaticDevUser = () => getDevSessionUser("OWNER");
 
 export async function createSession(userId: string, organizationId: string, locationId: string | null, devRole: AppRole = "OWNER") {
   const store = await cookies();
@@ -42,11 +43,12 @@ export async function destroySession() {
 export async function getSessionUser(): Promise<SessionUser | null> {
   const store = await cookies();
   const token = store.get(cookieName())?.value;
-  if (!token) return null;
-
   if (isDevAuthEnabled()) {
-    return verifyDevSessionToken(token);
+    if (!token) return getAutomaticDevUser();
+    return verifyDevSessionToken(token) || getAutomaticDevUser();
   }
+
+  if (!token) return null;
 
   const rows = await db()<SessionUser[]>`
     select u.id as "userId", u.email, u.name, m.role, s.organization_id as "organizationId",

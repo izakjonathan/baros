@@ -10,7 +10,8 @@ export async function POST(request: Request) {
 
   const form = await request.formData();
   const role = normalizeDevRole(form.get("role"));
-  const response = NextResponse.redirect(new URL("/", request.url), 303);
+  const destination = role === "EMPLOYEE" ? "/employee" : "/";
+  const response = NextResponse.redirect(new URL(destination, request.url), 303);
   response.cookies.set(cookieName(), createDevSessionToken(role), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

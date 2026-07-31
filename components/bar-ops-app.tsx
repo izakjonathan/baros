@@ -8,6 +8,7 @@ import {
   Copy, Send, Boxes, Wine, UserRoundPlus
 } from "lucide-react";
 import { days, initialProducts, initialShifts, orders, team, type NavKey, type Product, type Shift, type ShiftRole } from "@/lib/data";
+import { DevRoleSwitcher } from "@/components/dev-role-switcher";
 
 const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Overview", icon: LayoutDashboard },
@@ -17,7 +18,7 @@ const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = 
   { id: "team", label: "Team", icon: Users },
 ];
 
-export function BarOpsApp() {
+export function BarOpsApp({ userName, userRole, devMode }: { userName: string; userRole: string; devMode: boolean }) {
   const [active, setActive] = useState<NavKey>("dashboard");
   const [mobileNav, setMobileNav] = useState(false);
   const [shifts, setShifts] = useState(initialShifts);
@@ -32,7 +33,7 @@ export function BarOpsApp() {
 
   return (
     <div className="app-frame">
-      <Sidebar active={active} onChange={(value) => { setActive(value); setMobileNav(false); }} open={mobileNav} onClose={() => setMobileNav(false)} />
+      <Sidebar active={active} onChange={(value) => { setActive(value); setMobileNav(false); }} open={mobileNav} onClose={() => setMobileNav(false)} userName={userName} userRole={userRole} devMode={devMode} />
       <main className="main-shell">
         <Topbar onMenu={() => setMobileNav(true)} />
         <div className="page-wrap">
@@ -51,7 +52,7 @@ export function BarOpsApp() {
   );
 }
 
-function Sidebar({ active, onChange, open, onClose }: { active: NavKey; onChange: (id: NavKey) => void; open: boolean; onClose: () => void }) {
+function Sidebar({ active, onChange, open, onClose, userName, userRole, devMode }: { active: NavKey; onChange: (id: NavKey) => void; open: boolean; onClose: () => void; userName: string; userRole: string; devMode: boolean }) {
   return <>
     {open && <button className="scrim" aria-label="Close navigation" onClick={onClose} />}
     <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
@@ -62,7 +63,7 @@ function Sidebar({ active, onChange, open, onClose }: { active: NavKey; onChange
       </nav>
       <div className="side-bottom">
         <button><Settings size={19} /><span>Settings</span></button>
-        <div className="profile"><div className="avatar dark">IH</div><div><strong>Izak Hyllested</strong><span>Owner</span></div><ChevronDown size={16} /></div>
+        {devMode && <DevRoleSwitcher currentRole={userRole} />}<div className="profile"><div className="avatar dark">{userName.split(" ").map(part => part[0]).join("").slice(0,2)}</div><div><strong>{userName}</strong><span>{userRole.replace("_", " ").toLowerCase()}</span></div><ChevronDown size={16} /></div>
       </div>
     </aside>
   </>

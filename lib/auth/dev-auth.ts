@@ -1,12 +1,12 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { AppRole, SessionUser } from "./session";
 
-const allowedDevRoles: AppRole[] = ["OWNER", "ADMIN", "MANAGER", "SHIFT_MANAGER"];
+const allowedDevRoles: AppRole[] = ["OWNER", "ADMIN", "MANAGER", "SHIFT_MANAGER", "EMPLOYEE"];
 
 export function isDevAuthEnabled() {
   if (process.env.DEV_AUTH_ENABLED === "false") return false;
   if (process.env.DEV_AUTH_ENABLED === "true") return true;
-  return process.env.NODE_ENV !== "production" && !process.env.DATABASE_URL;
+  return !process.env.DATABASE_URL;
 }
 
 function secret() {
@@ -57,6 +57,7 @@ export function getDevSessionUser(role: AppRole = "OWNER"): SessionUser {
     ADMIN: "Development Admin",
     MANAGER: "Development Manager",
     SHIFT_MANAGER: "Development Shift Manager",
+    EMPLOYEE: "Development Employee",
   };
 
   return {

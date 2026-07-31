@@ -1,8 +1,8 @@
-# Bar Ops v0.3.2 — Stable developer access
+# Bar Ops v0.3.3 — Automatic Development Workspace
 
-- Replaces the fragile client-only development login path with a server-handled HTML form flow.
-- Adds one-click Owner, Manager and Shift Manager development sessions.
-- Uses a signed, HTTP-only role-aware development cookie.
-- Avoids the Safari/Vercel `The string did not match the expected pattern` failure.
-- Keeps PostgreSQL authentication unchanged and available on the same login screen.
-- Development access remains disabled unless local development has no `DATABASE_URL`, or `DEV_AUTH_ENABLED=true` is explicitly set.
+- Opens directly as Owner whenever `DATABASE_URL` is absent.
+- Works on local development and Vercel previews without requiring `DEV_AUTH_ENABLED`.
+- Adds a developer role switcher for Owner, Manager, Shift Manager and Employee.
+- Role changes are stored in signed HTTP-only cookies and redirect to the appropriate workspace.
+- Adding `DATABASE_URL` automatically restores normal PostgreSQL authentication unless `DEV_AUTH_ENABLED=true` is explicitly retained.
+- The real database authentication implementation is unchanged.
