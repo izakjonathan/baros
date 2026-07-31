@@ -115,7 +115,7 @@ npm run test:audit
 
 Read `DEEP_PRODUCT_AUDIT.md` and `RESEARCH_MATRIX.md` for the full product review and prioritised roadmap.
 
-## v0.6.0 development additions
+## v0.6.1 development additions
 
 - Schedule overlap detection and publish blocking
 - Recurring series edit scope
@@ -125,6 +125,6 @@ Read `DEEP_PRODUCT_AUDIT.md` and `RESEARCH_MATRIX.md` for the full product revie
 - `npm run test:integrity`
 
 
-## v0.6.0 migration
+## v0.6.1 migration
 
 Run `npm run db:migrate` to apply the production operations schema in `db/migrations/005_production_operations.sql`. See `IMPLEMENTATION_STATUS.md` for the exact implementation boundary.

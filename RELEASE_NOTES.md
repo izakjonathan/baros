@@ -23,3 +23,10 @@ Run `npm run db:migrate` to apply `005_production_operations.sql`.
 Run `npm run test:production` for the new production-foundation assertions.
 
 See `IMPLEMENTATION_STATUS.md` for external-service and dedicated-UI work that remains staged rather than falsely represented as complete.
+
+## v0.6.1 — Employee hours build fix
+
+- Rebuilt `app/employee/hours/page.tsx` as valid, formatted JSX.
+- Fixed the malformed correction-request section that caused Turbopack to report `Expected '</', got 'ident'`.
+- Preserved clock controls, period selection, hour summaries, timesheet history, and correction-request functionality.
+- Re-ran all project regression suites successfully.
