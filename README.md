@@ -85,3 +85,9 @@ Dialogs scroll independently on iOS Safari and keep their header and action area
 ## Editing existing shifts
 
 In the Shift plan, tap or click any shift card to open it. Managers can reassign it to another employee, change it to an Available shift, assign an open shift to an employee, edit its day/role/times/status, or delete it. In development mode these changes use local state; after PostgreSQL is connected the manager workspace will be wired to the persistent shift APIs.
+
+## v0.3.8 development workflows
+Copy previous week duplicates the immediately preceding week into the currently visible week as drafts. Publish week publishes every draft in the visible week. Team records can be added and edited in local development state. Shift creation and editing now use calendar dates. These local changes reset after a full refresh until PostgreSQL manager APIs are connected.
+
+## v0.3.9 Time & attendance
+Adds scheduled-versus-worked hour reporting, employee period totals, clock in/out and breaks, manager timesheet approval, and PostgreSQL migration `003_time_attendance.sql`. In database-free development mode the screens use demo state; with PostgreSQL the new APIs provide persistent punches and timesheets.

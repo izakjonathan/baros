@@ -5,7 +5,7 @@ import {
   ArrowRight, Bell, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight,
   CircleDollarSign, ClipboardList, Clock3, Coffee, LayoutDashboard, Menu, Package, Plus,
   Search, Settings, ShoppingCart, Sparkles, Users, X, AlertTriangle, Truck, MoreHorizontal,
-  Copy, Send, Boxes, Wine, UserRoundPlus
+  Copy, Send, Boxes, Wine, UserRoundPlus, Timer, Play, Square, FileCheck2
 } from "lucide-react";
 import { days, initialProducts, initialShifts, orders, team, type NavKey, type Product, type Shift, type ShiftRole } from "@/lib/data";
 import { DevRoleSwitcher } from "@/components/dev-role-switcher";
@@ -13,20 +13,36 @@ import { DevRoleSwitcher } from "@/components/dev-role-switcher";
 const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Overview", icon: LayoutDashboard },
   { id: "schedule", label: "Shift plan", icon: CalendarDays },
+  { id: "attendance", label: "Time & attendance", icon: Timer },
   { id: "inventory", label: "Inventory", icon: Package },
   { id: "orders", label: "Orders", icon: ShoppingCart },
   { id: "team", label: "Team", icon: Users },
 ];
+
+type Employee = { name: string; initials: string; role: string; hours: number; status: string; active: boolean; email?: string; phone?: string };
+type TimeEntry = { id: string; employee: string; date: string; clockIn: string; clockOut?: string; breakMinutes: number; status: "Running" | "Pending" | "Approved"; scheduledHours: number };
+const BASE_MONDAY = new Date(2026, 6, 27);
+function toIsoDate(date: Date) { const y = date.getFullYear(); const m = String(date.getMonth()+1).padStart(2,"0"); const d = String(date.getDate()).padStart(2,"0"); return `${y}-${m}-${d}`; }
+function shiftPositionFromDate(value: string) { const date = new Date(`${value}T12:00:00`); const diffDays = Math.round((date.getTime() - BASE_MONDAY.getTime()) / 86400000); return { day: ((diffDays % 7) + 7) % 7, weekOffset: Math.floor(diffDays / 7) }; }
+function dateFromShift(weekOffset = 0, day = 0) { const date = new Date(BASE_MONDAY); date.setDate(BASE_MONDAY.getDate() + weekOffset * 7 + day); return toIsoDate(date); }
 
 export function BarOpsApp({ userName, userRole, devMode }: { userName: string; userRole: string; devMode: boolean }) {
   const [active, setActive] = useState<NavKey>("dashboard");
   const [mobileNav, setMobileNav] = useState(false);
   const [shifts, setShifts] = useState(initialShifts);
   const [products, setProducts] = useState(initialProducts);
-  const [dialog, setDialog] = useState<"shift" | "product" | "order" | null>(null);
+  const [employees, setEmployees] = useState<Employee[]>(team.map((person) => ({ ...person, active: true })));
+  const [dialog, setDialog] = useState<"shift" | "product" | "order" | "employee" | null>(null);
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [editingShift, setEditingShift] = useState<Shift | null>(null);
   const [toast, setToast] = useState("");
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
+  const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([
+    { id: "t1", employee: "Alex Morgan", date: "2026-07-27", clockIn: "15:57", clockOut: "00:08", breakMinutes: 30, status: "Approved", scheduledHours: 8 },
+    { id: "t2", employee: "Maya Chen", date: "2026-07-27", clockIn: "18:04", clockOut: "02:02", breakMinutes: 20, status: "Approved", scheduledHours: 8 },
+    { id: "t3", employee: "Jonas Berg", date: "2026-07-28", clockIn: "16:51", clockOut: "01:14", breakMinutes: 30, status: "Pending", scheduledHours: 8 },
+    { id: "t4", employee: "Sofia Lund", date: "2026-07-31", clockIn: "18:58", breakMinutes: 0, status: "Running", scheduledHours: 7 },
+  ]);
 
   function notify(message: string) {
     setToast(message);
@@ -40,14 +56,17 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
         <Topbar onMenu={() => setMobileNav(true)} />
         <div className="page-wrap">
           {active === "dashboard" && <Dashboard shifts={shifts} products={products} onNavigate={setActive} onNewShift={() => setDialog("shift")} />}
-          {active === "schedule" && <Schedule shifts={shifts} setShifts={setShifts} onNewShift={() => setDialog("shift")} onEditShift={setEditingShift} notify={notify} currentWeekOffset={currentWeekOffset} setCurrentWeekOffset={setCurrentWeekOffset} />}
+          {active === "schedule" && <Schedule shifts={shifts} setShifts={setShifts} employees={employees} onNewShift={() => setDialog("shift")} onEditShift={setEditingShift} notify={notify} currentWeekOffset={currentWeekOffset} setCurrentWeekOffset={setCurrentWeekOffset} />}
+          {active === "attendance" && <Attendance employees={employees} shifts={shifts} entries={timeEntries} setEntries={setTimeEntries} notify={notify} />}
           {active === "inventory" && <Inventory products={products} setProducts={setProducts} onNewProduct={() => setDialog("product")} notify={notify} />}
           {active === "orders" && <Orders onNewOrder={() => setDialog("order")} notify={notify} />}
-          {active === "team" && <Team notify={notify} />}
+          {active === "team" && <Team employees={employees} onAdd={() => setDialog("employee")} onEdit={setEditingEmployee} />}
         </div>
       </main>
-      {editingShift && <EditShiftDialog shift={editingShift} onClose={() => setEditingShift(null)} onSave={(updated) => { setShifts((current) => current.map((item) => item.id === updated.id ? updated : item)); setEditingShift(null); notify(updated.isOpen ? "Shift changed to available" : `Shift assigned to ${updated.employee}`); }} onDelete={() => { setShifts((current) => current.filter((item) => item.id !== editingShift.id)); setEditingShift(null); notify("Shift removed"); }} />}
-      {dialog === "shift" && <ShiftDialog currentWeekOffset={currentWeekOffset} onClose={() => setDialog(null)} onSave={(newShifts) => { setShifts((current) => [...current, ...newShifts]); setDialog(null); notify(newShifts.length > 1 ? `${newShifts.length} repeating shifts added` : "Shift added to the draft schedule"); }} />}
+      {editingShift && <EditShiftDialog shift={editingShift} employees={employees} onClose={() => setEditingShift(null)} onSave={(updated) => { setShifts((current) => current.map((item) => item.id === updated.id ? updated : item)); setEditingShift(null); notify(updated.isOpen ? "Shift changed to available" : `Shift assigned to ${updated.employee}`); }} onDelete={() => { setShifts((current) => current.filter((item) => item.id !== editingShift.id)); setEditingShift(null); notify("Shift removed"); }} />}
+      {dialog === "shift" && <ShiftDialog employees={employees} currentWeekOffset={currentWeekOffset} onClose={() => setDialog(null)} onSave={(newShifts) => { setShifts((current) => [...current, ...newShifts]); setDialog(null); notify(newShifts.length > 1 ? `${newShifts.length} repeating shifts added` : "Shift added to the draft schedule"); }} />}
+      {editingEmployee && <EmployeeDialog employee={editingEmployee} onClose={() => setEditingEmployee(null)} onSave={(updated) => { setEmployees((current) => current.map((item) => item.name === editingEmployee.name ? updated : item)); setEditingEmployee(null); notify("Employee updated"); }} />}
+      {dialog === "employee" && <EmployeeDialog onClose={() => setDialog(null)} onSave={(employee) => { setEmployees((current) => [...current, employee]); setDialog(null); notify("Employee added"); }} />}
       {dialog === "product" && <ProductDialog onClose={() => setDialog(null)} onSave={(product) => { setProducts((current) => [...current, product]); setDialog(null); notify("Product added to inventory"); }} />}
       {dialog === "order" && <OrderDialog onClose={() => setDialog(null)} onSave={() => { setDialog(null); notify("Purchase order created"); }} />}
       {toast && <div className="toast"><span><Check size={16} /></span>{toast}</div>}
@@ -118,19 +137,30 @@ function Metric({ icon: Icon, label, value, detail, trend, warning }: { icon: ty
 function PanelTitle({ title, subtitle, action }: { title: string; subtitle: string; action?: React.ReactNode }) { return <div className="panel-title"><div><h2>{title}</h2><p>{subtitle}</p></div>{action}</div> }
 function Quick({ icon: Icon, label, detail, onClick }: { icon: typeof CalendarDays; label: string; detail: string; onClick: () => void }) { return <button className="quick-action" onClick={onClick}><span><Icon size={19} /></span><div><strong>{label}</strong><small>{detail}</small></div><ArrowRight size={17} /></button> }
 
-function Schedule({ shifts, setShifts, onNewShift, onEditShift, notify, currentWeekOffset, setCurrentWeekOffset }: { shifts: Shift[]; setShifts: React.Dispatch<React.SetStateAction<Shift[]>>; onNewShift: () => void; onEditShift: (shift: Shift) => void; notify: (s: string) => void; currentWeekOffset: number; setCurrentWeekOffset: React.Dispatch<React.SetStateAction<number>> }) {
+function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notify, currentWeekOffset, setCurrentWeekOffset }: { shifts: Shift[]; setShifts: React.Dispatch<React.SetStateAction<Shift[]>>; employees: Employee[]; onNewShift: () => void; onEditShift: (shift: Shift) => void; notify: (s: string) => void; currentWeekOffset: number; setCurrentWeekOffset: React.Dispatch<React.SetStateAction<number>> }) {
   const visibleShifts = shifts.filter((shift) => (shift.weekOffset ?? 0) === currentWeekOffset);
   const drafts = visibleShifts.filter((shift) => shift.status === "Draft").length;
-  const baseMonday = new Date(2026, 6, 27);
-  const monday = new Date(baseMonday); monday.setDate(baseMonday.getDate() + currentWeekOffset * 7);
+  const monday = new Date(BASE_MONDAY); monday.setDate(BASE_MONDAY.getDate() + currentWeekOffset * 7);
   const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
   const weekDays = Array.from({ length: 7 }, (_, index) => { const date = new Date(monday); date.setDate(monday.getDate() + index); return { short: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index], date: String(date.getDate()).padStart(2, "0") }; });
   const rangeLabel = `${monday.toLocaleDateString("en-GB", { day: "numeric", month: "long" })} – ${sunday.toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`;
   const weekLabel = currentWeekOffset === 0 ? "This week" : currentWeekOffset === -1 ? "Last week" : currentWeekOffset === 1 ? "Next week" : rangeLabel;
-  function publish() { setShifts((current) => current.map((shift) => (shift.weekOffset ?? 0) === currentWeekOffset ? { ...shift, status: "Published" } : shift)); notify("Weekly shift plan published"); }
+  function publish() {
+    if (!drafts) { notify("This week is already published"); return; }
+    setShifts((current) => current.map((shift) => (shift.weekOffset ?? 0) === currentWeekOffset ? { ...shift, status: "Published" } : shift));
+    notify(`${drafts} shift${drafts === 1 ? "" : "s"} published`);
+  }
+  function copyPreviousWeek() {
+    const source = shifts.filter((shift) => (shift.weekOffset ?? 0) === currentWeekOffset - 1);
+    if (!source.length) { notify("The previous week has no shifts to copy"); return; }
+    if (visibleShifts.length && !window.confirm("This week already contains shifts. Add copies from the previous week as additional drafts?")) return;
+    const copies = source.map((shift) => ({ ...shift, id: crypto.randomUUID(), weekOffset: currentWeekOffset, status: "Draft" as const, recurrenceLabel: undefined }));
+    setShifts((current) => [...current, ...copies]);
+    notify(`${copies.length} shifts copied as drafts`);
+  }
   return <>
-    <PageHeader eyebrow={rangeLabel} title="Shift plan" subtitle="Build, review and publish the weekly schedule." action={<div className="header-actions"><button className="secondary" onClick={() => notify("Previous week copied into the current draft")}><Copy size={17} /> Copy week</button><button className="primary" onClick={onNewShift}><Plus size={18} /> Add shift</button></div>} />
-    <section className="schedule-toolbar"><div className="week-switch"><button onClick={() => setCurrentWeekOffset((week) => week - 1)} aria-label="Previous week"><ChevronLeft size={18} /></button><strong>{weekLabel}</strong><button onClick={() => setCurrentWeekOffset((week) => week + 1)} aria-label="Next week"><ChevronRight size={18} /></button></div><div className="schedule-summary"><span><b>{visibleShifts.length}</b> shifts</span>{drafts > 0 && <button className="publish-button" onClick={publish}><Send size={16} /> Publish {drafts} drafts</button>}</div></section>
+    <PageHeader eyebrow={rangeLabel} title="Shift plan" subtitle="Build, review and publish the weekly schedule." action={<div className="header-actions"><button className="secondary" onClick={copyPreviousWeek}><Copy size={17} /> Copy previous week</button><button className="primary" onClick={onNewShift}><Plus size={18} /> Add shift</button></div>} />
+    <section className="schedule-toolbar"><div className="week-switch"><button onClick={() => setCurrentWeekOffset((week) => week - 1)} aria-label="Previous week"><ChevronLeft size={18} /></button><strong>{weekLabel}</strong><button onClick={() => setCurrentWeekOffset((week) => week + 1)} aria-label="Next week"><ChevronRight size={18} /></button></div><div className="schedule-summary"><span><b>{visibleShifts.length}</b> shifts · <b>{drafts}</b> drafts</span><button className="publish-button" onClick={publish} disabled={!drafts}><Send size={16} /> {drafts ? `Publish week (${drafts})` : "Week published"}</button></div></section>
     <section className="calendar-panel"><div className="calendar-grid">
       {weekDays.map((day, index) => <div className={`day-column ${currentWeekOffset === 0 && index === 4 ? "today" : ""}`} key={day.short}><div className="day-header"><span>{day.short}</span><strong>{day.date}</strong></div><div className="day-body">{visibleShifts.filter((shift) => shift.day === index).map((shift) => <ShiftCard key={shift.id} shift={shift} onOpen={() => onEditShift(shift)} />)}<button className="add-slot" onClick={onNewShift}><Plus size={16} /> Add shift</button></div></div>)}
     </div></section>
@@ -138,6 +168,20 @@ function Schedule({ shifts, setShifts, onNewShift, onEditShift, notify, currentW
   </>
 }
 function ShiftCard({ shift, onOpen }: { shift: Shift; onOpen: () => void }) { return <button type="button" className={`shift-card shift-card-button role-${shift.role.toLowerCase()} ${shift.status === "Draft" ? "is-draft" : ""}`} onClick={onOpen} aria-label={`Open ${shift.isOpen ? "available" : shift.employee} shift ${shift.start} to ${shift.end}`}><div className="shift-card-top"><span>{shift.start}–{shift.end}</span><ChevronRight size={14} /></div><strong>{shift.isOpen ? "Available shift" : shift.employee}</strong><small>{shift.role}{shift.recurrenceLabel ? ` · ${shift.recurrenceLabel}` : ""}</small>{shift.isOpen && <em>Open</em>}{shift.status === "Draft" && <em>Draft</em>}</button> }
+
+function hoursBetween(start: string, end: string) { const [sh,sm]=start.split(":").map(Number); const [eh,em]=end.split(":").map(Number); let mins=(eh*60+em)-(sh*60+sm); if(mins<=0) mins+=1440; return mins/60; }
+function workedHours(entry: TimeEntry) { return entry.clockOut ? Math.max(0, hoursBetween(entry.clockIn, entry.clockOut) - entry.breakMinutes/60) : 0; }
+function Attendance({ employees, shifts, entries, setEntries, notify }: { employees: Employee[]; shifts: Shift[]; entries: TimeEntry[]; setEntries: React.Dispatch<React.SetStateAction<TimeEntry[]>>; notify:(s:string)=>void }) {
+  const [period,setPeriod]=useState("week"); const [employeeFilter,setEmployeeFilter]=useState("All employees");
+  const visible=entries.filter(e=>employeeFilter==="All employees"||e.employee===employeeFilter);
+  const scheduled=shifts.filter(s=>!s.isOpen).reduce((sum,s)=>sum+hoursBetween(s.start,s.end),0);
+  const worked=visible.reduce((sum,e)=>sum+workedHours(e),0); const pending=visible.filter(e=>e.status==="Pending").length;
+  return <><PageHeader title="Time & attendance" subtitle="Compare scheduled hours with clocked and approved time." action={<button className="primary" onClick={()=>notify("Kiosk mode will use employee PINs once the database is connected")}><Timer size={18}/> Open time clock</button>} />
+  <div className="attendance-filters"><select value={period} onChange={e=>setPeriod(e.target.value)}><option value="week">This week</option><option value="lastweek">Last week</option><option value="month">This month</option><option value="custom">Custom period</option></select><select value={employeeFilter} onChange={e=>setEmployeeFilter(e.target.value)}><option>All employees</option>{employees.map(e=><option key={e.name}>{e.name}</option>)}</select></div>
+  <section className="metric-grid attendance-metrics"><Metric icon={CalendarDays} label="Scheduled" value={`${scheduled.toFixed(1)}h`} detail="Published and draft shifts" trend={period}/><Metric icon={Clock3} label="Worked" value={`${worked.toFixed(1)}h`} detail="Completed punches" trend="Actual"/><Metric icon={FileCheck2} label="Awaiting approval" value={String(pending)} detail="Timesheets to review" trend={pending?"Action needed":"Clear"}/></section>
+  <section className="panel table-panel"><PanelTitle title="Timesheets" subtitle="Clock events become worked-time records. Approve them before payroll."/><div className="data-table attendance-table"><div className="table-row table-head"><span>Employee</span><span>Date</span><span>Clocked</span><span>Break</span><span>Worked</span><span>Status</span></div>{visible.map(e=><div className="table-row" key={e.id}><span><b>{e.employee}</b></span><span>{e.date}</span><span>{e.clockIn}–{e.clockOut||"Now"}</span><span>{e.breakMinutes} min</span><span><b>{e.clockOut?workedHours(e).toFixed(2)+"h":"Running"}</b></span><span><i className={`status status-${e.status.toLowerCase()}`}>{e.status}</i>{e.status==="Pending"&&<button className="approve-mini" onClick={()=>{setEntries(cur=>cur.map(x=>x.id===e.id?{...x,status:"Approved"}:x));notify("Timesheet approved")}}>Approve</button>}</span></div>)}</div></section>
+  <section className="hours-by-employee"><PanelTitle title="Hours by employee" subtitle="Scheduled versus approved worked hours for the selected period."/><div className="team-grid">{employees.map(emp=>{const scheduledEmp=shifts.filter(s=>s.employee===emp.name).reduce((n,s)=>n+hoursBetween(s.start,s.end),0);const workedEmp=entries.filter(e=>e.employee===emp.name&&e.status==="Approved").reduce((n,e)=>n+workedHours(e),0);return <article className="team-card" key={emp.name}><div className="avatar large">{emp.initials}</div><h2>{emp.name}</h2><p>{emp.role}</p><div className="hours-compare"><span>Scheduled<b>{scheduledEmp.toFixed(1)}h</b></span><span>Approved worked<b>{workedEmp.toFixed(1)}h</b></span></div></article>})}</div></section></>;
+}
 
 function Inventory({ products, setProducts, onNewProduct, notify }: { products: Product[]; setProducts: React.Dispatch<React.SetStateAction<Product[]>>; onNewProduct: () => void; notify: (s: string) => void }) {
   const [query, setQuery] = useState(""); const [onlyLow, setOnlyLow] = useState(false);
@@ -159,25 +203,28 @@ function Orders({ onNewOrder, notify }: { onNewOrder: () => void; notify: (s: st
   </>
 }
 
-function Team({ notify }: { notify: (s: string) => void }) { return <><PageHeader title="Team" subtitle="Manage employees, roles and weekly hours." action={<button className="primary" onClick={() => notify("Employee invitation prepared")}><UserRoundPlus size={18} /> Invite employee</button>} />
-  <section className="team-grid">{team.map((person) => <article className="team-card" key={person.name}><div className="team-card-head"><div className="avatar large">{person.initials}</div><button className="more"><MoreHorizontal size={19} /></button></div><h2>{person.name}</h2><p>{person.role}</p><div className="team-stats"><span>Scheduled <b>{person.hours}h</b></span><span className={person.status.includes("pending") ? "pending-text" : ""}>{person.status}</span></div><button className="secondary full" onClick={() => notify(`${person.name}'s profile opened`)}>View profile</button></article>)}</section></> }
+function Team({ employees, onAdd, onEdit }: { employees: Employee[]; onAdd: () => void; onEdit: (employee: Employee) => void }) { return <><PageHeader title="Team" subtitle="Add employees and maintain roles, contact details and active status." action={<button className="primary" onClick={onAdd}><UserRoundPlus size={18} /> Add employee</button>} />
+  <section className="team-grid">{employees.map((person) => <article className={`team-card ${!person.active ? "employee-inactive" : ""}`} key={person.name}><div className="team-card-head"><div className="avatar large">{person.initials}</div><span className={`status ${person.active ? "status-submitted" : "status-draft"}`}>{person.active ? "Active" : "Inactive"}</span></div><h2>{person.name}</h2><p>{person.role}</p><div className="team-stats"><span>Scheduled <b>{person.hours}h</b></span><span>{person.email || person.status}</span></div><button className="secondary full" onClick={() => onEdit(person)}>Edit employee</button></article>)}</section></> }
 
-function ShiftDialog({ onClose, onSave, currentWeekOffset }: { onClose: () => void; onSave: (shifts: Shift[]) => void; currentWeekOffset: number }) {
+function ShiftDialog({ onClose, onSave, currentWeekOffset, employees }: { onClose: () => void; onSave: (shifts: Shift[]) => void; currentWeekOffset: number; employees: Employee[] }) {
   const [assignment, setAssignment] = useState<"employee" | "open">("employee");
-  const [employee, setEmployee] = useState("Alex Morgan"); const [day, setDay] = useState("4"); const [role, setRole] = useState<ShiftRole>("Bartender"); const [start, setStart] = useState("17:00"); const [end, setEnd] = useState("01:00");
+  const activeEmployees = employees.filter((person) => person.active);
+  const [employee, setEmployee] = useState(activeEmployees[0]?.name ?? ""); const [shiftDate, setShiftDate] = useState(dateFromShift(currentWeekOffset, 4)); const [role, setRole] = useState<ShiftRole>("Bartender"); const [start, setStart] = useState("17:00"); const [end, setEnd] = useState("01:00");
   const [repeat, setRepeat] = useState(false); const [frequency, setFrequency] = useState<"daily" | "weekly">("weekly"); const [count, setCount] = useState(4); const [weekdays, setWeekdays] = useState<number[]>([4]);
   const weekdayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   function save() {
     const safeCount = Math.max(1, Math.min(count || 1, frequency === "daily" ? 31 : 52));
     let occurrences: { day: number; weekOffset: number }[];
-    if (!repeat) occurrences = [{ day: Number(day), weekOffset: currentWeekOffset }];
-    else if (frequency === "daily") occurrences = Array.from({ length: safeCount }, (_, index) => { const absoluteDay = Number(day) + index; return { day: absoluteDay % 7, weekOffset: currentWeekOffset + Math.floor(absoluteDay / 7) }; });
+    const startPosition = shiftPositionFromDate(shiftDate);
+    if (!repeat) occurrences = [startPosition];
+    else if (frequency === "daily") occurrences = Array.from({ length: safeCount }, (_, index) => { const date = new Date(`${shiftDate}T12:00:00`); date.setDate(date.getDate() + index); return shiftPositionFromDate(toIsoDate(date)); });
     else {
-      const selected = weekdays.length ? weekdays : [Number(day)];
-      occurrences = Array.from({ length: safeCount }, (_, week) => selected.map((selectedDay) => ({ day: selectedDay, weekOffset: currentWeekOffset + week }))).flat();
+      const selected = weekdays.length ? weekdays : [startPosition.day];
+      const weekStart = new Date(`${shiftDate}T12:00:00`); weekStart.setDate(weekStart.getDate() - startPosition.day);
+      occurrences = Array.from({ length: safeCount }, (_, week) => selected.map((selectedDay) => { const date = new Date(weekStart); date.setDate(weekStart.getDate() + week * 7 + selectedDay); return shiftPositionFromDate(toIsoDate(date)); })).flat().filter((occurrence) => occurrence.weekOffset > startPosition.weekOffset || occurrence.day >= startPosition.day);
     }
     const uniqueOccurrences = Array.from(new Map(occurrences.map((occurrence) => [`${occurrence.weekOffset}-${occurrence.day}`, occurrence])).values());
-    const label = repeat ? (frequency === "daily" ? `Daily · ${uniqueOccurrences.length} times` : `Weekly · ${(weekdays.length ? weekdays : [Number(day)]).map((d) => weekdayNames[d]).join(", ")}`) : undefined;
+    const label = repeat ? (frequency === "daily" ? `Daily · ${uniqueOccurrences.length} times` : `Weekly · ${(weekdays.length ? weekdays : [shiftPositionFromDate(shiftDate).day]).map((d) => weekdayNames[d]).join(", ")}`) : undefined;
     const name = assignment === "open" ? "Available shift" : employee;
     const initials = assignment === "open" ? "+" : employee.split(" ").map((word) => word[0]).join("");
     onSave(uniqueOccurrences.map((occurrence, index) => ({ id: crypto.randomUUID(), day: occurrence.day, weekOffset: occurrence.weekOffset, employee: name, initials, start, end, role, status: "Draft", isOpen: assignment === "open", recurrenceLabel: index === 0 ? label : undefined })));
@@ -185,9 +232,9 @@ function ShiftDialog({ onClose, onSave, currentWeekOffset }: { onClose: () => vo
   return <Modal title="Add shift" subtitle="Create one shift or a repeating series." onClose={onClose}>
     <div className="assignment-toggle"><button className={assignment === "employee" ? "selected" : ""} onClick={() => setAssignment("employee")}>Assign employee</button><button className={assignment === "open" ? "selected" : ""} onClick={() => setAssignment("open")}>Available shift</button></div>
     <div className="form-grid">
-      {assignment === "employee" && <label className="full-field">Employee<select value={employee} onChange={(e) => setEmployee(e.target.value)}>{team.map((p) => <option key={p.name}>{p.name}</option>)}</select></label>}
+      {assignment === "employee" && <label className="full-field">Employee<select value={employee} onChange={(e) => setEmployee(e.target.value)}>{activeEmployees.map((p) => <option key={p.name}>{p.name}</option>)}</select></label>}
       {assignment === "open" && <div className="open-shift-note full-field"><Users size={18}/><div><strong>Employees can request this shift</strong><span>A manager approves the employee who receives it.</span></div></div>}
-      <label>First day<select value={day} onChange={(e) => { setDay(e.target.value); setWeekdays([Number(e.target.value)]); }}>{days.map((d, i) => <option value={i} key={d.short}>{d.short}</option>)}</select></label>
+      <label>Shift date<input type="date" value={shiftDate} onChange={(e) => { setShiftDate(e.target.value); setWeekdays([shiftPositionFromDate(e.target.value).day]); }} /></label>
       <label>Role<select value={role} onChange={(e) => setRole(e.target.value as ShiftRole)}><option>Manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label>
       <label>Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} /></label><label>Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /></label>
     </div>
@@ -199,24 +246,26 @@ function ShiftDialog({ onClose, onSave, currentWeekOffset }: { onClose: () => vo
     <ModalActions onClose={onClose} onSave={save} label={repeat ? "Add repeating shifts" : "Add shift"} />
   </Modal>
 }
-function EditShiftDialog({ shift, onClose, onSave, onDelete }: { shift: Shift; onClose: () => void; onSave: (shift: Shift) => void; onDelete: () => void }) {
+function EditShiftDialog({ shift, employees, onClose, onSave, onDelete }: { shift: Shift; employees: Employee[]; onClose: () => void; onSave: (shift: Shift) => void; onDelete: () => void }) {
   const [assignment, setAssignment] = useState<"employee" | "open">(shift.isOpen ? "open" : "employee");
-  const [employee, setEmployee] = useState(shift.isOpen ? team[0].name : shift.employee);
-  const [day, setDay] = useState(String(shift.day));
+  const activeEmployees = employees.filter((person) => person.active);
+  const [employee, setEmployee] = useState(shift.isOpen ? activeEmployees[0]?.name ?? "" : shift.employee);
+  const [shiftDate, setShiftDate] = useState(dateFromShift(shift.weekOffset ?? 0, shift.day));
   const [role, setRole] = useState<ShiftRole>(shift.role);
   const [start, setStart] = useState(shift.start);
   const [end, setEnd] = useState(shift.end);
   const [status, setStatus] = useState<"Draft" | "Published">(shift.status);
   function save() {
     const selectedEmployee = assignment === "open" ? "Available shift" : employee;
-    onSave({ ...shift, day: Number(day), employee: selectedEmployee, initials: assignment === "open" ? "+" : employee.split(" ").map((word) => word[0]).join(""), role, start, end, status, isOpen: assignment === "open" });
+    const position = shiftPositionFromDate(shiftDate);
+    onSave({ ...shift, day: position.day, weekOffset: position.weekOffset, employee: selectedEmployee, initials: assignment === "open" ? "+" : employee.split(" ").map((word) => word[0]).join(""), role, start, end, status, isOpen: assignment === "open" });
   }
   return <Modal title="Edit shift" subtitle="Update this shift occurrence, its assignment or availability." onClose={onClose}>
     <div className="assignment-toggle"><button type="button" className={assignment === "employee" ? "selected" : ""} onClick={() => setAssignment("employee")}>Assign employee</button><button type="button" className={assignment === "open" ? "selected" : ""} onClick={() => setAssignment("open")}>Available shift</button></div>
     <div className="form-grid">
-      {assignment === "employee" && <label className="full-field">Employee<select value={employee} onChange={(e) => setEmployee(e.target.value)}>{team.map((person) => <option key={person.name}>{person.name}</option>)}</select></label>}
+      {assignment === "employee" && <label className="full-field">Employee<select value={employee} onChange={(e) => setEmployee(e.target.value)}>{activeEmployees.map((person) => <option key={person.name}>{person.name}</option>)}</select></label>}
       {assignment === "open" && <div className="open-shift-note full-field"><Users size={18}/><div><strong>Employees can request this shift</strong><span>The current employee is removed. A manager approves the employee who receives it.</span></div></div>}
-      <label>Day<select value={day} onChange={(e) => setDay(e.target.value)}>{days.map((item, index) => <option value={index} key={item.short}>{item.short}</option>)}</select></label>
+      <label>Shift date<input type="date" value={shiftDate} onChange={(e) => setShiftDate(e.target.value)} /></label>
       <label>Role<select value={role} onChange={(e) => setRole(e.target.value as ShiftRole)}><option>Manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label>
       <label>Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} /></label><label>Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /></label>
       <label className="full-field">Schedule status<select value={status} onChange={(e) => setStatus(e.target.value as "Draft" | "Published")}><option>Draft</option><option>Published</option></select></label>
@@ -224,6 +273,16 @@ function EditShiftDialog({ shift, onClose, onSave, onDelete }: { shift: Shift; o
     {shift.recurrenceLabel && <div className="series-edit-note"><CalendarDays size={17}/><div><strong>Repeating shift</strong><span>This edit changes only this occurrence. Series-wide editing will be added separately.</span></div></div>}
     <div className="edit-shift-actions"><button type="button" className="danger-button" onClick={onDelete}>Delete shift</button><div><button type="button" className="secondary" onClick={onClose}>Cancel</button><button type="button" className="primary" onClick={save}>Save changes</button></div></div>
   </Modal>
+}
+
+function EmployeeDialog({ employee, onClose, onSave }: { employee?: Employee; onClose: () => void; onSave: (employee: Employee) => void }) {
+  const [name, setName] = useState(employee?.name ?? "");
+  const [role, setRole] = useState(employee?.role ?? "Bartender");
+  const [email, setEmail] = useState(employee?.email ?? "");
+  const [phone, setPhone] = useState(employee?.phone ?? "");
+  const [active, setActive] = useState(employee?.active ?? true);
+  function save() { const cleanName = name.trim() || "New employee"; onSave({ name: cleanName, initials: cleanName.split(" ").map((part) => part[0]).join("").slice(0,2).toUpperCase(), role, email, phone, active, hours: employee?.hours ?? 0, status: active ? "No shifts scheduled" : "Inactive" }); }
+  return <Modal title={employee ? "Edit employee" : "Add employee"} subtitle="Maintain the employee profile used throughout scheduling." onClose={onClose}><div className="form-grid"><label className="full-field">Full name<input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Employee name" /></label><label>Role<select value={role} onChange={(e) => setRole(e.target.value)}><option>General manager</option><option>Bar manager</option><option>Shift manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label><label>Status<select value={active ? "active" : "inactive"} onChange={(e) => setActive(e.target.value === "active")}><option value="active">Active</option><option value="inactive">Inactive</option></select></label><label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" /></label><label>Phone<input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+45 ..." /></label></div><ModalActions onClose={onClose} onSave={save} label={employee ? "Save employee" : "Add employee"} /></Modal>
 }
 
 function ProductDialog({ onClose, onSave }: { onClose: () => void; onSave: (product: Product) => void }) { const [name, setName] = useState(""); const [supplier, setSupplier] = useState("Nordic Drinks"); return <Modal title="Add product" subtitle="Create a new inventory item." onClose={onClose}><div className="form-grid"><label className="full-field">Product name<input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Lager 30L" /></label><label>Supplier<select value={supplier} onChange={(e) => setSupplier(e.target.value)}><option>Nordic Drinks</option><option>Vin & Co.</option><option>Bar Supply DK</option><option>City Produce</option></select></label><label>Category<select><option>Draught beer</option><option>Wine</option><option>Spirits</option><option>Soft drinks</option></select></label><label>Current stock<input type="number" defaultValue="0" /></label><label>Par level<input type="number" defaultValue="6" /></label></div><ModalActions onClose={onClose} onSave={() => onSave({ id: crypto.randomUUID(), name: name || "New product", category: "Draught beer", supplier, stock: 0, par: 6, unit: "units", price: 0 })} label="Add product" /></Modal> }

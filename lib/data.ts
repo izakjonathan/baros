@@ -1,4 +1,4 @@
-export type NavKey = "dashboard" | "schedule" | "inventory" | "orders" | "team";
+export type NavKey = "dashboard" | "schedule" | "attendance" | "inventory" | "orders" | "team";
 export type ShiftRole = "Manager" | "Bartender" | "Floor" | "Kitchen";
 export type ShiftStatus = "Published" | "Draft";
 
