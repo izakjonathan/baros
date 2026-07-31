@@ -5,7 +5,7 @@ import {
   ArrowRight, Bell, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight,
   CircleDollarSign, ClipboardList, Clock3, Coffee, LayoutDashboard, Menu, Package, Plus,
   Search, Settings, ShoppingCart, Sparkles, Users, X, AlertTriangle, Truck, MoreHorizontal,
-  Copy, Send, Boxes, Wine, UserRoundPlus, Timer, Play, Square, FileCheck2
+  Copy, Send, Boxes, Wine, UserRoundPlus, Timer, Play, Square, FileCheck2, FileDown, CheckCheck
 } from "lucide-react";
 import { days, initialProducts, initialShifts, orders, team, type NavKey, type Product, type Shift, type ShiftRole } from "@/lib/data";
 import { DevRoleSwitcher } from "@/components/dev-role-switcher";
@@ -176,17 +176,48 @@ function ShiftCard({ shift, onOpen }: { shift: Shift; onOpen: () => void }) { co
 function hoursBetween(start: string, end: string) { const [sh,sm]=start.split(":").map(Number); const [eh,em]=end.split(":").map(Number); let mins=(eh*60+em)-(sh*60+sm); if(mins<=0) mins+=1440; return mins/60; }
 function workedHours(entry: TimeEntry) { return entry.clockOut ? Math.max(0, hoursBetween(entry.clockIn, entry.clockOut) - entry.breakMinutes/60) : 0; }
 function Attendance({ employees, shifts, entries, setEntries, notify }: { employees: Employee[]; shifts: Shift[]; entries: TimeEntry[]; setEntries: React.Dispatch<React.SetStateAction<TimeEntry[]>>; notify:(s:string)=>void }) {
-  const [period,setPeriod]=useState("week"); const [employeeFilter,setEmployeeFilter]=useState("All employees");
-  const visible=entries.filter(e=>employeeFilter==="All employees"||e.employee===employeeFilter);
-  const scheduled=shifts.filter(s=>!s.isOpen).reduce((sum,s)=>sum+hoursBetween(s.start,s.end),0);
-  const worked=visible.reduce((sum,e)=>sum+workedHours(e),0); const pending=visible.filter(e=>e.status==="Pending").length;
-  return <><PageHeader title="Time & attendance" subtitle="Compare scheduled hours with clocked and approved time." action={<button className="primary" onClick={()=>notify("Kiosk mode will use employee PINs once the database is connected")}><Timer size={18}/> Open time clock</button>} />
-  <div className="attendance-filters"><select value={period} onChange={e=>setPeriod(e.target.value)}><option value="week">This week</option><option value="lastweek">Last week</option><option value="month">This month</option><option value="custom">Custom period</option></select><select value={employeeFilter} onChange={e=>setEmployeeFilter(e.target.value)}><option>All employees</option>{employees.map(e=><option key={e.name}>{e.name}</option>)}</select></div>
-  <section className="metric-grid attendance-metrics"><Metric icon={CalendarDays} label="Scheduled" value={`${scheduled.toFixed(1)}h`} detail="Published and draft shifts" trend={period}/><Metric icon={Clock3} label="Worked" value={`${worked.toFixed(1)}h`} detail="Completed punches" trend="Actual"/><Metric icon={FileCheck2} label="Awaiting approval" value={String(pending)} detail="Timesheets to review" trend={pending?"Action needed":"Clear"}/></section>
-  <section className="panel table-panel"><PanelTitle title="Timesheets" subtitle="Clock events become worked-time records. Approve them before payroll."/><div className="data-table attendance-table"><div className="table-row table-head"><span>Employee</span><span>Date</span><span>Clocked</span><span>Break</span><span>Worked</span><span>Status</span></div>{visible.map(e=><div className="table-row" key={e.id}><span><b>{e.employee}</b></span><span>{e.date}</span><span>{e.clockIn}–{e.clockOut||"Now"}</span><span>{e.breakMinutes} min</span><span><b>{e.clockOut?workedHours(e).toFixed(2)+"h":"Running"}</b></span><span><i className={`status status-${e.status.toLowerCase()}`}>{e.status}</i>{e.status==="Pending"&&<button className="approve-mini" onClick={()=>{setEntries(cur=>cur.map(x=>x.id===e.id?{...x,status:"Approved"}:x));notify("Timesheet approved")}}>Approve</button>}</span></div>)}</div></section>
-  <section className="hours-by-employee"><PanelTitle title="Hours by employee" subtitle="Scheduled versus approved worked hours for the selected period."/><div className="team-grid">{employees.map(emp=>{const scheduledEmp=shifts.filter(s=>s.employee===emp.name).reduce((n,s)=>n+hoursBetween(s.start,s.end),0);const workedEmp=entries.filter(e=>e.employee===emp.name&&e.status==="Approved").reduce((n,e)=>n+workedHours(e),0);return <article className="team-card" key={emp.name}><div className="avatar large">{emp.initials}</div><h2>{emp.name}</h2><p>{emp.role}</p><div className="hours-compare"><span>Scheduled<b>{scheduledEmp.toFixed(1)}h</b></span><span>Approved worked<b>{workedEmp.toFixed(1)}h</b></span></div></article>})}</div></section></>;
-}
+  const [fromDate, setFromDate] = useState("2026-07-27");
+  const [toDate, setToDate] = useState("2026-08-02");
+  const [employeeFilter,setEmployeeFilter]=useState("All employees");
+  const withinPeriod = (date: string) => date >= fromDate && date <= toDate;
+  const visible=entries.filter(e=>withinPeriod(e.date) && (employeeFilter==="All employees"||e.employee===employeeFilter));
+  const visibleShifts=shifts.filter(s=>withinPeriod(canonicalShiftDate(s)) && (employeeFilter==="All employees"||s.employee===employeeFilter));
+  const scheduled=visibleShifts.filter(s=>!s.isOpen).reduce((n,s)=>n+hoursBetween(s.start,s.end),0);
+  const worked=visible.filter(e=>e.status==="Approved").reduce((n,e)=>n+workedHours(e),0);
+  const pending=visible.filter(e=>e.status==="Pending").length;
+  const approved=visible.filter(e=>e.status==="Approved");
 
+  function approveTimesheet(id: string) {
+    setEntries(cur=>cur.map(x=>x.id===id?{...x,status:"Approved"}:x));
+    notify("Timesheet approved and included in payroll exports");
+  }
+  function approveAllVisible() {
+    const count=visible.filter(e=>e.status==="Pending").length;
+    if(!count){notify("No pending timesheets in this period");return;}
+    setEntries(cur=>cur.map(x=>withinPeriod(x.date)&&(employeeFilter==="All employees"||x.employee===employeeFilter)&&x.status==="Pending"?{...x,status:"Approved"}:x));
+    notify(`${count} timesheet${count===1?"":"s"} approved`);
+  }
+  function csvCell(value: string | number) { const text=String(value ?? ""); return /[",\n]/.test(text)?`"${text.replaceAll('"','""')}"`:text; }
+  function exportApproved() {
+    const rows=employees.map(emp=>{
+      const records=approved.filter(entry=>entry.employee===emp.name);
+      return {emp,records,total:records.reduce((sum,entry)=>sum+workedHours(entry),0)};
+    }).filter(row=>row.records.length>0);
+    if(!rows.length){notify("There are no approved timesheets to export for this period");return;}
+    const header=["Employee","Email","Phone","Role","Period start","Period end","Approved timesheets","Approved hours"];
+    const lines=[header,...rows.map(({emp,records,total})=>[emp.name,emp.email||"",emp.phone||"",emp.role,fromDate,toDate,records.length,total.toFixed(2)])].map(row=>row.map(csvCell).join(","));
+    const blob=new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"});
+    const url=URL.createObjectURL(blob); const link=document.createElement("a"); link.href=url; link.download=`approved-hours-${fromDate}-to-${toDate}.csv`; document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url);
+    notify(`${rows.length} employee summaries exported`);
+  }
+  return <>
+  <PageHeader title="Time & attendance" subtitle="Review clock records, approve worked time, and export payroll-ready employee totals." action={<div className="header-actions"><button className="secondary" onClick={approveAllVisible} disabled={!pending}><CheckCheck size={18}/>Approve all ({pending})</button><button className="primary" onClick={exportApproved} disabled={!approved.length}><FileDown size={18}/>Export approved</button></div>}/>
+  <section className="attendance-workflow"><span><b>1</b> Review punches</span><span><b>2</b> Approve timesheets</span><span><b>3</b> Export approved totals</span></section>
+  <div className="attendance-filters"><label>From<input type="date" value={fromDate} onChange={e=>setFromDate(e.target.value)}/></label><label>To<input type="date" value={toDate} min={fromDate} onChange={e=>setToDate(e.target.value)}/></label><label>Employee<select value={employeeFilter} onChange={e=>setEmployeeFilter(e.target.value)}><option>All employees</option>{employees.map(e=><option key={e.name}>{e.name}</option>)}</select></label></div>
+  <section className="metric-grid attendance-metrics"><Metric icon={CalendarDays} label="Scheduled" value={`${scheduled.toFixed(1)}h`} detail="Assigned shifts in period" trend={`${fromDate}–${toDate}`}/><Metric icon={Clock3} label="Approved worked" value={`${worked.toFixed(1)}h`} detail="Included in export" trend="Payroll ready"/><Metric icon={FileCheck2} label="Awaiting approval" value={String(pending)} detail="Excluded from export" trend={pending?"Action needed":"Clear"}/></section>
+  <section className="panel table-panel"><PanelTitle title="Timesheets" subtitle="Only approved records are included in exports. Running and pending records stay excluded."/><div className="data-table attendance-table"><div className="table-row table-head"><span>Employee</span><span>Date</span><span>Clocked</span><span>Break</span><span>Worked</span><span>Status</span></div>{visible.map(e=><div className="table-row" key={e.id}><span><b>{e.employee}</b></span><span>{e.date}</span><span>{e.clockIn}–{e.clockOut||"Now"}</span><span>{e.breakMinutes} min</span><span><b>{e.clockOut?workedHours(e).toFixed(2)+"h":"Running"}</b></span><span><i className={`status status-${e.status.toLowerCase()}`}>{e.status}</i>{e.status==="Pending"&&<button className="approve-mini" onClick={()=>approveTimesheet(e.id)}>Approve</button>}</span></div>)}{!visible.length&&<div className="attendance-empty">No timesheets match this period and employee filter.</div>}</div></section>
+  <section className="hours-by-employee"><PanelTitle title="Export preview" subtitle="Employee information plus the sum of approved timesheets in the selected period."/><div className="team-grid">{employees.map(emp=>{const scheduledEmp=visibleShifts.filter(s=>s.employee===emp.name).reduce((n,s)=>n+hoursBetween(s.start,s.end),0);const approvedEntries=approved.filter(e=>e.employee===emp.name);const workedEmp=approvedEntries.reduce((n,e)=>n+workedHours(e),0);return <article className="team-card" key={emp.name}><div className="avatar large">{emp.initials}</div><h2>{emp.name}</h2><p>{emp.role}</p><div className="hours-compare"><span>Scheduled<b>{scheduledEmp.toFixed(1)}h</b></span><span>Approved export<b>{workedEmp.toFixed(2)}h</b></span></div><small className="export-count">{approvedEntries.length} approved timesheet{approvedEntries.length===1?"":"s"}</small></article>})}</div></section></>;
+}
 function Inventory({ products, setProducts, onNewProduct, notify }: { products: Product[]; setProducts: React.Dispatch<React.SetStateAction<Product[]>>; onNewProduct: () => void; notify: (s: string) => void }) {
   const [query, setQuery] = useState(""); const [onlyLow, setOnlyLow] = useState(false);
   const filtered = products.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()) && (!onlyLow || p.stock < p.par));

@@ -1,11 +1,10 @@
-# v0.4.0 — Mobile audit and overnight shift hardening
+# v0.4.1 — Payroll approval, approved-hours export and scale pass
 
-- Makes the shift start date canonical and independent of the end time.
-- Reassigning an overnight available shift no longer changes its scheduled day.
-- Shows `+1` and “Overnight” when a shift ends on the following calendar day.
-- Copies canonical dates correctly when copying the previous week.
-- Restores pinch zoom and reliable vertical scrolling in iOS dialogs.
-- Prevents modal and employee-portal horizontal overflow.
-- Uses 16px mobile form controls to avoid Safari focus zoom.
-- Preserves and restores background scroll position while dialogs are open.
-- Adds source-level shift-date, overnight, recurrence, and copy-week regression checks.
+- Adds explicit single and bulk timesheet approval.
+- Pending and running timesheets are excluded from every export.
+- Adds custom-period CSV export aggregated by employee.
+- Export contains employee name, email, phone, role, selected period, approved timesheet count and approved-hour total.
+- Adds persistent tenant-scoped `/api/timesheets/export` route.
+- Adds export preview cards and a three-step payroll workflow.
+- Standardises scale and spacing across every manager module and mobile dialog.
+- Adds payroll export regression tests and a product gap audit.

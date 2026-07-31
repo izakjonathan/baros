@@ -100,3 +100,6 @@ npm run build
 ```
 
 Overnight shifts belong to the calendar date on which they start. An end time earlier than the start time is displayed as ending the following day and does not move the shift to that day.
+
+## v0.4.1 payroll workflow
+The manager Time & attendance module now uses a strict review → approve → export flow. Pending/running records are excluded from CSV exports. Choose a From/To period, approve individual records or all pending records in the filtered view, then export employee-level approved-hour totals. With PostgreSQL connected, `GET /api/timesheets/export?from=YYYY-MM-DD&to=YYYY-MM-DD` provides the tenant-scoped CSV export.
