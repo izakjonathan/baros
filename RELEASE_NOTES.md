@@ -1,21 +1,17 @@
-# Bar Ops v0.3.5 — Week navigation and recurrence fix
+# Bar Ops v0.3.6 — Editable shift assignments
 
-- Week navigation now changes the visible seven-day schedule.
-- Shift records in development state carry a week offset.
-- Daily repeats flow into later weeks instead of wrapping onto the same visible week.
-- Weekly repeats create one occurrence per selected weekday per week.
-- Duplicate dates are removed before a recurring series is saved.
-- Publishing affects only the currently visible week.
+## Added
+- Tap or click any existing shift card to open its full edit view.
+- Reassign an existing shift to any employee in the team list.
+- Convert an assigned shift into an Available shift.
+- Assign an Available shift directly to an employee.
+- Edit weekday, role, start time, end time, and draft/published status.
+- Delete an existing shift from the edit view.
+- Repeating occurrences clearly state that the current edit affects only the selected occurrence.
+- Mobile-safe sticky edit actions and accessible focus states.
 
-# Bar Ops v0.3.4 — Mobile dialog scrolling fix
+## Product research applied
+The workflow follows established scheduling patterns used by Planday, When I Work, Deputy and similar systems: opening an existing shift exposes assignment and shift details in one view; an assigned shift can be changed to an unassigned/open shift; open shifts remain existing shifts rather than being deleted and recreated; and employees can later request the open shift subject to manager approval.
 
-Based on v0.3.3.
-
-## Fixed
-- Add Shift and other dialogs now have their own vertical scroll container.
-- Mobile dialogs use a bottom-sheet layout sized with `100dvh`.
-- iOS momentum scrolling and vertical touch gestures are explicitly enabled.
-- The modal header and action buttons stay visible while the form scrolls.
-- Safe-area padding keeps actions above the Safari controls and home indicator.
-- Time inputs and other form fields can no longer overflow their grid columns.
-- Background page scrolling is locked while a dialog is open.
+## Development-state note
+These edits work in the database-free manager workspace. They update local in-memory state until PostgreSQL is connected. The persistent shift update API remains the target for the database-backed manager workspace.

@@ -81,3 +81,7 @@ For a temporary Vercel preview without a database, set `DEV_AUTH_ENABLED=true`, 
 
 ## v0.3.5 mobile dialog behavior
 Dialogs scroll independently on iOS Safari and keep their header and action area visible.
+
+## Editing existing shifts
+
+In the Shift plan, tap or click any shift card to open it. Managers can reassign it to another employee, change it to an Available shift, assign an open shift to an employee, edit its day/role/times/status, or delete it. In development mode these changes use local state; after PostgreSQL is connected the manager workspace will be wired to the persistent shift APIs.
