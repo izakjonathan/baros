@@ -11,6 +11,8 @@ export type Shift = {
   end: string;
   role: ShiftRole;
   status: ShiftStatus;
+  isOpen?: boolean;
+  recurrenceLabel?: string;
 };
 
 export type Product = {

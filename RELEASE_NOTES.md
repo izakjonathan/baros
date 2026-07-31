@@ -1,19 +1,33 @@
-# v0.2.0 — Persistent Foundation
+# v0.3.1 — Database-free development login
+
+- Adds an isolated development authentication mode that does not require PostgreSQL.
+- Enables automatically during local development when `DATABASE_URL` is absent.
+- Supports temporary Vercel previews through `DEV_AUTH_ENABLED=true`.
+- Uses an HTTP-only HMAC-signed session cookie.
+- Preserves the real database-backed login and switches to it automatically when development auth is disabled.
+- Default local credentials: `dev@barops.local` / `dev`.
+- Database-backed employee pages and API persistence still require PostgreSQL.
+
+# Bar Ops v0.3.0 — Shift workflows
+
+Built from the v0.2.0 persistent foundation.
 
 ## Added
-- PostgreSQL domain schema and migration runner
-- Organization and multi-location tenancy
-- Database sessions and role-based access
-- Persistent domain APIs for employees, shifts, products, orders, requests and availability
-- Employee mobile portal
-- Time-off and availability request submission
-- Audit log service and audit API
-- Persistent notification service and notification API
-- Production-oriented seed workflow
+- Daily recurring shifts for a specified number of occurrences.
+- Weekly recurring shifts with selectable weekdays and a week count.
+- Recurrence-group storage while keeping every generated shift independently editable.
+- Assigned shifts and open/available shifts.
+- Employee requests for open shifts, with manager approval and competing-request rejection.
+- Employee handover requests to a named colleague.
+- Employee shift swaps using a selected colleague shift.
+- Receiving-employee acceptance before manager approval.
+- Transactional final assignment and swapping.
+- Audit events for shift series, open-shift requests, and transfer requests.
+- Employee portal UI for open shifts, claims, handovers, and swaps.
+- Expanded manager shift dialog for recurrence and assignment mode.
 
-## Preserved
-- Complete v0.1.0 responsive manager frontend
-- Existing visual language, navigation and demo interactions
+## Database migration
+Run `npm run db:migrate` after deployment to apply `002_shift_workflows.sql`.
 
-## Deliberate boundary
-The manager screens remain visually compatible with v0.1.0 while persistence is introduced through server APIs. This minimizes a risky full UI rewrite in the same release. Subsequent versions can migrate each manager module from local presentation state to the persistent APIs one workflow at a time.
+## Validation note
+The source tree, migration files, scripts, and archive were structurally validated. A complete dependency install/build could not run in this workspace because its internal npm mirror returns 404 for standard scoped packages such as `@types/node`.

@@ -43,7 +43,7 @@ export function BarOpsApp() {
           {active === "team" && <Team notify={notify} />}
         </div>
       </main>
-      {dialog === "shift" && <ShiftDialog onClose={() => setDialog(null)} onSave={(shift) => { setShifts((current) => [...current, shift]); setDialog(null); notify("Shift added to the draft schedule"); }} />}
+      {dialog === "shift" && <ShiftDialog onClose={() => setDialog(null)} onSave={(newShifts) => { setShifts((current) => [...current, ...newShifts]); setDialog(null); notify(newShifts.length > 1 ? `${newShifts.length} repeating shifts added` : "Shift added to the draft schedule"); }} />}
       {dialog === "product" && <ProductDialog onClose={() => setDialog(null)} onSave={(product) => { setProducts((current) => [...current, product]); setDialog(null); notify("Product added to inventory"); }} />}
       {dialog === "order" && <OrderDialog onClose={() => setDialog(null)} onSave={() => { setDialog(null); notify("Purchase order created"); }} />}
       {toast && <div className="toast"><span><Check size={16} /></span>{toast}</div>}
@@ -126,7 +126,7 @@ function Schedule({ shifts, setShifts, onNewShift, notify }: { shifts: Shift[]; 
     <div className="legend"><span><i className="manager" /> Manager</span><span><i className="bartender" /> Bartender</span><span><i className="floor" /> Floor</span><span><i className="draft" /> Draft</span></div>
   </>
 }
-function ShiftCard({ shift, onDelete }: { shift: Shift; onDelete: () => void }) { return <article className={`shift-card role-${shift.role.toLowerCase()} ${shift.status === "Draft" ? "is-draft" : ""}`}><div className="shift-card-top"><span>{shift.start}–{shift.end}</span><button onClick={onDelete} aria-label="Delete shift"><X size={14} /></button></div><strong>{shift.employee}</strong><small>{shift.role}</small>{shift.status === "Draft" && <em>Draft</em>}</article> }
+function ShiftCard({ shift, onDelete }: { shift: Shift; onDelete: () => void }) { return <article className={`shift-card role-${shift.role.toLowerCase()} ${shift.status === "Draft" ? "is-draft" : ""}`}><div className="shift-card-top"><span>{shift.start}–{shift.end}</span><button onClick={onDelete} aria-label="Delete shift"><X size={14} /></button></div><strong>{shift.isOpen ? "Available shift" : shift.employee}</strong><small>{shift.role}{shift.recurrenceLabel ? ` · ${shift.recurrenceLabel}` : ""}</small>{shift.isOpen && <em>Open</em>}{shift.status === "Draft" && <em>Draft</em>}</article> }
 
 function Inventory({ products, setProducts, onNewProduct, notify }: { products: Product[]; setProducts: React.Dispatch<React.SetStateAction<Product[]>>; onNewProduct: () => void; notify: (s: string) => void }) {
   const [query, setQuery] = useState(""); const [onlyLow, setOnlyLow] = useState(false);
@@ -151,10 +151,35 @@ function Orders({ onNewOrder, notify }: { onNewOrder: () => void; notify: (s: st
 function Team({ notify }: { notify: (s: string) => void }) { return <><PageHeader title="Team" subtitle="Manage employees, roles and weekly hours." action={<button className="primary" onClick={() => notify("Employee invitation prepared")}><UserRoundPlus size={18} /> Invite employee</button>} />
   <section className="team-grid">{team.map((person) => <article className="team-card" key={person.name}><div className="team-card-head"><div className="avatar large">{person.initials}</div><button className="more"><MoreHorizontal size={19} /></button></div><h2>{person.name}</h2><p>{person.role}</p><div className="team-stats"><span>Scheduled <b>{person.hours}h</b></span><span className={person.status.includes("pending") ? "pending-text" : ""}>{person.status}</span></div><button className="secondary full" onClick={() => notify(`${person.name}'s profile opened`)}>View profile</button></article>)}</section></> }
 
-function ShiftDialog({ onClose, onSave }: { onClose: () => void; onSave: (shift: Shift) => void }) {
+function ShiftDialog({ onClose, onSave }: { onClose: () => void; onSave: (shifts: Shift[]) => void }) {
+  const [assignment, setAssignment] = useState<"employee" | "open">("employee");
   const [employee, setEmployee] = useState("Alex Morgan"); const [day, setDay] = useState("4"); const [role, setRole] = useState<ShiftRole>("Bartender"); const [start, setStart] = useState("17:00"); const [end, setEnd] = useState("01:00");
-  const initials = employee.split(" ").map((word) => word[0]).join("");
-  return <Modal title="Add shift" subtitle="Add a shift to the current weekly plan." onClose={onClose}><div className="form-grid"><label className="full-field">Employee<select value={employee} onChange={(e) => setEmployee(e.target.value)}>{team.map((p) => <option key={p.name}>{p.name}</option>)}</select></label><label>Day<select value={day} onChange={(e) => setDay(e.target.value)}>{days.map((d, i) => <option value={i} key={d.short}>{d.short}, {d.date} July</option>)}</select></label><label>Role<select value={role} onChange={(e) => setRole(e.target.value as ShiftRole)}><option>Manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label><label>Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} /></label><label>Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /></label></div><ModalActions onClose={onClose} onSave={() => onSave({ id: crypto.randomUUID(), day: Number(day), employee, initials, start, end, role, status: "Draft" })} label="Add shift" /></Modal>
+  const [repeat, setRepeat] = useState(false); const [frequency, setFrequency] = useState<"daily" | "weekly">("weekly"); const [count, setCount] = useState(4); const [weekdays, setWeekdays] = useState<number[]>([5]);
+  const weekdayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  function save() {
+    const selectedDays = frequency === "daily" ? Array.from({ length: Math.min(Math.max(count, 1), 31) }, (_, i) => (Number(day) + i) % 7) : Array.from({ length: Math.min(Math.max(count, 1), 52) }).flatMap((_, week) => weekdays.map((weekday) => weekday + week * 7));
+    const occurrences = repeat ? selectedDays : [Number(day)];
+    const label = repeat ? (frequency === "daily" ? `Daily · ${occurrences.length} times` : `Weekly · ${weekdays.map((d) => weekdayNames[d]).join(", ")}`) : undefined;
+    const name = assignment === "open" ? "Available shift" : employee;
+    const initials = assignment === "open" ? "+" : employee.split(" ").map((word) => word[0]).join("");
+    onSave(occurrences.map((offset, index) => ({ id: crypto.randomUUID(), day: offset % 7, employee: name, initials, start, end, role, status: "Draft", isOpen: assignment === "open", recurrenceLabel: index === 0 ? label : undefined })));
+  }
+  return <Modal title="Add shift" subtitle="Create one shift or a repeating series." onClose={onClose}>
+    <div className="assignment-toggle"><button className={assignment === "employee" ? "selected" : ""} onClick={() => setAssignment("employee")}>Assign employee</button><button className={assignment === "open" ? "selected" : ""} onClick={() => setAssignment("open")}>Available shift</button></div>
+    <div className="form-grid">
+      {assignment === "employee" && <label className="full-field">Employee<select value={employee} onChange={(e) => setEmployee(e.target.value)}>{team.map((p) => <option key={p.name}>{p.name}</option>)}</select></label>}
+      {assignment === "open" && <div className="open-shift-note full-field"><Users size={18}/><div><strong>Employees can request this shift</strong><span>A manager approves the employee who receives it.</span></div></div>}
+      <label>First day<select value={day} onChange={(e) => { setDay(e.target.value); setWeekdays([Number(e.target.value)]); }}>{days.map((d, i) => <option value={i} key={d.short}>{d.short}, {d.date} July</option>)}</select></label>
+      <label>Role<select value={role} onChange={(e) => setRole(e.target.value as ShiftRole)}><option>Manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label>
+      <label>Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} /></label><label>Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /></label>
+    </div>
+    <label className="repeat-switch"><input type="checkbox" checked={repeat} onChange={(e) => setRepeat(e.target.checked)}/><span><strong>Repeat shift</strong><small>Create a daily or weekly series</small></span></label>
+    {repeat && <div className="repeat-panel"><div className="frequency-toggle"><button className={frequency === "daily" ? "selected" : ""} onClick={() => setFrequency("daily")}>Daily</button><button className={frequency === "weekly" ? "selected" : ""} onClick={() => setFrequency("weekly")}>Weekly</button></div>
+      {frequency === "weekly" && <div className="weekday-picker">{weekdayNames.map((name, index) => <button key={name} className={weekdays.includes(index) ? "selected" : ""} onClick={() => setWeekdays((current) => current.includes(index) ? current.filter((d) => d !== index) : [...current, index].sort())}>{name}</button>)}</div>}
+      <label className="repeat-count">Repeat for <input type="number" min="1" max={frequency === "daily" ? 31 : 52} value={count} onChange={(e) => setCount(Number(e.target.value))}/><span>{frequency === "daily" ? "days" : "weeks"}</span></label>
+    </div>}
+    <ModalActions onClose={onClose} onSave={save} label={repeat ? "Add repeating shifts" : "Add shift"} />
+  </Modal>
 }
 function ProductDialog({ onClose, onSave }: { onClose: () => void; onSave: (product: Product) => void }) { const [name, setName] = useState(""); const [supplier, setSupplier] = useState("Nordic Drinks"); return <Modal title="Add product" subtitle="Create a new inventory item." onClose={onClose}><div className="form-grid"><label className="full-field">Product name<input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Lager 30L" /></label><label>Supplier<select value={supplier} onChange={(e) => setSupplier(e.target.value)}><option>Nordic Drinks</option><option>Vin & Co.</option><option>Bar Supply DK</option><option>City Produce</option></select></label><label>Category<select><option>Draught beer</option><option>Wine</option><option>Spirits</option><option>Soft drinks</option></select></label><label>Current stock<input type="number" defaultValue="0" /></label><label>Par level<input type="number" defaultValue="6" /></label></div><ModalActions onClose={onClose} onSave={() => onSave({ id: crypto.randomUUID(), name: name || "New product", category: "Draught beer", supplier, stock: 0, par: 6, unit: "units", price: 0 })} label="Add product" /></Modal> }
 function OrderDialog({ onClose, onSave }: { onClose: () => void; onSave: () => void }) { return <Modal title="Create purchase order" subtitle="Choose a supplier to begin an order." onClose={onClose}><div className="supplier-options">{["Nordic Drinks", "Vin & Co.", "Bar Supply DK", "City Produce"].map((supplier, i) => <label key={supplier}><input type="radio" name="supplier" defaultChecked={i === 0} /><span className="attention-icon blue"><Truck size={18} /></span><b>{supplier}</b><ChevronRight size={17} /></label>)}</div><ModalActions onClose={onClose} onSave={onSave} label="Continue" /></Modal> }
