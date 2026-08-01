@@ -1,13 +1,13 @@
-# v0.7.4 implementation status
+# v0.8.0 implementation status
 
-## Completed in this release
+## Completed
 
-Employee portal invitation hardening, existing-account-safe activation, kiosk PIN compatibility, employee API validation and transactions, invitation revocation/share fallback, ID-based employee updates, persistence-aware employee/product feedback, and transactional recurring-shift creation/editing.
+The release establishes a reliable employee persistence error path, including explicit duplicate-email conflicts, preserved form state, actionable manager feedback, and regression checks. It includes all v0.7.6 postgres.js build corrections.
 
 ## Database action
 
-No new SQL migration is included. Existing installations should already have migrations 001–007. Commit the release and allow GitHub Quality Checks and Vercel deployment to run. Database Verify may be run as a health check but is not required.
+No migration is included or required.
 
-## Remaining production work
+## Next v0.8 work
 
-The manager application still needs modular decomposition, all legacy APIs need shared validation, tenant relationships need broader database-level enforcement, and external-service features need completed integrations and end-to-end tests.
+Continue converting remaining manager operations to fully awaited PostgreSQL writes, add the unified manager inbox, complete employee self-service request history, and add real PostgreSQL integration and browser tests.

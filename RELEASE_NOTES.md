@@ -1,12 +1,21 @@
-# Bar Ops v0.7.6 — Postgres JSON value build fix
+# Bar Ops v0.8.0 — Persistent workspace reliability
 
-- Fixes TypeScript overload errors caused by passing postgres.js Row objects directly into tagged SQL templates.
-- Serializes employee and shift audit payloads with JSON.stringify(... )::jsonb.
-- Adds `npm run test:postgres-values` and includes it in `test:all`.
-- No database migration is required.
+This release starts the v0.8 production-workspace phase from the confirmed v0.7.6 baseline.
 
-# Bar Ops v0.7.5 — PostgreSQL transaction build fix
+## Employee creation reliability
 
-- Replaces unsupported `db().transaction(...)` calls with the correct postgres.js `db().begin(...)` API in employee activation, employee writes, invitation writes, and recurring shift writes.
-- Adds `npm run test:postgres-api` to prevent unsupported transaction APIs from returning.
-- Preserves all v0.7.4 functionality and requires no database migration.
+- Duplicate employee emails now return HTTP 409 instead of a generic internal server error.
+- The manager receives an actionable message directing them to the existing Team profile.
+- The Add employee dialog remains open after failed saves so entered information is not lost.
+- Successful UI updates still wait for the PostgreSQL response.
+- Duplicate checks cover both employee creation and email changes on existing employees.
+
+## Build and regression protection
+
+- Preserves the postgres.js transaction and JSON serialization build fixes from v0.7.5–v0.7.6.
+- Adds `npm run test:employee-conflicts`.
+- Includes the new check in `npm run test:all`.
+
+## Database action
+
+No migration is required. Commit the release to `baros` and allow GitHub Quality Checks and Vercel to deploy it.

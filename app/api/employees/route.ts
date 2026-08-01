@@ -55,7 +55,17 @@ export async function POST(request: Request) {
       return employee;
     });
     return NextResponse.json(row, { status: 201 });
-  } catch (error) { return jsonError(error); }
+  } catch (error) {
+    const databaseError = error as { code?: string; constraint?: string; constraint_name?: string };
+    const constraint = String(databaseError.constraint || databaseError.constraint_name || "");
+    if (databaseError.code === "23505" && constraint.toLowerCase().includes("employee")) {
+      return NextResponse.json(
+        { error: "An employee with this email already exists. Open their existing Team profile instead." },
+        { status: 409 },
+      );
+    }
+    return jsonError(error);
+  }
 }
 
 export async function PATCH(request: Request) {
@@ -84,5 +94,15 @@ export async function PATCH(request: Request) {
       return employee;
     });
     return NextResponse.json(result);
-  } catch (error) { return jsonError(error); }
+  } catch (error) {
+    const databaseError = error as { code?: string; constraint?: string; constraint_name?: string };
+    const constraint = String(databaseError.constraint || databaseError.constraint_name || "");
+    if (databaseError.code === "23505" && constraint.toLowerCase().includes("employee")) {
+      return NextResponse.json(
+        { error: "An employee with this email already exists. Open their existing Team profile instead." },
+        { status: 409 },
+      );
+    }
+    return jsonError(error);
+  }
 }

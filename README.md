@@ -1,4 +1,4 @@
-# Bar Ops v0.7.4
+# Bar Ops v0.8.0
 
 Employee portal access release for the iPad-first `baros` workflow. Managers can create an employee, generate a secure activation link, share it from the iPad share sheet, and track invitation/activation status. Employees set their own password and are routed to the employee portal.
 
