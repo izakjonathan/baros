@@ -1,8 +1,3 @@
-# Bar Ops v0.8.6 — Team scheduled-hours fix
+# v0.8.7 — Published shift persistence
 
-- Team cards now calculate scheduled hours from the live PostgreSQL-backed shift state instead of displaying contracted hours.
-- Published assigned shifts in the next 28 days are counted.
-- Employee matching uses immutable employee UUIDs, with a name fallback only for legacy development data.
-- Overnight shifts are calculated correctly.
-- Added `npm run test:team-scheduled-hours`.
-- No database migration is required.
+Fixes published shifts returning to Draft after refresh. The manager publish action now calls the transactional PostgreSQL schedule publication API and waits for confirmation before updating the visible schedule. It sends the selected location and exact week range, displays a publishing state, preserves drafts on failure, and uses an idempotency key. No database migration is required.
