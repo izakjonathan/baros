@@ -1,4 +1,6 @@
-# Bar Ops v0.8.4
+# Bar Ops v0.8.8
+
+This release redesigns the Shift plan workspace for a denser week/month overview, horizontal day navigation, and date-aware quick shift creation. See `RELEASE_NOTES.md` for details.
 
 Hospitality operations workspace for scheduling, attendance, inventory, ordering, employee self-service, and payroll workflows.
 

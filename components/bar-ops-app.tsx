@@ -65,6 +65,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
   const [products, setProducts] = useState(initialProducts);
   const [employees, setEmployees] = useState<Employee[]>(team.map((person) => ({ ...person, active: true })));
   const [dialog, setDialog] = useState<"shift" | "product" | "order" | "employee" | "stockCount" | null>(null);
+  const [selectedShiftDate, setSelectedShiftDate] = useState<string | null>(null);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [stockAdjustments, setStockAdjustments] = useState<StockAdjustment[]>([]);
@@ -137,6 +138,11 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
     window.setTimeout(() => setToast(""), 2600);
   }
 
+  function openShiftDialog(date?: string) {
+    setSelectedShiftDate(date || null);
+    setDialog("shift");
+  }
+
   if (!dataReady) {
     return <div className="workspace-loading" role="status" aria-live="polite"><div className="workspace-loading-card"><Database size={26}/><strong>Loading workspace</strong><span>Synchronizing shifts, employees and operations with PostgreSQL…</span></div></div>;
   }
@@ -147,8 +153,8 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       <main className="main-shell">
         <Topbar onMenu={() => setMobileNav(true)} locations={locations} selectedLocationId={selectedLocationId} onLocationChange={setSelectedLocationId} />
         <div className="page-wrap">
-          {active === "dashboard" && <Dashboard shifts={shifts} products={products} onNavigate={setActive} onNewShift={() => setDialog("shift")} />}
-          {active === "schedule" && <Schedule shifts={shifts} setShifts={setShifts} employees={employees} onNewShift={() => setDialog("shift")} onEditShift={setEditingShift} notify={notify} currentWeekOffset={currentWeekOffset} setCurrentWeekOffset={setCurrentWeekOffset} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
+          {active === "dashboard" && <Dashboard shifts={shifts} products={products} onNavigate={setActive} onNewShift={() => openShiftDialog()} />}
+          {active === "schedule" && <Schedule shifts={shifts} setShifts={setShifts} employees={employees} onNewShift={openShiftDialog} onEditShift={setEditingShift} notify={notify} currentWeekOffset={currentWeekOffset} setCurrentWeekOffset={setCurrentWeekOffset} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
           {active === "attendance" && <Attendance employees={employees} shifts={shifts} entries={timeEntries} setEntries={setTimeEntries} notify={notify} onEdit={setEditingTimeEntry} />}
           {active === "inventory" && <Inventory products={products} setProducts={setProducts} onNewProduct={() => setDialog("product")} onEditProduct={setEditingProduct} onStockCount={() => setDialog("stockCount")} adjustments={stockAdjustments} setAdjustments={setStockAdjustments} notify={notify} />}
           {active === "orders" && <Orders products={products} setProducts={setProducts} onNewOrder={() => setDialog("order")} notify={notify} />}
@@ -210,7 +216,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
         try { if (!devMode) await persist(`/api/shifts?id=${editingShift.id}`,{method:"DELETE"}); setShifts((current) => current.filter((item) => item.id !== editingShift.id)); setEditingShift(null); notify("Shift removed"); }
         catch (error) { notify(error instanceof Error ? error.message : "Could not remove shift"); }
       }} />}
-      {dialog === "shift" && <ShiftDialog employees={employees} currentWeekOffset={currentWeekOffset} locations={locations} selectedLocationId={selectedLocationId} onClose={() => setDialog(null)} onSave={async (newShifts) => {
+      {dialog === "shift" && <ShiftDialog employees={employees} currentWeekOffset={currentWeekOffset} initialDate={selectedShiftDate || undefined} locations={locations} selectedLocationId={selectedLocationId} onClose={() => setDialog(null)} onSave={async (newShifts) => {
         try {
           if (devMode) setShifts((current) => [...current, ...newShifts]);
           else {
@@ -218,7 +224,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
             const saved = savedGroups.flatMap(result => (result?.shifts || []).map(mapDatabaseShift));
             setShifts(current => [...current, ...saved].sort((a,b)=>canonicalShiftDate(a).localeCompare(canonicalShiftDate(b))));
           }
-          setDialog(null); notify(newShifts.length > 1 ? `${newShifts.length} repeating shifts added` : "Shift added to the draft schedule");
+          setDialog(null); setSelectedShiftDate(null); notify(newShifts.length > 1 ? `${newShifts.length} repeating shifts added` : "Shift added to the draft schedule");
         } catch (error) { notify(error instanceof Error ? error.message : "Could not add shift"); }
       }} />}
       {editingTimeEntry && <TimesheetDialog entry={editingTimeEntry} onClose={() => setEditingTimeEntry(null)} onSave={(updated) => { setTimeEntries((current) => current.map((item) => item.id === updated.id ? updated : item)); setEditingTimeEntry(null); notify("Timesheet corrected and returned to pending review"); }} />}
@@ -297,54 +303,74 @@ function Metric({ icon: Icon, label, value, detail, trend, warning }: { icon: ty
 function PanelTitle({ title, subtitle, action }: { title: string; subtitle: string; action?: React.ReactNode }) { return <div className="panel-title"><div><h2>{title}</h2><p>{subtitle}</p></div>{action}</div> }
 function Quick({ icon: Icon, label, detail, onClick }: { icon: typeof CalendarDays; label: string; detail: string; onClick: () => void }) { return <button className="quick-action" onClick={onClick}><span><Icon size={19} /></span><div><strong>{label}</strong><small>{detail}</small></div><ArrowRight size={17} /></button> }
 
-function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notify, currentWeekOffset, setCurrentWeekOffset, devMode, selectedLocationId, persist }: { shifts: Shift[]; setShifts: React.Dispatch<React.SetStateAction<Shift[]>>; employees: Employee[]; onNewShift: () => void; onEditShift: (shift: Shift) => void; notify: (s: string) => void; currentWeekOffset: number; setCurrentWeekOffset: React.Dispatch<React.SetStateAction<number>>; devMode: boolean; selectedLocationId: string; persist: (path:string, options:RequestInit) => Promise<any> }) {
+function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notify, currentWeekOffset, setCurrentWeekOffset, devMode, selectedLocationId, persist }: { shifts: Shift[]; setShifts: React.Dispatch<React.SetStateAction<Shift[]>>; employees: Employee[]; onNewShift: (date?: string) => void; onEditShift: (shift: Shift) => void; notify: (s: string) => void; currentWeekOffset: number; setCurrentWeekOffset: React.Dispatch<React.SetStateAction<number>>; devMode: boolean; selectedLocationId: string; persist: (path:string, options:RequestInit) => Promise<any> }) {
   const [publishing, setPublishing] = useState(false);
-  const visibleShifts = shifts.filter((shift) => (shift.weekOffset ?? 0) === currentWeekOffset);
+  const [viewMode, setViewMode] = useState<"week" | "month">("week");
+  const [monthOffset, setMonthOffset] = useState(0);
+  const weekMonday = new Date(BASE_MONDAY); weekMonday.setDate(BASE_MONDAY.getDate() + currentWeekOffset * 7);
+  const monthAnchor = new Date(2026, 7 + monthOffset, 1, 12);
+  const periodStart = viewMode === "week" ? weekMonday : new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), 1, 12);
+  const periodEnd = viewMode === "week" ? new Date(weekMonday.getFullYear(), weekMonday.getMonth(), weekMonday.getDate() + 6, 12) : new Date(monthAnchor.getFullYear(), monthAnchor.getMonth() + 1, 0, 12);
+  const displayDays = Array.from({ length: Math.round((dateSerial(toIsoDate(periodEnd)) - dateSerial(toIsoDate(periodStart)))) + 1 }, (_, index) => {
+    const date = new Date(periodStart); date.setDate(periodStart.getDate() + index);
+    const iso = toIsoDate(date);
+    const pos = shiftPositionFromDate(iso);
+    return { iso, short: date.toLocaleDateString("en-GB", { weekday: "short" }).toUpperCase(), date: String(date.getDate()).padStart(2, "0"), pos };
+  });
+  const startIso = displayDays[0]?.iso;
+  const endIso = displayDays.at(-1)?.iso;
+  const visibleShifts = shifts.filter((shift) => { const date = canonicalShiftDate(shift); return !!startIso && !!endIso && date >= startIso && date <= endIso; });
   const drafts = visibleShifts.filter((shift) => shift.status === "Draft").length;
   const conflicts = conflictIds(visibleShifts);
-  const monday = new Date(BASE_MONDAY); monday.setDate(BASE_MONDAY.getDate() + currentWeekOffset * 7);
-  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
-  const weekDays = Array.from({ length: 7 }, (_, index) => { const date = new Date(monday); date.setDate(monday.getDate() + index); return { short: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index], date: String(date.getDate()).padStart(2, "0") }; });
-  const rangeLabel = `${monday.toLocaleDateString("en-GB", { day: "numeric", month: "long" })} – ${sunday.toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`;
+  const rangeLabel = viewMode === "week"
+    ? `${periodStart.toLocaleDateString("en-GB", { day: "numeric", month: "long" })} – ${periodEnd.toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`
+    : periodStart.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
   const weekLabel = currentWeekOffset === 0 ? "This week" : currentWeekOffset === -1 ? "Last week" : currentWeekOffset === 1 ? "Next week" : rangeLabel;
+  function movePeriod(direction: number) { if (viewMode === "week") setCurrentWeekOffset((week) => week + direction); else setMonthOffset((month) => month + direction); }
   async function publish() {
+    if (viewMode !== "week") { notify("Switch to Week view to publish a schedule"); return; }
     if (!drafts) { notify("This week is already published"); return; }
     if (conflicts.size) { notify(`Resolve ${conflicts.size} conflicting shift${conflicts.size === 1 ? "" : "s"} before publishing`); return; }
     if (!devMode && !selectedLocationId) { notify("Select a location before publishing"); return; }
     setPublishing(true);
     try {
       if (!devMode) {
-        const weekStart = toIsoDate(monday);
-        const exclusiveEnd = new Date(monday); exclusiveEnd.setDate(monday.getDate() + 7);
-        await persist("/api/schedule-publish", {
-          method: "POST",
-          headers: { "idempotency-key": crypto.randomUUID() },
-          body: JSON.stringify({ locationId: selectedLocationId, weekStart, weekEnd: toIsoDate(exclusiveEnd) })
-        });
+        const exclusiveEnd = new Date(weekMonday); exclusiveEnd.setDate(weekMonday.getDate() + 7);
+        await persist("/api/schedule-publish", { method: "POST", headers: { "idempotency-key": crypto.randomUUID() }, body: JSON.stringify({ locationId: selectedLocationId, weekStart: toIsoDate(weekMonday), weekEnd: toIsoDate(exclusiveEnd) }) });
       }
       setShifts((current) => current.map((shift) => (shift.weekOffset ?? 0) === currentWeekOffset && shift.status === "Draft" ? { ...shift, status: "Published" } : shift));
       notify(`${drafts} shift${drafts === 1 ? "" : "s"} published`);
-    } catch (error) {
-      notify(error instanceof Error ? error.message : "Could not publish week");
-    } finally {
-      setPublishing(false);
-    }
+    } catch (error) { notify(error instanceof Error ? error.message : "Could not publish week"); }
+    finally { setPublishing(false); }
   }
   function copyPreviousWeek() {
+    if (viewMode !== "week") { notify("Switch to Week view to copy the previous week"); return; }
     const source = shifts.filter((shift) => (shift.weekOffset ?? 0) === currentWeekOffset - 1);
     if (!source.length) { notify("The previous week has no shifts to copy"); return; }
     if (visibleShifts.length && !window.confirm("This week already contains shifts. Add copies from the previous week as additional drafts?")) return;
     const copies = source.map((shift) => { const sourceDate = new Date(`${canonicalShiftDate(shift)}T12:00:00`); sourceDate.setDate(sourceDate.getDate() + 7); const date = toIsoDate(sourceDate); const position = shiftPositionFromDate(date); return { ...shift, id: crypto.randomUUID(), date, day: position.day, weekOffset: position.weekOffset, status: "Draft" as const, recurrenceLabel: undefined }; });
-    setShifts((current) => [...current, ...copies]);
-    notify(`${copies.length} shifts copied as drafts`);
+    setShifts((current) => [...current, ...copies]); notify(`${copies.length} shifts copied as drafts`);
   }
   return <>
-    <PageHeader eyebrow={rangeLabel} title="Shift plan" subtitle="Build, review and publish the weekly schedule." action={<div className="header-actions"><button className="secondary" onClick={copyPreviousWeek}><Copy size={17} /> Copy previous week</button><button className="primary" onClick={onNewShift}><Plus size={18} /> Add shift</button></div>} />
-    <section className="schedule-toolbar"><div className="week-switch"><button onClick={() => setCurrentWeekOffset((week) => week - 1)} aria-label="Previous week"><ChevronLeft size={18} /></button><strong>{weekLabel}</strong><button onClick={() => setCurrentWeekOffset((week) => week + 1)} aria-label="Next week"><ChevronRight size={18} /></button></div><div className="schedule-summary"><span><b>{visibleShifts.length}</b> shifts · <b>{drafts}</b> drafts{conflicts.size ? <> · <b className="conflict-count">{conflicts.size}</b> conflicts</> : null}</span><button className="publish-button" onClick={publish} disabled={!drafts || publishing}><Send size={16} /> {publishing ? "Publishing…" : drafts ? `Publish week (${drafts})` : "Week published"}</button></div></section>
-    <section className="calendar-panel"><div className="calendar-grid">
-      {weekDays.map((day, index) => <div className={`day-column ${currentWeekOffset === 0 && index === 4 ? "today" : ""}`} key={day.short} onDragOver={(e)=>e.preventDefault()} onDrop={(e)=>{e.preventDefault();const id=e.dataTransfer.getData("text/shift-id");const targetDate=dateFromShift(currentWeekOffset,index);setShifts(cur=>cur.map(x=>x.id===id?{...x,date:targetDate,day:index,weekOffset:currentWeekOffset,status:"Draft"}:x));notify("Shift moved and returned to draft");}}><div className="day-header"><span>{day.short}</span><strong>{day.date}</strong></div><div className="day-body">{visibleShifts.filter((shift) => shift.day === index).map((shift) => <ShiftCard key={shift.id} shift={shift} conflict={conflicts.has(shift.id)} onOpen={() => onEditShift(shift)} onDragStart={(e)=>e.dataTransfer.setData("text/shift-id",shift.id)} />)}<button className="add-slot" onClick={onNewShift}><Plus size={16} /> Add shift</button></div></div>)}
+    <div className="schedule-head">
+      <div><p className="eyebrow">{rangeLabel}</p><h1>Shift plan</h1></div>
+      <div className="schedule-head-actions"><button className="secondary compact-action" onClick={copyPreviousWeek} disabled={viewMode !== "week"}><Copy size={15} /><span>Copy previous week</span></button><button className="primary compact-action" onClick={() => onNewShift(displayDays[0]?.iso)}><Plus size={16} /><span>Add shift</span></button></div>
+    </div>
+    <section className="schedule-toolbar compact-schedule-toolbar">
+      <div className="period-controls"><button onClick={() => movePeriod(-1)} aria-label={`Previous ${viewMode}`}><ChevronLeft size={17}/></button><strong>{viewMode === "week" ? weekLabel : rangeLabel}</strong><button onClick={() => movePeriod(1)} aria-label={`Next ${viewMode}`}><ChevronRight size={17}/></button></div>
+      <div className="schedule-toolbar-right"><div className="view-toggle" aria-label="Schedule view"><button className={viewMode === "week" ? "selected" : ""} onClick={() => setViewMode("week")}>Week</button><button className={viewMode === "month" ? "selected" : ""} onClick={() => setViewMode("month")}>Month</button></div><span className="schedule-counts"><b>{visibleShifts.length}</b> shifts · <b>{drafts}</b> drafts{conflicts.size ? <> · <b className="conflict-count">{conflicts.size}</b> conflicts</> : null}</span>{viewMode === "week" && <button className="publish-button compact-publish" onClick={publish} disabled={!drafts || publishing}><Send size={15}/><span>{publishing ? "Publishing…" : drafts ? `Publish (${drafts})` : "Published"}</span></button>}</div>
+    </section>
+    <section className={`calendar-panel schedule-calendar ${viewMode === "month" ? "month-view" : "week-view"}`}><div className="calendar-grid">
+      {displayDays.map((day) => {
+        const isToday = day.iso === toIsoDate(new Date());
+        const dayShifts = visibleShifts.filter((shift) => canonicalShiftDate(shift) === day.iso);
+        return <div className={`day-column ${isToday ? "today" : ""}`} key={day.iso} onDragOver={(e)=>e.preventDefault()} onDrop={(e)=>{e.preventDefault();const id=e.dataTransfer.getData("text/shift-id");setShifts(cur=>cur.map(x=>x.id===id?{...x,date:day.iso,day:day.pos.day,weekOffset:day.pos.weekOffset,status:"Draft"}:x));notify("Shift moved and returned to draft");}}>
+          <div className="day-header"><span>{day.short}</span><strong>{day.date}</strong></div>
+          <div className="day-body">{dayShifts.map((shift) => <ShiftCard key={shift.id} shift={shift} conflict={conflicts.has(shift.id)} onOpen={() => onEditShift(shift)} onDragStart={(e)=>e.dataTransfer.setData("text/shift-id",shift.id)} />)}<button className="add-slot" onClick={() => onNewShift(day.iso)}><Plus size={15}/> Add shift</button></div>
+        </div>;
+      })}
     </div></section>
-    <div className="legend"><span><i className="manager" /> Manager</span><span><i className="bartender" /> Bartender</span><span><i className="floor" /> Floor</span><span><i className="draft" /> Draft</span></div>
+    <div className="legend compact-legend"><span><i className="manager"/> Manager</span><span><i className="bartender"/> Bartender</span><span><i className="floor"/> Floor</span><span><i className="draft"/> Draft</span></div>
   </>
 }
 function ShiftCard({ shift, conflict, onOpen, onDragStart }: { shift: Shift; conflict?: boolean; onOpen: () => void; onDragStart?: (event: React.DragEvent<HTMLButtonElement>) => void }) { const overnight = isOvernight(shift.start, shift.end); return <button type="button" draggable onDragStart={onDragStart} className={`shift-card shift-card-button role-${shift.role.toLowerCase()} ${shift.status === "Draft" ? "is-draft" : ""} ${conflict ? "has-conflict" : ""}`} onClick={onOpen} aria-label={`Open ${shift.isOpen ? "available" : shift.employee} shift ${shift.start} to ${shift.end}${overnight ? " next day" : ""}`}><div className="shift-card-top"><span>{shift.start}–{shift.end}{overnight ? " +1" : ""}</span><ChevronRight size={14} /></div><strong>{shift.isOpen ? "Available shift" : shift.employee}</strong><small>{shift.role}{overnight ? " · Overnight" : ""}{shift.recurrenceLabel ? ` · ${shift.recurrenceLabel}` : ""}</small>{shift.isOpen && <em>Open</em>}{shift.status === "Draft" && <em>Draft</em>}{conflict && <em className="conflict-badge">Conflict</em>}</button> }
@@ -451,12 +477,12 @@ function ControlCenter({devMode,databaseStatus,notify}:{devMode:boolean;database
  return <><PageHeader title="Control centre" subtitle="Production controls plus development-data tools for realistic testing before database setup." action={<span className={`connection-pill ${devMode?"dev":"live"}`}>{databaseStatus}</span>}/>{devMode&&<section className="panel dev-data-tools"><PanelTitle title="Development data" subtitle="Your workspace is saved in this browser. Export a backup or reset to the original demo data."/><div><button className="secondary" onClick={()=>{const raw=localStorage.getItem("barops-dev-v070")||"{}";const blob=new Blob([raw],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="bar-ops-development-data.json";a.click();URL.revokeObjectURL(url);notify("Development data exported")}}><DownloadCloud size={17}/>Export JSON</button><label className="secondary file-import"><Upload size={17}/>Import JSON<input type="file" accept="application/json" onChange={async e=>{const file=e.target.files?.[0];if(!file)return;try{JSON.parse(await file.text());localStorage.setItem("barops-dev-v070",await file.text());location.reload()}catch{notify("That file is not valid Bar Ops JSON")}}}/></label><button className="secondary danger-outline" onClick={()=>{if(confirm("Reset all development data to the original demo workspace?")){localStorage.removeItem("barops-dev-v070");location.reload()}}}><RotateCcw size={17}/>Reset demo data</button></div></section>}<div className="control-grid">{groups.map(g=>{const Icon=g.icon;return <section className="panel control-card" key={g.title}><div className="control-icon"><Icon size={20}/></div><h2>{g.title}</h2>{g.items.map(i=><p key={i}><Check size={15}/>{i}</p>)}</section>})}</div><section className="panel control-actions"><PanelTitle title="Operational actions" subtitle="These actions use persistent APIs when PostgreSQL is connected."/><div className="quick-grid"><button className="quick-action" onClick={()=>notify("Create and lock a payroll period in Time & attendance")}><LockKeyhole/><div><strong>Payroll periods</strong><small>Lock, export and close</small></div></button><button className="quick-action" onClick={()=>notify("Kiosk endpoint ready at /api/kiosk")}><KeyRound/><div><strong>Kiosk mode</strong><small>PIN and geofence verified</small></div></button><button className="quick-action" onClick={()=>notify("Receiving, waste and transfers use /api/operations")}><ArrowLeftRight/><div><strong>Stock operations</strong><small>Receive, waste, transfer</small></div></button><button className="quick-action" onClick={()=>notify("Security controls use /api/security")}><ShieldCheck/><div><strong>Security</strong><small>MFA, reset, GDPR, sessions</small></div></button></div></section></>
 }
 
-function ShiftDialog({ onClose, onSave, currentWeekOffset, employees, locations, selectedLocationId }: { onClose: () => void; onSave: (shifts: Shift[]) => void; currentWeekOffset: number; employees: Employee[]; locations: Location[]; selectedLocationId: string }) {
+function ShiftDialog({ onClose, onSave, currentWeekOffset, initialDate, employees, locations, selectedLocationId }: { onClose: () => void; onSave: (shifts: Shift[]) => void; currentWeekOffset: number; initialDate?: string; employees: Employee[]; locations: Location[]; selectedLocationId: string }) {
   const [assignment, setAssignment] = useState<"employee" | "open">("employee");
   const [locationId, setLocationId] = useState(selectedLocationId);
   const activeEmployees = employees.filter((person) => person.active);
-  const [employee, setEmployee] = useState(activeEmployees[0]?.name ?? ""); const [shiftDate, setShiftDate] = useState(dateFromShift(currentWeekOffset, 4)); const [role, setRole] = useState<ShiftRole>("Bartender"); const [start, setStart] = useState("17:00"); const [end, setEnd] = useState("01:00");
-  const [repeat, setRepeat] = useState(false); const [frequency, setFrequency] = useState<"daily" | "weekly">("weekly"); const [count, setCount] = useState(4); const [weekdays, setWeekdays] = useState<number[]>([4]);
+  const [employee, setEmployee] = useState(activeEmployees[0]?.name ?? ""); const [shiftDate, setShiftDate] = useState(initialDate || dateFromShift(currentWeekOffset, 0)); const [role, setRole] = useState<ShiftRole>("Bartender"); const [start, setStart] = useState("17:00"); const [end, setEnd] = useState("01:00");
+  const [repeat, setRepeat] = useState(false); const [frequency, setFrequency] = useState<"daily" | "weekly">("weekly"); const [count, setCount] = useState(4); const [weekdays, setWeekdays] = useState<number[]>([shiftPositionFromDate(initialDate || dateFromShift(currentWeekOffset, 0)).day]);
   const weekdayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   function save() {
     if (!locationId) { alert("No active location is configured. Add or activate a location before creating shifts."); return; }
