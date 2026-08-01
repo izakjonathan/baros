@@ -37,3 +37,22 @@ export function isoDate(value: unknown, key: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(text) || Number.isNaN(Date.parse(`${text}T00:00:00Z`))) throw new ApiError(400, `${key} must be YYYY-MM-DD`);
   return text;
 }
+export function finiteNumber(value: unknown, key: string, options: { min?: number; max?: number; integer?: boolean } = {}) {
+  const number = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(number)) throw new ApiError(400, `${key} must be a number`);
+  if (options.integer && !Number.isInteger(number)) throw new ApiError(400, `${key} must be an integer`);
+  if (options.min != null && number < options.min) throw new ApiError(400, `${key} must be at least ${options.min}`);
+  if (options.max != null && number > options.max) throw new ApiError(400, `${key} must be at most ${options.max}`);
+  return number;
+}
+export function enumValue<T extends string>(value: unknown, key: string, allowed: readonly T[]): T {
+  const text = String(value || "");
+  if (!allowed.includes(text as T)) throw new ApiError(400, `${key} is invalid`);
+  return text as T;
+}
+export function objectArray(value: unknown, key: string, max = 250): Record<string, unknown>[] {
+  if (!Array.isArray(value)) throw new ApiError(400, `${key} must be an array`);
+  if (value.length > max) throw new ApiError(400, `${key} has too many items`);
+  if (value.some(item => !item || Array.isArray(item) || typeof item !== "object")) throw new ApiError(400, `${key} contains an invalid item`);
+  return value as Record<string, unknown>[];
+}
