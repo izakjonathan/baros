@@ -8,6 +8,10 @@ This release fixes assigned shifts displaying as “Unassigned” immediately af
 
 Commit the ZIP to the `baros` GitHub repository. GitHub Quality Checks and Vercel will run automatically. No database migration is required.
 
-## v0.8.5 database upgrade
+## v0.8.6 database upgrade
 
 After committing this release, run **GitHub → Actions → Database administration → migrate**, then run **verify**. Migration 009 is required before using the new stock, receiving, transfer, waste, or concurrency protections.
+
+
+## v0.8.6
+Team cards show published scheduled hours for the next four weeks based on live shift assignments.

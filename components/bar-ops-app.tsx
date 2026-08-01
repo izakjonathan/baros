@@ -48,7 +48,7 @@ function mapDatabaseShift(x: any): Shift {
   const pos = shiftPositionFromDate(date);
   const employeeName = x.is_open ? "Available shift" : x.employee_name || "Unassigned";
   return {
-    id: x.id, date, day: pos.day, weekOffset: pos.weekOffset, employee: employeeName,
+    id: x.id, date, day: pos.day, weekOffset: pos.weekOffset, employee: employeeName, employeeId: x.employee_id || undefined,
     initials: x.is_open ? "+" : employeeName.split(" ").map((word: string) => word[0]).join(""),
     start: startDate.toISOString().slice(11, 16), end: endDate.toISOString().slice(11, 16),
     role: x.role, status: x.status === "DRAFT" ? "Draft" : "Published", isOpen: x.is_open,
@@ -156,6 +156,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
           {active === "team" && (
             <Team
               employees={employees}
+              shifts={shifts}
               devMode={devMode}
               onAdd={() => setDialog("employee")}
               onEdit={setEditingEmployee}
@@ -411,8 +412,16 @@ function DailyOperations({tasks,setTasks,logs,setLogs,notify}:{tasks:OpsTask[];s
  <section className="panel logbook"><PanelTitle title="Manager logbook" subtitle="Permanent shift handovers and important operational context."/><div className="log-compose"><textarea value={logText} onChange={e=>setLogText(e.target.value)} placeholder="What does the next manager need to know?"/><button className="primary" onClick={addLog}><Send size={16}/>Save handover</button></div><div className="log-list">{logs.map(l=><article key={l.id}><div><b>{l.title}</b><small>{l.author} · {l.createdAt}</small></div><p>{l.body}</p></article>)}</div></section></div></>
 }
 
-function Team({ employees, devMode, onAdd, onEdit, onInvite, onRevoke }: { employees: Employee[]; devMode:boolean; onAdd: () => void; onEdit: (employee: Employee) => void; onInvite:(employee:Employee)=>void; onRevoke:(employee:Employee)=>void }) { return <><PageHeader title="Team" subtitle="Add employees, maintain records and manage employee portal access." action={<button className="primary" onClick={onAdd}><UserRoundPlus size={18} /> Add employee</button>} />
-  <section className="team-grid">{employees.map((person) => <article className={`team-card ${!person.active ? "employee-inactive" : ""}`} key={person.id||person.name}><div className="team-card-head"><div className="avatar large">{person.initials}</div><span className={`status ${person.active ? "status-submitted" : "status-draft"}`}>{person.active ? "Active" : "Inactive"}</span></div><h2>{person.name}</h2><p>{person.role}</p><div className="team-stats"><span>Scheduled <b>{person.hours}h</b></span><span>{person.email || person.status}</span></div><div className="portal-access"><span className={`status ${person.portalStatus==="ACTIVE"?"status-submitted":person.portalStatus==="INVITED"?"status-pending":"status-draft"}`}>{person.portalStatus==="ACTIVE"?"Portal active":person.portalStatus==="INVITED"?"Invitation pending":person.portalStatus==="EXPIRED"?"Invitation expired":"No portal access"}</span></div><div className="team-actions"><button className="secondary" onClick={() => onEdit(person)}>Edit employee</button><button className="secondary" disabled={devMode||!person.email||person.portalStatus==="ACTIVE"} onClick={()=>onInvite(person)}>{person.portalStatus==="INVITED"?"Resend invite":"Invite to portal"}</button>{person.portalStatus==="INVITED"&&<button className="secondary danger-outline" disabled={devMode} onClick={()=>onRevoke(person)}>Revoke invite</button>}</div>{devMode&&<small className="muted-note">Connect PostgreSQL to create real employee logins.</small>}</article>)}</section></> }
+function Team({ employees, shifts, devMode, onAdd, onEdit, onInvite, onRevoke }: { employees: Employee[]; shifts: Shift[]; devMode:boolean; onAdd: () => void; onEdit: (employee: Employee) => void; onInvite:(employee:Employee)=>void; onRevoke:(employee:Employee)=>void }) {
+  const today = dateSerial(toIsoDate(new Date()));
+  const windowEnd = today + 28;
+  const scheduledHours = (person: Employee) => shifts.filter((shift) => {
+    const shiftDay = dateSerial(canonicalShiftDate(shift));
+    const matchesEmployee = person.id ? shift.employeeId === person.id || (!shift.employeeId && shift.employee === person.name) : shift.employee === person.name;
+    return matchesEmployee && !shift.isOpen && shift.status === "Published" && shiftDay >= today && shiftDay < windowEnd;
+  }).reduce((total, shift) => total + hoursBetween(shift.start, shift.end), 0);
+  return <><PageHeader title="Team" subtitle="Add employees, maintain records and manage employee portal access." action={<button className="primary" onClick={onAdd}><UserRoundPlus size={18} /> Add employee</button>} />
+  <section className="team-grid">{employees.map((person) => { const upcomingHours = scheduledHours(person); return <article className={`team-card ${!person.active ? "employee-inactive" : ""}`} key={person.id||person.name}><div className="team-card-head"><div className="avatar large">{person.initials}</div><span className={`status ${person.active ? "status-submitted" : "status-draft"}`}>{person.active ? "Active" : "Inactive"}</span></div><h2>{person.name}</h2><p>{person.role}</p><div className="team-stats"><span>Scheduled next 4 weeks <b>{upcomingHours.toFixed(upcomingHours % 1 ? 1 : 0)}h</b></span><span>{person.email || person.status}</span></div><div className="portal-access"><span className={`status ${person.portalStatus==="ACTIVE"?"status-submitted":person.portalStatus==="INVITED"?"status-pending":"status-draft"}`}>{person.portalStatus==="ACTIVE"?"Portal active":person.portalStatus==="INVITED"?"Invitation pending":person.portalStatus==="EXPIRED"?"Invitation expired":"No portal access"}</span></div><div className="team-actions"><button className="secondary" onClick={() => onEdit(person)}>Edit employee</button><button className="secondary" disabled={devMode||!person.email||person.portalStatus==="ACTIVE"} onClick={()=>onInvite(person)}>{person.portalStatus==="INVITED"?"Resend invite":"Invite to portal"}</button>{person.portalStatus==="INVITED"&&<button className="secondary danger-outline" disabled={devMode} onClick={()=>onRevoke(person)}>Revoke invite</button>}</div>{devMode&&<small className="muted-note">Connect PostgreSQL to create real employee logins.</small>}</article>})}</section></> }
 function ControlCenter({devMode,databaseStatus,notify}:{devMode:boolean;databaseStatus:string;notify:(s:string)=>void}) {
  const groups=[
   {title:"Database & payroll",icon:Database,items:["All manager modules use tenant-scoped PostgreSQL APIs","Permanent payroll export ledger with SHA-256 hashes","Open, locked, exported and closed payroll periods","Payroll IDs, salary codes and cost centres"]},

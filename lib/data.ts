@@ -8,6 +8,7 @@ export type Shift = {
   weekOffset?: number;
   date?: string;
   employee: string;
+  employeeId?: string;
   initials: string;
   start: string;
   end: string;
