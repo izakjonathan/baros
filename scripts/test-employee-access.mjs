@@ -11,7 +11,7 @@ const checks=[
  ["random single-use token",invite.includes("randomBytes(32)")&&invite.includes("tokenHash(token)")],
  ["seven-day expiry",invite.includes("7 * 86400000")],
  ["manager role protection",invite.includes('"OWNER", "ADMIN", "MANAGER"')],
- ["activation transaction",activate.includes("db().transaction")],
+ ["activation transaction",activate.includes("db().begin")],
  ["password hashing",activate.includes("hashPassword(password)")],
  ["employee membership",activate.includes("'EMPLOYEE'")],
  ["employee linkage",activate.includes("update employees set user_id")],

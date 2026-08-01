@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
     await enforceRateLimit(`activate:${ip}:${tokenHash(token).slice(0,16)}`, 8, 15 * 60);
 
-    const result = await db().transaction(async (tx) => {
+    const result = await db().begin(async (tx) => {
       const invitations = await tx<Array<{id:string;organization_id:string;employee_id:string;email:string;first_name:string;last_name:string;location_id:string|null}>>`
         select i.id,i.organization_id,i.employee_id,i.email,e.first_name,e.last_name,
           (select el.location_id from employee_locations el where el.employee_id=e.id order by el.primary_location desc limit 1) location_id

@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     const locationId = body.locationId ? uuid(body.locationId, "locationId") : user.locationId;
     const kioskPinHash = body.kioskPin ? await hashKioskPin(requiredString(body, "kioskPin", 8)) : null;
 
-    const row = await db().transaction(async (tx) => {
+    const row = await db().begin(async (tx) => {
       if (locationId) {
         const locations = await tx`select id from locations where id=${locationId} and organization_id=${user.organizationId}`;
         if (!locations.length) throw new ApiError(400, "Location does not belong to this organization");
@@ -64,7 +64,7 @@ export async function PATCH(request: Request) {
     if (!user || !allowed.includes(user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const body = await readJsonObject(request, 20_000);
     const id = uuid(body.id, "id");
-    const result = await db().transaction(async (tx) => {
+    const result = await db().begin(async (tx) => {
       const beforeRows = await tx`select * from employees where id=${id} and organization_id=${user.organizationId} for update`;
       const before = beforeRows[0];
       if (!before) throw new ApiError(404, "Employee not found");

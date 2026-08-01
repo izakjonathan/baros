@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     const recurrence = body.recurrence as Recurrence | undefined;
     const starts = expandStarts(firstStart, recurrence);
 
-    const result = await db().transaction(async (tx) => {
+    const result = await db().begin(async (tx) => {
       const location = await tx`select id from locations where id=${locationId} and organization_id=${user.organizationId}`;
       if (!location.length) throw new ApiError(400, "Location does not belong to this organization");
       if (employeeId) {
@@ -97,7 +97,7 @@ export async function PATCH(request: Request) {
     const scope = String(body.scope || "occurrence");
     if (!['occurrence','future','series'].includes(scope)) throw new ApiError(400, "scope is invalid");
 
-    const rows = await db().transaction(async (tx) => {
+    const rows = await db().begin(async (tx) => {
       const currentRows = await tx`select * from shifts where id=${id} and organization_id=${user.organizationId} for update`;
       const current = currentRows[0];
       if (!current) throw new ApiError(404, "Shift not found");

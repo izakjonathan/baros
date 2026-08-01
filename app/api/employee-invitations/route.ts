@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     if (!/^https?:\/\//i.test(baseUrl)) throw new Error("APP_URL_INVALID");
     const token = randomBytes(32).toString("base64url");
     const expiresAt = new Date(Date.now() + 7 * 86400000);
-    const rows = await db().transaction(async (tx) => {
+    const rows = await db().begin(async (tx) => {
       await tx`update employee_invitations set status='REVOKED',revoked_at=now(),updated_at=now()
         where employee_id=${employeeId} and organization_id=${user.organizationId} and status='PENDING'`;
       return tx`insert into employee_invitations(organization_id,employee_id,email,token_hash,expires_at,invited_by)
