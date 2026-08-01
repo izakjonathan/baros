@@ -1,18 +1,13 @@
-# Bar Ops v0.8.2 — Persistent shift synchronization
+# Bar Ops v0.8.3 — Location Context
 
-## Fixed
+- Adds an organization-wide current-location context to the manager workspace.
+- Automatically selects the only active location when an organization has one location.
+- Shows a persistent location switcher when multiple active locations exist.
+- Reloads shifts, inventory, orders, timesheets, alerts, templates and forecasts for the selected location.
+- New shifts inherit the current location automatically; the shift form exposes a location selector only when multiple choices exist.
+- Employee and product creation inherit the current location.
+- Product stock/par edits are applied to the current location inventory record.
+- Replaces the vague “A location is required” failure with actionable no-location handling.
+- Adds `npm run test:location-context`.
 
-- New shifts no longer disappear when switching between manager modules.
-- Production workspace now waits for the initial PostgreSQL bootstrap before allowing edits.
-- Shift creation waits for the database response and stores the real PostgreSQL shift IDs.
-- Shift editing uses the rows returned by PostgreSQL rather than optimistic temporary state.
-- Shift deletion only removes the visible record after PostgreSQL confirms deletion.
-- Failed shift writes keep the dialog/record intact and show the server error.
-
-## Database
-
-No migration is required.
-
-## Test
-
-`npm run test:shift-persistence` protects the synchronization workflow.
+No database migration is required.

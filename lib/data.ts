@@ -16,6 +16,7 @@ export type Shift = {
   isOpen?: boolean;
   recurrenceLabel?: string;
   recurrenceGroupId?: string;
+  locationId?: string;
 };
 
 export type Product = {

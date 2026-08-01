@@ -1,3 +1,7 @@
+# Bar Ops v0.8.3
+
+Current release: persistent manager location context for Neon-backed multi-location operation.
+
 # Bar Ops v0.8.2
 
 Employee portal activation schema repair built on v0.8.0.

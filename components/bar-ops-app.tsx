@@ -21,6 +21,7 @@ const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = 
   { id: "control", label: "Control centre", icon: Settings },
 ];
 
+type Location = { id: string; name: string };
 type Employee = { id?: string; name: string; initials: string; role: string; hours: number; status: string; active: boolean; email?: string; phone?: string; payrollId?: string; salaryCode?: string; costCentre?: string; portalStatus?: "NONE" | "INVITED" | "ACTIVE" | "EXPIRED" };
 type StockAdjustment = { id: string; productId: string; productName: string; delta: number; reason: string; createdAt: string };
 type OpsTask = { id: string; title: string; type: "Opening" | "Closing" | "Task" | "Maintenance"; owner: string; due: string; done: boolean; note?: string };
@@ -51,12 +52,14 @@ function mapDatabaseShift(x: any): Shift {
     initials: x.is_open ? "+" : employeeName.split(" ").map((word: string) => word[0]).join(""),
     start: startDate.toISOString().slice(11, 16), end: endDate.toISOString().slice(11, 16),
     role: x.role, status: x.status === "DRAFT" ? "Draft" : "Published", isOpen: x.is_open,
-    recurrenceGroupId: x.recurrence_group_id
+    recurrenceGroupId: x.recurrence_group_id, locationId: x.location_id
   };
 }
 
 export function BarOpsApp({ userName, userRole, devMode }: { userName: string; userRole: string; devMode: boolean }) {
   const [active, setActive] = useState<NavKey>("dashboard");
+  const [locations, setLocations] = useState<Location[]>(devMode ? [{ id: "dev-temple", name: "Temple Bar" }] : []);
+  const [selectedLocationId, setSelectedLocationId] = useState<string>(devMode ? "dev-temple" : "");
   const [mobileNav, setMobileNav] = useState(false);
   const [shifts, setShifts] = useState(initialShifts);
   const [products, setProducts] = useState(initialProducts);
@@ -107,16 +110,26 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
   }, [devMode,dataReady,products,shifts,employees,timeEntries,stockAdjustments,opsTasks,logEntries]);
   useEffect(() => {
     if (devMode) return;
-    fetch("/api/manager/bootstrap", { cache: "no-store" }).then(async response => {
+    const controller = new AbortController();
+    const requestedLocation = selectedLocationId ? `?locationId=${encodeURIComponent(selectedLocationId)}` : "";
+    setDataReady(false);
+    fetch(`/api/manager/bootstrap${requestedLocation}`, { cache: "no-store", signal: controller.signal }).then(async response => {
       if (!response.ok) throw new Error("Could not load workspace");
       const data = await response.json();
+      const availableLocations: Location[] = data.locations || [];
+      setLocations(availableLocations);
+      const resolvedLocationId = data.selectedLocationId || availableLocations[0]?.id || "";
+      if (resolvedLocationId && resolvedLocationId !== selectedLocationId) setSelectedLocationId(resolvedLocationId);
       setEmployees((data.employees || []).map((e: any) => ({ id:e.id, name:`${e.first_name} ${e.last_name}`, initials:`${e.first_name?.[0]||""}${e.last_name?.[0]||""}`, role:e.employment_title||"Employee", hours:Number(e.contracted_hours||0), status:e.active?"Active":"Inactive", active:e.active, email:e.email||"", phone:e.phone||"", payrollId:e.payroll_id||"", salaryCode:e.salary_code||"", costCentre:e.cost_centre||"", portalStatus:e.portal_status||"NONE" })));
       setShifts((data.shifts || []).map(mapDatabaseShift));
       setProducts((data.products || []).map((x:any)=>({id:x.id,name:x.name,category:x.category,supplier:x.supplier||"Unassigned",stock:Number(x.quantity||0),par:Number(x.par_level||0),unit:x.unit,price:Number(x.purchase_price||0)})));
       setTimeEntries((data.timesheets || []).map((x:any)=>({id:x.id,employee:x.employee_name,date:String(x.work_date).slice(0,10),clockIn:String(x.clocked_in_at).slice(11,16),clockOut:x.clocked_out_at?String(x.clocked_out_at).slice(11,16):undefined,breakMinutes:x.break_minutes,status:(x.status==="OPEN"?"Running":x.status[0]+x.status.slice(1).toLowerCase()) as TimeEntry["status"],scheduledHours:Number(x.scheduled_minutes||0)/60,note:x.manager_note})));
-      setDatabaseStatus("PostgreSQL connected"); setDataReady(true); fetch("/api/employee-invitations",{cache:"no-store"}).then(r=>r.ok?r.json():[]).then((rows:any[])=>setEmployees(current=>current.map(item=>({...item,portalStatus:(rows.find(row=>row.employee_id===item.id)?.portal_status||item.portalStatus||"NONE")})))).catch(()=>{});
-    }).catch(() => { setDatabaseStatus("Database connection error"); setDataReady(true); });
-  }, [devMode]);
+      setDatabaseStatus(resolvedLocationId ? "PostgreSQL connected" : "No active location configured");
+      setDataReady(true);
+      fetch("/api/employee-invitations",{cache:"no-store"}).then(r=>r.ok?r.json():[]).then((rows:any[])=>setEmployees(current=>current.map(item=>({...item,portalStatus:(rows.find(row=>row.employee_id===item.id)?.portal_status||item.portalStatus||"NONE")})))).catch(()=>{});
+    }).catch((error) => { if (error?.name !== "AbortError") { setDatabaseStatus("Database connection error"); setDataReady(true); } });
+    return () => controller.abort();
+  }, [devMode, selectedLocationId]);
   async function persist(path:string, options:RequestInit){ if(devMode) return null; const response=await fetch(path,{...options,headers:{"content-type":"application/json",...(options.headers||{})}}); if(!response.ok) throw new Error((await response.json().catch(()=>({}))).error||"Save failed"); return response.json(); }
 
   function notify(message: string) {
@@ -132,7 +145,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
     <div className="app-frame">
       <Sidebar active={active} onChange={(value) => { setActive(value); setMobileNav(false); }} open={mobileNav} onClose={() => setMobileNav(false)} userName={userName} userRole={userRole} devMode={devMode} />
       <main className="main-shell">
-        <Topbar onMenu={() => setMobileNav(true)} />
+        <Topbar onMenu={() => setMobileNav(true)} locations={locations} selectedLocationId={selectedLocationId} onLocationChange={setSelectedLocationId} />
         <div className="page-wrap">
           {active === "dashboard" && <Dashboard shifts={shifts} products={products} onNavigate={setActive} onNewShift={() => setDialog("shift")} />}
           {active === "schedule" && <Schedule shifts={shifts} setShifts={setShifts} employees={employees} onNewShift={() => setDialog("shift")} onEditShift={setEditingShift} notify={notify} currentWeekOffset={currentWeekOffset} setCurrentWeekOffset={setCurrentWeekOffset} />}
@@ -196,11 +209,11 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
         try { if (!devMode) await persist(`/api/shifts?id=${editingShift.id}`,{method:"DELETE"}); setShifts((current) => current.filter((item) => item.id !== editingShift.id)); setEditingShift(null); notify("Shift removed"); }
         catch (error) { notify(error instanceof Error ? error.message : "Could not remove shift"); }
       }} />}
-      {dialog === "shift" && <ShiftDialog employees={employees} currentWeekOffset={currentWeekOffset} onClose={() => setDialog(null)} onSave={async (newShifts) => {
+      {dialog === "shift" && <ShiftDialog employees={employees} currentWeekOffset={currentWeekOffset} locations={locations} selectedLocationId={selectedLocationId} onClose={() => setDialog(null)} onSave={async (newShifts) => {
         try {
           if (devMode) setShifts((current) => [...current, ...newShifts]);
           else {
-            const savedGroups = await Promise.all(newShifts.map(async x => { const assigned=employees.find(e=>e.name===x.employee); return persist("/api/shifts",{method:"POST",body:JSON.stringify({employeeId:assigned?.id,isOpen:x.isOpen,role:x.role,startsAt:`${canonicalShiftDate(x)}T${x.start}:00`,endsAt:`${dateFromSerial(dateSerial(canonicalShiftDate(x))+(isOvernight(x.start,x.end)?1:0))}T${x.end}:00`,status:"DRAFT"})}); }));
+            const savedGroups = await Promise.all(newShifts.map(async x => { const assigned=employees.find(e=>e.name===x.employee); return persist("/api/shifts",{method:"POST",body:JSON.stringify({locationId:x.locationId || selectedLocationId,employeeId:assigned?.id,isOpen:x.isOpen,role:x.role,startsAt:`${canonicalShiftDate(x)}T${x.start}:00`,endsAt:`${dateFromSerial(dateSerial(canonicalShiftDate(x))+(isOvernight(x.start,x.end)?1:0))}T${x.end}:00`,status:"DRAFT"})}); }));
             const saved = savedGroups.flatMap(result => (result?.shifts || []).map(mapDatabaseShift));
             setShifts(current => [...current, ...saved].sort((a,b)=>canonicalShiftDate(a).localeCompare(canonicalShiftDate(b))));
           }
@@ -209,9 +222,9 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       }} />}
       {editingTimeEntry && <TimesheetDialog entry={editingTimeEntry} onClose={() => setEditingTimeEntry(null)} onSave={(updated) => { setTimeEntries((current) => current.map((item) => item.id === updated.id ? updated : item)); setEditingTimeEntry(null); notify("Timesheet corrected and returned to pending review"); }} />}
       {editingEmployee && <EmployeeDialog employee={editingEmployee} onClose={() => setEditingEmployee(null)} onSave={async (updated) => { try { const saved=await persist("/api/employees",{method:"PATCH",body:JSON.stringify({...updated,id:editingEmployee.id})}); setEmployees((current) => current.map((item) => item.id === editingEmployee.id ? {...updated,...saved,id:editingEmployee.id} : item)); setEditingEmployee(null); notify("Employee updated"); } catch(error) { notify(error instanceof Error?error.message:"Could not update employee"); } }} />}
-      {dialog === "employee" && <EmployeeDialog onClose={() => setDialog(null)} onSave={async (employee) => { try { const saved=await persist("/api/employees",{method:"POST",body:JSON.stringify(employee)}); setEmployees((current) => [...current, {...employee,id:saved?.id,portalStatus:"NONE"}]); setDialog(null); notify(devMode?"Employee added":"Employee added — you can now invite them to the portal"); } catch(e) { notify(e instanceof Error?e.message:"Could not add employee"); } }} />}
-      {dialog === "product" && <ProductDialog onClose={() => setDialog(null)} onSave={async (product) => { try { const saved=await persist("/api/products",{method:"POST",body:JSON.stringify(product)}); setProducts((current) => [...current, {...product,...saved}]); setDialog(null); notify("Product added to inventory"); } catch(error) { notify(error instanceof Error?error.message:"Could not add product"); } }} />}
-      {editingProduct && <ProductDialog product={editingProduct} onClose={() => setEditingProduct(null)} onSave={async (product) => { try { const saved=await persist("/api/products",{method:"PATCH",body:JSON.stringify(product)}); setProducts(current => current.map(p => p.id === product.id ? {...product,...saved} : p)); setEditingProduct(null); notify("Product updated"); } catch(error) { notify(error instanceof Error?error.message:"Could not update product"); } }} />}
+      {dialog === "employee" && <EmployeeDialog onClose={() => setDialog(null)} onSave={async (employee) => { try { const saved=await persist("/api/employees",{method:"POST",body:JSON.stringify({...employee,locationId:selectedLocationId})}); setEmployees((current) => [...current, {...employee,id:saved?.id,portalStatus:"NONE"}]); setDialog(null); notify(devMode?"Employee added":"Employee added — you can now invite them to the portal"); } catch(e) { notify(e instanceof Error?e.message:"Could not add employee"); } }} />}
+      {dialog === "product" && <ProductDialog onClose={() => setDialog(null)} onSave={async (product) => { try { const saved=await persist("/api/products",{method:"POST",body:JSON.stringify({...product,locationId:selectedLocationId})}); setProducts((current) => [...current, {...product,...saved}]); setDialog(null); notify("Product added to inventory"); } catch(error) { notify(error instanceof Error?error.message:"Could not add product"); } }} />}
+      {editingProduct && <ProductDialog product={editingProduct} onClose={() => setEditingProduct(null)} onSave={async (product) => { try { const saved=await persist("/api/products",{method:"PATCH",body:JSON.stringify({...product,locationId:selectedLocationId})}); setProducts(current => current.map(p => p.id === product.id ? {...product,...saved} : p)); setEditingProduct(null); notify("Product updated"); } catch(error) { notify(error instanceof Error?error.message:"Could not update product"); } }} />}
       {dialog === "stockCount" && <StockCountDialog products={products} onClose={() => setDialog(null)} onSave={(counts) => { setProducts(current => current.map(p => ({...p,stock:counts[p.id] ?? p.stock}))); setDialog(null); notify("Stock count approved and inventory updated"); }} />}
       {dialog === "order" && <OrderDialog onClose={() => setDialog(null)} onSave={() => { setDialog(null); notify("Purchase order created"); }} />}
       {toast && <div className="toast"><span><Check size={16} /></span>{toast}</div>}
@@ -236,8 +249,9 @@ function Sidebar({ active, onChange, open, onClose, userName, userRole, devMode 
   </>
 }
 
-function Topbar({ onMenu }: { onMenu: () => void }) {
-  return <header className="topbar"><button className="menu-button" onClick={onMenu}><Menu size={21} /></button><div className="location-switch"><span className="status-dot" />Temple Bar<ChevronDown size={15} /></div><div className="top-actions"><button className="icon-button"><Search size={19} /></button><button className="icon-button notification"><Bell size={19} /><i /></button><button className="help-button">Help</button></div></header>
+function Topbar({ onMenu, locations, selectedLocationId, onLocationChange }: { onMenu: () => void; locations: Location[]; selectedLocationId: string; onLocationChange: (id: string) => void }) {
+  const selected = locations.find(location => location.id === selectedLocationId);
+  return <header className="topbar"><button className="menu-button" onClick={onMenu}><Menu size={21} /></button><label className="location-switch" aria-label="Current location"><span className="status-dot" />{locations.length > 1 ? <><select value={selectedLocationId} onChange={event => onLocationChange(event.target.value)}>{locations.map(location => <option key={location.id} value={location.id}>{location.name}</option>)}</select><ChevronDown size={15} /></> : <span>{selected?.name || "No active location"}</span>}</label><div className="top-actions"><button className="icon-button"><Search size={19} /></button><button className="icon-button notification"><Bell size={19} /><i /></button><button className="help-button">Help</button></div></header>
 }
 
 function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; title: string; subtitle: string; action?: React.ReactNode }) {
@@ -410,13 +424,15 @@ function ControlCenter({devMode,databaseStatus,notify}:{devMode:boolean;database
  return <><PageHeader title="Control centre" subtitle="Production controls plus development-data tools for realistic testing before database setup." action={<span className={`connection-pill ${devMode?"dev":"live"}`}>{databaseStatus}</span>}/>{devMode&&<section className="panel dev-data-tools"><PanelTitle title="Development data" subtitle="Your workspace is saved in this browser. Export a backup or reset to the original demo data."/><div><button className="secondary" onClick={()=>{const raw=localStorage.getItem("barops-dev-v070")||"{}";const blob=new Blob([raw],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="bar-ops-development-data.json";a.click();URL.revokeObjectURL(url);notify("Development data exported")}}><DownloadCloud size={17}/>Export JSON</button><label className="secondary file-import"><Upload size={17}/>Import JSON<input type="file" accept="application/json" onChange={async e=>{const file=e.target.files?.[0];if(!file)return;try{JSON.parse(await file.text());localStorage.setItem("barops-dev-v070",await file.text());location.reload()}catch{notify("That file is not valid Bar Ops JSON")}}}/></label><button className="secondary danger-outline" onClick={()=>{if(confirm("Reset all development data to the original demo workspace?")){localStorage.removeItem("barops-dev-v070");location.reload()}}}><RotateCcw size={17}/>Reset demo data</button></div></section>}<div className="control-grid">{groups.map(g=>{const Icon=g.icon;return <section className="panel control-card" key={g.title}><div className="control-icon"><Icon size={20}/></div><h2>{g.title}</h2>{g.items.map(i=><p key={i}><Check size={15}/>{i}</p>)}</section>})}</div><section className="panel control-actions"><PanelTitle title="Operational actions" subtitle="These actions use persistent APIs when PostgreSQL is connected."/><div className="quick-grid"><button className="quick-action" onClick={()=>notify("Create and lock a payroll period in Time & attendance")}><LockKeyhole/><div><strong>Payroll periods</strong><small>Lock, export and close</small></div></button><button className="quick-action" onClick={()=>notify("Kiosk endpoint ready at /api/kiosk")}><KeyRound/><div><strong>Kiosk mode</strong><small>PIN and geofence verified</small></div></button><button className="quick-action" onClick={()=>notify("Receiving, waste and transfers use /api/operations")}><ArrowLeftRight/><div><strong>Stock operations</strong><small>Receive, waste, transfer</small></div></button><button className="quick-action" onClick={()=>notify("Security controls use /api/security")}><ShieldCheck/><div><strong>Security</strong><small>MFA, reset, GDPR, sessions</small></div></button></div></section></>
 }
 
-function ShiftDialog({ onClose, onSave, currentWeekOffset, employees }: { onClose: () => void; onSave: (shifts: Shift[]) => void; currentWeekOffset: number; employees: Employee[] }) {
+function ShiftDialog({ onClose, onSave, currentWeekOffset, employees, locations, selectedLocationId }: { onClose: () => void; onSave: (shifts: Shift[]) => void; currentWeekOffset: number; employees: Employee[]; locations: Location[]; selectedLocationId: string }) {
   const [assignment, setAssignment] = useState<"employee" | "open">("employee");
+  const [locationId, setLocationId] = useState(selectedLocationId);
   const activeEmployees = employees.filter((person) => person.active);
   const [employee, setEmployee] = useState(activeEmployees[0]?.name ?? ""); const [shiftDate, setShiftDate] = useState(dateFromShift(currentWeekOffset, 4)); const [role, setRole] = useState<ShiftRole>("Bartender"); const [start, setStart] = useState("17:00"); const [end, setEnd] = useState("01:00");
   const [repeat, setRepeat] = useState(false); const [frequency, setFrequency] = useState<"daily" | "weekly">("weekly"); const [count, setCount] = useState(4); const [weekdays, setWeekdays] = useState<number[]>([4]);
   const weekdayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   function save() {
+    if (!locationId) { alert("No active location is configured. Add or activate a location before creating shifts."); return; }
     const safeCount = Math.max(1, Math.min(count || 1, frequency === "daily" ? 31 : 52));
     let occurrences: { day: number; weekOffset: number }[];
     const startPosition = shiftPositionFromDate(shiftDate);
@@ -432,9 +448,10 @@ function ShiftDialog({ onClose, onSave, currentWeekOffset, employees }: { onClos
     const name = assignment === "open" ? "Available shift" : employee;
     const recurrenceGroupId = repeat ? crypto.randomUUID() : undefined;
     const initials = assignment === "open" ? "+" : employee.split(" ").map((word) => word[0]).join("");
-    onSave(uniqueOccurrences.map((occurrence, index) => ({ id: crypto.randomUUID(), date: dateFromShift(occurrence.weekOffset, occurrence.day), day: occurrence.day, weekOffset: occurrence.weekOffset, employee: name, initials, start, end, role, status: "Draft", isOpen: assignment === "open", recurrenceLabel: label, recurrenceGroupId })));
+    onSave(uniqueOccurrences.map((occurrence, index) => ({ id: crypto.randomUUID(), date: dateFromShift(occurrence.weekOffset, occurrence.day), day: occurrence.day, weekOffset: occurrence.weekOffset, employee: name, initials, start, end, role, status: "Draft", isOpen: assignment === "open", recurrenceLabel: label, recurrenceGroupId, locationId })));
   }
   return <Modal title="Add shift" subtitle="Create one shift or a repeating series." onClose={onClose}>
+    {locations.length > 1 && <label className="location-field">Location<select value={locationId} onChange={event=>setLocationId(event.target.value)}>{locations.map(location=><option key={location.id} value={location.id}>{location.name}</option>)}</select></label>}
     <div className="assignment-toggle"><button className={assignment === "employee" ? "selected" : ""} onClick={() => setAssignment("employee")}>Assign employee</button><button className={assignment === "open" ? "selected" : ""} onClick={() => setAssignment("open")}>Available shift</button></div>
     <div className="form-grid">
       {assignment === "employee" && <label className="full-field">Employee<select value={employee} onChange={(e) => setEmployee(e.target.value)}>{activeEmployees.map((p) => <option key={p.name}>{p.name}</option>)}</select></label>}
