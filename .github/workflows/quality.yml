@@ -1,0 +1,43 @@
+name: Quality checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: baros-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out baros
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Run regression suites
+        run: npm run test:all
+
+      - name: Type-check and build
+        env:
+          DEV_AUTH_ENABLED: "true"
+          DEV_AUTH_EMAIL: "ci@baros.local"
+          DEV_AUTH_PASSWORD: "ci-development-password"
+          DEV_AUTH_SECRET: "ci-only-development-secret-at-least-32-characters"
+        run: npm run build

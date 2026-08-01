@@ -1,6 +1,6 @@
 {
   "name": "bar-ops",
-  "version": "0.7.0",
+  "version": "0.7.2",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -14,7 +14,11 @@
     "test:audit": "node scripts/test-audit.mjs",
     "test:integrity": "node scripts/test-integrity.mjs",
     "test:production": "node scripts/test-production-foundation.mjs",
-    "test:inventory": "node scripts/test-inventory-operations.mjs"
+    "test:inventory": "node scripts/test-inventory-operations.mjs",
+    "test:remediation": "node scripts/test-remediation.mjs",
+    "db:verify": "node scripts/verify-database.mjs",
+    "test:all": "npm run test:logic && npm run test:payroll && npm run test:audit && npm run test:integrity && npm run test:production && npm run test:inventory && npm run test:remediation && npm run test:ipad-ops",
+    "test:ipad-ops": "node scripts/test-ipad-operations.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

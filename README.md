@@ -1,3 +1,7 @@
+# Bar Ops v0.7.1
+
+Security and transaction-integrity remediation release. Run `npm run db:migrate` to apply migration 006 and `npm run test:remediation` with the existing regression suites. See `RELEASE_NOTES.md` and `IMPLEMENTATION_STATUS.md`.
+
 # Bar Ops v0.5.0 v0.2.0 — Persistent Foundation
 
 A Vercel-ready Next.js hospitality operations platform with a PostgreSQL data layer, custom database-backed authentication, multi-organization/location tenancy, manager workspace, and employee self-service portal.
@@ -144,3 +148,14 @@ Run the new regression suite with:
 ```bash
 npm run test:inventory
 ```
+
+## v0.7.2 iPad database administration
+
+The repository is configured for the GitHub repository named `baros` and includes browser-operated GitHub Actions:
+
+- **Database administration** — manually verify, migrate, or intentionally seed Neon.
+- **Quality checks** — runs regression tests and a production build on `main`, pull requests, or manually.
+
+See [`IPAD_NEON_VERCEL_SETUP.md`](./IPAD_NEON_VERCEL_SETUP.md) for the complete Safari/iPad flow. Database credentials belong in GitHub Actions secrets and Vercel environment variables; they must never be committed.
+
+Seeding is protected by both a workflow confirmation phrase and the `ALLOW_DATABASE_SEED=SEED BAROS` process guard.

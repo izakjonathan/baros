@@ -1,0 +1,88 @@
+name: Database administration
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Select the database operation
+        required: true
+        type: choice
+        options:
+          - verify
+          - migrate
+          - seed
+        default: verify
+      seed_confirmation:
+        description: For seed only, enter exactly SEED BAROS
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: baros-database-admin
+  cancel-in-progress: false
+
+jobs:
+  database:
+    name: ${{ inputs.operation }} Neon database
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_DIRECT_URL: ${{ secrets.DATABASE_DIRECT_URL }}
+      SEED_OWNER_EMAIL: ${{ secrets.SEED_OWNER_EMAIL }}
+      SEED_OWNER_PASSWORD: ${{ secrets.SEED_OWNER_PASSWORD }}
+      NODE_ENV: production
+
+    steps:
+      - name: Check out baros
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+
+      - name: Validate required secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "DATABASE_URL is missing from GitHub Actions secrets."
+            exit 1
+          fi
+          if [ "${{ inputs.operation }}" = "migrate" ] && [ -z "${DATABASE_DIRECT_URL:-}" ]; then
+            echo "DATABASE_DIRECT_URL is required for migrations."
+            exit 1
+          fi
+          if [ "${{ inputs.operation }}" = "seed" ]; then
+            if [ "${{ inputs.seed_confirmation }}" != "SEED BAROS" ]; then
+              echo "Seed cancelled. Enter exactly: SEED BAROS"
+              exit 1
+            fi
+            if [ -z "${SEED_OWNER_EMAIL:-}" ] || [ -z "${SEED_OWNER_PASSWORD:-}" ]; then
+              echo "SEED_OWNER_EMAIL and SEED_OWNER_PASSWORD are required for seeding."
+              exit 1
+            fi
+          fi
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Run migrations
+        if: ${{ inputs.operation == 'migrate' }}
+        run: npm run db:migrate
+
+      - name: Seed initial data
+        if: ${{ inputs.operation == 'seed' }}
+        env:
+          ALLOW_DATABASE_SEED: "SEED BAROS"
+        run: npm run db:seed
+
+      - name: Verify database
+        if: ${{ inputs.operation == 'verify' || inputs.operation == 'migrate' || inputs.operation == 'seed' }}
+        run: npm run db:verify
