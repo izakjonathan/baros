@@ -65,7 +65,7 @@ export async function POST(request: Request) {
         created.push(rows[0]);
       }
       await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,after_data)
-        values(${user.organizationId},${locationId},${user.userId},${recurrence ? "SHIFT_SERIES_CREATED" : "SHIFT_CREATED"},'shift',${recurrenceId || created[0]?.id},${{ count: created.length, shifts: created }})`;
+        values(${user.organizationId},${locationId},${user.userId},${recurrence ? "SHIFT_SERIES_CREATED" : "SHIFT_CREATED"},'shift',${recurrenceId || created[0]?.id},${JSON.stringify({ count: created.length, shifts: created })}::jsonb)`;
       return { shifts: created, recurrenceGroupId: recurrenceId };
     });
     return NextResponse.json(result, { status: 201 });
@@ -122,7 +122,7 @@ export async function PATCH(request: Request) {
         const changed = await tx`update shifts set employee_id=${employeeId},is_open=${isOpen},role=${body.role ? String(body.role).slice(0,100) : item.role},starts_at=${start.toISOString()},ends_at=${end.toISOString()},status=${body.status ? String(body.status) : item.status},notes=${body.notes===undefined?item.notes:String(body.notes).slice(0,2000)},updated_at=now() where id=${item.id} and organization_id=${user.organizationId} returning *`;
         updated.push(changed[0]);
       }
-      await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,before_data,after_data) values(${user.organizationId},${current.location_id},${user.userId},'SHIFT_UPDATED','shift',${id},${current},${{ scope, count: updated.length, changes: body }})`;
+      await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,before_data,after_data) values(${user.organizationId},${current.location_id},${user.userId},'SHIFT_UPDATED','shift',${id},${JSON.stringify(current)}::jsonb,${JSON.stringify({ scope, count: updated.length, changes: body })}::jsonb)`;
       return updated;
     });
     return NextResponse.json(rows);

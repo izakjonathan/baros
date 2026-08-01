@@ -51,7 +51,7 @@ export async function POST(request: Request) {
         values(${user.organizationId},${firstName},${lastName},${email},${phone},${title},${numberValue(body.hourlyRate,"hourlyRate")},${numberValue(body.contractedHours,"contractedHours",0,168)},${optionalString(body,"payrollId",100)},${optionalString(body,"salaryCode",100)},${optionalString(body,"costCentre",100)},${kioskPinHash},${body.active !== false}) returning *`;
       const employee = created[0];
       if (locationId) await tx`insert into employee_locations(employee_id,location_id,primary_location) values(${employee.id},${locationId},true) on conflict do nothing`;
-      await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,after_data) values(${user.organizationId},${locationId},${user.userId},'EMPLOYEE_CREATED','employee',${employee.id},${employee})`;
+      await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,after_data) values(${user.organizationId},${locationId},${user.userId},'EMPLOYEE_CREATED','employee',${employee.id},${JSON.stringify(employee)}::jsonb)`;
       return employee;
     });
     return NextResponse.json(row, { status: 201 });
@@ -80,7 +80,7 @@ export async function PATCH(request: Request) {
         kiosk_pin_hash=${pin},active=${body.active===undefined?before.active:Boolean(body.active)},updated_at=now()
         where id=${id} and organization_id=${user.organizationId} returning *`;
       const employee = rows[0];
-      await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,before_data,after_data) values(${user.organizationId},${user.locationId},${user.userId},'EMPLOYEE_UPDATED','employee',${employee.id},${before},${employee})`;
+      await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,before_data,after_data) values(${user.organizationId},${user.locationId},${user.userId},'EMPLOYEE_UPDATED','employee',${employee.id},${JSON.stringify(before)}::jsonb,${JSON.stringify(employee)}::jsonb)`;
       return employee;
     });
     return NextResponse.json(result);
