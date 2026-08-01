@@ -47,9 +47,11 @@ export async function POST(request: Request) {
     const result = await db().begin(async (tx) => {
       const location = await tx`select id from locations where id=${locationId} and organization_id=${user.organizationId}`;
       if (!location.length) throw new ApiError(400, "Location does not belong to this organization");
+      let employeeName: string | null = null;
       if (employeeId) {
-        const employee = await tx`select id from employees where id=${employeeId} and organization_id=${user.organizationId} and active`;
+        const employee = await tx`select id, first_name||' '||last_name as employee_name from employees where id=${employeeId} and organization_id=${user.organizationId} and active`;
         if (!employee.length) throw new ApiError(400, "Employee is unavailable or belongs to another organization");
+        employeeName = employee[0].employee_name;
       }
       let recurrenceId: string | null = null;
       if (recurrence) {
@@ -62,7 +64,7 @@ export async function POST(request: Request) {
         const end = new Date(start.getTime() + duration);
         const rows = await tx`insert into shifts(organization_id,location_id,employee_id,role,starts_at,ends_at,break_minutes,status,notes,created_by,recurrence_group_id,is_open)
           values(${user.organizationId},${locationId},${employeeId},${role},${start.toISOString()},${end.toISOString()},${Number(body.breakMinutes || 0)},${String(body.status || "DRAFT")},${body.notes ? String(body.notes).slice(0,2000) : null},${user.userId},${recurrenceId},${isOpen}) returning *`;
-        created.push(rows[0]);
+        created.push({ ...rows[0], employee_name: employeeName });
       }
       await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,after_data)
         values(${user.organizationId},${locationId},${user.userId},${recurrence ? "SHIFT_SERIES_CREATED" : "SHIFT_CREATED"},'shift',${recurrenceId || created[0]?.id},${JSON.stringify({ count: created.length, shifts: created })}::jsonb)`;
@@ -111,6 +113,12 @@ export async function PATCH(request: Request) {
       const dateDelta = requestedStart.getTime() - new Date(current.starts_at).getTime();
       const isOpen = body.isOpen === undefined ? current.is_open : Boolean(body.isOpen);
       const employeeId = isOpen ? null : (body.employeeId === undefined ? current.employee_id : uuid(body.employeeId, "employeeId"));
+      let employeeName: string | null = null;
+      if (employeeId) {
+        const employee = await tx`select id, first_name||' '||last_name as employee_name from employees where id=${employeeId} and organization_id=${user.organizationId} and active`;
+        if (!employee.length) throw new ApiError(400, "Employee is unavailable or belongs to another organization");
+        employeeName = employee[0].employee_name;
+      }
       const updated: any[] = [];
       for (const item of targetRows) {
         const start = scope === 'occurrence' ? requestedStart : new Date(new Date(item.starts_at).getTime() + dateDelta);
@@ -120,7 +128,7 @@ export async function PATCH(request: Request) {
           if (conflicts.length && !body.overrideConflicts) throw new ApiError(409, "Employee has scheduling conflicts", conflicts);
         }
         const changed = await tx`update shifts set employee_id=${employeeId},is_open=${isOpen},role=${body.role ? String(body.role).slice(0,100) : item.role},starts_at=${start.toISOString()},ends_at=${end.toISOString()},status=${body.status ? String(body.status) : item.status},notes=${body.notes===undefined?item.notes:String(body.notes).slice(0,2000)},updated_at=now() where id=${item.id} and organization_id=${user.organizationId} returning *`;
-        updated.push(changed[0]);
+        updated.push({ ...changed[0], employee_name: employeeName });
       }
       await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,before_data,after_data) values(${user.organizationId},${current.location_id},${user.userId},'SHIFT_UPDATED','shift',${id},${JSON.stringify(current)}::jsonb,${JSON.stringify({ scope, count: updated.length, changes: body })}::jsonb)`;
       return updated;

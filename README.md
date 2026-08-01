@@ -1,20 +1,9 @@
-# Bar Ops v0.8.3
+# Bar Ops v0.8.4
 
-Current release: persistent manager location context for Neon-backed multi-location operation.
+Hospitality operations workspace for scheduling, attendance, inventory, ordering, employee self-service, and payroll workflows.
 
-# Bar Ops v0.8.2
+This release fixes assigned shifts displaying as “Unassigned” immediately after creation or reassignment. PostgreSQL shift mutation responses now include the employee display name expected by the manager schedule mapper.
 
-Employee portal activation schema repair built on v0.8.0.
+## Deployment
 
-After deployment, run:
-
-```bash
-npm run db:migrate
-npm run db:verify
-```
-
-This applies `008_employee_updated_at.sql`, which adds the timestamp required by employee activation and employee editing.
-
-
-## v0.8.2 shift synchronization
-Production schedule writes are now server-confirmed and the workspace waits for PostgreSQL bootstrap before interaction.
+Commit the ZIP to the `baros` GitHub repository. GitHub Quality Checks and Vercel will run automatically. No database migration is required.

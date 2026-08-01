@@ -1,13 +1,12 @@
-# Bar Ops v0.8.3 — Location Context
+# Bar Ops v0.8.4 — Shift Assignment Display Fix
 
-- Adds an organization-wide current-location context to the manager workspace.
-- Automatically selects the only active location when an organization has one location.
-- Shows a persistent location switcher when multiple active locations exist.
-- Reloads shifts, inventory, orders, timesheets, alerts, templates and forecasts for the selected location.
-- New shifts inherit the current location automatically; the shift form exposes a location selector only when multiple choices exist.
-- Employee and product creation inherit the current location.
-- Product stock/par edits are applied to the current location inventory record.
-- Replaces the vague “A location is required” failure with actionable no-location handling.
-- Adds `npm run test:location-context`.
+## Fixed
 
-No database migration is required.
+- Newly created assigned shifts now return the assigned employee's display name from PostgreSQL.
+- Reassigned existing shifts now return the new employee's display name.
+- The manager schedule no longer maps a successfully assigned shift to “Unassigned” merely because the raw insert/update response lacked the joined `employee_name` field.
+- Employee organization and active-status validation is performed before both creation and reassignment.
+
+## Deployment
+
+This is a code-only release. No database migration is required.
