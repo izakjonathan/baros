@@ -14,8 +14,8 @@ const checks=[
  ["activation transaction",activate.includes("db().begin")],
  ["password hashing",activate.includes("hashPassword(password)")],
  ["employee membership",activate.includes("'EMPLOYEE'")],
- ["employee linkage",activate.includes("update employees set user_id")],
- ["single-use acceptance",activate.includes("status='ACCEPTED'")],
+ ["employee linkage",/update\s+employees[\s\S]*set\s+user_id/.test(activate)],
+ ["single-use acceptance",/status\s*=\s*['"]ACCEPTED['"]/.test(activate)],
  ["activation page",page.includes("ActivationForm")],
  ["manager share action",ui.includes("navigator.share")&&ui.includes("Invite to portal")],
 ];

@@ -17,3 +17,8 @@ After committing this release, run **GitHub → Actions → Database administrat
 
 ## v0.8.6
 Team cards show published scheduled hours for the next four weeks based on live shift assignments.
+## v0.8.9 Settings and production time clock
+
+Settings is now a working manager workspace. Per-location time-clock controls are stored in PostgreSQL. The employee My Hours page uses persistent clock, break, timesheet, scheduled-hours and correction-request APIs and restores an open clock after refresh.
+
+Clocking is based on a linked employee identity, not the management role. Employees, shift managers, managers, admins and owners can record time when their user account is linked to an employee profile and location.

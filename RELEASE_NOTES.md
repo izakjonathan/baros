@@ -1,29 +1,21 @@
-# Bar Ops v0.8.8 — Schedule Workspace Redesign
+# Bar Ops v0.8.9 — Settings and Production Time Clock
 
-## Schedule creation
+## Settings workspace
 
-- Tapping **Add shift** inside a day column now opens the form with that exact calendar date selected.
-- The top-level Add shift action defaults to the first visible day.
-- Repeating-shift weekday defaults follow the selected date.
+The sidebar Settings control now opens a real workspace. It includes organization/location context, persistent per-location time-clock settings, and security/data status. Owners, admins and managers can configure mobile clocking, kiosk clocking, unscheduled clocking, location checks, early-clock windows, missed-clock-out thresholds, rounding and optional approval tolerance.
 
-## Compact schedule layout
+## Persistent employee time clock
 
-- Removed the descriptive sentence below the Shift plan title.
-- Moved Copy previous week and Add shift into a compact action row beside the title.
-- Reduced title, toolbar, day-header, shift-card, and add-slot height.
-- Increased the vertical area available to the schedule grid.
-- Added sticky compact day headers while the schedule is scrolled.
+My Hours now uses PostgreSQL instead of demo React state. Clock-in, break start/end and clock-out call the production API. An open clock and active break are restored after refresh or sign-in. Clock-in links to the nearest eligible published shift where possible and respects the selected location's mobile and unscheduled-clock settings.
 
-## Views and navigation
+## Hours and correction requests
 
-- Added Week and Month view controls.
-- Previous/next navigation follows the selected view.
-- Both views use a horizontally scrollable day rail with scroll snapping on touch devices.
-- Month view shows every date of the selected month as a compact day column.
-- Publishing remains a week-based action to preserve the existing publication and notification model.
+Scheduled hours are calculated from published shifts. Approved worked hours are calculated from approved timesheets. Timesheet history is loaded from PostgreSQL and employee correction requests are persisted and notify managers.
 
-## Research basis
+## Role behaviour
 
-The layout follows current workforce scheduling conventions: period/view controls remain next to navigation, creation occurs from the target day, and longer periods are navigable with horizontal day scrolling. Planday and Deputy both expose Day/Week/Month period selection and direct creation from the intended day; FullCalendar documents separate week/day views and scrollable time/day surfaces.
+Clocking is available to any authenticated user who has a linked employee profile and location, regardless of whether their organization role is Employee, Shift Manager, Manager, Admin or Owner. Management permission alone does not create an attendance identity. Managers can open My Hours from Settings.
 
-No PostgreSQL migration is required.
+## Database
+
+No new migration is required. The release uses the existing time_clock_settings, timesheets, time_events, time_breaks and timesheet_correction_requests tables.

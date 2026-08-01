@@ -197,6 +197,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
             />
           )}
           {active === "control" && <ControlCenter devMode={devMode} databaseStatus={databaseStatus} notify={notify} />}
+          {active === "settings" && <SettingsWorkspace locations={locations} selectedLocationId={selectedLocationId} userRole={userRole} devMode={devMode} notify={notify} />}
         </div>
       </main>
       {editingShift && <EditShiftDialog shift={editingShift} employees={employees} onClose={() => setEditingShift(null)} onSave={async (updated, scope) => {
@@ -249,7 +250,7 @@ function Sidebar({ active, onChange, open, onClose, userName, userRole, devMode 
         {navItems.map((item) => <button key={item.id} className={active === item.id ? "active" : ""} onClick={() => onChange(item.id)}><item.icon size={19} /><span>{item.label}</span>{item.id === "inventory" && <em>5</em>}</button>)}
       </nav>
       <div className="side-bottom">
-        <button><Settings size={19} /><span>Settings</span></button>
+        <button className={active === "settings" ? "active" : ""} onClick={() => onChange("settings")}><Settings size={19} /><span>Settings</span></button>
         {devMode && <DevRoleSwitcher currentRole={userRole} />}<div className="profile"><div className="avatar dark">{userName.split(" ").map(part => part[0]).join("").slice(0,2)}</div><div><strong>{userName}</strong><span>{userRole.replace("_", " ").toLowerCase()}</span></div><ChevronDown size={16} /></div>
       </div>
     </aside>
@@ -466,6 +467,75 @@ function Team({ employees, shifts, devMode, onAdd, onEdit, onInvite, onRevoke }:
   }).reduce((total, shift) => total + hoursBetween(shift.start, shift.end), 0);
   return <><PageHeader title="Team" subtitle="Add employees, maintain records and manage employee portal access." action={<button className="primary" onClick={onAdd}><UserRoundPlus size={18} /> Add employee</button>} />
   <section className="team-grid">{employees.map((person) => { const upcomingHours = scheduledHours(person); return <article className={`team-card ${!person.active ? "employee-inactive" : ""}`} key={person.id||person.name}><div className="team-card-head"><div className="avatar large">{person.initials}</div><span className={`status ${person.active ? "status-submitted" : "status-draft"}`}>{person.active ? "Active" : "Inactive"}</span></div><h2>{person.name}</h2><p>{person.role}</p><div className="team-stats"><span>Scheduled next 4 weeks <b>{upcomingHours.toFixed(upcomingHours % 1 ? 1 : 0)}h</b></span><span>{person.email || person.status}</span></div><div className="portal-access"><span className={`status ${person.portalStatus==="ACTIVE"?"status-submitted":person.portalStatus==="INVITED"?"status-pending":"status-draft"}`}>{person.portalStatus==="ACTIVE"?"Portal active":person.portalStatus==="INVITED"?"Invitation pending":person.portalStatus==="EXPIRED"?"Invitation expired":"No portal access"}</span></div><div className="team-actions"><button className="secondary" onClick={() => onEdit(person)}>Edit employee</button><button className="secondary" disabled={devMode||!person.email||person.portalStatus==="ACTIVE"} onClick={()=>onInvite(person)}>{person.portalStatus==="INVITED"?"Resend invite":"Invite to portal"}</button>{person.portalStatus==="INVITED"&&<button className="secondary danger-outline" disabled={devMode} onClick={()=>onRevoke(person)}>Revoke invite</button>}</div>{devMode&&<small className="muted-note">Connect PostgreSQL to create real employee logins.</small>}</article>})}</section></> }
+
+type ClockSettings = {
+  allowMobileClock: boolean;
+  allowKioskClock: boolean;
+  allowUnscheduledClock: boolean;
+  requireLocationCheck: boolean;
+  earlyClockInMinutes: number;
+  lateClockOutMinutes: number;
+  roundingMinutes: number;
+  autoApproveWithinMinutes: number | "";
+};
+const defaultClockSettings: ClockSettings = { allowMobileClock:true, allowKioskClock:true, allowUnscheduledClock:false, requireLocationCheck:false, earlyClockInMinutes:15, lateClockOutMinutes:60, roundingMinutes:0, autoApproveWithinMinutes:"" };
+function SettingsWorkspace({ locations, selectedLocationId, userRole, devMode, notify }: { locations: Location[]; selectedLocationId: string; userRole: string; devMode: boolean; notify: (message:string)=>void }) {
+  const [section, setSection] = useState<"general"|"time"|"security">("time");
+  const [clock, setClock] = useState<ClockSettings>(defaultClockSettings);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const canManage = ["OWNER","ADMIN","MANAGER"].includes(userRole);
+  const location = locations.find(item => item.id === selectedLocationId);
+  useEffect(() => {
+    if (devMode || !selectedLocationId || section !== "time") return;
+    setLoading(true);
+    fetch(`/api/settings/time-clock?locationId=${encodeURIComponent(selectedLocationId)}`, { cache:"no-store" })
+      .then(async response => { const data=await response.json(); if(!response.ok) throw new Error(data.error||"Could not load settings"); return data; })
+      .then(data => setClock({
+        allowMobileClock:Boolean(data.allow_mobile_clock), allowKioskClock:Boolean(data.allow_kiosk_clock),
+        allowUnscheduledClock:Boolean(data.allow_unscheduled_clock), requireLocationCheck:Boolean(data.require_location_check),
+        earlyClockInMinutes:Number(data.early_clock_in_minutes||0), lateClockOutMinutes:Number(data.late_clock_out_minutes||0),
+        roundingMinutes:Number(data.rounding_minutes||0), autoApproveWithinMinutes:data.auto_approve_within_minutes ?? ""
+      }))
+      .catch(error => notify(error.message || "Could not load settings"))
+      .finally(() => setLoading(false));
+  }, [devMode, selectedLocationId, section]);
+  async function saveClock() {
+    if (devMode) { notify("Development settings saved for this session"); return; }
+    if (!selectedLocationId) { notify("Select a location first"); return; }
+    setSaving(true);
+    try {
+      const response=await fetch("/api/settings/time-clock", { method:"PUT", headers:{"content-type":"application/json"}, body:JSON.stringify({ locationId:selectedLocationId, ...clock }) });
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok) throw new Error(data.error||"Could not save settings");
+      notify("Time clock settings saved");
+    } catch(error) { notify(error instanceof Error ? error.message : "Could not save settings"); }
+    finally { setSaving(false); }
+  }
+  return <>
+    <PageHeader eyebrow="Workspace configuration" title="Settings" subtitle={`Manage how ${location?.name || "this location"} operates.`} />
+    <div className="settings-layout">
+      <nav className="settings-nav" aria-label="Settings sections">
+        <button className={section==="general"?"active":""} onClick={()=>setSection("general")}><MapPin size={18}/>Organization & location</button>
+        <button className={section==="time"?"active":""} onClick={()=>setSection("time")}><Timer size={18}/>Time clock</button>
+        <button className={section==="security"?"active":""} onClick={()=>setSection("security")}><ShieldCheck size={18}/>Security & data</button>
+      </nav>
+      <section className="panel settings-panel">
+        {section==="general" && <><PanelTitle title="Organization & location" subtitle="The active workspace context used by scheduling, inventory and attendance."/><div className="settings-summary"><div><span>Current location</span><strong>{location?.name || "No active location"}</strong></div><div><span>Available locations</span><strong>{locations.length}</strong></div><div><span>Your role</span><strong>{userRole.replaceAll("_"," ")}</strong></div></div><p className="settings-help">Location creation and organization identity editing are staged for a later administration release. Switch location from the top bar.</p></>}
+        {section==="time" && <><PanelTitle title="Time clock" subtitle="Control mobile and kiosk attendance for the selected location."/>{loading?<div className="settings-loading">Loading settings…</div>:<div className="settings-form">
+          <label className="toggle-row"><span><strong>Mobile clock-in</strong><small>Allow linked employees to clock in from their portal.</small></span><input type="checkbox" checked={clock.allowMobileClock} onChange={e=>setClock({...clock,allowMobileClock:e.target.checked})}/></label>
+          <label className="toggle-row"><span><strong>Kiosk clock-in</strong><small>Allow PIN-based clocking from a shared device.</small></span><input type="checkbox" checked={clock.allowKioskClock} onChange={e=>setClock({...clock,allowKioskClock:e.target.checked})}/></label>
+          <label className="toggle-row"><span><strong>Unscheduled clock-in</strong><small>Permit clock-in when no nearby published shift exists.</small></span><input type="checkbox" checked={clock.allowUnscheduledClock} onChange={e=>setClock({...clock,allowUnscheduledClock:e.target.checked})}/></label>
+          <label className="toggle-row"><span><strong>Require location check</strong><small>Require location verification when geofencing is configured.</small></span><input type="checkbox" checked={clock.requireLocationCheck} onChange={e=>setClock({...clock,requireLocationCheck:e.target.checked})}/></label>
+          <div className="settings-field-grid"><label>Early clock-in window<input type="number" min="0" max="240" value={clock.earlyClockInMinutes} onChange={e=>setClock({...clock,earlyClockInMinutes:Number(e.target.value)})}/><small>Minutes before the shift</small></label><label>Missed clock-out threshold<input type="number" min="0" max="720" value={clock.lateClockOutMinutes} onChange={e=>setClock({...clock,lateClockOutMinutes:Number(e.target.value)})}/><small>Minutes after scheduled end</small></label><label>Rounding<select value={clock.roundingMinutes} onChange={e=>setClock({...clock,roundingMinutes:Number(e.target.value)})}><option value="0">No rounding</option><option value="5">5 minutes</option><option value="6">6 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option></select></label><label>Auto-approval tolerance<input type="number" min="0" max="240" value={clock.autoApproveWithinMinutes} onChange={e=>setClock({...clock,autoApproveWithinMinutes:e.target.value===""?"":Number(e.target.value)})}/><small>Leave blank for manager approval</small></label></div>
+          <div className="settings-actions"><button className="primary" disabled={!canManage||saving} onClick={saveClock}><Save size={17}/>{saving?"Saving…":"Save settings"}</button><a className="secondary settings-link" href="/employee/hours"><Clock3 size={17}/>Open my time clock</a>{!canManage&&<small>Owner, Admin or Manager permission is required to change settings.</small>}</div>
+        </div>}</>}
+        {section==="security" && <><PanelTitle title="Security & data" subtitle="Current production safeguards and administration status."/><div className="settings-summary"><div><span>Authentication</span><strong>Database sessions</strong></div><div><span>Audit trail</span><strong>Enabled</strong></div><div><span>GDPR requests</span><strong>Foundation ready</strong></div></div><p className="settings-help">MFA enrollment, password-reset delivery, session revocation and managed backups remain in the production roadmap.</p></>}
+      </section>
+    </div>
+  </>;
+}
+
 function ControlCenter({devMode,databaseStatus,notify}:{devMode:boolean;databaseStatus:string;notify:(s:string)=>void}) {
  const groups=[
   {title:"Database & payroll",icon:Database,items:["All manager modules use tenant-scoped PostgreSQL APIs","Permanent payroll export ledger with SHA-256 hashes","Open, locked, exported and closed payroll periods","Payroll IDs, salary codes and cost centres"]},
