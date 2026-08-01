@@ -1,5 +1,88 @@
-import { createHash } from "node:crypto";import { NextResponse } from "next/server";import { getSessionUser } from "@/lib/auth/session";import { db } from "@/lib/db/client";import { writeAudit } from "@/lib/services/audit";
-const allowed=['OWNER','ADMIN','MANAGER'];
-export async function GET(){const u=await getSessionUser();if(!u||u.role==='EMPLOYEE')return NextResponse.json({error:'Forbidden'},{status:403});return NextResponse.json(await db()`select e.*,coalesce(json_agg(json_build_object('id',l.id,'name',l.name)) filter(where l.id is not null),'[]') locations from employees e left join employee_locations el on el.employee_id=e.id left join locations l on l.id=el.location_id where e.organization_id=${u.organizationId} group by e.id order by e.first_name,e.last_name`)}
-export async function POST(req:Request){const u=await getSessionUser();if(!u||!allowed.includes(u.role))return NextResponse.json({error:'Forbidden'},{status:403});const b=await req.json();const parts=String(b.name||'').trim().split(/\s+/);const [row]=await db()`insert into employees(organization_id,first_name,last_name,email,phone,employment_title,hourly_rate,contracted_hours,payroll_id,salary_code,cost_centre,kiosk_pin_hash,active) values(${u.organizationId},${b.firstName||parts[0]},${b.lastName||parts.slice(1).join(' ')||'-'},${b.email||null},${b.phone||null},${b.title||b.role||null},${b.hourlyRate||null},${b.contractedHours||null},${b.payrollId||null},${b.salaryCode||null},${b.costCentre||null},${b.kioskPin?createHash('sha256').update(String(b.kioskPin)).digest('hex'):null},${b.active!==false}) returning *`;if(b.locationId||u.locationId)await db()`insert into employee_locations(employee_id,location_id,primary_location) values(${row.id},${b.locationId||u.locationId},true) on conflict do nothing`;await writeAudit({organizationId:u.organizationId,locationId:b.locationId||u.locationId,actorUserId:u.userId,action:'EMPLOYEE_CREATED',entityType:'employee',entityId:row.id,after:row});return NextResponse.json(row,{status:201})}
-export async function PATCH(req:Request){const u=await getSessionUser();if(!u||!allowed.includes(u.role))return NextResponse.json({error:'Forbidden'},{status:403});const b=await req.json();const [before]=await db()`select * from employees where id=${b.id} and organization_id=${u.organizationId}`;if(!before)return NextResponse.json({error:'Not found'},{status:404});const parts=String(b.name||`${before.first_name} ${before.last_name}`).trim().split(/\s+/);const pin=b.kioskPin?createHash('sha256').update(String(b.kioskPin)).digest('hex'):before.kiosk_pin_hash;const [row]=await db()`update employees set first_name=${b.firstName||parts[0]},last_name=${b.lastName||parts.slice(1).join(' ')||'-'},email=${b.email??before.email},phone=${b.phone??before.phone},employment_title=${b.title||b.role||before.employment_title},hourly_rate=${b.hourlyRate??before.hourly_rate},contracted_hours=${b.contractedHours??before.contracted_hours},payroll_id=${b.payrollId??before.payroll_id},salary_code=${b.salaryCode??before.salary_code},cost_centre=${b.costCentre??before.cost_centre},kiosk_pin_hash=${pin},active=${b.active??before.active},updated_at=now() where id=${b.id} and organization_id=${u.organizationId} returning *`;await writeAudit({organizationId:u.organizationId,locationId:u.locationId,actorUserId:u.userId,action:'EMPLOYEE_UPDATED',entityType:'employee',entityId:row.id,before,after:row});return NextResponse.json(row)}
+import { NextResponse } from "next/server";
+import { getSessionUser } from "@/lib/auth/session";
+import { db } from "@/lib/db/client";
+import { writeAudit } from "@/lib/services/audit";
+import { hashKioskPin } from "@/lib/security/kiosk-pin";
+import { ApiError, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
+
+const allowed = ["OWNER", "ADMIN", "MANAGER"];
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const numberValue = (value: unknown, key: string, min = 0, max = 1_000_000) => {
+  if (value == null || value === "") return null;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < min || parsed > max) throw new ApiError(400, `${key} is invalid`);
+  return parsed;
+};
+const emailValue = (value: unknown) => {
+  if (value == null || value === "") return null;
+  const email = String(value).trim().toLowerCase();
+  if (email.length > 254 || !emailPattern.test(email)) throw new ApiError(400, "email is invalid");
+  return email;
+};
+
+export async function GET() {
+  const user = await getSessionUser();
+  if (!user || user.role === "EMPLOYEE") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  return NextResponse.json(await db()`select e.*,coalesce(json_agg(json_build_object('id',l.id,'name',l.name)) filter(where l.id is not null),'[]') locations from employees e left join employee_locations el on el.employee_id=e.id left join locations l on l.id=el.location_id where e.organization_id=${user.organizationId} group by e.id order by e.first_name,e.last_name`);
+}
+
+export async function POST(request: Request) {
+  try {
+    const user = await getSessionUser();
+    if (!user || !allowed.includes(user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const body = await readJsonObject(request, 20_000);
+    const suppliedName = optionalString(body, "name", 160);
+    const nameParts = String(suppliedName || "").trim().split(/\s+/).filter(Boolean);
+    const firstName = optionalString(body, "firstName", 80) || nameParts[0];
+    const lastName = optionalString(body, "lastName", 80) || nameParts.slice(1).join(" ") || "-";
+    if (!firstName) throw new ApiError(400, "Employee first name is required");
+    const email = emailValue(body.email);
+    const phone = optionalString(body, "phone", 40);
+    const title = optionalString(body, "title", 120) || optionalString(body, "role", 120);
+    const locationId = body.locationId ? uuid(body.locationId, "locationId") : user.locationId;
+    const kioskPinHash = body.kioskPin ? await hashKioskPin(requiredString(body, "kioskPin", 8)) : null;
+
+    const row = await db().transaction(async (tx) => {
+      if (locationId) {
+        const locations = await tx`select id from locations where id=${locationId} and organization_id=${user.organizationId}`;
+        if (!locations.length) throw new ApiError(400, "Location does not belong to this organization");
+      }
+      const created = await tx`insert into employees(organization_id,first_name,last_name,email,phone,employment_title,hourly_rate,contracted_hours,payroll_id,salary_code,cost_centre,kiosk_pin_hash,active)
+        values(${user.organizationId},${firstName},${lastName},${email},${phone},${title},${numberValue(body.hourlyRate,"hourlyRate")},${numberValue(body.contractedHours,"contractedHours",0,168)},${optionalString(body,"payrollId",100)},${optionalString(body,"salaryCode",100)},${optionalString(body,"costCentre",100)},${kioskPinHash},${body.active !== false}) returning *`;
+      const employee = created[0];
+      if (locationId) await tx`insert into employee_locations(employee_id,location_id,primary_location) values(${employee.id},${locationId},true) on conflict do nothing`;
+      await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,after_data) values(${user.organizationId},${locationId},${user.userId},'EMPLOYEE_CREATED','employee',${employee.id},${employee})`;
+      return employee;
+    });
+    return NextResponse.json(row, { status: 201 });
+  } catch (error) { return jsonError(error); }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const user = await getSessionUser();
+    if (!user || !allowed.includes(user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const body = await readJsonObject(request, 20_000);
+    const id = uuid(body.id, "id");
+    const result = await db().transaction(async (tx) => {
+      const beforeRows = await tx`select * from employees where id=${id} and organization_id=${user.organizationId} for update`;
+      const before = beforeRows[0];
+      if (!before) throw new ApiError(404, "Employee not found");
+      const suppliedName = optionalString(body, "name", 160);
+      const parts = String(suppliedName || `${before.first_name} ${before.last_name}`).trim().split(/\s+/).filter(Boolean);
+      const pin = body.kioskPin ? await hashKioskPin(requiredString(body, "kioskPin", 8)) : before.kiosk_pin_hash;
+      const email = body.email === undefined ? before.email : emailValue(body.email);
+      const rows = await tx`update employees set
+        first_name=${optionalString(body,"firstName",80)||parts[0]},last_name=${optionalString(body,"lastName",80)||parts.slice(1).join(" ")||"-"},
+        email=${email},phone=${body.phone===undefined?before.phone:optionalString(body,"phone",40)},employment_title=${optionalString(body,"title",120)||optionalString(body,"role",120)||before.employment_title},
+        hourly_rate=${body.hourlyRate===undefined?before.hourly_rate:numberValue(body.hourlyRate,"hourlyRate")},contracted_hours=${body.contractedHours===undefined?before.contracted_hours:numberValue(body.contractedHours,"contractedHours",0,168)},
+        payroll_id=${body.payrollId===undefined?before.payroll_id:optionalString(body,"payrollId",100)},salary_code=${body.salaryCode===undefined?before.salary_code:optionalString(body,"salaryCode",100)},cost_centre=${body.costCentre===undefined?before.cost_centre:optionalString(body,"costCentre",100)},
+        kiosk_pin_hash=${pin},active=${body.active===undefined?before.active:Boolean(body.active)},updated_at=now()
+        where id=${id} and organization_id=${user.organizationId} returning *`;
+      const employee = rows[0];
+      await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,before_data,after_data) values(${user.organizationId},${user.locationId},${user.userId},'EMPLOYEE_UPDATED','employee',${employee.id},${before},${employee})`;
+      return employee;
+    });
+    return NextResponse.json(result);
+  } catch (error) { return jsonError(error); }
+}

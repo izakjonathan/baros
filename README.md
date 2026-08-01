@@ -1,3 +1,8 @@
+# Bar Ops v0.7.4
+
+Employee portal access release for the iPad-first `baros` workflow. Managers can create an employee, generate a secure activation link, share it from the iPad share sheet, and track invitation/activation status. Employees set their own password and are routed to the employee portal.
+
+Run `npm run db:migrate` to apply migration `007_employee_portal_access.sql`. See `RELEASE_NOTES.md` and `IPAD_NEON_VERCEL_SETUP.md`.
 # Bar Ops v0.7.1
 
 Security and transaction-integrity remediation release. Run `npm run db:migrate` to apply migration 006 and `npm run test:remediation` with the existing regression suites. See `RELEASE_NOTES.md` and `IMPLEMENTATION_STATUS.md`.

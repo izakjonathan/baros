@@ -1,39 +1,13 @@
-# v0.7.1 implementation status
+# v0.7.4 implementation status
 
-## Implemented in this release
-- Explicit, production-safe development authentication
-- Login throttling
-- Correct kiosk employee identification
-- Scrypt kiosk PIN format and verification helper
-- Atomic/idempotent payroll export
-- Database-enforced payroll-period timesheet protection
-- Atomic/idempotent schedule publication
-- Shared API input validation foundation
-- Security headers and CSP
-- Direct migration connection support
+## Completed in this release
 
-## Migration note
-Existing SHA-256 kiosk PIN values cannot be converted back into PINs. Reset each employee PIN through a future manager PIN editor or an administrative script so it is stored in the new `scrypt:salt:hash` format.
+Employee portal invitation hardening, existing-account-safe activation, kiosk PIN compatibility, employee API validation and transactions, invitation revocation/share fallback, ID-based employee updates, persistence-aware employee/product feedback, and transactional recurring-shift creation/editing.
 
-## Still staged
-- Splitting the manager monolith into feature components
-- Full schema validation on every legacy endpoint
-- Composite organization foreign keys on every tenant relation
-- Complete password-reset and MFA user flows
-- Full Vitest/PostgreSQL/Playwright/Axe suite and CI
-- Worker-based alert delivery and external monitoring
+## Database action
 
-## v0.7.2 iPad/GitHub operations
+No new SQL migration is included. Existing installations should already have migrations 001–007. Commit the release and allow GitHub Quality Checks and Vercel deployment to run. Database Verify may be run as a health check but is not required.
 
-Implemented:
+## Remaining production work
 
-- Manual GitHub Actions database migration, verification, and guarded seed operations.
-- Neon database verification from GitHub without a local terminal.
-- Automated regression and production-build checks for the `baros` repository.
-- Repository-secret and optional GitHub Environment protection model.
-
-Still external/configuration-dependent:
-
-- The user must create Neon and add secrets to GitHub and Vercel.
-- Vercel deployments still require the repository to be connected in the Vercel dashboard.
-- GitHub Actions dependency installation depends on the public npm registry being available.
+The manager application still needs modular decomposition, all legacy APIs need shared validation, tenant relationships need broader database-level enforcement, and external-service features need completed integrations and end-to-end tests.

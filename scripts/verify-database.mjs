@@ -31,6 +31,7 @@ try {
     "004_payroll_integrity.sql",
     "005_production_operations.sql",
     "006_integrity_remediation.sql",
+    "007_employee_portal_access.sql",
   ];
 
   const applied = new Set(migrations.map((row) => row.filename));

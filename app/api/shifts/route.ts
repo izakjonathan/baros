@@ -1,90 +1,140 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
-import { writeAudit } from "@/lib/services/audit";
+import { ApiError, isoDate, jsonError, readJsonObject, requiredString, uuid } from "@/lib/http";
 
 type Recurrence = { frequency: "DAILY" | "WEEKLY"; count?: number; until?: string; weekdays?: number[] };
+const management = (role?: string) => Boolean(role && role !== "EMPLOYEE");
+const dateTime = (value: unknown, key: string) => {
+  const text = requiredString({ [key]: value }, key, 40);
+  const parsed = new Date(text);
+  if (Number.isNaN(parsed.getTime())) throw new ApiError(400, `${key} is invalid`);
+  return parsed;
+};
 
-export async function GET(req: Request) {
-  const u = await getSessionUser();
-  if (!u) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const q = new URL(req.url).searchParams;
-  const from = q.get("from") || new Date().toISOString();
-  const to = q.get("to") || new Date(Date.now() + 14 * 864e5).toISOString();
-  const rows = await db()`select s.*,e.first_name||' '||e.last_name employee_name,
-    (select count(*)::int from shift_claims c where c.shift_id=s.id and c.status='PENDING') pending_claims
-    from shifts s left join employees e on e.id=s.employee_id
-    where s.organization_id=${u.organizationId} and (${u.locationId}::uuid is null or s.location_id=${u.locationId})
-    and s.starts_at>=${from} and s.starts_at<${to} order by starts_at`;
-  return NextResponse.json(rows);
+export async function GET(request: Request) {
+  try {
+    const user = await getSessionUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const query = new URL(request.url).searchParams;
+    const from = query.get("from") || new Date().toISOString();
+    const to = query.get("to") || new Date(Date.now() + 14 * 864e5).toISOString();
+    return NextResponse.json(await db()`select s.*,e.first_name||' '||e.last_name employee_name,
+      (select count(*)::int from shift_claims c where c.shift_id=s.id and c.status='PENDING') pending_claims
+      from shifts s left join employees e on e.id=s.employee_id
+      where s.organization_id=${user.organizationId} and (${user.locationId}::uuid is null or s.location_id=${user.locationId})
+      and s.starts_at>=${from} and s.starts_at<${to} order by starts_at`);
+  } catch (error) { return jsonError(error); }
 }
 
-export async function POST(req: Request) {
-  const u = await getSessionUser();
-  if (!u || u.role === "EMPLOYEE") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  const b = await req.json();
-  const locationId = b.locationId || u.locationId;
-  if (!locationId) return NextResponse.json({ error: "A location is required" }, { status: 400 });
-  if (!b.isOpen && !b.employeeId) return NextResponse.json({ error: "Choose an employee or make the shift available" }, { status: 400 });
+export async function POST(request: Request) {
+  try {
+    const user = await getSessionUser();
+    if (!user || !management(user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const body = await readJsonObject(request, 24_000);
+    const locationId = body.locationId ? uuid(body.locationId, "locationId") : user.locationId;
+    if (!locationId) throw new ApiError(400, "A location is required");
+    const isOpen = Boolean(body.isOpen);
+    const employeeId = isOpen ? null : uuid(body.employeeId, "employeeId");
+    const role = requiredString(body, "role", 100);
+    const firstStart = dateTime(body.startsAt, "startsAt");
+    const firstEnd = dateTime(body.endsAt, "endsAt");
+    const duration = firstEnd.getTime() - firstStart.getTime();
+    if (duration <= 0 || duration > 36 * 60 * 60 * 1000) throw new ApiError(400, "Shift duration must be between 1 minute and 36 hours");
+    const recurrence = body.recurrence as Recurrence | undefined;
+    const starts = expandStarts(firstStart, recurrence);
 
-  const starts = expandStarts(new Date(b.startsAt), b.recurrence as Recurrence | undefined);
-  const duration = new Date(b.endsAt).getTime() - new Date(b.startsAt).getTime();
-  if (!(duration > 0)) return NextResponse.json({ error: "Shift end must be after start" }, { status: 400 });
-
-  let recurrenceId: string | null = null;
-  if (b.recurrence) {
-    const r = b.recurrence as Recurrence;
-    const [rule] = await db()`insert into shift_recurrence_rules(organization_id,location_id,frequency,weekdays,starts_on,ends_on,occurrence_count,created_by)
-      values(${u.organizationId},${locationId},${r.frequency},${r.weekdays || []},${b.startsAt.slice(0,10)},${r.until || null},${r.count || null},${u.userId}) returning id`;
-    recurrenceId = rule.id;
-  }
-
-  const created = [];
-  for (const start of starts) {
-    const end = new Date(start.getTime() + duration);
-    const [row] = await db()`insert into shifts(organization_id,location_id,employee_id,role,starts_at,ends_at,break_minutes,status,notes,created_by,recurrence_group_id,is_open)
-      values(${u.organizationId},${locationId},${b.isOpen ? null : b.employeeId},${b.role},${start.toISOString()},${end.toISOString()},${b.breakMinutes || 0},${b.status || "DRAFT"},${b.notes || null},${u.userId},${recurrenceId},${Boolean(b.isOpen)}) returning *`;
-    created.push(row);
-  }
-  await writeAudit({ organizationId: u.organizationId, locationId, actorUserId: u.userId, action: b.recurrence ? "SHIFT_SERIES_CREATED" : "SHIFT_CREATED", entityType: "shift", entityId: recurrenceId || created[0]?.id, after: { count: created.length, shifts: created } });
-  return NextResponse.json({ shifts: created, recurrenceGroupId: recurrenceId }, { status: 201 });
+    const result = await db().transaction(async (tx) => {
+      const location = await tx`select id from locations where id=${locationId} and organization_id=${user.organizationId}`;
+      if (!location.length) throw new ApiError(400, "Location does not belong to this organization");
+      if (employeeId) {
+        const employee = await tx`select id from employees where id=${employeeId} and organization_id=${user.organizationId} and active`;
+        if (!employee.length) throw new ApiError(400, "Employee is unavailable or belongs to another organization");
+      }
+      let recurrenceId: string | null = null;
+      if (recurrence) {
+        const rules = await tx`insert into shift_recurrence_rules(organization_id,location_id,frequency,weekdays,starts_on,ends_on,occurrence_count,created_by)
+          values(${user.organizationId},${locationId},${recurrence.frequency},${recurrence.weekdays || []},${firstStart.toISOString().slice(0,10)},${recurrence.until || null},${recurrence.count || null},${user.userId}) returning id`;
+        recurrenceId = rules[0].id;
+      }
+      const created: any[] = [];
+      for (const start of starts) {
+        const end = new Date(start.getTime() + duration);
+        const rows = await tx`insert into shifts(organization_id,location_id,employee_id,role,starts_at,ends_at,break_minutes,status,notes,created_by,recurrence_group_id,is_open)
+          values(${user.organizationId},${locationId},${employeeId},${role},${start.toISOString()},${end.toISOString()},${Number(body.breakMinutes || 0)},${String(body.status || "DRAFT")},${body.notes ? String(body.notes).slice(0,2000) : null},${user.userId},${recurrenceId},${isOpen}) returning *`;
+        created.push(rows[0]);
+      }
+      await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,after_data)
+        values(${user.organizationId},${locationId},${user.userId},${recurrence ? "SHIFT_SERIES_CREATED" : "SHIFT_CREATED"},'shift',${recurrenceId || created[0]?.id},${{ count: created.length, shifts: created }})`;
+      return { shifts: created, recurrenceGroupId: recurrenceId };
+    });
+    return NextResponse.json(result, { status: 201 });
+  } catch (error) { return jsonError(error); }
 }
 
 function expandStarts(first: Date, recurrence?: Recurrence) {
   if (!recurrence) return [first];
-  const max = Math.min(Math.max(recurrence.count || 1, 1), 366);
-  const until = recurrence.until ? new Date(`${recurrence.until}T23:59:59.999Z`) : null;
+  if (recurrence.frequency !== "DAILY" && recurrence.frequency !== "WEEKLY") throw new ApiError(400, "Unsupported recurrence frequency");
+  const max = Math.min(Math.max(Number(recurrence.count || 1), 1), 366);
+  const until = recurrence.until ? new Date(`${isoDate(recurrence.until, "until")}T23:59:59.999Z`) : null;
   const result: Date[] = [];
   if (recurrence.frequency === "DAILY") {
-    for (let i = 0; i < max; i++) {
-      const date = new Date(first); date.setUTCDate(first.getUTCDate() + i);
-      if (until && date > until) break; result.push(date);
-    }
+    for (let i = 0; i < max; i++) { const date = new Date(first); date.setUTCDate(first.getUTCDate() + i); if (until && date > until) break; result.push(date); }
     return result;
   }
-  const weekdays = new Set((recurrence.weekdays?.length ? recurrence.weekdays : [first.getUTCDay()]));
-  for (let offset = 0; result.length < max && offset < 730; offset++) {
-    const date = new Date(first); date.setUTCDate(first.getUTCDate() + offset);
-    if (until && date > until) break;
-    if (weekdays.has(date.getUTCDay())) result.push(date);
-  }
+  const weekdays = new Set((recurrence.weekdays?.length ? recurrence.weekdays : [first.getUTCDay()]).map(Number));
+  if ([...weekdays].some(day => !Number.isInteger(day) || day < 0 || day > 6)) throw new ApiError(400, "weekdays must contain values from 0 to 6");
+  for (let offset = 0; result.length < max && offset < 730; offset++) { const date = new Date(first); date.setUTCDate(first.getUTCDate() + offset); if (until && date > until) break; if (weekdays.has(date.getUTCDay())) result.push(date); }
   return result;
 }
 
-export async function PATCH(req: Request) {
-  const u = await getSessionUser(); if (!u || u.role === "EMPLOYEE") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  const b = await req.json(); const scope = b.scope || "occurrence";
-  const [current] = await db()`select * from shifts where id=${b.id} and organization_id=${u.organizationId}`;
-  if (!current) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  const startsAt = b.startsAt || current.starts_at; const endsAt = b.endsAt || current.ends_at; const employeeId = b.isOpen ? null : (b.employeeId ?? current.employee_id);
-  if (employeeId) {
-    const conflicts = await db()`select 'OVERLAP' kind,id from shifts where organization_id=${u.organizationId} and employee_id=${employeeId} and id<>${b.id} and status<>'CANCELLED' and starts_at<${endsAt} and ends_at>${startsAt}
-      union all select 'LEAVE' kind,r.id from requests r where r.organization_id=${u.organizationId} and r.employee_id=${employeeId} and r.status='APPROVED' and r.type='TIME_OFF' and r.starts_at<${endsAt} and r.ends_at>${startsAt}
-      union all select 'UNAVAILABLE' kind,a.id from availability_rules a where a.organization_id=${u.organizationId} and a.employee_id=${employeeId} and a.available=false and (a.valid_from is null or a.valid_from<=${String(startsAt).slice(0,10)}::date) and (a.valid_until is null or a.valid_until>=${String(startsAt).slice(0,10)}::date) and a.weekday=extract(dow from ${startsAt}::timestamptz)::int limit 5`;
-    if (conflicts.length && !b.overrideConflicts) return NextResponse.json({ error: "Employee has scheduling conflicts", conflicts }, { status: 409 });
-  }
-  const filter = scope==='series' && current.recurrence_group_id ? db()`recurrence_group_id=${current.recurrence_group_id}` : scope==='future' && current.recurrence_group_id ? db()`recurrence_group_id=${current.recurrence_group_id} and starts_at>=${current.starts_at}` : db()`id=${b.id}`;
-  const rows = await db()`update shifts set employee_id=${employeeId},is_open=${Boolean(b.isOpen)},role=${b.role||current.role},starts_at=${startsAt},ends_at=${endsAt},status=${b.status||current.status},notes=${b.notes??current.notes},updated_at=now() where organization_id=${u.organizationId} and ${filter} returning *`;
-  await writeAudit({organizationId:u.organizationId,locationId:current.location_id,actorUserId:u.userId,action:'SHIFT_UPDATED',entityType:'shift',entityId:b.id,before:current,after:{scope,count:rows.length,changes:b}}); return NextResponse.json(rows);
+export async function PATCH(request: Request) {
+  try {
+    const user = await getSessionUser();
+    if (!user || !management(user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const body = await readJsonObject(request, 20_000);
+    const id = uuid(body.id, "id");
+    const scope = String(body.scope || "occurrence");
+    if (!['occurrence','future','series'].includes(scope)) throw new ApiError(400, "scope is invalid");
+
+    const rows = await db().transaction(async (tx) => {
+      const currentRows = await tx`select * from shifts where id=${id} and organization_id=${user.organizationId} for update`;
+      const current = currentRows[0];
+      if (!current) throw new ApiError(404, "Shift not found");
+      const targetRows = scope === 'occurrence' || !current.recurrence_group_id
+        ? currentRows
+        : await tx`select * from shifts where organization_id=${user.organizationId} and recurrence_group_id=${current.recurrence_group_id} ${scope === 'future' ? tx`and starts_at>=${current.starts_at}` : tx``} order by starts_at for update`;
+      const requestedStart = body.startsAt ? dateTime(body.startsAt, "startsAt") : new Date(current.starts_at);
+      const requestedEnd = body.endsAt ? dateTime(body.endsAt, "endsAt") : new Date(current.ends_at);
+      const newDuration = requestedEnd.getTime() - requestedStart.getTime();
+      if (newDuration <= 0 || newDuration > 36 * 60 * 60 * 1000) throw new ApiError(400, "Shift duration must be between 1 minute and 36 hours");
+      const dateDelta = requestedStart.getTime() - new Date(current.starts_at).getTime();
+      const isOpen = body.isOpen === undefined ? current.is_open : Boolean(body.isOpen);
+      const employeeId = isOpen ? null : (body.employeeId === undefined ? current.employee_id : uuid(body.employeeId, "employeeId"));
+      const updated: any[] = [];
+      for (const item of targetRows) {
+        const start = scope === 'occurrence' ? requestedStart : new Date(new Date(item.starts_at).getTime() + dateDelta);
+        const end = new Date(start.getTime() + newDuration);
+        if (employeeId) {
+          const conflicts = await tx`select id from shifts where organization_id=${user.organizationId} and employee_id=${employeeId} and id<>${item.id} and status<>'CANCELLED' and starts_at<${end.toISOString()} and ends_at>${start.toISOString()} limit 1`;
+          if (conflicts.length && !body.overrideConflicts) throw new ApiError(409, "Employee has scheduling conflicts", conflicts);
+        }
+        const changed = await tx`update shifts set employee_id=${employeeId},is_open=${isOpen},role=${body.role ? String(body.role).slice(0,100) : item.role},starts_at=${start.toISOString()},ends_at=${end.toISOString()},status=${body.status ? String(body.status) : item.status},notes=${body.notes===undefined?item.notes:String(body.notes).slice(0,2000)},updated_at=now() where id=${item.id} and organization_id=${user.organizationId} returning *`;
+        updated.push(changed[0]);
+      }
+      await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,before_data,after_data) values(${user.organizationId},${current.location_id},${user.userId},'SHIFT_UPDATED','shift',${id},${current},${{ scope, count: updated.length, changes: body }})`;
+      return updated;
+    });
+    return NextResponse.json(rows);
+  } catch (error) { return jsonError(error); }
 }
-export async function DELETE(req: Request) { const u=await getSessionUser();if(!u||u.role==='EMPLOYEE')return NextResponse.json({error:'Forbidden'},{status:403});const id=new URL(req.url).searchParams.get('id');const rows=await db()`delete from shifts where id=${id} and organization_id=${u.organizationId} returning *`;return rows.length?NextResponse.json({ok:true}):NextResponse.json({error:'Not found'},{status:404}); }
+
+export async function DELETE(request: Request) {
+  try {
+    const user = await getSessionUser();
+    if (!user || !management(user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const id = uuid(new URL(request.url).searchParams.get("id"), "id");
+    const rows = await db()`delete from shifts where id=${id} and organization_id=${user.organizationId} returning *`;
+    return rows.length ? NextResponse.json({ ok: true }) : NextResponse.json({ error: "Not found" }, { status: 404 });
+  } catch (error) { return jsonError(error); }
+}
