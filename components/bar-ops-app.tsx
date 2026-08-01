@@ -38,6 +38,22 @@ function shiftPositionFromDate(value: string) { const diffDays = dateSerial(valu
 function dateFromShift(weekOffset = 0, day = 0) { const date = new Date(BASE_MONDAY); date.setDate(BASE_MONDAY.getDate() + weekOffset * 7 + day); return toIsoDate(date); }
 function canonicalShiftDate(shift: Shift) { return shift.date ?? dateFromShift(shift.weekOffset ?? 0, shift.day); }
 function isOvernight(start: string, end: string) { return end <= start; }
+function mapDatabaseShift(x: any): Shift {
+  const startText = String(x.starts_at);
+  const endText = String(x.ends_at);
+  const startDate = new Date(startText);
+  const endDate = new Date(endText);
+  const date = startText.slice(0, 10);
+  const pos = shiftPositionFromDate(date);
+  const employeeName = x.is_open ? "Available shift" : x.employee_name || "Unassigned";
+  return {
+    id: x.id, date, day: pos.day, weekOffset: pos.weekOffset, employee: employeeName,
+    initials: x.is_open ? "+" : employeeName.split(" ").map((word: string) => word[0]).join(""),
+    start: startDate.toISOString().slice(11, 16), end: endDate.toISOString().slice(11, 16),
+    role: x.role, status: x.status === "DRAFT" ? "Draft" : "Published", isOpen: x.is_open,
+    recurrenceGroupId: x.recurrence_group_id
+  };
+}
 
 export function BarOpsApp({ userName, userRole, devMode }: { userName: string; userRole: string; devMode: boolean }) {
   const [active, setActive] = useState<NavKey>("dashboard");
@@ -69,7 +85,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
   ]);
   const [databaseStatus, setDatabaseStatus] = useState(devMode ? "Development data · saved locally" : "Connecting…");
   useEffect(() => {
-    if (!devMode) { setDataReady(true); return; }
+    if (!devMode) return;
     try {
       const raw = localStorage.getItem("barops-dev-v070");
       if (raw) {
@@ -95,17 +111,21 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       if (!response.ok) throw new Error("Could not load workspace");
       const data = await response.json();
       setEmployees((data.employees || []).map((e: any) => ({ id:e.id, name:`${e.first_name} ${e.last_name}`, initials:`${e.first_name?.[0]||""}${e.last_name?.[0]||""}`, role:e.employment_title||"Employee", hours:Number(e.contracted_hours||0), status:e.active?"Active":"Inactive", active:e.active, email:e.email||"", phone:e.phone||"", payrollId:e.payroll_id||"", salaryCode:e.salary_code||"", costCentre:e.cost_centre||"", portalStatus:e.portal_status||"NONE" })));
-      setShifts((data.shifts || []).map((x:any) => { const d=new Date(x.starts_at); const end=new Date(x.ends_at); const date=x.starts_at.slice(0,10); const pos=shiftPositionFromDate(date); return {id:x.id,date,day:pos.day,weekOffset:pos.weekOffset,employee:x.is_open?"Available shift":x.employee_name||"Unassigned",initials:x.is_open?"+":(x.employee_name||"").split(" ").map((w:string)=>w[0]).join(""),start:d.toISOString().slice(11,16),end:end.toISOString().slice(11,16),role:x.role,status:x.status==="DRAFT"?"Draft":"Published",isOpen:x.is_open,recurrenceGroupId:x.recurrence_group_id}; }));
+      setShifts((data.shifts || []).map(mapDatabaseShift));
       setProducts((data.products || []).map((x:any)=>({id:x.id,name:x.name,category:x.category,supplier:x.supplier||"Unassigned",stock:Number(x.quantity||0),par:Number(x.par_level||0),unit:x.unit,price:Number(x.purchase_price||0)})));
       setTimeEntries((data.timesheets || []).map((x:any)=>({id:x.id,employee:x.employee_name,date:String(x.work_date).slice(0,10),clockIn:String(x.clocked_in_at).slice(11,16),clockOut:x.clocked_out_at?String(x.clocked_out_at).slice(11,16):undefined,breakMinutes:x.break_minutes,status:(x.status==="OPEN"?"Running":x.status[0]+x.status.slice(1).toLowerCase()) as TimeEntry["status"],scheduledHours:Number(x.scheduled_minutes||0)/60,note:x.manager_note})));
-      setDatabaseStatus("PostgreSQL connected"); fetch("/api/employee-invitations",{cache:"no-store"}).then(r=>r.ok?r.json():[]).then((rows:any[])=>setEmployees(current=>current.map(item=>({...item,portalStatus:(rows.find(row=>row.employee_id===item.id)?.portal_status||item.portalStatus||"NONE")})))).catch(()=>{});
-    }).catch(() => setDatabaseStatus("Database connection error"));
+      setDatabaseStatus("PostgreSQL connected"); setDataReady(true); fetch("/api/employee-invitations",{cache:"no-store"}).then(r=>r.ok?r.json():[]).then((rows:any[])=>setEmployees(current=>current.map(item=>({...item,portalStatus:(rows.find(row=>row.employee_id===item.id)?.portal_status||item.portalStatus||"NONE")})))).catch(()=>{});
+    }).catch(() => { setDatabaseStatus("Database connection error"); setDataReady(true); });
   }, [devMode]);
   async function persist(path:string, options:RequestInit){ if(devMode) return null; const response=await fetch(path,{...options,headers:{"content-type":"application/json",...(options.headers||{})}}); if(!response.ok) throw new Error((await response.json().catch(()=>({}))).error||"Save failed"); return response.json(); }
 
   function notify(message: string) {
     setToast(message);
     window.setTimeout(() => setToast(""), 2600);
+  }
+
+  if (!dataReady) {
+    return <div className="workspace-loading" role="status" aria-live="polite"><div className="workspace-loading-card"><Database size={26}/><strong>Loading workspace</strong><span>Synchronizing shifts, employees and operations with PostgreSQL…</span></div></div>;
   }
 
   return (
@@ -159,8 +179,34 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
           {active === "control" && <ControlCenter devMode={devMode} databaseStatus={databaseStatus} notify={notify} />}
         </div>
       </main>
-      {editingShift && <EditShiftDialog shift={editingShift} employees={employees} onClose={() => setEditingShift(null)} onSave={(updated, scope) => { const assigned=employees.find(e=>e.name===updated.employee); persist("/api/shifts",{method:"PATCH",body:JSON.stringify({id:updated.id,scope,employeeId:assigned?.id,isOpen:updated.isOpen,role:updated.role,startsAt:`${canonicalShiftDate(updated)}T${updated.start}:00`,endsAt:`${dateFromSerial(dateSerial(canonicalShiftDate(updated))+(isOvernight(updated.start,updated.end)?1:0))}T${updated.end}:00`,status:updated.status.toUpperCase()})}).catch(e=>notify(e.message)); setShifts((current) => current.map((item) => { if (scope === "occurrence") return item.id === updated.id ? updated : item; if (!updated.recurrenceGroupId || item.recurrenceGroupId !== updated.recurrenceGroupId) return item; if (scope === "future" && dateSerial(canonicalShiftDate(item)) < dateSerial(canonicalShiftDate(editingShift))) return item; const originalDate = canonicalShiftDate(editingShift); const targetDate = canonicalShiftDate(updated); const dayDelta = dateSerial(targetDate) - dateSerial(originalDate); const shiftedDate = dateFromSerial(dateSerial(canonicalShiftDate(item)) + dayDelta); const pos = shiftPositionFromDate(shiftedDate); return { ...item, employee: updated.employee, initials: updated.initials, role: updated.role, start: updated.start, end: updated.end, status: updated.status, isOpen: updated.isOpen, date: shiftedDate, day: pos.day, weekOffset: pos.weekOffset }; })); setEditingShift(null); notify(scope === "occurrence" ? "Shift updated" : scope === "future" ? "This and future shifts updated" : "Entire shift series updated"); }} onDelete={() => { persist(`/api/shifts?id=${editingShift.id}`,{method:"DELETE"}).catch(e=>notify(e.message)); setShifts((current) => current.filter((item) => item.id !== editingShift.id)); setEditingShift(null); notify("Shift removed"); }} />}
-      {dialog === "shift" && <ShiftDialog employees={employees} currentWeekOffset={currentWeekOffset} onClose={() => setDialog(null)} onSave={(newShifts) => { setShifts((current) => [...current, ...newShifts]); if(!devMode){for(const x of newShifts){const assigned=employees.find(e=>e.name===x.employee);persist("/api/shifts",{method:"POST",body:JSON.stringify({employeeId:assigned?.id,isOpen:x.isOpen,role:x.role,startsAt:`${canonicalShiftDate(x)}T${x.start}:00`,endsAt:`${dateFromSerial(dateSerial(canonicalShiftDate(x))+(isOvernight(x.start,x.end)?1:0))}T${x.end}:00`,status:"DRAFT"})}).catch(e=>notify(e.message));}} setDialog(null); notify(newShifts.length > 1 ? `${newShifts.length} repeating shifts added` : "Shift added to the draft schedule"); }} />}
+      {editingShift && <EditShiftDialog shift={editingShift} employees={employees} onClose={() => setEditingShift(null)} onSave={async (updated, scope) => {
+        try {
+          if (devMode) {
+            setShifts((current) => current.map((item) => { if (scope === "occurrence") return item.id === updated.id ? updated : item; if (!updated.recurrenceGroupId || item.recurrenceGroupId !== updated.recurrenceGroupId) return item; if (scope === "future" && dateSerial(canonicalShiftDate(item)) < dateSerial(canonicalShiftDate(editingShift))) return item; const dayDelta = dateSerial(canonicalShiftDate(updated)) - dateSerial(canonicalShiftDate(editingShift)); const shiftedDate = dateFromSerial(dateSerial(canonicalShiftDate(item)) + dayDelta); const pos = shiftPositionFromDate(shiftedDate); return { ...item, employee: updated.employee, initials: updated.initials, role: updated.role, start: updated.start, end: updated.end, status: updated.status, isOpen: updated.isOpen, date: shiftedDate, day: pos.day, weekOffset: pos.weekOffset }; }));
+          } else {
+            const assigned=employees.find(e=>e.name===updated.employee);
+            const rows = await persist("/api/shifts",{method:"PATCH",body:JSON.stringify({id:updated.id,scope,employeeId:assigned?.id,isOpen:updated.isOpen,role:updated.role,startsAt:`${canonicalShiftDate(updated)}T${updated.start}:00`,endsAt:`${dateFromSerial(dateSerial(canonicalShiftDate(updated))+(isOvernight(updated.start,updated.end)?1:0))}T${updated.end}:00`,status:updated.status.toUpperCase()})});
+            const mapped = (rows || []).map(mapDatabaseShift);
+            const changedIds = new Set(mapped.map((item: Shift) => item.id));
+            setShifts(current => [...current.filter(item => !changedIds.has(item.id)), ...mapped].sort((a,b)=>canonicalShiftDate(a).localeCompare(canonicalShiftDate(b))));
+          }
+          setEditingShift(null); notify(scope === "occurrence" ? "Shift updated" : scope === "future" ? "This and future shifts updated" : "Entire shift series updated");
+        } catch (error) { notify(error instanceof Error ? error.message : "Could not update shift"); }
+      }} onDelete={async () => {
+        try { if (!devMode) await persist(`/api/shifts?id=${editingShift.id}`,{method:"DELETE"}); setShifts((current) => current.filter((item) => item.id !== editingShift.id)); setEditingShift(null); notify("Shift removed"); }
+        catch (error) { notify(error instanceof Error ? error.message : "Could not remove shift"); }
+      }} />}
+      {dialog === "shift" && <ShiftDialog employees={employees} currentWeekOffset={currentWeekOffset} onClose={() => setDialog(null)} onSave={async (newShifts) => {
+        try {
+          if (devMode) setShifts((current) => [...current, ...newShifts]);
+          else {
+            const savedGroups = await Promise.all(newShifts.map(async x => { const assigned=employees.find(e=>e.name===x.employee); return persist("/api/shifts",{method:"POST",body:JSON.stringify({employeeId:assigned?.id,isOpen:x.isOpen,role:x.role,startsAt:`${canonicalShiftDate(x)}T${x.start}:00`,endsAt:`${dateFromSerial(dateSerial(canonicalShiftDate(x))+(isOvernight(x.start,x.end)?1:0))}T${x.end}:00`,status:"DRAFT"})}); }));
+            const saved = savedGroups.flatMap(result => (result?.shifts || []).map(mapDatabaseShift));
+            setShifts(current => [...current, ...saved].sort((a,b)=>canonicalShiftDate(a).localeCompare(canonicalShiftDate(b))));
+          }
+          setDialog(null); notify(newShifts.length > 1 ? `${newShifts.length} repeating shifts added` : "Shift added to the draft schedule");
+        } catch (error) { notify(error instanceof Error ? error.message : "Could not add shift"); }
+      }} />}
       {editingTimeEntry && <TimesheetDialog entry={editingTimeEntry} onClose={() => setEditingTimeEntry(null)} onSave={(updated) => { setTimeEntries((current) => current.map((item) => item.id === updated.id ? updated : item)); setEditingTimeEntry(null); notify("Timesheet corrected and returned to pending review"); }} />}
       {editingEmployee && <EmployeeDialog employee={editingEmployee} onClose={() => setEditingEmployee(null)} onSave={async (updated) => { try { const saved=await persist("/api/employees",{method:"PATCH",body:JSON.stringify({...updated,id:editingEmployee.id})}); setEmployees((current) => current.map((item) => item.id === editingEmployee.id ? {...updated,...saved,id:editingEmployee.id} : item)); setEditingEmployee(null); notify("Employee updated"); } catch(error) { notify(error instanceof Error?error.message:"Could not update employee"); } }} />}
       {dialog === "employee" && <EmployeeDialog onClose={() => setDialog(null)} onSave={async (employee) => { try { const saved=await persist("/api/employees",{method:"POST",body:JSON.stringify(employee)}); setEmployees((current) => [...current, {...employee,id:saved?.id,portalStatus:"NONE"}]); setDialog(null); notify(devMode?"Employee added":"Employee added — you can now invite them to the portal"); } catch(e) { notify(e instanceof Error?e.message:"Could not add employee"); } }} />}

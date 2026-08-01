@@ -1,21 +1,18 @@
-# Bar Ops v0.8.0 — Persistent workspace reliability
+# Bar Ops v0.8.2 — Persistent shift synchronization
 
-This release starts the v0.8 production-workspace phase from the confirmed v0.7.6 baseline.
+## Fixed
 
-## Employee creation reliability
+- New shifts no longer disappear when switching between manager modules.
+- Production workspace now waits for the initial PostgreSQL bootstrap before allowing edits.
+- Shift creation waits for the database response and stores the real PostgreSQL shift IDs.
+- Shift editing uses the rows returned by PostgreSQL rather than optimistic temporary state.
+- Shift deletion only removes the visible record after PostgreSQL confirms deletion.
+- Failed shift writes keep the dialog/record intact and show the server error.
 
-- Duplicate employee emails now return HTTP 409 instead of a generic internal server error.
-- The manager receives an actionable message directing them to the existing Team profile.
-- The Add employee dialog remains open after failed saves so entered information is not lost.
-- Successful UI updates still wait for the PostgreSQL response.
-- Duplicate checks cover both employee creation and email changes on existing employees.
+## Database
 
-## Build and regression protection
+No migration is required.
 
-- Preserves the postgres.js transaction and JSON serialization build fixes from v0.7.5–v0.7.6.
-- Adds `npm run test:employee-conflicts`.
-- Includes the new check in `npm run test:all`.
+## Test
 
-## Database action
-
-No migration is required. Commit the release to `baros` and allow GitHub Quality Checks and Vercel to deploy it.
+`npm run test:shift-persistence` protects the synchronization workflow.
