@@ -3,7 +3,7 @@ const app=fs.readFileSync('components/bar-ops-app.tsx','utf8');
 const css=fs.readFileSync('app/globals.css','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const checks=[
-  [['0.9.6','0.9.7','0.9.8','0.9.9','0.10.0','0.10.1'].includes(pkg.version),'package version is compatible'],
+  [['0.9.6','0.9.7','0.9.8','0.9.9','0.10.0','0.10.1','0.10.2'].includes(pkg.version),'package version is compatible'],
   [!app.includes('Manage how Temple Bar operates.'),'settings subtitle removed'],
   [!app.includes('Add employees, maintain records and manage employee portal access.'),'team subtitle removed'],
   [!app.includes('Maintain the employee profile used throughout scheduling.'),'employee modal subtitle removed'],

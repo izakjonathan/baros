@@ -543,3 +543,98 @@ button:disabled,
     font-size: 12px;
   }
 }
+
+/* v0.10.2 compact forms and control correction */
+.schedule-view-select {
+  width: 132px;
+  min-width: 132px;
+  background: transparent;
+  overflow: visible;
+}
+.schedule-view-select select {
+  width: 100%;
+  min-width: 0;
+  padding-inline: 10px 30px;
+  background: transparent;
+  text-overflow: clip;
+}
+.schedule-view-select svg { right: 8px; }
+.schedule-head-actions { grid-template-columns: 132px 44px 44px; }
+.custom-range {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+.custom-range label { min-width: 0; }
+.custom-range input[type="date"] {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 44px;
+  padding: 0 10px;
+  font-size: 14px;
+  text-align: left;
+}
+
+/* Keep Team creation action aligned with the title. */
+.page-header:has(.team-add-button) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 12px;
+}
+.team-add-button { align-self: center; justify-self: end; margin: 0; }
+
+/* Compact time and attendance control area. */
+.attendance-filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px 12px;
+}
+.attendance-filters label { min-width: 0; gap: 4px; }
+.attendance-filters input,
+.attendance-filters select { width: 100%; min-width: 0; height: 42px; }
+
+/* Shift dialogs: date full-width, times side-by-side even on mobile. */
+.shift-dialog-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.shift-dialog-fields .shift-date-field { grid-column: 1 / -1; }
+.shift-dialog-fields input[type="date"] { width: 100%; min-width: 0; max-width: 100%; }
+.shift-dialog-fields .shift-time-field { min-width: 0; }
+.shift-dialog-fields .shift-time-field input { width: 100%; min-width: 0; }
+.repeat-switch,
+.repeat-panel,
+.frequency-toggle,
+.weekday-picker,
+.repeat-count { background: transparent; }
+.repeat-panel { padding-inline: 0; }
+.frequency-toggle button,
+.weekday-picker button { background: transparent; }
+.frequency-toggle button.selected,
+.weekday-picker button.selected { background: var(--mono-inset); }
+
+@media (max-width: 760px) {
+  .attendance-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .attendance-filters label:nth-child(1),
+  .attendance-filters label:nth-child(2) { grid-row: 1; }
+  .attendance-filters label:nth-child(3),
+  .attendance-filters label:nth-child(4) { grid-row: 2; }
+}
+
+@media (max-width: 640px) {
+  .schedule-head-actions { grid-template-columns: 124px 44px 44px; }
+  .schedule-view-select { width: 124px; min-width: 124px; }
+  .custom-range input[type="date"] { font-size: 13px; padding-inline: 8px; }
+  .shift-dialog-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 430px) {
+  .schedule-head-actions { grid-template-columns: 116px 42px 42px; }
+  .schedule-view-select { width: 116px; min-width: 116px; }
+  .schedule-view-select select { font-size: 12px; }
+  .attendance-filters { padding-inline: 0; background: transparent; }
+  .custom-range { gap: 6px; }
+  .custom-range input[type="date"] { font-size: 12px; }
+}

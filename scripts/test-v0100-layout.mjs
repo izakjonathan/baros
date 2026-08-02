@@ -2,7 +2,7 @@ import fs from 'node:fs';
 const css=fs.readFileSync(new URL('../app/mono-components.css',import.meta.url),'utf8');
 const pkg=JSON.parse(fs.readFileSync(new URL('../package.json',import.meta.url),'utf8'));
 const checks=[
- ['version',['0.10.0','0.10.1'].includes(pkg.version)],
+ ['version',['0.10.0','0.10.1','0.10.2'].includes(pkg.version)],
  ['fixed topbar',/\.topbar\s*\{[\s\S]*?position:\s*fixed/.test(css.slice(css.lastIndexOf('v0.10.0')))],
  ['mobile sidebar below header',/\.sidebar\s*\{[\s\S]*?top:\s*var\(--app-header-height\)/.test(css.slice(css.lastIndexOf('v0.10.0')))],
  ['labelled publish width',/compact-publish[\s\S]*?min-width:\s*116px/.test(css.slice(css.lastIndexOf('v0.10.0')))],
