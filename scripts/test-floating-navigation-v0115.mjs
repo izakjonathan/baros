@@ -6,7 +6,7 @@ const app=fs.readFileSync(path.join(root,'components/bar-ops-app.tsx'),'utf8');
 const css=fs.readFileSync(path.join(root,'app/design-system.css'),'utf8');
 const pkg=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
 const checks=[
-  [pkg.version==='0.11.6','package version'],
+  [['0.11.6','0.11.7'].includes(pkg.version),'package version'],
   [shell.includes('export function FloatingNavigation'),'floating navigation component'],
   [!shell.includes('export function Sidebar'),'legacy sidebar component removed'],
   [shell.includes('label: "Timesheets"'),'attendance renamed Timesheets'],
@@ -19,4 +19,4 @@ const checks=[
   [css.includes('overflow-x: auto'),'menu strip scrolls horizontally'],
   [css.includes('position: fixed'),'navigation stays fixed'],
 ];
-for(const [ok,label] of checks){if(!ok) throw new Error(`v0.11.6 floating navigation failed: ${label}`); console.log(`✓ ${label}`)}
+for(const [ok,label] of checks){if(!ok) throw new Error(`floating navigation regression failed: ${label}`); console.log(`✓ ${label}`)}
