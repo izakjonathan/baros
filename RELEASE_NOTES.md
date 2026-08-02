@@ -1,26 +1,18 @@
-# Bar Ops v0.9.5 — Employee Portal Rebuild
+# Bar Ops v0.9.6 — Borderless Surface Redesign
 
-This release is built directly from the user-supplied `bar-ops-v0 9 4-redesign.zip` baseline and preserves its manager-workspace redesign.
+This release rebuilds the visual hierarchy across the manager and employee products around two rules:
 
-## Employee portal
+1. Cards, buttons and panels placed on a contrasting surface no longer use decorative borders.
+2. Top-navigation actions visually become icons on the navigation surface, without separate button fill or outlines.
 
-- Published-only assigned and available shifts.
-- Faster employee navigation with loading and error states.
-- Compact Home, Schedule, Clock, Requests and More navigation.
-- Employee home summary with next shift, clock status, requests and notifications.
-- Incoming handover/swap responses and outgoing exchange history.
-- Recurring weekly availability editor backed by PostgreSQL.
-- Better leave-request validation, response messages and refresh behavior.
-- Persistent employee notification centre with mark-all-read support.
-- Venue-timezone schedule and hours formatting.
-- Time-clock state is loaded before actions appear.
-- Geolocation-aware clock-in and configured early-clock-window enforcement.
-- In-app timesheet correction form.
+## Site-wide changes
 
-## Baseline preservation
+- Removed the divider below the main and employee top navigation.
+- Made menu, search and notification actions transparent with black icons.
+- Removed outlines from overview metrics, panels, employee cards, settings panels, portal cards, schedule containers and other white surfaces on the grey canvas.
+- Removed outlines from standalone white actions placed directly on the canvas.
+- Retained separators inside tables, timelines, calendars and forms where they communicate structure or input boundaries.
+- Retained intentional semantic outlines for destructive actions, validation, draft indicators and add-slot affordances.
+- Applied the same hierarchy to the employee portal, notifications, availability, authentication and modal surfaces.
 
-The uploaded v0.9.4 redesign remains the source baseline. Its typography, manager layout, schedule toolbar, team-card redesign and responsive workspace styles have not been replaced by an older release.
-
-## Database
-
-No new migration is required.
+No database migration is required.
