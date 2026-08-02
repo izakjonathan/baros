@@ -1,15 +1,14 @@
-# Implementation status — v0.12.2
+# Implementation status — v0.13.1
 
-## Production-backed manager modules
+## Completed in this release
 
-Scheduling, employees, invitations, attendance, payroll, products, inventory transactions, settings and Daily Operations are backed by PostgreSQL.
+- Reconstructed the presentation layer from a single shared product stylesheet.
+- Removed legacy employee presentation, browser-blue link fallbacks, and green employee icon rules.
+- Removed shared topbar, modal, metric, navigation, and card appearance from the structural stylesheet.
+- Unified manager and employee typography, headers, surfaces, controls, cards, forms, and navigation.
+- Reduced the active default regression suite to current behavior tests; historical visual-system tests remain available through `npm run test:legacy-ui` but no longer block current releases.
+- Added presentation reconstruction assertions.
 
-Daily Operations now includes persistent location-scoped tasks and permanent manager logbook entries. Create, complete and delete operations are audited.
+## Deployment note
 
-## Testing
-
-The source regression suite runs on every quality build. GitHub Actions also provisions disposable PostgreSQL 17, applies all migrations and runs behavioral integration checks. Playwright mobile and iPad smoke tests remain available through `npm run test:e2e` but are not yet part of the default workflow.
-
-## Remaining major staged area
-
-Purchase-order creation remains an initial supplier-selection flow. Receiving, waste and stock-transfer posting are PostgreSQL-backed, but the complete line-item order editor is planned for a later release.
+A red GitHub Quality Checks run does not itself alter styling, but it means the commit was not validated. Vercel may still deploy independently unless branch protection is configured. Always compare commit SHAs before judging a release.

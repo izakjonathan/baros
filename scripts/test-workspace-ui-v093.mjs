@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 const app=fs.readFileSync('components/bar-ops-app.tsx','utf8')+fs.readFileSync('components/app-shell.tsx','utf8')+fs.readFileSync('features/team/team.tsx','utf8');
-const css=fs.readFileSync('app/globals.css','utf8')+fs.readFileSync('app/design-system.css','utf8');
+const css=fs.readFileSync('app/globals.css','utf8')+fs.readFileSync('app/product-system.css','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const checks=[
-  [['0.9.6','0.9.7','0.9.8','0.9.9','0.10.0','0.10.1','0.10.2','0.10.3','0.10.4','0.10.5','0.10.6','0.11.0','0.11.1','0.11.2','0.11.3','0.11.4','0.11.6','0.11.8','0.11.9','0.12.0','0.12.1','0.12.2'].includes(pkg.version),'package version is compatible'],
+  [['0.9.6','0.9.7','0.9.8','0.9.9','0.10.0','0.10.1','0.10.2','0.10.3','0.10.4','0.10.5','0.10.6','0.11.0','0.11.1','0.11.2','0.11.3','0.11.4','0.11.6','0.11.8','0.11.9','0.12.0','0.12.1','0.13.0','0.13.1'].includes(pkg.version),'package version is compatible'],
   [!app.includes('Manage how Temple Bar operates.'),'settings subtitle removed'],
   [!app.includes('Add employees, maintain records and manage employee portal access.'),'team subtitle removed'],
   [!app.includes('Maintain the employee profile used throughout scheduling.'),'employee modal subtitle removed'],

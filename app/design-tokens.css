@@ -1,4 +1,4 @@
-/* Bar Ops design tokens — v0.12.2
+/* Bar Ops design tokens — v0.13.1. Single semantic source of truth.
    This is the single source of truth for visual changes. Feature CSS must use
    these semantic tokens instead of introducing new colour, spacing, radius,
    typography or shell constants. */
@@ -73,6 +73,10 @@
   --space-card: var(--space-5);
   --space-section: var(--space-6);
   --space-page: var(--space-6);
+
+  /* Floating navigation placement. Browser Safari already constrains the visual viewport above its toolbar, so do not add the safe-area inset twice. */
+  --floating-nav-bottom-browser: 2px;
+  --floating-nav-bottom-standalone: calc(env(safe-area-inset-bottom, 0px) + 8px);
 
   /* Shape and interaction */
   --radius-sm: 10px;
