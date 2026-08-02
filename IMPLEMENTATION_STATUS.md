@@ -1,20 +1,15 @@
-# Implementation status — v0.11.0
+# Implementation status — v0.11.2
 
-v0.11.0 is the current working baseline. It retains the v0.10.6 database, PWA, manager, and employee functionality while introducing shared UI primitives and patterns.
+## Production-backed manager modules
 
-## Completed in this release
+Scheduling, employees, invitations, attendance, payroll, products, inventory transactions, settings and Daily Operations are backed by PostgreSQL.
 
-- Shared action, field, segmented-control, KPI, filter-bar, and dialog-footer primitives
-- One shared core field implementation for Add Shift and Edit Shift
-- Central semantic spacing/rhythm tokens
-- Time & Attendance migrated to shared filters and action groups
-- KPI grids migrated to one shared card implementation
-- Responsive dialog-footer pattern
+Daily Operations now includes persistent location-scoped tasks and permanent manager logbook entries. Create, complete and delete operations are audited.
 
-## Still staged
+## Testing
 
-- Daily Operations remains primarily browser-workspace data
-- Purchase-order creation remains an initial supplier flow rather than a complete line-item editor
-- Further feature modules can now be migrated incrementally to the shared primitives
+The source regression suite runs on every quality build. GitHub Actions also provisions disposable PostgreSQL 17, applies all migrations and runs behavioral integration checks. Playwright mobile and iPad smoke tests remain available through `npm run test:e2e` but are not yet part of the default workflow.
 
-No database migration is required.
+## Remaining major staged area
+
+Purchase-order creation remains an initial supplier-selection flow. Receiving, waste and stock-transfer posting are PostgreSQL-backed, but the complete line-item order editor is planned for a later release.

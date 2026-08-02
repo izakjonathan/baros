@@ -1,9 +1,9 @@
 import fs from 'node:fs';
-const app=fs.readFileSync('components/bar-ops-app.tsx','utf8');
+const app=fs.readFileSync('components/bar-ops-app.tsx','utf8')+fs.readFileSync('lib/workspace-types.ts','utf8');
 const css=fs.readFileSync('app/design-system.css','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const checks=[
- ['version',/^0\.10\.(?:2|3|4|5|6)$/.test(pkg.version) || pkg.version === '0.11.0'],
+ ['version',/^0\.10\.(?:2|3|4|5|6)$/.test(pkg.version) || ['0.11.0','0.11.1','0.11.2'].includes(pkg.version)],
  ['hourly rate type',app.includes('hourlyRate?: number')],
  ['hourly rate field',app.includes('Hourly pay (DKK)')],
  ['no employee autofocus',!app.includes('<input autoFocus value={name}')],

@@ -40,3 +40,15 @@ export function KpiCard({ icon, label, value, detail, footer, warning = false }:
 export function DialogFooter({ onCancel, onConfirm, confirmLabel, dangerAction }: { onCancel: () => void; onConfirm: () => void; confirmLabel: string; dangerAction?: ReactNode }) {
   return <div className={`dialog-footer ${dangerAction ? "has-danger" : ""}`}>{dangerAction}<div className="dialog-footer-actions"><ActionButton variant="ghost" type="button" onClick={onCancel}>Cancel</ActionButton><ActionButton variant="primary" type="button" onClick={onConfirm}>{confirmLabel}</ActionButton></div></div>;
 }
+
+export function IconButton({ label, className = "", children, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {
+  return <button className={`icon-button ${className}`.trim()} aria-label={label} title={label} {...props}>{children}</button>;
+}
+
+export function StatusPill({ children, tone = "neutral", className = "" }: { children: ReactNode; tone?: "neutral" | "positive" | "pending" | "danger"; className?: string }) {
+  return <span className={`status-pill status-pill-${tone} ${className}`.trim()}>{children}</span>;
+}
+
+export function EmptyState({ title, description, action }: { title: string; description: string; action?: ReactNode }) {
+  return <div className="empty-state"><strong>{title}</strong><p>{description}</p>{action}</div>;
+}

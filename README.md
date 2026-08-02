@@ -1,26 +1,41 @@
 # Bar Ops
 
-**Current release: v0.11.0 — UI Architecture**
+**Current release: v0.11.2 — PostgreSQL Integration & Daily Operations**
 
-Bar Ops is a Next.js hospitality operating system for scheduling, employee self-service, time and attendance, payroll export, inventory, ordering, and daily operations. It deploys through Vercel and uses PostgreSQL/Neon in production.
+Bar Ops is a Next.js hospitality operating system for scheduling, employees, attendance, payroll, inventory, ordering and daily bar operations. It is designed for Vercel, Neon PostgreSQL and iPhone/iPad standalone PWA use.
 
-## Design architecture
-
-- `app/design-tokens.css` — canonical colour, type, spacing, shape, control, and shell tokens
-- `app/design-system.css` — shared primitive and pattern styling
-- `app/globals.css` — feature-specific structural layout only
-- `components/ui-primitives.tsx` — shared React controls
-- `components/bar-ops-app.tsx` — manager feature composition
-
-Change semantic tokens or shared primitives first; avoid adding page-specific alternatives for existing controls.
-
-## Commands
+## Development
 
 ```bash
 npm install
+npm run dev
+```
+
+## Validation
+
+```bash
 npm run test:all
+npm run lint
 npm run typecheck
 npm run build
 ```
 
-Use `DATABASE_URL` for the pooled Neon runtime connection and `DATABASE_DIRECT_URL` for migrations. v0.11.0 adds no migration.
+Browser smoke tests:
+
+```bash
+npx playwright install
+npm run test:e2e
+```
+
+Live PostgreSQL integration checks require a disposable database:
+
+```bash
+TEST_DATABASE_URL=postgres://... DATABASE_URL=$TEST_DATABASE_URL npm run db:migrate
+TEST_DATABASE_URL=postgres://... npm run test:postgres-integration
+```
+
+## Database
+
+Use `DATABASE_URL` for the pooled Neon runtime connection and `DATABASE_DIRECT_URL` for migrations. v0.11.2 adds migration `011_daily_operations.sql`.
+
+After deploying this release, run **Database administration → migrate**, then **verify**.

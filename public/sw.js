@@ -1,6 +1,6 @@
-/* Bar Ops v0.11.0 service worker.
+/* Bar Ops v0.11.2 service worker.
    Authenticated pages and API responses are always network-only. */
-const VERSION = "bar-ops-v0110";
+const VERSION = "bar-ops-v0112";
 const STATIC_CACHE = `${VERSION}-static`;
 const STATIC_ASSETS = [
   "/offline.html",

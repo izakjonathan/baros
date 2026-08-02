@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-const ui=fs.readFileSync('components/bar-ops-app.tsx','utf8');
+const ui=fs.readFileSync('components/bar-ops-app.tsx','utf8')+fs.readFileSync('components/app-shell.tsx','utf8')+fs.readFileSync('features/team/team.tsx','utf8');
 const css=fs.readFileSync('app/globals.css','utf8');
 const checks=[
  ['overview add-shift removed',!ui.includes('Good evening, Izak')&&!ui.includes('onNewShift={() => openShiftDialog()}')],

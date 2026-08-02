@@ -1,35 +1,21 @@
-# Bar Ops v0.11.0 — UI Architecture
+# Bar Ops v0.11.2 — PostgreSQL Integration & Daily Operations
 
-This release converts the visual cleanup into a reusable component architecture.
+## Daily Operations persistence
 
-## Shared primitives
+- Added migration `011_daily_operations.sql`.
+- Opening, closing, maintenance and general operational tasks are stored per organization and location.
+- Task completion and deletion are transactional and audited.
+- Manager logbook entries are permanent PostgreSQL records with author and timestamp.
+- Manager bootstrap loads tasks and logbook entries with the rest of the selected-location workspace.
+- Development mode retains local persistence.
 
-A new `components/ui-primitives.tsx` provides the canonical application controls:
+## Live PostgreSQL integration testing
 
-- `ActionButton`
-- `ActionGroup`
-- `FilterBar`
-- `InputField`
-- `SelectField`
-- `SegmentedControl`
-- `KpiCard`
-- `DialogFooter`
+- GitHub Quality Checks now starts a disposable PostgreSQL 17 service.
+- All migrations are applied in sequence on every quality run.
+- A behavioral integration suite verifies Daily Operations transactions, audit entries and cross-tenant guards.
+- Integration tests use an isolated test organization and clean up their records.
 
-## Migrated workflows
+## Deployment
 
-- Overview and Time & Attendance KPI cards use one shared card component.
-- Time & Attendance actions and filters use shared action/field patterns.
-- Add Shift and Edit Shift now share a single `ShiftCoreFields` implementation.
-- Assignment and repeat-frequency selectors use one segmented-control pattern.
-- Modal footers use one shared responsive action layout, including the Edit Shift destructive action.
-
-## Central design changes
-
-`app/design-tokens.css` now includes semantic rhythm tokens for inline spacing, fields, cards, sections, and pages. `app/design-system.css` includes the primitive and pattern layer. Future alignment changes can be made centrally instead of per page.
-
-## Validation
-
-- All bundled regression suites passed.
-- 67 TypeScript/TSX files passed TypeScript syntax transpilation.
-- The service-worker cache namespace was rotated to v0.11.0.
-- No database migration is required.
+Migration 011 is required. After deployment, run the Database administration workflow with `migrate`, followed by `verify`.
