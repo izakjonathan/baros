@@ -1,15 +1,26 @@
-# Bar Ops v0.9.4 — Schedule Control & Team Card Layout Fix
+# Bar Ops v0.9.5 — Employee Portal Rebuild
 
-## Schedule workspace
-- Replaced the three-button Week/Month/Custom control with a compact dropdown beside Copy and Add shift.
-- Kept period navigation and publishing in the schedule toolbar.
-- Contained custom From/To fields in a dedicated responsive toolbar row on narrow screens.
-- Prevented date controls from overflowing the viewport or covering navigation and publishing controls.
+This release is built directly from the user-supplied `bar-ops-v0 9 4-redesign.zip` baseline and preserves its manager-workspace redesign.
 
-## Team cards
-- Locked every employee identity row to the same structure: avatar on the left, name and role directly beside it, status pill on the right.
-- Added narrow-screen sizing safeguards so employee names and roles do not fall below the avatar.
+## Employee portal
 
-## Validation
-- All bundled regression suites passed, including a new v0.9.4 layout regression test.
-- No database migration is required.
+- Published-only assigned and available shifts.
+- Faster employee navigation with loading and error states.
+- Compact Home, Schedule, Clock, Requests and More navigation.
+- Employee home summary with next shift, clock status, requests and notifications.
+- Incoming handover/swap responses and outgoing exchange history.
+- Recurring weekly availability editor backed by PostgreSQL.
+- Better leave-request validation, response messages and refresh behavior.
+- Persistent employee notification centre with mark-all-read support.
+- Venue-timezone schedule and hours formatting.
+- Time-clock state is loaded before actions appear.
+- Geolocation-aware clock-in and configured early-clock-window enforcement.
+- In-app timesheet correction form.
+
+## Baseline preservation
+
+The uploaded v0.9.4 redesign remains the source baseline. Its typography, manager layout, schedule toolbar, team-card redesign and responsive workspace styles have not been replaced by an older release.
+
+## Database
+
+No new migration is required.

@@ -57,6 +57,11 @@ export default function HoursPage() {
   const [period, setPeriod] = useState("This week");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [requireLocationCheck, setRequireLocationCheck] = useState(false);
+  const [timezone, setTimezone] = useState("Europe/Copenhagen");
+  const [correction, setCorrection] = useState<Timesheet | null>(null);
+  const [correctionReason, setCorrectionReason] = useState("");
 
   const load = useCallback(async () => {
     setError("");
@@ -72,9 +77,12 @@ export default function HoursPage() {
     setActive(clockData.active || null);
     setBreakActive(Boolean(clockData.breakActive));
     setEligible(clockData.eligible !== false);
+    setRequireLocationCheck(Boolean(clockData.requireLocationCheck));
+    setTimezone(clockData.timezone || "Europe/Copenhagen");
     setTimesheets(hoursData.timesheets || []);
     setScheduledMinutes(Number(hoursData.summary?.scheduled_minutes || 0));
     setApprovedMinutes(Number(hoursData.summary?.approved_minutes || 0));
+    setLoading(false);
   }, [period]);
 
   useEffect(() => {
@@ -85,10 +93,16 @@ export default function HoursPage() {
     setBusy(true);
     setError("");
     try {
+      let location: { latitude?: number; longitude?: number; accuracy?: number } = {};
+      if (action === "CLOCK_IN" && requireLocationCheck) {
+        if (!navigator.geolocation) throw new Error("Location services are not available on this device");
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }));
+        location = { latitude: position.coords.latitude, longitude: position.coords.longitude, accuracy: position.coords.accuracy };
+      }
       const response = await fetch("/api/time-clock", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ action, ...location }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Clock action failed");
@@ -100,25 +114,16 @@ export default function HoursPage() {
     }
   }
 
-  async function requestCorrection(timesheet: Timesheet) {
-    const reason = window.prompt(`What is wrong with the ${dateLabel(timesheet.work_date)} timesheet?`);
-    if (!reason?.trim()) return;
-    setBusy(true);
-    setError("");
+  async function requestCorrection() {
+    if (!correction || !correctionReason.trim()) return;
+    setBusy(true); setError("");
     try {
-      const response = await fetch("/api/employee/timesheet-corrections", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ timesheetId: timesheet.id, reason: reason.trim() }),
-      });
+      const response = await fetch("/api/employee/timesheet-corrections", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ timesheetId: correction.id, reason: correctionReason.trim() }) });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Could not send correction request");
-      await load();
-    } catch (reasonValue) {
-      setError(reasonValue instanceof Error ? reasonValue.message : "Could not send correction request");
-    } finally {
-      setBusy(false);
-    }
+      setCorrection(null); setCorrectionReason(""); await load();
+    } catch (reasonValue) { setError(reasonValue instanceof Error ? reasonValue.message : "Could not send correction request"); }
+    finally { setBusy(false); }
   }
 
   const started = useMemo(() => active ? time(active.clocked_in_at) : null, [active]);
@@ -131,6 +136,8 @@ export default function HoursPage() {
 
       {error && <div className="employee-error" role="alert">{error}</div>}
 
+      {loading && <div className="employee-loading-inline" role="status">Loading your current clock…</div>}
+
       <section className={`clock-card ${active ? "clock-running" : ""}`}>
         <div>
           <small>{active ? breakActive ? "Break in progress" : "Shift in progress" : "Ready to start"}</small>
@@ -140,7 +147,7 @@ export default function HoursPage() {
 
         {!eligible ? (
           <p className="clock-unavailable">Your account needs a linked employee profile before time can be recorded.</p>
-        ) : !active ? (
+        ) : loading ? null : !active ? (
           <button disabled={busy} onClick={() => clockAction("CLOCK_IN")}><Play size={19} />{busy ? "Starting…" : "Clock in"}</button>
         ) : (
           <div className="clock-actions">
@@ -173,7 +180,7 @@ export default function HoursPage() {
               <span className={item.status === "APPROVED" ? "approved" : "pending"}>{item.status === "APPROVED" && <CheckCircle2 size={13} />} {item.status[0] + item.status.slice(1).toLowerCase()}</span>
               <small>{time(item.clocked_in_at)}–{time(item.clocked_out_at)} · {item.break_minutes || 0}m break</small>
               {item.status !== "OPEN" && (
-                <button disabled={busy || item.correction_pending} className="correction-request" onClick={() => requestCorrection(item)}>
+                <button disabled={busy || item.correction_pending} className="correction-request" onClick={() => { setCorrection(item); setCorrectionReason(""); }}>
                   <MessageSquareWarning size={14} />{item.correction_pending ? "Correction pending" : "Request correction"}
                 </button>
               )}
@@ -184,6 +191,7 @@ export default function HoursPage() {
       </section>
 
       <p className="hours-note">Worked hours become payroll-ready only after manager approval.</p>
+      {correction && <div className="modal-layer"><button className="modal-scrim" aria-label="Close" onClick={()=>setCorrection(null)}/><section className="modal" role="dialog" aria-modal="true" aria-labelledby="correction-title"><div className="modal-head"><div><h2 id="correction-title">Request a correction</h2><p>{dateLabel(correction.work_date)} · {time(correction.clocked_in_at)}–{time(correction.clocked_out_at)}</p></div></div><label className="correction-field">What needs correcting?<textarea rows={5} value={correctionReason} onChange={e=>setCorrectionReason(e.target.value)} placeholder="Describe the correct clock-in, clock-out or break time"/></label><div className="modal-actions"><button className="secondary" onClick={()=>setCorrection(null)}>Cancel</button><button className="primary" disabled={busy||!correctionReason.trim()} onClick={requestCorrection}>{busy?'Sending…':'Send request'}</button></div></section></div>}
     </div>
   );
 }

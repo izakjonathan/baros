@@ -1,0 +1,2 @@
+"use client"; import { useRouter } from 'next/navigation'; import { useState } from 'react';
+export function MarkNotificationsRead(){const router=useRouter();const [busy,setBusy]=useState(false);async function mark(){setBusy(true);await fetch('/api/notifications',{method:'PATCH'});setBusy(false);router.refresh()}return <button className="secondary compact" disabled={busy} onClick={mark}>{busy?'Updating…':'Mark all read'}</button>}

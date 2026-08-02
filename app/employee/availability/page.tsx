@@ -1,1 +1,2 @@
-import { RequestForm } from "../request-form"; export default function Availability(){return <div className="employee-page"><p className="eyebrow">Planning</p><h1>Availability</h1><p className="employee-lead">Tell your manager about a period when your normal availability changes.</p><RequestForm type="AVAILABILITY"/></div>}
+import { AvailabilityEditor } from './availability-editor';
+export default function Availability(){return <div className="employee-page"><p className="eyebrow">Planning</p><h1>Availability</h1><p className="employee-lead">Set the weekly hours you are normally available to work.</p><AvailabilityEditor/></div>}

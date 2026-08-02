@@ -13,7 +13,7 @@ const checks = [
   ['settings workspace rendered', app.includes('<SettingsWorkspace')],
   ['time clock settings api', settings.includes('time_clock_settings') && settings.includes('on conflict(location_id)')],
   ['persistent clock load', hours.includes('fetch("/api/time-clock"')],
-  ['persistent clock actions', hours.includes('body: JSON.stringify({ action })')],
+  ['persistent clock actions', hours.includes('body: JSON.stringify({ action, ...location })')],
   ['active clock restore', api.includes('breakActive') && api.includes("status='OPEN'")],
   ['published shift linking', api.includes("status='PUBLISHED'") && api.includes('nextShift?.id')],
   ['hours summary', summary.includes('scheduled_minutes') && summary.includes('approved_minutes')],

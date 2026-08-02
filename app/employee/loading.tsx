@@ -1,0 +1,1 @@
+export default function Loading(){return <div className="employee-page employee-skeleton" aria-busy="true" aria-live="polite"><div className="skeleton-line short"/><div className="skeleton-line title"/><div className="skeleton-card"/><div className="skeleton-card"/><div className="skeleton-card"/></div>}
