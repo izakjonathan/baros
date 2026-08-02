@@ -1,4 +1,4 @@
-# Bar Ops Product Design System — v0.12.1
+# Bar Ops Product Design System — v0.12.2
 
 Bar Ops uses two type families with strict roles: Space Grotesk for primary page and dialog titles, and Inter for every smaller interface style. `app/design-tokens.css` is the central source of truth; `app/design-system.css` contains shared product patterns.
 

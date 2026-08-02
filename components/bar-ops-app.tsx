@@ -20,6 +20,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
   const [active, setActive] = useState<NavKey>("dashboard");
   const [locations, setLocations] = useState<Location[]>(devMode ? [{ id: "dev-temple", name: "Temple Bar" }] : []);
   const [selectedLocationId, setSelectedLocationId] = useState<string>(devMode ? "dev-temple" : "");
+  const [lastLocationName, setLastLocationName] = useState<string>(devMode ? "Temple Bar" : "Workspace");
   const [mobileNav, setMobileNav] = useState(false);
   const [shifts, setShifts] = useState(initialShifts);
   const [products, setProducts] = useState(initialProducts);
@@ -80,6 +81,8 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       const data = await response.json();
       const availableLocations: Location[] = data.locations || [];
       setLocations(availableLocations);
+      const resolvedLocationName = availableLocations.find((location) => location.id === (data.selectedLocationId || selectedLocationId))?.name || availableLocations[0]?.name;
+      if (resolvedLocationName) setLastLocationName(resolvedLocationName);
       const resolvedLocationId = data.selectedLocationId || availableLocations[0]?.id || "";
       if (resolvedLocationId && resolvedLocationId !== selectedLocationId) setSelectedLocationId(resolvedLocationId);
       setEmployees((data.employees || []).map((e: any) => ({ id:e.id, name:`${e.first_name} ${e.last_name}`, initials:`${e.first_name?.[0]||""}${e.last_name?.[0]||""}`, role:e.employment_title||"Employee", hours:Number(e.contracted_hours||0), status:e.active?"Active":"Inactive", active:e.active, email:e.email||"", phone:e.phone||"", payrollId:e.payroll_id||"", salaryCode:e.salary_code||"", costCentre:e.cost_centre||"", hourlyRate:Number(e.hourly_rate||0), portalStatus:e.portal_status||"NONE" })));
@@ -115,7 +118,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
     <div className="app-frame">
       <FloatingNavigation active={active} onChange={setActive} open={mobileNav} onToggle={() => setMobileNav((value) => !value)} userName={userName} userRole={userRole} devMode={devMode} />
       <main className="main-shell">
-        <Topbar locations={locations} selectedLocationId={selectedLocationId} onLocationChange={setSelectedLocationId} onNavigate={setActive} />
+        <Topbar locations={locations} selectedLocationId={selectedLocationId} onLocationChange={setSelectedLocationId} onNavigate={setActive} fallbackLocationName={lastLocationName} />
         <div className="page-wrap">
           {active === "dashboard" && <Dashboard shifts={shifts} products={products} onNavigate={setActive} />}
           {active === "schedule" && <Schedule shifts={shifts} setShifts={setShifts} employees={employees} onNewShift={openShiftDialog} onEditShift={setEditingShift} notify={notify} currentWeekOffset={currentWeekOffset} setCurrentWeekOffset={setCurrentWeekOffset} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}

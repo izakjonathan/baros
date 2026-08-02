@@ -1,6 +1,6 @@
 # Bar Ops
 
-**Current release: v0.12.1 — Cohesive Product Design**
+**Current release: v0.12.2 — Cohesive Product Design**
 
 Bar Ops is a Next.js hospitality operating system for scheduling, employees, attendance, payroll, inventory, ordering and daily bar operations. It is designed for Vercel, Neon PostgreSQL and iPhone/iPad standalone PWA use.
 
@@ -36,6 +36,6 @@ TEST_DATABASE_URL=postgres://... npm run test:postgres-integration
 
 ## Database
 
-Use `DATABASE_URL` for the pooled Neon runtime connection and `DATABASE_DIRECT_URL` for migrations. v0.12.1 includes migration `011_daily_operations.sql`.
+Use `DATABASE_URL` for the pooled Neon runtime connection and `DATABASE_DIRECT_URL` for migrations. v0.12.2 includes migration `011_daily_operations.sql`.
 
 After deploying this release, run **Database administration → migrate**, then **verify**.

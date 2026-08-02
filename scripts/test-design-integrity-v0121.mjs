@@ -6,7 +6,7 @@ const tokens=read('app/design-tokens.css');
 const system=read('app/design-system.css');
 const structural=read('app/globals.css');
 const checks=[
-  [pkg.version==='0.12.1','release version'],
+  [pkg.version==='0.12.2','release version'],
   [layout.indexOf('./design-tokens.css') < layout.indexOf('./globals.css') && layout.indexOf('./globals.css') < layout.indexOf('./design-system.css'),'stylesheet load order'],
   [!tokens.includes('--mono-'),'obsolete Mono aliases removed'],
   [!system.includes('!important') && !structural.includes('!important'),'no cascade-forcing declarations'],
@@ -15,4 +15,4 @@ const checks=[
   [tokens.includes('--space-page') && tokens.includes('--control-height'),'central layout tokens'],
 ];
 for(const [ok,label] of checks){if(!ok) throw new Error(`Design integrity failed: ${label}`)}
-console.log('v0.12.1 design integrity checks passed');
+console.log('v0.12.2 design integrity checks passed');

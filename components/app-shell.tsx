@@ -33,7 +33,7 @@ export function FloatingNavigation({ active, onChange, open, onToggle }: { activ
   </div>;
 }
 
-export function Topbar({ locations, selectedLocationId, onLocationChange, onNavigate }: { locations: Location[]; selectedLocationId: string; onLocationChange: (id: string) => void; onNavigate: (id: NavKey) => void }) {
+export function Topbar({ locations, selectedLocationId, onLocationChange, onNavigate, fallbackLocationName = "Workspace" }: { locations: Location[]; selectedLocationId: string; onLocationChange: (id: string) => void; onNavigate: (id: NavKey) => void; fallbackLocationName?: string }) {
   const selected = locations.find((location) => location.id === selectedLocationId);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -41,7 +41,7 @@ export function Topbar({ locations, selectedLocationId, onLocationChange, onNavi
   const matches = navItems.filter((item) => item.label.toLowerCase().includes(query.toLowerCase()));
   const go = (id: NavKey) => { onNavigate(id); setSearchOpen(false); setNotificationsOpen(false); setQuery(""); };
   return <header className="topbar">
-    <label className="location-switch" aria-label="Current location"><span className="status-dot" />{locations.length > 1 ? <><select value={selectedLocationId} onChange={(event) => onLocationChange(event.target.value)}>{locations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}</select><ChevronDown size={15} /></> : <span>{selected?.name || "No active location"}</span>}</label>
+    <label className="location-switch" aria-label="Current location"><span className="status-dot" />{locations.length > 1 ? <><select value={selectedLocationId} onChange={(event) => onLocationChange(event.target.value)}>{locations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}</select><ChevronDown size={15} /></> : <span>{selected?.name || locations[0]?.name || fallbackLocationName}</span>}</label>
     <div className="top-actions">
       <IconButton onClick={() => { setSearchOpen((value) => !value); setNotificationsOpen(false); }} label="Search workspace"><Search size={19} /></IconButton>
       <IconButton className="notification" onClick={() => { setNotificationsOpen((value) => !value); setSearchOpen(false); }} label="Open notifications"><Bell size={19} /><i /></IconButton>
