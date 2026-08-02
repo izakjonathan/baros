@@ -1,16 +1,20 @@
-# Bar Ops v0.10.1 — Functional Stabilization
+# Bar Ops v0.10.4 — Installable PWA & iOS Standalone
 
-This release is based on v0.10.0 and focuses on cross-layer functionality rather than adding another major module.
+## Added
+- App Router web app manifest with standalone display, start URL, scope, categories and shortcuts.
+- 192px, 512px, maskable and Apple touch icons.
+- Apple standalone metadata and status-bar configuration.
+- Production-only service-worker registration.
+- Controlled offline page.
+- Network-only handling for authenticated pages, API requests and account activation.
+- Static-only runtime caching for Next.js assets, manifest and icons.
+- Service-worker cache/version cleanup on activation.
+- Standalone safe-area and overscroll handling for iPhone and iPad.
+- CSP and response headers required for the service worker and manifest.
+- PWA regression test included in `npm run test:all`.
 
-## Fixed
+## Installation note
+After deployment, remove any older Bar Ops Home Screen shortcut and add the site again from Safari so iOS reads the new manifest and icon metadata.
 
-- Persistent schedule drag-and-drop in PostgreSQL mode
-- Persistent manager timesheet corrections
-- Persistent manual stock adjustments
-- Functional order search and status filters
-- Order-filter empty states
-- Accessible sidebar close action
-- Versioned development storage with backward-compatible recovery
-- Updated regression compatibility for v0.10.1
-
-No database migration is required.
+## Database
+No migration is required.

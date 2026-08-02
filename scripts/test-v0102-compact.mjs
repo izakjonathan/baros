@@ -3,7 +3,7 @@ const app=fs.readFileSync('components/bar-ops-app.tsx','utf8');
 const css=fs.readFileSync('app/mono-components.css','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const checks=[
- ['version',pkg.version==='0.10.2'],
+ ['version',/^0\.10\.(?:2|3|4)$/.test(pkg.version)],
  ['hourly rate type',app.includes('hourlyRate?: number')],
  ['hourly rate field',app.includes('Hourly pay (DKK)')],
  ['no employee autofocus',!app.includes('<input autoFocus value={name}')],

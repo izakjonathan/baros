@@ -638,3 +638,159 @@ button:disabled,
   .custom-range { gap: 6px; }
   .custom-range input[type="date"] { font-size: 12px; }
 }
+
+/* v0.10.3 — Safari-safe schedule selector and custom date sizing */
+.schedule-head-actions .schedule-view-select {
+  inline-size: 126px;
+  min-inline-size: 126px;
+  max-inline-size: 126px;
+  block-size: 44px;
+  min-block-size: 44px;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  border-radius: var(--mono-radius-md);
+  display: block;
+  position: relative;
+}
+.schedule-head-actions .schedule-view-select select {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  block-size: 44px;
+  margin: 0;
+  padding: 0 32px 0 10px;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--mono-radius-md);
+  background: transparent;
+  background-image: none;
+  color: var(--mono-ink);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 44px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-shadow: none;
+}
+.schedule-head-actions .schedule-view-select select:focus {
+  outline: 2px solid var(--mono-focus);
+  outline-offset: -2px;
+  background: var(--mono-inset);
+}
+.schedule-head-actions .schedule-view-select svg {
+  position: absolute;
+  inset-inline-end: 9px;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.compact-schedule-toolbar.has-custom-range .custom-range {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 12px;
+  row-gap: 4px;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow: hidden;
+}
+.compact-schedule-toolbar.has-custom-range .custom-range label {
+  display: grid;
+  grid-template-rows: auto 44px;
+  gap: 5px;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow: hidden;
+}
+.compact-schedule-toolbar.has-custom-range .custom-range input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  block-size: 44px;
+  min-block-size: 44px;
+  margin: 0;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--mono-radius-md);
+  background: var(--mono-inset);
+  color: var(--mono-ink);
+  font-size: 14px;
+  line-height: 44px;
+  text-align: center;
+  box-shadow: none;
+  overflow: hidden;
+}
+.compact-schedule-toolbar.has-custom-range .custom-range input[type="date"]::-webkit-date-and-time-value {
+  min-inline-size: 0;
+  margin: 0;
+  text-align: center;
+}
+.compact-schedule-toolbar.has-custom-range .custom-range input[type="date"]::-webkit-calendar-picker-indicator {
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 640px) {
+  .schedule-head-actions {
+    grid-template-columns: 126px 44px 44px;
+  }
+  .schedule-head-actions .schedule-view-select {
+    inline-size: 126px;
+    min-inline-size: 126px;
+    max-inline-size: 126px;
+  }
+  .compact-schedule-toolbar.has-custom-range .custom-range {
+    column-gap: 10px;
+    padding-inline: 0;
+  }
+  .compact-schedule-toolbar.has-custom-range .custom-range input[type="date"] {
+    font-size: 13px;
+    padding-inline: 6px;
+  }
+}
+
+@media (max-width: 390px) {
+  .schedule-head-actions {
+    grid-template-columns: 116px 42px 42px;
+  }
+  .schedule-head-actions .schedule-view-select {
+    inline-size: 116px;
+    min-inline-size: 116px;
+    max-inline-size: 116px;
+  }
+  .schedule-head-actions .schedule-view-select select {
+    font-size: 13px;
+    padding-inline-start: 8px;
+  }
+  .compact-schedule-toolbar.has-custom-range .custom-range {
+    column-gap: 8px;
+  }
+  .compact-schedule-toolbar.has-custom-range .custom-range input[type="date"] {
+    font-size: 12px;
+    padding-inline: 4px;
+  }
+}
+
+/* v0.10.4 — installed PWA and iOS standalone shell */
+@media (display-mode: standalone) {
+  html, body { min-height: 100%; background: var(--mono-canvas, #f4f4f2); }
+  body { overscroll-behavior-y: none; }
+  .app-frame, .employee-app { min-height: 100dvh; }
+  .topbar, .employee-header {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .page-wrap {
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+  }
+}
