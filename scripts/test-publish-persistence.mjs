@@ -6,7 +6,7 @@ const checks=[
   [app.includes('weekStart')&&app.includes('weekEnd'),"publish sends explicit week range"],
   [app.includes('selectedLocationId'),"publish sends location context"],
   [app.includes('publishing ? "Publishing…"'),"publish has in-flight state"],
-  [app.includes('shift.status === "Draft" ? { ...shift, status: "Published" }'),"only draft shifts update after confirmation"],
+  [app.includes('shift.status==="Draft"?{...shift,status:"Published"}:shift')||app.includes('shift.status === "Draft" ? { ...shift, status: "Published" }'),"only draft shifts update after confirmation"],
   [route.includes("update shifts set status='PUBLISHED'"),"database publish updates shift status"],
   [route.includes('db().begin'),"database publish is transactional"]
 ];

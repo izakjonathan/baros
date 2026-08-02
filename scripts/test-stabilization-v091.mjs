@@ -12,7 +12,7 @@ const checks=[
  ['timezone joins',bootstrap.includes('location_timezone')&&shifts.includes('location_timezone')],
  ['timezone display',app.includes('Intl.DateTimeFormat')&&app.includes('location_timezone')],
  ['production stock count persists',app.includes('Could not save stock count')],
- ['package version',pkg.version==='0.9.1'],
+ ['package version',pkg.version==='0.9.2'],
  ['database timeout',fs.readFileSync('lib/db/client.ts','utf8').includes('connect_timeout')],
  ['atomic time clock',clock.includes('const result = await db().begin')&&clock.includes('for update')],
  ['venue-local work date',clock.includes('at time zone')],

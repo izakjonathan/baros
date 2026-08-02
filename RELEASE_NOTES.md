@@ -1,18 +1,21 @@
-# Bar Ops v0.9.1 — Full-system stabilization
+# Bar Ops v0.9.2 — Workspace UI optimization
 
-This release audits and stabilizes the v0.9.0 codebase without adding another major module.
+This release implements the requested mobile workspace refinements on top of v0.9.1 and includes a build-fix for the malformed Control Centre JSX discovered during Vercel deployment.
 
-## Main corrections
-- Dynamic current-week and current-month calendar anchors replace the fixed July/August 2026 anchors.
-- Shift timestamps are displayed in the venue timezone rather than by slicing UTC ISO strings.
-- PostgreSQL shift bootstrap and shift mutation responses now include the location timezone.
-- Copy Previous Week now persists copied shifts to PostgreSQL instead of changing browser state only.
-- Production stock-count approval now persists changed quantities before reporting success.
-- Local development storage moves to schema version 2 while reading the prior key for compatibility.
-- PostgreSQL client configuration adds connection timeout, connection lifetime and application name.
-- CSP no longer contains unused Supabase browser endpoints.
-- Stale generated TypeScript build metadata and superseded audit documents were removed.
-- Package metadata now correctly identifies v0.9.1.
+## Interface changes
+- Removed the Add shift action from Overview.
+- Fixed the top navigation to the viewport and made its three controls square.
+- Added functional workspace search and notifications popovers.
+- Overview and Time & attendance metric cards use a responsive 2×2 grid on mobile.
+- Settings navigation and cards were rescaled for narrow screens; the introductory sentence was removed.
+- Shift plan supports Week, Month and Custom date ranges, with range publishing and a full-cell current-day highlight.
+- Team header and employee cards were condensed; identity, status and actions use less vertical space.
+- Removed the requested descriptive copy from Time & attendance, Team and Edit employee.
 
-## Validation
-Run `npm run test:all`, `npm run typecheck`, and `npm run build` in GitHub Quality Checks.
+## Build correction
+- Corrected the malformed closing JSX fragment in the Control Centre component that caused the Vercel “Expression expected” error.
+- Removed stale TypeScript build metadata.
+- Updated regression expectations for package version 0.9.2.
+
+## Database
+No migration is required.

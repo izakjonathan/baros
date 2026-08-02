@@ -12,7 +12,7 @@ const checks=[
  ['existing account password is preserved',activate.includes('verifyPassword')&&!activate.includes('update users set password_hash')],
  ['production invitations require APP_URL',invitations.includes('APP_URL_REQUIRED')],
  ['expired invitations are normalized',invitations.includes("status='EXPIRED'")],
- ['manager can revoke invitation',ui.includes('Revoke invite')&&ui.includes('action: "revoke"')],
+ ['manager can revoke invitation',(ui.includes('Revoke invite')||ui.includes('>Revoke<'))&&ui.includes('action: "revoke"')],
  ['employee UI updates by UUID',ui.includes('item.id === editingEmployee.id')],
  ['share cancellation has fallback',ui.includes('window.prompt("Copy this activation link"')],
  ['recurring shift create is transactional',shifts.includes('db().begin')&&shifts.includes('SHIFT_SERIES_CREATED')],

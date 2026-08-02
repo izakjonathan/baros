@@ -17,6 +17,6 @@ const checks=[
  ["employee linkage",/update\s+employees[\s\S]*set\s+user_id/.test(activate)],
  ["single-use acceptance",/status\s*=\s*['"]ACCEPTED['"]/.test(activate)],
  ["activation page",page.includes("ActivationForm")],
- ["manager share action",ui.includes("navigator.share")&&ui.includes("Invite to portal")],
+ ["manager share action",ui.includes("navigator.share")&&(ui.includes("Invite to portal")||ui.includes('"Invite"'))],
 ];
 for(const [name,ok] of checks){if(!ok)throw new Error(`FAIL ${name}`);console.log(`PASS ${name}`)}

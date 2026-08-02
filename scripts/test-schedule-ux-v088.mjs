@@ -5,7 +5,7 @@ const checks = [
   ['day tile passes its ISO date', 'onClick={() => onNewShift(day.iso)}'],
   ['dialog accepts an initial date', 'initialDate?: string'],
   ['dialog initializes selected date', 'useState(initialDate || dateFromShift(currentWeekOffset, 0))'],
-  ['week and month views exist', 'useState<"week" | "month">("week")'],
+  ['week and month views exist', 'useState<"week" | "month" | "custom">("week")'],
   ['month view renders full period', 'monthAnchor'],
   ['schedule intro copy removed', !source.includes('Build, review and publish the weekly schedule.')],
   ['compact title actions exist', 'schedule-head-actions'],
