@@ -272,3 +272,274 @@ button:disabled,
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto; transition-duration: .01ms; animation-duration: .01ms; animation-iteration-count: 1; }
 }
+
+/* v0.10.0 — fixed app shell and compact operational layouts */
+:root { --app-header-height: 66px; }
+
+/* A real fixed shell: the page scrolls beneath one persistent header. */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 246px;
+  right: 0;
+  width: auto;
+  height: var(--app-header-height);
+  z-index: 80;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.main-shell {
+  padding-top: var(--app-header-height);
+}
+.page-wrap {
+  scroll-margin-top: calc(var(--app-header-height) + 12px);
+}
+
+/* The desktop rail remains independent. On mobile it opens below the header. */
+.sidebar { z-index: 70; }
+.scrim { z-index: 65; }
+
+/* Schedule: keep view, copy and add compact; navigation and publish stay clear. */
+.schedule-head {
+  align-items: end;
+  gap: 12px;
+}
+.schedule-head-actions {
+  display: grid;
+  grid-template-columns: minmax(112px, auto) 44px 44px;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+.schedule-view-select {
+  width: 118px;
+  min-width: 118px;
+  height: 44px;
+  background: var(--mono-inset);
+  border: 0;
+  border-radius: var(--mono-radius-md);
+}
+.schedule-view-select select {
+  font-size: 13px;
+  padding-inline: 13px 34px;
+}
+.schedule-head-actions .compact-action {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  background: transparent;
+  color: var(--mono-ink);
+}
+.schedule-head-actions .compact-action span { display: none; }
+.schedule-head-actions .compact-action:hover,
+.schedule-head-actions .compact-action:active { background: var(--mono-inset); }
+
+.compact-schedule-toolbar,
+.compact-schedule-toolbar.has-custom-range {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+}
+.period-controls {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 6px;
+}
+.period-controls button {
+  width: 44px;
+  height: 44px;
+}
+.period-controls strong {
+  min-width: 0;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.schedule-toolbar-right {
+  margin-left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.compact-publish,
+.publish-button.compact-publish {
+  width: auto;
+  min-width: 116px;
+  height: 44px;
+  padding: 0 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: var(--mono-ink);
+  color: #fff;
+  border-radius: var(--mono-radius-md);
+}
+.compact-publish span { display: inline; }
+.compact-schedule-toolbar.has-custom-range .custom-range {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding-top: 2px;
+}
+
+/* Team: reduce empty height and keep related information close together. */
+.team-grid { gap: 14px; }
+.team-card {
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+.team-card-head { margin: 0; }
+.team-identity { gap: 10px; }
+.team-identity .avatar.large {
+  width: 48px;
+  height: 48px;
+}
+.team-status {
+  height: 28px;
+  min-height: 28px;
+  padding-inline: 11px;
+  border-radius: 999px;
+}
+.team-stats {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 0;
+}
+.portal-access { margin: 0; }
+.portal-access .status {
+  min-height: 26px;
+  height: 26px;
+  padding-inline: 10px;
+}
+.team-actions {
+  margin: 0;
+  gap: 6px;
+}
+.team-actions .secondary {
+  min-height: 40px;
+  height: 40px;
+  border: 0;
+  background: var(--mono-inset);
+}
+
+@media (max-width: 900px) {
+  :root { --app-header-height: 66px; }
+  .topbar {
+    left: 0;
+    right: 0;
+    height: var(--app-header-height);
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .main-shell {
+    margin-left: 0;
+    padding-top: var(--app-header-height);
+  }
+  .sidebar {
+    top: var(--app-header-height);
+    bottom: 0;
+    height: auto;
+    padding-top: 14px;
+    z-index: 75;
+  }
+  .sidebar .brand { display: none; }
+  .scrim {
+    top: var(--app-header-height);
+    bottom: 0;
+    height: auto;
+    z-index: 70;
+  }
+}
+
+@media (max-width: 640px) {
+  :root { --app-header-height: 60px; }
+  .page-wrap { padding-top: 20px; }
+  .schedule-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 8px;
+  }
+  .schedule-head-actions {
+    grid-template-columns: 108px 44px 44px;
+    gap: 4px;
+  }
+  .schedule-view-select {
+    width: 108px;
+    min-width: 108px;
+  }
+  .compact-schedule-toolbar,
+  .compact-schedule-toolbar.has-custom-range {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 9px 10px;
+  }
+  .schedule-counts { display: none; }
+  .compact-publish,
+  .publish-button.compact-publish {
+    width: auto;
+    min-width: 102px;
+    height: 44px;
+    padding-inline: 12px;
+  }
+  .period-controls strong { font-size: 13px; }
+  .custom-range {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .custom-range label {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .custom-range input {
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    font-size: 16px;
+  }
+  .team-card { padding: 13px; gap: 9px; }
+  .team-identity .avatar.large { width: 44px; height: 44px; }
+  .team-stats {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .team-actions { display: grid; }
+  .team-actions.two-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .team-actions.three-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .team-actions .secondary { width: 100%; font-size: 11px; }
+}
+
+@media (max-width: 430px) {
+  .schedule-head {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .schedule-head-actions {
+    grid-template-columns: 96px 42px 42px;
+  }
+  .schedule-view-select { width: 96px; min-width: 96px; }
+  .schedule-head-actions .compact-action { width: 42px; min-width: 42px; }
+  .compact-publish,
+  .publish-button.compact-publish {
+    min-width: 94px;
+    padding-inline: 10px;
+    font-size: 12px;
+  }
+}

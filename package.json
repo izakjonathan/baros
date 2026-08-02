@@ -1,6 +1,6 @@
 {
   "name": "bar-ops",
-  "version": "0.9.9",
+  "version": "0.10.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -17,7 +17,7 @@
     "test:inventory": "node scripts/test-inventory-operations.mjs",
     "test:remediation": "node scripts/test-remediation.mjs",
     "db:verify": "node scripts/verify-database.mjs",
-    "test:all": "npm run test:logic && npm run test:payroll && npm run test:audit && npm run test:integrity && npm run test:production && npm run test:inventory && npm run test:remediation && npm run test:ipad-ops && npm run test:employee-access && npm run test:hardening && npm run test:postgres-api && npm run test:postgres-values && npm run test:employee-conflicts && npm run test:activation-schema && npm run test:shift-persistence && npm run test:location-context && npm run test:shift-assignment-display && npm run test:postgresql-integrity && npm run test:team-scheduled-hours && npm run test:publish-persistence && npm run test:schedule-ux && npm run test:settings-time-clock && npm run test:activation-reliability && npm run test:stabilization && npm run test:ui-optimization && npm run test:workspace-ui-v093 && npm run test:layout-v094 && npm run test:employee-portal-v095 && npm run test:borderless-v096 && npm run test:minimal-flat-v097 && npm run test:bar-ops-mono && npm run test:mono-architecture",
+    "test:all": "npm run test:logic && npm run test:payroll && npm run test:audit && npm run test:integrity && npm run test:production && npm run test:inventory && npm run test:remediation && npm run test:ipad-ops && npm run test:employee-access && npm run test:hardening && npm run test:postgres-api && npm run test:postgres-values && npm run test:employee-conflicts && npm run test:activation-schema && npm run test:shift-persistence && npm run test:location-context && npm run test:shift-assignment-display && npm run test:postgresql-integrity && npm run test:team-scheduled-hours && npm run test:publish-persistence && npm run test:schedule-ux && npm run test:settings-time-clock && npm run test:activation-reliability && npm run test:stabilization && npm run test:ui-optimization && npm run test:workspace-ui-v093 && npm run test:layout-v094 && npm run test:employee-portal-v095 && npm run test:borderless-v096 && npm run test:minimal-flat-v097 && npm run test:bar-ops-mono && npm run test:mono-architecture && npm run test:v0100-layout",
     "test:ipad-ops": "node scripts/test-ipad-operations.mjs",
     "test:employee-access": "node scripts/test-employee-access.mjs",
     "test:hardening": "node scripts/test-v074-hardening.mjs",
@@ -43,7 +43,8 @@
     "test:borderless-v096": "node scripts/test-borderless-redesign-v096.mjs",
     "test:minimal-flat-v097": "node scripts/test-minimal-flat-v097.mjs",
     "test:bar-ops-mono": "node scripts/test-bar-ops-mono.mjs",
-    "test:mono-architecture": "node scripts/test-mono-architecture-v099.mjs"
+    "test:mono-architecture": "node scripts/test-mono-architecture-v099.mjs",
+    "test:v0100-layout": "node scripts/test-v0100-layout.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

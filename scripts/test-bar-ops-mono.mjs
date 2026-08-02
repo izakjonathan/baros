@@ -3,7 +3,7 @@ const css = fs.readFileSync('app/mono-tokens.css', 'utf8') + fs.readFileSync('ap
 const layout = fs.readFileSync('app/layout.tsx', 'utf8');
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const checks = [
-  ['version', ['0.9.8','0.9.9'].includes(pkg.version)],
+  ['version', ['0.9.8','0.9.9','0.10.0'].includes(pkg.version)],
   ['mono imported', layout.includes('import "./mono-tokens.css"') && layout.includes('import "./mono-components.css"')],
   ['light grey canvas', css.includes('--mono-canvas: #f4f4f2')],
   ['white surface', css.includes('--mono-surface: #ffffff')],

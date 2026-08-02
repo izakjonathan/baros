@@ -1,4 +1,4 @@
-# Bar Ops Mono v0.9.9
+# Bar Ops Mono v0.10.0
 
 Bar Ops Mono is a token-led monochrome interface. Hierarchy comes from tone, spacing, typography and state—not decorative borders or shadows.
 
