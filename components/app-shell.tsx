@@ -2,7 +2,6 @@
 
 import { useState, type ReactNode } from "react";
 import { ArrowRight, Bell, CalendarDays, ChevronDown, Clock3, LayoutDashboard, Menu, Package, Search, Settings, ShoppingCart, Timer, Users, X, NotebookPen } from "lucide-react";
-import { DevRoleSwitcher } from "@/components/dev-role-switcher";
 import { IconButton } from "@/components/ui-primitives";
 import type { NavKey } from "@/lib/data";
 import type { Location } from "@/lib/workspace-types";
@@ -18,25 +17,19 @@ export const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard
   { id: "control", label: "Control centre", icon: Settings },
 ];
 
-export function FloatingNavigation({ active, onChange, open, onToggle, userName, userRole, devMode }: { active: NavKey; onChange: (id: NavKey) => void; open: boolean; onToggle: () => void; userName: string; userRole: string; devMode: boolean }) {
-  const initials = userName.split(" ").map((part) => part[0]).join("").slice(0, 2);
+export function FloatingNavigation({ active, onChange, open, onToggle }: { active: NavKey; onChange: (id: NavKey) => void; open: boolean; onToggle: () => void; userName?: string; userRole?: string; devMode?: boolean }) {
+  const items = [...navItems, { id: "settings" as NavKey, label: "Settings", icon: Settings }];
   return <div className={`floating-navigation ${open ? "is-open" : ""}`}>
-    <button type="button" className="floating-navigation-toggle" onClick={onToggle} aria-label={open ? "Close navigation" : "Open navigation"} aria-expanded={open}>
-      {open ? <X size={22} /> : <Menu size={22} />}
-    </button>
-    <aside className="floating-navigation-panel" aria-hidden={!open}>
-      <nav className="floating-navigation-list" aria-label="Workspace navigation">
-        {navItems.map((item) => <button key={item.id} type="button" className={active === item.id ? "active" : ""} onClick={() => onChange(item.id)} tabIndex={open ? 0 : -1}>
+    <div className="floating-navigation-shell">
+      <button type="button" className="floating-navigation-toggle" onClick={onToggle} aria-label={open ? "Close navigation" : "Open navigation"} aria-expanded={open}>
+        {open ? <X size={20} /> : <Menu size={20} />}
+      </button>
+      <nav className="floating-navigation-strip" aria-label="Workspace navigation" aria-hidden={!open}>
+        {items.map((item) => <button key={item.id} type="button" className={active === item.id ? "active" : ""} onClick={() => onChange(item.id)} tabIndex={open ? 0 : -1}>
           <span>{item.label}</span>{item.id === "inventory" && <em>5</em>}
         </button>)}
-        <button type="button" className={active === "settings" ? "active" : ""} onClick={() => onChange("settings")} tabIndex={open ? 0 : -1}><span>Settings</span></button>
       </nav>
-      <div className="floating-navigation-profile">
-        <div className="avatar dark">{initials}</div>
-        <div><strong>{userName}</strong><span>{userRole.replace("_", " ").toLowerCase()}</span></div>
-      </div>
-      {devMode && <div className="floating-navigation-dev"><DevRoleSwitcher currentRole={userRole} /></div>}
-    </aside>
+    </div>
   </div>;
 }
 

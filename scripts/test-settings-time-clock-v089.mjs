@@ -9,7 +9,7 @@ const corrections = read('app/api/employee/timesheet-corrections/route.ts');
 const data = read('lib/data.ts');
 const checks = [
   ['settings nav key', data.includes('| "settings"')],
-  ['settings button wired', app.includes('onChange("settings")')],
+  ['settings button wired', app.includes('id: "settings" as NavKey')],
   ['settings workspace rendered', app.includes('<SettingsWorkspace')],
   ['time clock settings api', settings.includes('time_clock_settings') && settings.includes('on conflict(location_id)')],
   ['persistent clock load', hours.includes('fetch("/api/time-clock"')],
