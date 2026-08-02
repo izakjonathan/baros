@@ -1,25 +1,20 @@
-# Bar Ops v0.13.1 — Floating Navigation Placement
+# Bar Ops v0.13.2 — Layout Recovery
 
-Built directly on v0.13.0.
+This release repairs the shared layout foundation after the v0.13.0 presentation reconstruction.
 
-## Fixed
+## Key repairs
 
-- Moved the manager floating navigation down to the bottom edge of Safari's visual viewport.
-- Removed the duplicated browser safe-area offset that made the menu sit unnecessarily high.
-- Added separate browser and installed-PWA placement tokens.
-- Kept the toggle circle and expanded pill on one fixed vertical centre.
-- Preserved dialog hiding, horizontal menu scrolling, reduced motion and device side safe areas.
-- Corrected a malformed opening comment in `design-tokens.css` so the token stylesheet parses cleanly from its first rule.
+- Added every missing semantic CSS token used by the interface.
+- Rebuilt the canonical product stylesheet so it fully owns manager and employee presentation.
+- Restored stable mobile layouts for Shift Plan, Timesheets, Team and all dialogs.
+- Fixed primary/secondary button variants, including invisible employee-form save labels.
+- Reset modal scroll position whenever a dialog opens.
+- Added a dedicated modal content wrapper and reliable sticky action footer.
+- Kept Start and End fields together while full-width fields span the dialog.
+- Rebuilt schedule toolbars, period navigation and day columns for narrow Safari viewports.
+- Rebuilt compact Team cards and portal status/actions.
+- Rebuilt Timesheets action/filter/metric geometry.
+- Preserved the compact floating navigation and low browser placement.
+- Added `test:layout-recovery` to the default regression suite.
 
-## Central controls
-
-```css
---floating-nav-bottom-browser: 2px;
---floating-nav-bottom-standalone: calc(env(safe-area-inset-bottom, 0px) + 8px);
-```
-
-## Validation
-
-- Full `npm run test:all` passed.
-- New v0.13.1 floating-navigation placement checks passed.
-- No database migration is required.
+No database migration is required.

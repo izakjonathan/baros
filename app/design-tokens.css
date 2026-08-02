@@ -1,63 +1,42 @@
-/* Bar Ops design tokens — v0.13.1. Single semantic source of truth.
-   This is the single source of truth for visual changes. Feature CSS must use
-   these semantic tokens instead of introducing new colour, spacing, radius,
-   typography or shell constants. */
+/* Bar Ops design tokens — v0.13.2. Single semantic source of truth. */
 :root {
-  /* Colour roles */
   --color-canvas: #f4f4f2;
   --color-surface: #ffffff;
   --color-surface-muted: #ececea;
-  --color-hover: #e7e7e4;
-  --color-pressed: #deded9;
+  --color-surface-hover: #e7e7e4;
+  --color-surface-pressed: #deded9;
   --color-text: #111111;
-  --color-text-secondary: #60605c;
+  --color-text-secondary: #62625d;
   --color-text-tertiary: #85857f;
   --color-disabled: #aaa9a3;
-  --color-separator: rgba(17, 17, 17, 0.075);
-  --color-danger: #9b2828;
+  --color-separator: rgba(17,17,17,.08);
+  --color-separator-strong: rgba(17,17,17,.16);
+  --color-danger: #982d29;
   --color-success: #2f7a4c;
-  --color-warning: #9a6114;
-  --color-sidebar: #171816;
+  --color-warning: #986116;
 
-  /* Typography — one display role, one interface family.
-     Space Grotesk is reserved for page and dialog titles only. Inter is used
-     for all controls, labels, cards, tables and supporting copy. */
   --font-body: var(--font-inter), Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display: var(--font-space-grotesk), var(--font-body);
-
-  --type-caption: 0.75rem;      /* 12px metadata */
-  --type-label: 0.8125rem;      /* 13px labels */
-  --type-body: 0.9375rem;       /* 15px body */
-  --type-control: 1rem;         /* 16px controls, prevents iOS zoom */
-  --type-subtitle: 1.0625rem;   /* 17px card/row title */
-  --type-section: 1.25rem;      /* 20px section title */
-  --type-page: 2.625rem;        /* 42px display title */
-  --type-page-mobile: 2.25rem;  /* 36px display title */
-  --type-dialog: 2.25rem;       /* 36px dialog title */
-
-  --leading-tight: 1.02;
-  --leading-heading: 1.18;
+  --type-caption: .75rem;
+  --type-label: .8125rem;
+  --type-body: .9375rem;
+  --type-control: 1rem;
+  --type-subtitle: 1.0625rem;
+  --type-section: 1.25rem;
+  --type-page: clamp(2.15rem, 7.5vw, 2.625rem);
+  --type-dialog: clamp(2rem, 7vw, 2.35rem);
+  --leading-tight: 1.04;
+  --leading-heading: 1.15;
   --leading-body: 1.45;
   --leading-compact: 1.28;
-
-  --tracking-display: -0.045em;
-  --tracking-heading: -0.02em;
-  --tracking-label: 0.055em;
-
+  --tracking-display: -.045em;
+  --tracking-heading: -.02em;
+  --tracking-label: .055em;
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
   --weight-bold: 700;
 
-  /* Compatibility aliases for existing features. */
-  --text-xs: var(--type-caption);
-  --text-sm: var(--type-label);
-  --text-md: var(--type-body);
-  --text-lg: var(--type-subtitle);
-  --text-xl: var(--type-section);
-  --text-page: var(--type-page);
-
-  /* Spacing */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -66,39 +45,32 @@
   --space-6: 24px;
   --space-8: 32px;
   --space-10: 40px;
+  --space-page: 24px;
+  --space-section: 24px;
+  --space-card: 20px;
+  --space-field: 14px;
 
-  /* Semantic rhythm: change these to realign the whole product. */
-  --space-inline: var(--space-2);
-  --space-field: var(--space-3);
-  --space-card: var(--space-5);
-  --space-section: var(--space-6);
-  --space-page: var(--space-6);
-
-  /* Floating navigation placement. Browser Safari already constrains the visual viewport above its toolbar, so do not add the safe-area inset twice. */
-  --floating-nav-bottom-browser: 2px;
-  --floating-nav-bottom-standalone: calc(env(safe-area-inset-bottom, 0px) + 8px);
-
-  /* Shape and interaction */
   --radius-sm: 10px;
   --radius-md: 16px;
   --radius-lg: 22px;
+  --radius-xl: 28px;
   --radius-pill: 999px;
-  --control-height: 44px;
   --control-height-compact: 40px;
-  --icon-size: 22px;
+  --control-height: 46px;
+  --control-height-lg: 52px;
   --focus-ring: 0 0 0 2px var(--color-text);
   --transition-fast: 120ms ease;
-  --transition-standard: 180ms ease;
+  --transition-standard: 200ms cubic-bezier(.2,.8,.2,1);
 
-  /* App shell */
-  --sidebar-width: 246px;
-  --topbar-height: 66px;
-  --app-header-height: var(--topbar-height);
-  --content-max: 1480px;
+  --topbar-height: 72px;
+  --content-width: 1480px;
   --page-gutter: 28px;
   --page-gutter-mobile: 16px;
+  --floating-nav-size: 56px;
+  --floating-nav-bottom-browser: 2px;
+  --floating-nav-bottom-standalone: calc(env(safe-area-inset-bottom, 0px) + 8px);
 
-  /* Transitional aliases still consumed by structural feature layout. */
+  /* Structural aliases used by feature-only legacy geometry. */
   --canvas: var(--color-canvas);
   --surface: var(--color-surface);
   --ink: var(--color-text);
@@ -106,6 +78,11 @@
   --line: var(--color-separator);
   --accent: var(--color-text);
   --accent-dark: var(--color-surface);
-  --sidebar: var(--color-sidebar);
   --shadow: none;
+  --text-xs: var(--type-caption);
+  --text-sm: var(--type-label);
+  --text-md: var(--type-body);
+  --text-lg: var(--type-subtitle);
+  --text-xl: var(--type-section);
+  --text-page: var(--type-page);
 }

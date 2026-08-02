@@ -3,7 +3,7 @@ const tokens=fs.readFileSync('app/design-tokens.css','utf8');
 const system=fs.readFileSync('app/product-system.css','utf8');
 const app=fs.readFileSync('components/bar-ops-app.tsx','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
-if(!['0.11.8','0.11.9','0.12.0','0.12.1','0.13.0','0.13.1'].includes(pkg.version)) throw new Error('Expected v0.11.8');
+if(!['0.11.8','0.11.9','0.12.0','0.12.1','0.13.0','0.13.1','0.13.2'].includes(pkg.version)) throw new Error('Expected v0.11.8');
 for(const token of ['--type-caption','--type-label','--type-body','--type-control','--type-subtitle','--type-section','--type-page','--leading-body']) if(!tokens.includes(token)) throw new Error(`Missing ${token}`);
 if(!system.includes('v0.13.1 — canonical product presentation layer')) throw new Error('Missing typography layer');
 if(!system.includes('.filter-bar') && system.includes('.attendance-filters')) throw new Error('Timesheets controls not normalized');

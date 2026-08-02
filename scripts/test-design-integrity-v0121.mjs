@@ -6,7 +6,7 @@ const tokens=read('app/design-tokens.css');
 const system=read('app/product-system.css');
 const structural=read('app/globals.css');
 const checks=[
-  [['0.13.0','0.13.1'].includes(pkg.version),'0.13.1','release version'],
+  [['0.13.0','0.13.1','0.13.2'].includes(pkg.version),'0.13.1','release version'],
   [layout.indexOf('./design-tokens.css') < layout.indexOf('./globals.css') && layout.indexOf('./globals.css') < layout.indexOf('./product-system.css'),'stylesheet load order'],
   [!tokens.includes('--mono-'),'obsolete Mono aliases removed'],
   [!system.includes('!important') && !structural.includes('!important'),'no cascade-forcing declarations'],

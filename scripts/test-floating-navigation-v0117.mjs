@@ -4,7 +4,7 @@ const css = fs.readFileSync("app/product-system.css", "utf8");
 const shell = fs.readFileSync("components/app-shell.tsx", "utf8");
 const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
 
-if (!(["0.11.7","0.11.8","0.11.9","0.12.0","0.12.1","0.13.0","0.13.1"].includes(pkg.version))) throw new Error("Expected v0.11.7-compatible");
+if (!(["0.11.7","0.11.8","0.11.9","0.12.0","0.12.1","0.13.0","0.13.1","0.13.2"].includes(pkg.version))) throw new Error("Expected v0.11.7-compatible");
 if (!css.includes(".floating-navigation-toggle svg")) throw new Error("Missing scoped toggle icon rule");
 if (!/\.floating-navigation-toggle svg[\s\S]*color:\s*#ffffff/.test(css)) throw new Error("Toggle icon is not forced white");
 if (!css.includes("overflow-x: auto")) throw new Error("Navigation strip must scroll horizontally");

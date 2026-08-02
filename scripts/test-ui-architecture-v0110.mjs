@@ -7,7 +7,7 @@ const system = fs.readFileSync("app/product-system.css", "utf8");
 const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
 
 const checks = [
-  [["0.11.0","0.11.1","0.11.2","0.11.3","0.11.4","0.11.6","0.11.8","0.11.9","0.12.0","0.12.1","0.13.0","0.13.1"].includes(pkg.version), "package version is 0.11.0"],
+  [["0.11.0","0.11.1","0.11.2","0.11.3","0.11.4","0.11.6","0.11.8","0.11.9","0.12.0","0.12.1","0.13.0","0.13.1","0.13.2"].includes(pkg.version), "package version is 0.11.0"],
   [primitives.includes("export function ActionButton"), "shared ActionButton exists"],
   [primitives.includes("export function InputField") && primitives.includes("export function SelectField"), "shared field primitives exist"],
   [primitives.includes("export function SegmentedControl"), "shared segmented control exists"],

@@ -1,14 +1,11 @@
-# Implementation status — v0.13.1
+# Bar Ops implementation status — v0.13.2
 
-## Completed in this release
+All v0.13.1 database and application functionality is retained. v0.13.2 is a presentation and layout recovery release. It does not alter the PostgreSQL schema.
 
-- Reconstructed the presentation layer from a single shared product stylesheet.
-- Removed legacy employee presentation, browser-blue link fallbacks, and green employee icon rules.
-- Removed shared topbar, modal, metric, navigation, and card appearance from the structural stylesheet.
-- Unified manager and employee typography, headers, surfaces, controls, cards, forms, and navigation.
-- Reduced the active default regression suite to current behavior tests; historical visual-system tests remain available through `npm run test:legacy-ui` but no longer block current releases.
-- Added presentation reconstruction assertions.
+The active design architecture is:
 
-## Deployment note
+1. `app/design-tokens.css` — all semantic constants.
+2. `app/globals.css` — feature-specific structural geometry retained from the application.
+3. `app/product-system.css` — canonical role-independent presentation and responsive layout.
 
-A red GitHub Quality Checks run does not itself alter styling, but it means the commit was not validated. Vercel may still deploy independently unless branch protection is configured. Always compare commit SHAs before judging a release.
+The full bundled source regression suite passes, including the new layout-recovery checks.

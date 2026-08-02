@@ -1,6 +1,6 @@
 # Bar Ops
 
-**Current release: v0.13.1 — Floating Navigation Placement**
+**Current release: v0.13.2 — Floating Navigation Placement**
 
 Bar Ops is a Next.js operational workspace for scheduling, timesheets, payroll, inventory, orders, daily operations, and employee self-service.
 
