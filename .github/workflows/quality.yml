@@ -27,14 +27,19 @@ jobs:
         with:
           node-version: 22
 
-
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
       - name: Run regression suites
         run: npm run test:all
 
-      - name: Type-check and build
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Production build
         env:
           DEV_AUTH_ENABLED: "true"
           DEV_AUTH_EMAIL: "ci@baros.local"

@@ -1,22 +1,19 @@
-# Bar Ops v0.9.7 — Monochrome Minimal Flat Redesign
+# Bar Ops v0.9.9 — Mono Architecture & Release Integrity
 
-This release deepens the v0.9.6 visual-system work across the complete manager and employee applications.
+This release hardens Bar Ops Mono after the v0.9.8 release audit.
 
-## Visual principles
+## Design architecture
+- Replaced the single high-specificity `mono.css` override layer with `mono-tokens.css` and `mono-components.css`.
+- Removed all `!important` declarations from the Mono component layer.
+- Removed the global `svg` rule and scoped icon treatment to Lucide/application icon contexts.
+- Added explicit selected, pressed, disabled, loading and focus states.
+- Restored 44px minimum mobile control height.
+- Retained structural separators only for tables, settings rows and calendar columns.
 
-- The application canvas is now a subtle neutral light grey (`#f3f4f6`).
-- White surfaces are separated from the canvas through fill and spacing, not outlines.
-- Decorative borders and divider rules have been removed across cards, panels, navigation, lists, forms and action groups.
-- Only very subtle rules remain where they communicate real table or calendar structure.
-- Interface icons use a single black-stroke, transparent-background treatment.
-- Icon wrappers no longer use coloured tiles.
-- Adjacent actions share a consistent 40px control height and compact spacing.
-- Toolbar and inline actions use transparent flat controls with tonal hover and pressed feedback.
-- Inputs use a soft tonal fill rather than a hard outline while retaining a visible focus ring.
-- The manager and employee portals now use the same monochrome surface hierarchy.
+## Release integrity
+- Restored `.github/workflows/database-admin.yml` and `.github/workflows/quality.yml`.
+- Quality checks now run regression tests, lint, type-check and production build.
+- Added `test:mono-architecture` to prevent regression to the v0.9.8 override architecture.
 
-## Accessibility retained
-
-Invisible button chrome does not reduce the clickable area. Icon controls retain 40–44px targets and accessible labels. Focus states remain visible, semantic error/destructive colours remain available, and dense data structures retain subtle separators where needed.
-
-No database migration is required.
+## Database
+No migration is required.
