@@ -1,4 +1,4 @@
-/* Bar Ops design tokens — v0.11.8
+/* Bar Ops design tokens — v0.12.1
    This is the single source of truth for visual changes. Feature CSS must use
    these semantic tokens instead of introducing new colour, spacing, radius,
    typography or shell constants. */
@@ -19,31 +19,35 @@
   --color-warning: #9a6114;
   --color-sidebar: #171816;
 
-  /* Typography */
-  --font-body: var(--font-inter), Inter, system-ui, sans-serif;
-  --font-display: var(--font-space-grotesk), Inter, system-ui, sans-serif;
-  /* Restrained seven-step product type scale. Use semantic aliases below,
-     not page-specific pixel sizes. */
-  --type-caption: 0.75rem;      /* 12px metadata */
-  --type-label: 0.8125rem;      /* 13px labels and compact actions */
-  --type-body: 0.9375rem;       /* 15px primary body copy */
-  --type-control: 1rem;         /* 16px controls; prevents iOS input zoom */
-  --type-subtitle: 1.0625rem;   /* 17px compact headings */
-  --type-section: 1.25rem;      /* 20px section headings */
-  --type-page: clamp(2rem, 4vw, 2.375rem); /* 32–38px page titles */
+  /* Typography — one display role, one interface family.
+     Space Grotesk is reserved for page and dialog titles only. Inter is used
+     for all controls, labels, cards, tables and supporting copy. */
+  --font-body: var(--font-inter), Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-body);
 
-  --leading-tight: 1.08;
+  --type-caption: 0.75rem;      /* 12px metadata */
+  --type-label: 0.8125rem;      /* 13px labels */
+  --type-body: 0.9375rem;       /* 15px body */
+  --type-control: 1rem;         /* 16px controls, prevents iOS zoom */
+  --type-subtitle: 1.0625rem;   /* 17px card/row title */
+  --type-section: 1.25rem;      /* 20px section title */
+  --type-page: 2.625rem;        /* 42px display title */
+  --type-page-mobile: 2.25rem;  /* 36px display title */
+  --type-dialog: 2.25rem;       /* 36px dialog title */
+
+  --leading-tight: 1.02;
   --leading-heading: 1.18;
   --leading-body: 1.45;
-  --leading-compact: 1.25;
+  --leading-compact: 1.28;
 
-  --tracking-tight: -0.025em;
-  --tracking-label: 0.06em;
+  --tracking-display: -0.045em;
+  --tracking-heading: -0.02em;
+  --tracking-label: 0.055em;
 
-  --weight-regular: 450;
-  --weight-medium: 550;
-  --weight-semibold: 650;
-  --weight-bold: 750;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
 
   /* Compatibility aliases for existing features. */
   --text-xs: var(--type-caption);
@@ -66,14 +70,14 @@
   /* Semantic rhythm: change these to realign the whole product. */
   --space-inline: var(--space-2);
   --space-field: var(--space-3);
-  --space-card: var(--space-4);
+  --space-card: var(--space-5);
   --space-section: var(--space-6);
-  --space-page: var(--space-8);
+  --space-page: var(--space-6);
 
   /* Shape and interaction */
-  --radius-sm: 9px;
-  --radius-md: 13px;
-  --radius-lg: 18px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
   --radius-pill: 999px;
   --control-height: 44px;
   --control-height-compact: 40px;
@@ -87,27 +91,10 @@
   --topbar-height: 66px;
   --app-header-height: var(--topbar-height);
   --content-max: 1480px;
-  --page-gutter: 36px;
+  --page-gutter: 28px;
   --page-gutter-mobile: 16px;
 
-  /* Compatibility aliases. Legacy feature layout reads these values, but all
-     future central changes should target the semantic tokens above. */
-  --mono-canvas: var(--color-canvas);
-  --mono-surface: var(--color-surface);
-  --mono-inset: var(--color-surface-muted);
-  --mono-hover: var(--color-hover);
-  --mono-pressed: var(--color-pressed);
-  --mono-ink: var(--color-text);
-  --mono-secondary: var(--color-text-secondary);
-  --mono-tertiary: var(--color-text-tertiary);
-  --mono-disabled: var(--color-disabled);
-  --mono-separator: var(--color-separator);
-  --mono-danger: var(--color-danger);
-  --mono-radius-sm: var(--radius-sm);
-  --mono-radius-md: var(--radius-md);
-  --mono-radius-lg: var(--radius-lg);
-  --mono-control: var(--control-height);
-  --mono-content: var(--content-max);
+  /* Transitional aliases still consumed by structural feature layout. */
   --canvas: var(--color-canvas);
   --surface: var(--color-surface);
   --ink: var(--color-text);

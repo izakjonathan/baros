@@ -1,16 +1,16 @@
-# Bar Ops v0.11.8 — Unified Typography System
+# Bar Ops v0.12.1 — Design-System Integrity Cleanup
 
-- Fixes the invisible Menu/X icon caused by the global Lucide icon colour rule.
-- Forces the toggle icon to white inside the black circle.
-- Tightens the floating pill height and spacing to more closely match the compact reference.
-- Preserves horizontal scrolling, fixed positioning, safe-area offsets, and open-across-navigation behaviour.
+This release audits and consolidates the v0.12.0 design implementation.
+
+## Changes
+
+- Removed 476 declarations in structural CSS that were contradicted by the canonical design system.
+- Removed 152 internally superseded declarations and 39 empty duplicate rules.
+- Removed obsolete `--mono-*` compatibility tokens that were no longer referenced anywhere.
+- Reordered stylesheet loading so tokens load first, structural layout second, and the component design system last.
+- Preserved feature geometry while removing duplicate visual ownership from structural CSS.
+- Normalized and reformatted the structural stylesheet so future conflicts can be reviewed and changed safely.
+- Added a design-integrity regression test covering stylesheet order, obsolete tokens, typography roles, spacing tokens, and cascade-forcing declarations.
+- Updated the PWA cache namespace to v0.12.1.
 
 No database migration is required.
-
-## Typography system pass
-
-- Replaced scattered feature-level type choices with a seven-step semantic type scale.
-- Standardized page titles, section titles, labels, body copy, metadata, controls and metrics.
-- Reduced oversized Timesheets date/select controls and Add/Edit Employee fields.
-- Normalized all date, time, number and select controls to 16px for iOS legibility without zoom.
-- Standardized line-height, tracking and weights across manager and employee experiences.

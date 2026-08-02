@@ -1,3 +1,7 @@
+# Bar Ops Product Design System — v0.12.1
+
+Bar Ops uses two type families with strict roles: Space Grotesk for primary page and dialog titles, and Inter for every smaller interface style. `app/design-tokens.css` is the central source of truth; `app/design-system.css` contains shared product patterns.
+
 # Bar Ops design system — v0.11.0
 
 ## Source of truth
@@ -20,3 +24,7 @@ Changing these values realigns the product centrally.
 ## Canonical controls
 
 Use `ActionButton`, `ActionGroup`, `InputField`, `SelectField`, `SegmentedControl`, `FilterBar`, `KpiCard`, and `DialogFooter`. Do not create new page-specific button, field, or footer systems when one of these applies.
+
+
+## Role parity
+All manager and employee-facing routes consume the same semantic design tokens and interaction primitives.

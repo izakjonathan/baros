@@ -1,4 +1,4 @@
-# Implementation status — v0.11.8
+# Implementation status — v0.12.1
 
 ## Production-backed manager modules
 

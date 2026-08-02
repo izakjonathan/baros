@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
-import "./globals.css";
 import "./design-tokens.css";
+import "./globals.css";
 import "./design-system.css";
 import { PwaRegister } from "./pwa-register";
 

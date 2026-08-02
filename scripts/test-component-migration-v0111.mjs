@@ -6,7 +6,7 @@ const app = read("components/bar-ops-app.tsx");
 const primitives = read("components/ui-primitives.tsx");
 
 const checks = [
-  [["0.11.1","0.11.2","0.11.3","0.11.4","0.11.6","0.11.8"].includes(pkg.version), "package version is 0.11.1"],
+  [["0.11.1","0.11.2","0.11.3","0.11.4","0.11.6","0.11.8","0.11.9","0.12.0","0.12.1"].includes(pkg.version), "package version is 0.11.1"],
   [fs.existsSync("components/app-shell.tsx"), "app shell extracted"],
   [fs.existsSync("features/overview/dashboard.tsx"), "overview feature extracted"],
   [fs.existsSync("features/team/team.tsx"), "team feature extracted"],

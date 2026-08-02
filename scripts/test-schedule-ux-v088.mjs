@@ -9,8 +9,8 @@ const checks = [
   ['month view renders full period', 'monthAnchor'],
   ['schedule intro copy removed', !source.includes('Build, review and publish the weekly schedule.')],
   ['compact title actions exist', 'schedule-head-actions'],
-  ['horizontal day scrolling exists', 'scroll-snap-type:x proximity'],
-  ['compact day headers exist', '.schedule-calendar .day-header{height:47px'],
+  ['horizontal day scrolling exists', /scroll-snap-type\s*:\s*x proximity/.test(css)],
+  ['compact day headers exist', /\.schedule-calendar \.day-header\s*\{[^}]*height\s*:\s*47px/.test(css)],
 ];
 for (const [name, expected] of checks) {
   const ok = typeof expected === 'boolean' ? expected : source.includes(expected) || css.includes(expected);
