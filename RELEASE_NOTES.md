@@ -1,20 +1,15 @@
-# Bar Ops v0.10.4 — Installable PWA & iOS Standalone
+# Bar Ops v0.10.5 — Cleanup & Release Consolidation
 
-## Added
-- App Router web app manifest with standalone display, start URL, scope, categories and shortcuts.
-- 192px, 512px, maskable and Apple touch icons.
-- Apple standalone metadata and status-bar configuration.
-- Production-only service-worker registration.
-- Controlled offline page.
-- Network-only handling for authenticated pages, API requests and account activation.
-- Static-only runtime caching for Next.js assets, manifest and icons.
-- Service-worker cache/version cleanup on activation.
-- Standalone safe-area and overscroll handling for iPhone and iPad.
-- CSP and response headers required for the service worker and manifest.
-- PWA regression test included in `npm run test:all`.
+This release performs a non-schema cleanup of the v0.10.4 PWA baseline.
 
-## Installation note
-After deployment, remove any older Bar Ops Home Screen shortcut and add the site again from Safari so iOS reads the new manifest and icon metadata.
+## Cleaned
 
-## Database
-No migration is required.
+- Removed superseded audit and release-note files from the deployable archive.
+- Rewrote README, implementation status and Mono documentation to describe the current release accurately.
+- Removed a dead PWA shortcut that linked to an unsupported manager query parameter.
+- Removed the manifest portrait-only restriction so the installed iPad app can follow device orientation.
+- Rotated the service-worker cache namespace to v0.10.5.
+- Updated release compatibility checks and added cleanup-specific regression protection.
+- Retained both GitHub Actions workflows, all migrations and the complete regression suite.
+
+No database migration is required.

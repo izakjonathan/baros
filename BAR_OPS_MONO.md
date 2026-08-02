@@ -1,17 +1,21 @@
-# Bar Ops Mono v0.10.0
+# Bar Ops Mono — v0.10.5
 
-Bar Ops Mono is a token-led monochrome interface. Hierarchy comes from tone, spacing, typography and state—not decorative borders or shadows.
+Bar Ops Mono is the current visual system.
 
-## Source files
-- `app/mono-tokens.css`: canonical neutral palette, radii, control sizes and compatibility aliases.
-- `app/mono-components.css`: application-level surface, toolbar, form, schedule, employee and interaction primitives.
+## Foundations
 
-## Rules
-1. Grey canvas, white surfaces, one inset grey.
-2. No decorative border where tone or spacing already separates content.
-3. Structural separators only for dense data and same-tone rows.
-4. Black outline icons scoped to icon components; never mutate every SVG globally.
-5. Minimum 44px interaction targets on touch devices.
-6. Explicit selected, pressed, disabled, loading and focus-visible states.
-7. One dominant primary action per context.
-8. Semantic colour is reserved for danger, warning and success meaning.
+- Subtle light-grey application canvas
+- White primary surfaces and one muted inset surface
+- Near-black text and black-stroke Lucide icons
+- No decorative borders or routine card shadows
+- Minimum 44px interaction targets
+- Tonal selected, pressed, disabled and focus states
+- Semantic colour reserved for warning, success and destructive meaning
+
+## CSS ownership
+
+- `app/mono-tokens.css` defines design tokens.
+- `app/mono-components.css` defines shared component and responsive treatments.
+- `app/globals.css` retains feature layout and legacy structural rules pending gradual module extraction.
+
+New visual work should extend shared tokens and primitives instead of adding page-specific override layers.

@@ -1,16 +1,26 @@
-# Implementation status — v0.9.1
+# Implementation status — v0.10.5
 
-## Persistent and server-confirmed
-Employee profiles and invitations, shifts and publications, products and location inventory, payroll/timesheet APIs, employee clock actions, settings, stock receipt/waste/transfer APIs, and audit records.
+## PostgreSQL-backed and server-confirmed
 
-## Development-local or partially integrated
-Daily operations editor, complete purchase-order editor, some dashboard summary cards, and some manager approval surfaces still use presentation state or incomplete UI flows. They are not represented as completed production workflows.
+- Employee profiles, invitations and activation
+- Shift creation, recurrence, assignment, movement, publication and employee visibility
+- Location context
+- Employee availability, leave and exchange foundations
+- Clock actions, timesheets, corrections, approval and payroll-export safeguards
+- Products, location inventory, stock adjustments, receipt, waste and transfer foundations
+- Time-clock settings, sessions, audit records and database verification
 
-## Operational rule
-A manager action must not show success before its PostgreSQL request succeeds. New work should use UUIDs, selected location context, tenant-scoped queries, shared validation helpers, and a transaction for multi-table writes.
+## Staged or partial workflows
 
+- Daily Operations tasks and logbook still use browser workspace state.
+- Purchase-order creation is not yet a complete line-item editor.
+- Some dashboard summaries remain illustrative rather than authoritative database reports.
+- The regression suite is broad, but most checks are source assertions rather than disposable-PostgreSQL and browser end-to-end tests.
 
-## v0.10.0 release integrity
-- GitHub database and quality workflows are restored.
-- Mono is split into tokens and component primitives with no `!important` declarations in the Mono layer.
-- A dependency lockfile is still not included because the release workspace could not reach the public npm registry reliably. GitHub currently uses `npm install`; generate and commit `package-lock.json` from a successful public-registry install before changing workflows to `npm ci`.
+## Engineering rules
+
+A mutation must not report success before PostgreSQL confirms it. New work must use immutable UUIDs, selected-location context, tenant-scoped validation, transactional multi-table writes and explicit loading/error states.
+
+## Release integrity
+
+GitHub database and quality workflows are included. A dependency lockfile is not included because the build workspace cannot reliably access the public npm registry; workflows therefore continue to use `npm install`.

@@ -1,19 +1,23 @@
 # Bar Ops
 
-**Current release: v0.10.1 — Functional Stabilization** v0.9.1
+**Current release: v0.10.5 — Cleanup & Release Consolidation**
 
-Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
+Bar Ops is a Next.js, TypeScript and PostgreSQL hospitality operating system designed for Vercel, Neon and an iPad-first deployment workflow.
 
-## iPad workflow
-Commit the flat ZIP to the private `baros` repository using the Commit app. GitHub Quality Checks installs dependencies, runs tests/type checking/build, and Vercel deploys the commit.
+## Deploy from iPad
+
+1. Commit the flat ZIP to the private `baros` repository with the Commit app.
+2. GitHub Quality Checks installs dependencies, runs the regression suite, lint, type-check and production build.
+3. Vercel deploys the accepted commit.
 
 ## Database
-Use `DATABASE_URL` for the pooled Neon runtime URL and `DATABASE_DIRECT_URL` for migrations.
 
-For this release no new migration is required.
+Use `DATABASE_URL` for the pooled Neon runtime connection and `DATABASE_DIRECT_URL` for migrations. v0.10.5 adds no migration.
 
-## Install as an iPhone or iPad app
+## Install on iPhone or iPad
 
-Bar Ops v0.10.4 includes a web app manifest, Apple metadata, app icons and a service worker. In Safari, open the deployed site, choose **Share → Add to Home Screen**, then launch Bar Ops from its icon. If an older shortcut was installed before v0.10.4, delete it and add it again so iOS picks up the new standalone configuration.
+Open the deployed site in Safari and choose **Share → Add to Home Screen**. Bar Ops launches in standalone mode with Apple Home Screen metadata, app icons and a safe network-first service worker. Authenticated APIs and operational page responses are never cached.
 
-The service worker does not cache authenticated API responses or operational pages. When offline, Bar Ops shows a controlled reconnect screen rather than stale schedule, payroll or inventory data.
+## Release boundaries
+
+Core scheduling, employee access, attendance, payroll foundations, products and inventory use PostgreSQL-backed routes. Daily Operations and the full purchase-order editor remain staged workflows; see `IMPLEMENTATION_STATUS.md`.

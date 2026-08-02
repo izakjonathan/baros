@@ -1,4 +1,4 @@
-/* Bar Ops Mono component primitives v0.9.9. Loaded after legacy feature CSS. */
+/* Bar Ops Mono component primitives — current release v0.10.5. Loaded after legacy feature CSS.
 html, body, .app-frame, .main-shell, .employee-app, .employee-shell,
 .employee-page, .workspace-loading, .login-shell {
   background: var(--mono-canvas);

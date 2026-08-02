@@ -5,7 +5,7 @@ const components=read('app/mono-components.css');
 const layout=read('app/layout.tsx');
 const pkg=JSON.parse(read('package.json'));
 const checks=[
- ['version 0.9.9+',['0.9.9','0.10.0','0.10.1','0.10.2','0.10.3','0.10.4'].includes(pkg.version)],
+ ['version 0.9.9+',['0.9.9','0.10.0','0.10.1','0.10.2','0.10.3','0.10.4','0.10.5'].includes(pkg.version)],
  ['mono tokens loaded',layout.includes('mono-tokens.css')],
  ['mono components loaded',layout.includes('mono-components.css')],
  ['legacy mono override removed',!fs.existsSync('app/mono.css')],

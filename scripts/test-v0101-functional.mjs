@@ -3,7 +3,7 @@ const app=fs.readFileSync('components/bar-ops-app.tsx','utf8');
 const timesheets=fs.readFileSync('app/api/timesheets/route.ts','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const checks=[
- ['version',['0.10.1','0.10.2','0.10.3','0.10.4'].includes(pkg.version)],
+ ['version',['0.10.1','0.10.2','0.10.3','0.10.4','0.10.5'].includes(pkg.version)],
  ['drag drop persists',app.includes('Could not move shift')&&app.includes('scope:"occurrence"')],
  ['stock adjustments persist',app.includes('Could not save stock adjustment')&&app.includes('quantity:nextStock')],
  ['order search works',app.includes('visibleOrders')&&app.includes('statusFilter')],
