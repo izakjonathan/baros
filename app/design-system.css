@@ -899,7 +899,7 @@ button:disabled,
   .dialog-footer.has-danger > .danger-button { justify-self: start; }
 }
 
-/* v0.11.7 verified compact expanding floating navigation */
+/* v0.11.8 verified compact expanding floating navigation */
 .main-shell {
   margin-left: 0;
   padding-bottom: calc(72px + env(safe-area-inset-bottom));
@@ -1037,3 +1037,204 @@ button:disabled,
   .floating-navigation-toggle { transition-duration: 1ms; }
 }
 
+
+
+/* v0.11.8 — canonical typography system
+   Apple recommends a small hierarchy of consistent text styles, while USWDS
+   recommends tokenized type sizes and line heights. These rules intentionally
+   override historical feature-level font declarations. */
+html { font-size: 100%; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: var(--leading-body);
+  font-weight: var(--weight-regular);
+  letter-spacing: 0;
+}
+
+h1, h2, h3, h4, p, small, label, button, input, select, textarea { font-family: inherit; }
+h1, h2, h3, h4 { color: var(--color-text); }
+
+/* Page and section hierarchy */
+.page-header h1,
+.employee-page h1,
+.modal-header h1,
+.modal h1 {
+  font-family: var(--font-display);
+  font-size: var(--type-page);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  font-weight: var(--weight-bold);
+}
+.page-header > div > p:not(.eyebrow),
+.employee-lead,
+.modal-subtitle,
+.modal-header p {
+  font-size: var(--type-body);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+}
+.eyebrow {
+  font-size: var(--type-caption);
+  line-height: var(--leading-compact);
+  letter-spacing: var(--tracking-label);
+  font-weight: var(--weight-bold);
+}
+.panel-title h2,
+.employee-page h2,
+.settings-card h2,
+.team-identity h2 {
+  font-family: var(--font-display);
+  font-size: var(--type-subtitle);
+  line-height: var(--leading-heading);
+  letter-spacing: -0.015em;
+  font-weight: var(--weight-semibold);
+}
+.panel-title p,
+.settings-card > p,
+.field-help,
+.app-field small {
+  font-size: var(--type-label);
+  line-height: var(--leading-body);
+}
+
+/* Shared controls — one size and weight everywhere. */
+button,
+.primary,
+.secondary,
+.ghost,
+.danger-button,
+.publish-button,
+.text-button,
+.floating-navigation-strip button {
+  font-size: var(--type-label);
+  line-height: 1;
+  font-weight: var(--weight-semibold);
+}
+.app-field > span,
+.form-grid > label,
+.settings-field-grid > label,
+.location-field,
+.custom-range label,
+.availability-times label,
+.correction-field label {
+  font-size: var(--type-label);
+  line-height: var(--leading-compact);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0;
+  text-transform: none;
+}
+input,
+select,
+textarea,
+.app-field input,
+.app-field select,
+.form-grid input,
+.form-grid select,
+.form-grid textarea,
+.settings-field-grid input,
+.settings-field-grid select,
+.custom-range input,
+.availability-times input,
+.request-date-grid input {
+  font-size: var(--type-control);
+  line-height: var(--leading-compact);
+  font-weight: var(--weight-medium);
+}
+input[type="date"], input[type="time"], input[type="number"], select {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Prevent previously oversized operational fields. */
+.attendance-filters input,
+.attendance-filters select,
+.shift-date-field input,
+.shift-time-field input,
+.employee-dialog input,
+.employee-dialog select,
+.product-form input,
+.product-form select,
+.custom-range input[type="date"] {
+  font-size: var(--type-control);
+  min-height: var(--control-height);
+}
+.attendance-filters .app-field > span,
+.shift-dialog-fields .app-field > span,
+.form-grid > label,
+.custom-range label {
+  font-size: var(--type-label);
+}
+
+/* Metrics, cards, tables and status copy. */
+.metric-label,
+.inventory-stats span,
+.data-table,
+.table-row,
+.timeline-row,
+.team-meta,
+.employee-list,
+.notification-list,
+.availability-grid {
+  font-size: var(--type-label);
+  line-height: var(--leading-compact);
+}
+.metric-card > strong {
+  font-size: var(--type-section);
+  line-height: var(--leading-heading);
+  letter-spacing: -0.02em;
+}
+.metric-card small,
+.metric-trend,
+.status,
+.status-pill,
+.claim-state,
+.shift-card small,
+.shift-card em {
+  font-size: var(--type-caption);
+  line-height: var(--leading-compact);
+}
+.shift-card strong,
+.shift-card-top,
+.day-header span,
+.day-header strong {
+  line-height: var(--leading-compact);
+}
+.day-header strong { font-size: var(--type-section); }
+
+/* Dialog typography and compact form rhythm. */
+.modal-content,
+.modal-card { font-size: var(--type-body); }
+.open-shift-note strong,
+.toggle-row strong { font-size: var(--type-body); line-height: var(--leading-heading); }
+.open-shift-note span,
+.toggle-row small { font-size: var(--type-label); line-height: var(--leading-body); }
+
+/* Employee portal follows the same hierarchy. */
+.employee-page h1 { margin-bottom: var(--space-2); }
+.employee-home-grid small,
+.notification-list small,
+.claim-state,
+.employee-nav a,
+.employee-nav button { font-size: var(--type-caption); }
+.employee-home-grid strong,
+.notification-list p,
+.employee-inbox p { font-size: var(--type-label); }
+.employee-more-sheet > a,
+.employee-more-sheet > button { font-size: var(--type-body); }
+
+@media (max-width: 640px) {
+  :root { --type-page: 2rem; }
+  .page-header h1,
+  .employee-page h1,
+  .modal-header h1,
+  .modal h1 { font-size: var(--type-page); }
+  .page-header > div > p:not(.eyebrow),
+  .employee-lead,
+  .modal-subtitle,
+  .modal-header p { font-size: var(--type-label); }
+  .metric-card > strong { font-size: 1.125rem; }
+  .panel-title h2,
+  .employee-page h2,
+  .settings-card h2,
+  .team-identity h2 { font-size: 1rem; }
+}

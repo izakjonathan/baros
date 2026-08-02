@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+const tokens=fs.readFileSync('app/design-tokens.css','utf8');
+const system=fs.readFileSync('app/design-system.css','utf8');
+const app=fs.readFileSync('components/bar-ops-app.tsx','utf8');
+const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+if(pkg.version!=='0.11.8') throw new Error('Expected v0.11.8');
+for(const token of ['--type-caption','--type-label','--type-body','--type-control','--type-subtitle','--type-section','--type-page','--leading-body']) if(!tokens.includes(token)) throw new Error(`Missing ${token}`);
+if(!system.includes('v0.11.8 — canonical typography system')) throw new Error('Missing typography layer');
+if(!system.includes('.attendance-filters input')) throw new Error('Timesheets controls not normalized');
+if(!system.includes('.employee-dialog input')) throw new Error('Employee fields not normalized');
+if(!app.includes('form-grid employee-dialog')) throw new Error('Employee dialog typography hook missing');
+console.log('v0.11.8 typography system checks passed');

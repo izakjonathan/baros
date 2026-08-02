@@ -1,4 +1,4 @@
-/* Bar Ops design tokens — v0.11.0
+/* Bar Ops design tokens — v0.11.8
    This is the single source of truth for visual changes. Feature CSS must use
    these semantic tokens instead of introducing new colour, spacing, radius,
    typography or shell constants. */
@@ -22,15 +22,36 @@
   /* Typography */
   --font-body: var(--font-inter), Inter, system-ui, sans-serif;
   --font-display: var(--font-space-grotesk), Inter, system-ui, sans-serif;
-  --text-xs: 0.75rem;
-  --text-sm: 0.8125rem;
-  --text-md: 0.9375rem;
-  --text-lg: 1.0625rem;
-  --text-xl: 1.5rem;
-  --text-page: clamp(2rem, 5vw, 2.75rem);
+  /* Restrained seven-step product type scale. Use semantic aliases below,
+     not page-specific pixel sizes. */
+  --type-caption: 0.75rem;      /* 12px metadata */
+  --type-label: 0.8125rem;      /* 13px labels and compact actions */
+  --type-body: 0.9375rem;       /* 15px primary body copy */
+  --type-control: 1rem;         /* 16px controls; prevents iOS input zoom */
+  --type-subtitle: 1.0625rem;   /* 17px compact headings */
+  --type-section: 1.25rem;      /* 20px section headings */
+  --type-page: clamp(2rem, 4vw, 2.375rem); /* 32–38px page titles */
+
+  --leading-tight: 1.08;
+  --leading-heading: 1.18;
+  --leading-body: 1.45;
+  --leading-compact: 1.25;
+
+  --tracking-tight: -0.025em;
+  --tracking-label: 0.06em;
+
+  --weight-regular: 450;
   --weight-medium: 550;
   --weight-semibold: 650;
   --weight-bold: 750;
+
+  /* Compatibility aliases for existing features. */
+  --text-xs: var(--type-caption);
+  --text-sm: var(--type-label);
+  --text-md: var(--type-body);
+  --text-lg: var(--type-subtitle);
+  --text-xl: var(--type-section);
+  --text-page: var(--type-page);
 
   /* Spacing */
   --space-1: 4px;
