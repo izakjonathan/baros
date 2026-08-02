@@ -19,3 +19,9 @@ This release implements the requested mobile workspace refinements on top of v0.
 
 ## Database
 No migration is required.
+
+## v0.9.3 build correction
+
+- Typed the PostgreSQL copy-week `saved` collection as `Shift[]`.
+- Fixes the Vercel TypeScript error: `Variable saved implicitly has type any[]`.
+- No database migration required.

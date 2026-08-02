@@ -372,7 +372,7 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
     try {
       if (devMode) setShifts((current) => [...current, ...copies]);
       else {
-        const saved = [];
+        const saved: Shift[] = [];
         for (const shift of copies) {
           const result = await persist("/api/shifts", { method:"POST", body:JSON.stringify({ locationId:selectedLocationId, employeeId:shift.employeeId, isOpen:shift.isOpen, role:shift.role, startsAt:`${canonicalShiftDate(shift)}T${shift.start}:00`, endsAt:`${dateFromSerial(dateSerial(canonicalShiftDate(shift))+(isOvernight(shift.start,shift.end)?1:0))}T${shift.end}:00`, status:"DRAFT" }) });
           saved.push(...(result?.shifts || []).map(mapDatabaseShift));

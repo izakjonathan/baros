@@ -184,3 +184,24 @@ html{font-size:16px;overflow-x:hidden}body{line-height:1.45;min-width:320px}butt
   .team-grid{grid-template-columns:1fr!important}.team-card{padding:14px}.team-actions .secondary{min-height:38px}.team-stats{display:grid;gap:6px}.team-stats span:last-child{text-align:left}
 }
 @media(max-width:390px){.metric-grid,.attendance-metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}.metric-card{min-height:142px;padding:10px}.metric-card>strong{font-size:16px}.metric-label{font-size:9px}.metric-trend{font-size:9px}.settings-summary{grid-template-columns:1fr}.settings-summary>div:last-child:nth-child(odd){grid-column:auto}.team-actions.three-actions{gap:5px}.team-actions .secondary{padding:0 5px;font-size:10px}}
+
+/* v0.9.3 final requested workspace polish */
+.page-wrap{scroll-margin-top:74px}
+.topbar{width:auto}
+.metric-grid,.attendance-metrics{width:100%}
+.metric-card{width:100%;overflow:hidden}
+.settings-nav button{overflow-wrap:anywhere}
+.team-card-head{min-width:0}
+.team-actions{width:100%}
+@media(max-width:640px){
+  .page-wrap{padding-top:18px}
+  .metric-grid,.attendance-metrics{width:100%;grid-auto-rows:1fr}
+  .metric-card{height:100%;min-height:138px}
+  .settings-layout{width:100%;min-width:0}
+  .settings-nav,.settings-panel{width:100%;min-width:0}
+  .settings-nav button{font-size:10px;padding-inline:4px}
+  .team-card-head{align-items:center}
+  .team-status{font-size:10px}
+  .team-actions{display:flex;gap:6px}
+  .team-actions .secondary{flex:1;min-width:0}
+}
