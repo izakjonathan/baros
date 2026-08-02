@@ -34,75 +34,73 @@ export async function POST(request: Request) {
     if (!user.employeeId || !user.locationId) throw new ApiError(400, "A linked employee profile and location are required");
     const body = await readJsonObject(request);
     const action = String(body.action || "").toUpperCase();
-    const sql = db();
-    const [settings] = await sql`
-      select * from time_clock_settings where organization_id=${user.organizationId} and location_id=${user.locationId}
-    `;
-    if (action === "CLOCK_IN" && settings && !settings.allow_mobile_clock) throw new ApiError(403, "Mobile clock-in is disabled for this location");
+    if (!['CLOCK_IN','BREAK_START','BREAK_END','CLOCK_OUT'].includes(action)) throw new ApiError(400, "Unsupported action");
 
-    if (action === "CLOCK_IN") {
-      const existing = await sql`select id from timesheets where organization_id=${user.organizationId} and employee_id=${user.employeeId} and status='OPEN'`;
-      if (existing.length) throw new ApiError(409, "Already clocked in");
-      const [nextShift] = await sql`
-        select id,starts_at,ends_at,role from shifts
-        where organization_id=${user.organizationId} and location_id=${user.locationId}
-          and employee_id=${user.employeeId} and status='PUBLISHED'
-          and starts_at between now()-interval '4 hours' and now()+interval '12 hours'
-        order by abs(extract(epoch from (starts_at-now()))) asc limit 1
+    const result = await db().begin(async (tx) => {
+      const [location] = await tx`
+        select l.id,l.timezone,
+          coalesce(s.allow_mobile_clock,true) allow_mobile_clock,
+          coalesce(s.allow_unscheduled_clock,false) allow_unscheduled_clock
+        from locations l
+        left join time_clock_settings s on s.location_id=l.id and s.organization_id=l.organization_id
+        where l.id=${user.locationId} and l.organization_id=${user.organizationId} and l.active=true
+        for update of l
       `;
-      if (!nextShift && settings && !settings.allow_unscheduled_clock) throw new ApiError(409, "No eligible published shift is available for clock-in");
-      const rows = await sql.begin(async (tx) => {
-        const result = await tx`
+      if (!location) throw new ApiError(400, "The assigned location is unavailable");
+
+      if (action === 'CLOCK_IN') {
+        if (!location.allow_mobile_clock) throw new ApiError(403, "Mobile clock-in is disabled for this location");
+        const existing = await tx`select id from timesheets where organization_id=${user.organizationId} and employee_id=${user.employeeId} and status='OPEN' for update`;
+        if (existing.length) throw new ApiError(409, "Already clocked in");
+        const [nextShift] = await tx`
+          select id,starts_at,ends_at,role from shifts
+          where organization_id=${user.organizationId} and location_id=${user.locationId}
+            and employee_id=${user.employeeId} and status='PUBLISHED'
+            and starts_at between now()-interval '4 hours' and now()+interval '12 hours'
+          order by abs(extract(epoch from (starts_at-now()))) asc limit 1
+          for update
+        `;
+        if (!nextShift && !location.allow_unscheduled_clock) throw new ApiError(409, "No eligible published shift is available for clock-in");
+        const [timesheet] = await tx`
           insert into timesheets(organization_id,location_id,employee_id,shift_id,work_date,clocked_in_at,scheduled_minutes,status)
-          values(${user.organizationId},${user.locationId},${user.employeeId},${nextShift?.id || null},current_date,now(),${nextShift ? Math.max(0, Math.round((new Date(nextShift.ends_at).getTime()-new Date(nextShift.starts_at).getTime())/60000)) : 0},'OPEN')
-          returning *
+          values(
+            ${user.organizationId},${user.locationId},${user.employeeId},${nextShift?.id || null},
+            (now() at time zone ${location.timezone})::date,now(),
+            ${nextShift ? Math.max(0, Math.round((new Date(nextShift.ends_at).getTime()-new Date(nextShift.starts_at).getTime())/60000)) : 0},'OPEN'
+          ) returning *
         `;
-        await tx`
-          insert into time_events(organization_id,location_id,employee_id,timesheet_id,event_type,source,created_by)
-          values(${user.organizationId},${user.locationId},${user.employeeId},${result[0].id},'CLOCK_IN','MOBILE',${user.userId})
-        `;
-        return result;
-      });
-      return NextResponse.json(rows[0], { status: 201 });
-    }
+        await tx`insert into time_events(organization_id,location_id,employee_id,timesheet_id,event_type,source,created_by) values(${user.organizationId},${user.locationId},${user.employeeId},${timesheet.id},'CLOCK_IN','MOBILE',${user.userId})`;
+        return { status: 201, body: timesheet };
+      }
 
-    const [open] = await sql`
-      select * from timesheets where organization_id=${user.organizationId} and employee_id=${user.employeeId} and status='OPEN' for update
-    `;
-    if (!open) throw new ApiError(409, "No open timesheet");
+      const [open] = await tx`select * from timesheets where organization_id=${user.organizationId} and employee_id=${user.employeeId} and status='OPEN' for update`;
+      if (!open) throw new ApiError(409, "No open timesheet");
 
-    if (action === "BREAK_START") {
-      const [already] = await sql`select id from time_breaks where timesheet_id=${open.id} and ended_at is null limit 1`;
-      if (already) throw new ApiError(409, "A break is already in progress");
-      await sql.begin(async (tx) => {
+      if (action === 'BREAK_START') {
+        const openBreak = await tx`select id from time_breaks where timesheet_id=${open.id} and ended_at is null for update`;
+        if (openBreak.length) throw new ApiError(409, "A break is already in progress");
         await tx`insert into time_breaks(timesheet_id,started_at) values(${open.id},now())`;
         await tx`insert into time_events(organization_id,location_id,employee_id,timesheet_id,event_type,source,created_by) values(${user.organizationId},${user.locationId},${user.employeeId},${open.id},'BREAK_START','MOBILE',${user.userId})`;
-      });
-      return NextResponse.json({ ok: true });
-    }
-    if (action === "BREAK_END") {
-      const rows = await sql.begin(async (tx) => {
+        return { status: 200, body: { ok: true } };
+      }
+      if (action === 'BREAK_END') {
         const ended = await tx`update time_breaks set ended_at=now() where timesheet_id=${open.id} and ended_at is null returning id`;
         if (!ended.length) throw new ApiError(409, "No break is in progress");
         await tx`insert into time_events(organization_id,location_id,employee_id,timesheet_id,event_type,source,created_by) values(${user.organizationId},${user.locationId},${user.employeeId},${open.id},'BREAK_END','MOBILE',${user.userId})`;
-        return ended;
-      });
-      return NextResponse.json({ ok: Boolean(rows.length) });
-    }
-    if (action === "CLOCK_OUT") {
-      await sql.begin(async (tx) => {
-        await tx`update time_breaks set ended_at=now() where timesheet_id=${open.id} and ended_at is null`;
-        await tx`
-          update timesheets set clocked_out_at=now(),
-            break_minutes=coalesce((select sum(extract(epoch from (coalesce(ended_at,now())-started_at))/60)::int from time_breaks where timesheet_id=${open.id}),0),
-            worked_minutes=greatest(0,(extract(epoch from (now()-clocked_in_at))/60)::int-coalesce((select sum(extract(epoch from (coalesce(ended_at,now())-started_at))/60)::int from time_breaks where timesheet_id=${open.id}),0)),
-            status='PENDING',updated_at=now() where id=${open.id}
-        `;
-        await tx`insert into time_events(organization_id,location_id,employee_id,timesheet_id,event_type,source,created_by) values(${user.organizationId},${user.locationId},${user.employeeId},${open.id},'CLOCK_OUT','MOBILE',${user.userId})`;
-      });
-      return NextResponse.json({ ok: true });
-    }
-    throw new ApiError(400, "Unsupported action");
+        return { status: 200, body: { ok: true } };
+      }
+
+      await tx`update time_breaks set ended_at=now() where timesheet_id=${open.id} and ended_at is null`;
+      const [closed] = await tx`
+        update timesheets set clocked_out_at=now(),
+          break_minutes=coalesce((select sum(extract(epoch from (ended_at-started_at))/60)::int from time_breaks where timesheet_id=${open.id}),0),
+          worked_minutes=greatest(0,(extract(epoch from (now()-clocked_in_at))/60)::int-coalesce((select sum(extract(epoch from (ended_at-started_at))/60)::int from time_breaks where timesheet_id=${open.id}),0)),
+          status='PENDING',updated_at=now() where id=${open.id} returning *
+      `;
+      await tx`insert into time_events(organization_id,location_id,employee_id,timesheet_id,event_type,source,created_by) values(${user.organizationId},${user.locationId},${user.employeeId},${open.id},'CLOCK_OUT','MOBILE',${user.userId})`;
+      return { status: 200, body: closed };
+    });
+    return NextResponse.json(result.body, { status: result.status });
   } catch (error) {
     return jsonError(error);
   }

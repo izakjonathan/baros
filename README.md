@@ -1,24 +1,11 @@
-# Bar Ops v0.8.8
+# Bar Ops v0.9.1
 
-This release redesigns the Shift plan workspace for a denser week/month overview, horizontal day navigation, and date-aware quick shift creation. See `RELEASE_NOTES.md` for details.
+Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 
-Hospitality operations workspace for scheduling, attendance, inventory, ordering, employee self-service, and payroll workflows.
+## iPad workflow
+Commit the flat ZIP to the private `baros` repository using the Commit app. GitHub Quality Checks installs dependencies, runs tests/type checking/build, and Vercel deploys the commit.
 
-This release fixes assigned shifts displaying as “Unassigned” immediately after creation or reassignment. PostgreSQL shift mutation responses now include the employee display name expected by the manager schedule mapper.
+## Database
+Use `DATABASE_URL` for the pooled Neon runtime URL and `DATABASE_DIRECT_URL` for migrations.
 
-## Deployment
-
-Commit the ZIP to the `baros` GitHub repository. GitHub Quality Checks and Vercel will run automatically. No database migration is required.
-
-## v0.8.6 database upgrade
-
-After committing this release, run **GitHub → Actions → Database administration → migrate**, then run **verify**. Migration 009 is required before using the new stock, receiving, transfer, waste, or concurrency protections.
-
-
-## v0.8.6
-Team cards show published scheduled hours for the next four weeks based on live shift assignments.
-## v0.8.9 Settings and production time clock
-
-Settings is now a working manager workspace. Per-location time-clock controls are stored in PostgreSQL. The employee My Hours page uses persistent clock, break, timesheet, scheduled-hours and correction-request APIs and restores an open clock after refresh.
-
-Clocking is based on a linked employee identity, not the management role. Employees, shift managers, managers, admins and owners can record time when their user account is linked to an employee profile and location.
+For this release no new migration is required.

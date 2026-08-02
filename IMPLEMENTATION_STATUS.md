@@ -1,19 +1,10 @@
-# v0.8.9 implementation status
+# Implementation status — v0.9.1
 
-Implemented:
-- Functional Settings navigation and workspace
-- PostgreSQL-backed time-clock configuration per location
-- Persistent mobile clock-in, break and clock-out
-- Active timesheet and break restoration after refresh
-- Published-shift association for clock-in
-- PostgreSQL-backed scheduled/approved hour summaries
-- Persistent employee correction requests and manager notifications
-- Role-aware clock eligibility based on a linked employee profile
+## Persistent and server-confirmed
+Employee profiles and invitations, shifts and publications, products and location inventory, payroll/timesheet APIs, employee clock actions, settings, stock receipt/waste/transfer APIs, and audit records.
 
-Still staged:
-- Dedicated shared-device kiosk screen
-- Browser geolocation capture and full radius enforcement in mobile clock UI
-- Background missed-clock-out worker
-- Automatic approval engine using tolerance settings
-- Full organization/location creation and editing UI
-- MFA enrollment and managed backup controls
+## Development-local or partially integrated
+Daily operations editor, complete purchase-order editor, some dashboard summary cards, and some manager approval surfaces still use presentation state or incomplete UI flows. They are not represented as completed production workflows.
+
+## Operational rule
+A manager action must not show success before its PostgreSQL request succeeds. New work should use UUIDs, selected location context, tenant-scoped queries, shared validation helpers, and a transaction for multi-table writes.

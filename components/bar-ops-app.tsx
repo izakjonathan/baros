@@ -21,16 +21,17 @@ const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = 
   { id: "control", label: "Control centre", icon: Settings },
 ];
 
-type Location = { id: string; name: string };
+type Location = { id: string; name: string; timezone?: string };
 type Employee = { id?: string; name: string; initials: string; role: string; hours: number; status: string; active: boolean; email?: string; phone?: string; payrollId?: string; salaryCode?: string; costCentre?: string; portalStatus?: "NONE" | "INVITED" | "ACTIVE" | "EXPIRED" };
 type StockAdjustment = { id: string; productId: string; productName: string; delta: number; reason: string; createdAt: string };
 type OpsTask = { id: string; title: string; type: "Opening" | "Closing" | "Task" | "Maintenance"; owner: string; due: string; done: boolean; note?: string };
 type LogEntry = { id: string; title: string; body: string; author: string; createdAt: string };
 type TimeEntry = { id: string; employee: string; date: string; clockIn: string; clockOut?: string; breakMinutes: number; status: "Running" | "Pending" | "Approved" | "Rejected"; scheduledHours: number; note?: string; edited?: boolean };
-const BASE_MONDAY = new Date(2026, 6, 27, 12);
+const todayAtNoon = new Date(); todayAtNoon.setHours(12,0,0,0);
+const BASE_MONDAY = new Date(todayAtNoon); BASE_MONDAY.setDate(todayAtNoon.getDate() - ((todayAtNoon.getDay() + 6) % 7));
 function toIsoDate(date: Date) { const y = date.getFullYear(); const m = String(date.getMonth()+1).padStart(2,"0"); const d = String(date.getDate()).padStart(2,"0"); return `${y}-${m}-${d}`; }
 function dateSerial(value: string) { const [year, month, day] = value.split("-").map(Number); return Date.UTC(year, month - 1, day) / 86400000; }
-const BASE_DATE_SERIAL = dateSerial("2026-07-27");
+const BASE_DATE_SERIAL = dateSerial(toIsoDate(BASE_MONDAY));
 function dateFromSerial(serial: number) { const date = new Date(serial * 86400000); return date.toISOString().slice(0, 10); }
 function shiftInterval(shift: Shift) { const startDay = dateSerial(canonicalShiftDate(shift)); const [sh, sm] = shift.start.split(":").map(Number); const [eh, em] = shift.end.split(":").map(Number); const start = startDay * 1440 + sh * 60 + sm; let end = startDay * 1440 + eh * 60 + em; if (end <= start) end += 1440; return { start, end }; }
 function shiftsOverlap(a: Shift, b: Shift) { const x = shiftInterval(a); const y = shiftInterval(b); return x.start < y.end && y.start < x.end; }
@@ -44,13 +45,17 @@ function mapDatabaseShift(x: any): Shift {
   const endText = String(x.ends_at);
   const startDate = new Date(startText);
   const endDate = new Date(endText);
-  const date = startText.slice(0, 10);
+  const timezone = x.location_timezone || "Europe/Copenhagen";
+  const parts = (date: Date) => Object.fromEntries(new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", hourCycle:"h23" }).formatToParts(date).map(part => [part.type, part.value]));
+  const startParts = parts(startDate);
+  const endParts = parts(endDate);
+  const date = `${startParts.year}-${startParts.month}-${startParts.day}`;
   const pos = shiftPositionFromDate(date);
   const employeeName = x.is_open ? "Available shift" : x.employee_name || "Unassigned";
   return {
     id: x.id, date, day: pos.day, weekOffset: pos.weekOffset, employee: employeeName, employeeId: x.employee_id || undefined,
     initials: x.is_open ? "+" : employeeName.split(" ").map((word: string) => word[0]).join(""),
-    start: startDate.toISOString().slice(11, 16), end: endDate.toISOString().slice(11, 16),
+    start: `${startParts.hour}:${startParts.minute}`, end: `${endParts.hour}:${endParts.minute}`,
     role: x.role, status: x.status === "DRAFT" ? "Draft" : "Published", isOpen: x.is_open,
     recurrenceGroupId: x.recurrence_group_id, locationId: x.location_id
   };
@@ -91,7 +96,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
   useEffect(() => {
     if (!devMode) return;
     try {
-      const raw = localStorage.getItem("barops-dev-v070");
+      const raw = localStorage.getItem("barops-dev-v091") || localStorage.getItem("barops-dev-v070");
       if (raw) {
         const saved = JSON.parse(raw);
         if (saved.products) setProducts(saved.products);
@@ -102,12 +107,12 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
         if (saved.opsTasks) setOpsTasks(saved.opsTasks);
         if (saved.logEntries) setLogEntries(saved.logEntries);
       }
-    } catch { localStorage.removeItem("barops-dev-v070"); }
+    } catch { localStorage.removeItem("barops-dev-v091"); localStorage.removeItem("barops-dev-v070"); }
     setDataReady(true);
   }, [devMode]);
   useEffect(() => {
     if (!devMode || !dataReady) return;
-    localStorage.setItem("barops-dev-v070", JSON.stringify({version:1,products,shifts,employees,timeEntries,stockAdjustments,opsTasks,logEntries}));
+    localStorage.setItem("barops-dev-v091", JSON.stringify({version:2,products,shifts,employees,timeEntries,stockAdjustments,opsTasks,logEntries}));
   }, [devMode,dataReady,products,shifts,employees,timeEntries,stockAdjustments,opsTasks,logEntries]);
   useEffect(() => {
     if (devMode) return;
@@ -233,7 +238,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       {dialog === "employee" && <EmployeeDialog onClose={() => setDialog(null)} onSave={async (employee) => { try { const saved=await persist("/api/employees",{method:"POST",body:JSON.stringify({...employee,locationId:selectedLocationId})}); setEmployees((current) => [...current, {...employee,id:saved?.id,portalStatus:"NONE"}]); setDialog(null); notify(devMode?"Employee added":"Employee added — you can now invite them to the portal"); } catch(e) { notify(e instanceof Error?e.message:"Could not add employee"); } }} />}
       {dialog === "product" && <ProductDialog onClose={() => setDialog(null)} onSave={async (product) => { try { const saved=await persist("/api/products",{method:"POST",body:JSON.stringify({...product,locationId:selectedLocationId})}); setProducts((current) => [...current, {...product,...saved}]); setDialog(null); notify("Product added to inventory"); } catch(error) { notify(error instanceof Error?error.message:"Could not add product"); } }} />}
       {editingProduct && <ProductDialog product={editingProduct} onClose={() => setEditingProduct(null)} onSave={async (product) => { try { const saved=await persist("/api/products",{method:"PATCH",body:JSON.stringify({...product,locationId:selectedLocationId})}); setProducts(current => current.map(p => p.id === product.id ? {...product,...saved} : p)); setEditingProduct(null); notify("Product updated"); } catch(error) { notify(error instanceof Error?error.message:"Could not update product"); } }} />}
-      {dialog === "stockCount" && <StockCountDialog products={products} onClose={() => setDialog(null)} onSave={(counts) => { setProducts(current => current.map(p => ({...p,stock:counts[p.id] ?? p.stock}))); setDialog(null); notify("Stock count approved and inventory updated"); }} />}
+      {dialog === "stockCount" && <StockCountDialog products={products} onClose={() => setDialog(null)} onSave={async (counts) => { try { if (!devMode) { for (const product of products) if (counts[product.id] !== undefined && counts[product.id] !== product.stock) await persist("/api/products", { method:"PATCH", body:JSON.stringify({...product, stock:counts[product.id], locationId:selectedLocationId}) }); } setProducts(current => current.map(p => ({...p,stock:counts[p.id] ?? p.stock}))); setDialog(null); notify("Stock count approved and inventory updated"); } catch(error) { notify(error instanceof Error ? error.message : "Could not save stock count"); } }} />}
       {dialog === "order" && <OrderDialog onClose={() => setDialog(null)} onSave={() => { setDialog(null); notify("Purchase order created"); }} />}
       {toast && <div className="toast"><span><Check size={16} /></span>{toast}</div>}
     </div>
@@ -309,7 +314,7 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
   const [viewMode, setViewMode] = useState<"week" | "month">("week");
   const [monthOffset, setMonthOffset] = useState(0);
   const weekMonday = new Date(BASE_MONDAY); weekMonday.setDate(BASE_MONDAY.getDate() + currentWeekOffset * 7);
-  const monthAnchor = new Date(2026, 7 + monthOffset, 1, 12);
+  const monthAnchor = new Date(BASE_MONDAY.getFullYear(), BASE_MONDAY.getMonth() + monthOffset, 1, 12);
   const periodStart = viewMode === "week" ? weekMonday : new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), 1, 12);
   const periodEnd = viewMode === "week" ? new Date(weekMonday.getFullYear(), weekMonday.getMonth(), weekMonday.getDate() + 6, 12) : new Date(monthAnchor.getFullYear(), monthAnchor.getMonth() + 1, 0, 12);
   const displayDays = Array.from({ length: Math.round((dateSerial(toIsoDate(periodEnd)) - dateSerial(toIsoDate(periodStart)))) + 1 }, (_, index) => {
@@ -344,13 +349,24 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
     } catch (error) { notify(error instanceof Error ? error.message : "Could not publish week"); }
     finally { setPublishing(false); }
   }
-  function copyPreviousWeek() {
+  async function copyPreviousWeek() {
     if (viewMode !== "week") { notify("Switch to Week view to copy the previous week"); return; }
     const source = shifts.filter((shift) => (shift.weekOffset ?? 0) === currentWeekOffset - 1);
     if (!source.length) { notify("The previous week has no shifts to copy"); return; }
     if (visibleShifts.length && !window.confirm("This week already contains shifts. Add copies from the previous week as additional drafts?")) return;
     const copies = source.map((shift) => { const sourceDate = new Date(`${canonicalShiftDate(shift)}T12:00:00`); sourceDate.setDate(sourceDate.getDate() + 7); const date = toIsoDate(sourceDate); const position = shiftPositionFromDate(date); return { ...shift, id: crypto.randomUUID(), date, day: position.day, weekOffset: position.weekOffset, status: "Draft" as const, recurrenceLabel: undefined }; });
-    setShifts((current) => [...current, ...copies]); notify(`${copies.length} shifts copied as drafts`);
+    try {
+      if (devMode) setShifts((current) => [...current, ...copies]);
+      else {
+        const saved = [];
+        for (const shift of copies) {
+          const result = await persist("/api/shifts", { method:"POST", body:JSON.stringify({ locationId:selectedLocationId, employeeId:shift.employeeId, isOpen:shift.isOpen, role:shift.role, startsAt:`${canonicalShiftDate(shift)}T${shift.start}:00`, endsAt:`${dateFromSerial(dateSerial(canonicalShiftDate(shift))+(isOvernight(shift.start,shift.end)?1:0))}T${shift.end}:00`, status:"DRAFT" }) });
+          saved.push(...(result?.shifts || []).map(mapDatabaseShift));
+        }
+        setShifts((current) => [...current, ...saved]);
+      }
+      notify(`${copies.length} shifts copied as drafts`);
+    } catch (error) { notify(error instanceof Error ? error.message : "Could not copy previous week"); }
   }
   return <>
     <div className="schedule-head">
@@ -544,7 +560,7 @@ function ControlCenter({devMode,databaseStatus,notify}:{devMode:boolean;database
   {title:"Stock operations",icon:ReceiptText,items:["Delivery receiving and partial/disputed receipts","Invoice number, total and discrepancy matching","Waste logs with stock ledger entries","Draft, in-transit and received location transfers"]},
   {title:"Security & compliance",icon:ShieldCheck,items:["MFA factor foundation and recovery records","Password-reset tokens and rate limiting","Managed backup/restore runbook and health events","GDPR export, deletion and rectification requests"]}
  ];
- return <><PageHeader title="Control centre" subtitle="Production controls plus development-data tools for realistic testing before database setup." action={<span className={`connection-pill ${devMode?"dev":"live"}`}>{databaseStatus}</span>}/>{devMode&&<section className="panel dev-data-tools"><PanelTitle title="Development data" subtitle="Your workspace is saved in this browser. Export a backup or reset to the original demo data."/><div><button className="secondary" onClick={()=>{const raw=localStorage.getItem("barops-dev-v070")||"{}";const blob=new Blob([raw],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="bar-ops-development-data.json";a.click();URL.revokeObjectURL(url);notify("Development data exported")}}><DownloadCloud size={17}/>Export JSON</button><label className="secondary file-import"><Upload size={17}/>Import JSON<input type="file" accept="application/json" onChange={async e=>{const file=e.target.files?.[0];if(!file)return;try{JSON.parse(await file.text());localStorage.setItem("barops-dev-v070",await file.text());location.reload()}catch{notify("That file is not valid Bar Ops JSON")}}}/></label><button className="secondary danger-outline" onClick={()=>{if(confirm("Reset all development data to the original demo workspace?")){localStorage.removeItem("barops-dev-v070");location.reload()}}}><RotateCcw size={17}/>Reset demo data</button></div></section>}<div className="control-grid">{groups.map(g=>{const Icon=g.icon;return <section className="panel control-card" key={g.title}><div className="control-icon"><Icon size={20}/></div><h2>{g.title}</h2>{g.items.map(i=><p key={i}><Check size={15}/>{i}</p>)}</section>})}</div><section className="panel control-actions"><PanelTitle title="Operational actions" subtitle="These actions use persistent APIs when PostgreSQL is connected."/><div className="quick-grid"><button className="quick-action" onClick={()=>notify("Create and lock a payroll period in Time & attendance")}><LockKeyhole/><div><strong>Payroll periods</strong><small>Lock, export and close</small></div></button><button className="quick-action" onClick={()=>notify("Kiosk endpoint ready at /api/kiosk")}><KeyRound/><div><strong>Kiosk mode</strong><small>PIN and geofence verified</small></div></button><button className="quick-action" onClick={()=>notify("Receiving, waste and transfers use /api/operations")}><ArrowLeftRight/><div><strong>Stock operations</strong><small>Receive, waste, transfer</small></div></button><button className="quick-action" onClick={()=>notify("Security controls use /api/security")}><ShieldCheck/><div><strong>Security</strong><small>MFA, reset, GDPR, sessions</small></div></button></div></section></>
+ return <><PageHeader title="Control centre" subtitle="Production controls plus development-data tools for realistic testing before database setup." action={<span className={`connection-pill ${devMode?"dev":"live"}`}>{databaseStatus}</span>}/>{devMode&&<section className="panel dev-data-tools"><PanelTitle title="Development data" subtitle="Your workspace is saved in this browser. Export a backup or reset to the original demo data."/><div><button className="secondary" onClick={()=>{const raw=localStorage.getItem("barops-dev-v091") || localStorage.getItem("barops-dev-v070")||"{}";const blob=new Blob([raw],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="bar-ops-development-data.json";a.click();URL.revokeObjectURL(url);notify("Development data exported")}}><DownloadCloud size={17}/>Export JSON</button><label className="secondary file-import"><Upload size={17}/>Import JSON<input type="file" accept="application/json" onChange={async e=>{const file=e.target.files?.[0];if(!file)return;try{JSON.parse(await file.text());localStorage.setItem("barops-dev-v091",await file.text());location.reload()}catch{notify("That file is not valid Bar Ops JSON")}}}/></label><button className="secondary danger-outline" onClick={()=>{if(confirm("Reset all development data to the original demo workspace?")){localStorage.removeItem("barops-dev-v091"); localStorage.removeItem("barops-dev-v070");location.reload()}}}><RotateCcw size={17}/>Reset demo data</button></div></section>}<div className="control-grid">{groups.map(g=>{const Icon=g.icon;return <section className="panel control-card" key={g.title}><div className="control-icon"><Icon size={20}/></div><h2>{g.title}</h2>{g.items.map(i=><p key={i}><Check size={15}/>{i}</p>)}</section>})}</div><section className="panel control-actions"><PanelTitle title="Production status" subtitle="Only workflows connected to a complete manager interface are presented as operational. Backend foundations remain documented in Implementation status."/><p className="settings-note">Use Time & attendance for payroll and clock review, Inventory for product and stock controls, and Settings for location time-clock configuration.</p></section></>>
 }
 
 function ShiftDialog({ onClose, onSave, currentWeekOffset, initialDate, employees, locations, selectedLocationId }: { onClose: () => void; onSave: (shifts: Shift[]) => void; currentWeekOffset: number; initialDate?: string; employees: Employee[]; locations: Location[]; selectedLocationId: string }) {
