@@ -1,4 +1,4 @@
-/* Bar Ops design tokens — v0.10.6
+/* Bar Ops design tokens — v0.11.0
    This is the single source of truth for visual changes. Feature CSS must use
    these semantic tokens instead of introducing new colour, spacing, radius,
    typography or shell constants. */
@@ -41,6 +41,13 @@
   --space-6: 24px;
   --space-8: 32px;
   --space-10: 40px;
+
+  /* Semantic rhythm: change these to realign the whole product. */
+  --space-inline: var(--space-2);
+  --space-field: var(--space-3);
+  --space-card: var(--space-4);
+  --space-section: var(--space-6);
+  --space-page: var(--space-8);
 
   /* Shape and interaction */
   --radius-sm: 9px;

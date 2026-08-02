@@ -4,7 +4,7 @@ const root=process.cwd();
 const pkg=JSON.parse(fs.readFileSync(path.join(root,"package.json"),"utf8"));
 const read=(p)=>fs.readFileSync(path.join(root,p),"utf8");
 const checks=[
-  [["0.10.5","0.10.6"].includes(pkg.version),"package version"],
+  [["0.10.5","0.10.6","0.11.0"].includes(pkg.version),"package version"],
   [/v0\.10\.[56]/.test(read("README.md")),"current README"],
   [read("IMPLEMENTATION_STATUS.md").startsWith("# Implementation status — v0.10."),"current implementation status"],
   [/bar-ops-v010[56]/.test(read("public/sw.js")),"rotated service-worker cache"],

@@ -1,42 +1,35 @@
-# Bar Ops v0.10.6 — Code & Design-System Consolidation
+# Bar Ops v0.11.0 — UI Architecture
 
-This release is a code-architecture cleanup built on v0.10.5. It does not add a database migration.
+This release converts the visual cleanup into a reusable component architecture.
 
-## Design-system consolidation
+## Shared primitives
 
-- Replaced `mono-tokens.css` and `mono-components.css` with the canonical files:
-  - `app/design-tokens.css`
-  - `app/design-system.css`
-- Centralized colour, typography, spacing, radius, control, icon, transition and app-shell values.
-- Kept compatibility aliases so existing feature layouts can migrate gradually without visual regressions.
-- Removed the legacy `:root` token block from `globals.css`.
-- Removed all `!important` declarations from application CSS.
-- Removed superseded v0.9.6 and v0.9.7 visual override layers from `globals.css`.
-- Removed duplicate declarations where a later identical selector already supplied the final value.
-- Fixed the malformed opening comment that previously swallowed the first design-system rule.
-- Removed an undefined legacy focus token.
+A new `components/ui-primitives.tsx` provides the canonical application controls:
 
-## CSS responsibilities
+- `ActionButton`
+- `ActionGroup`
+- `FilterBar`
+- `InputField`
+- `SelectField`
+- `SegmentedControl`
+- `KpiCard`
+- `DialogFooter`
 
-- `design-tokens.css`: the only source of global visual constants.
-- `design-system.css`: shared component appearance and cross-feature responsive behavior.
-- `globals.css`: structural and feature-specific layout only.
+## Migrated workflows
 
-## Regression-suite cleanup
+- Overview and Time & Attendance KPI cards use one shared card component.
+- Time & Attendance actions and filters use shared action/field patterns.
+- Add Shift and Edit Shift now share a single `ShiftCoreFields` implementation.
+- Assignment and repeat-frequency selectors use one segmented-control pattern.
+- Modal footers use one shared responsive action layout, including the Edit Shift destructive action.
 
-Historical tests now check current semantic outcomes instead of requiring old filenames, `!important`, or obsolete release-comment strings.
+## Central design changes
 
-Added `npm run test:design-system` to prevent the architecture from drifting back toward competing token roots and override layers.
-
-## PWA
-
-- Rotated the service-worker cache namespace to v0.10.6.
-- Retained standalone iPhone/iPad behavior and secure API cache exclusions.
+`app/design-tokens.css` now includes semantic rhythm tokens for inline spacing, fields, cards, sections, and pages. `app/design-system.css` includes the primitive and pattern layer. Future alignment changes can be made centrally instead of per page.
 
 ## Validation
 
-- Full `npm run test:all` passed.
-- CSS parsed without syntax errors.
-- All JavaScript test and service-worker files passed syntax validation.
-- Both GitHub Actions workflows remain included.
-- ZIP integrity and duplicate-entry checks passed.
+- All bundled regression suites passed.
+- 67 TypeScript/TSX files passed TypeScript syntax transpilation.
+- The service-worker cache namespace was rotated to v0.11.0.
+- No database migration is required.

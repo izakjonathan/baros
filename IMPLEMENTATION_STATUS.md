@@ -1,21 +1,20 @@
-# Implementation status — v0.10.6
+# Implementation status — v0.11.0
 
-## Current baseline
+v0.11.0 is the current working baseline. It retains the v0.10.6 database, PWA, manager, and employee functionality while introducing shared UI primitives and patterns.
 
-v0.10.6 is the current working baseline. It retains all v0.10.5 operational and PWA functionality while consolidating the CSS and design-system architecture.
+## Completed in this release
 
-## Architecture
+- Shared action, field, segmented-control, KPI, filter-bar, and dialog-footer primitives
+- One shared core field implementation for Add Shift and Edit Shift
+- Central semantic spacing/rhythm tokens
+- Time & Attendance migrated to shared filters and action groups
+- KPI grids migrated to one shared card implementation
+- Responsive dialog-footer pattern
 
-- PostgreSQL/Neon runtime and migrations remain unchanged.
-- Manager and employee workflows remain unchanged.
-- PWA manifest, icons, service worker and iOS standalone support remain active.
-- Visual constants are centralized in `app/design-tokens.css`.
-- Shared visual components are centralized in `app/design-system.css`.
-- Structural feature layout remains in `app/globals.css`.
+## Still staged
 
-## Remaining architecture work
+- Daily Operations remains primarily browser-workspace data
+- Purchase-order creation remains an initial supplier flow rather than a complete line-item editor
+- Further feature modules can now be migrated incrementally to the shared primitives
 
-- `components/bar-ops-app.tsx` is still a large manager component and should be split feature-by-feature in a later dedicated release.
-- Some historical regression scripts retain old version names, but now validate current semantic behavior.
-- A dependency lockfile should be generated and committed when a full public npm install is available.
-- Browser end-to-end and disposable PostgreSQL integration tests remain recommended.
+No database migration is required.
