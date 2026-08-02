@@ -1,8 +1,8 @@
-# Bar Ops v0.11.3 — UI Architecture Build Fix
+# Bar Ops v0.11.4 — UI Architecture Build Fix
 
 This release corrects the Vercel TypeScript failure in v0.11.2 by completing the Time & Attendance migration from the removed local `Metric` component to the shared `KpiCard` primitive. All v0.11.2 Daily Operations and PostgreSQL integration features are retained.
 
-# Bar Ops v0.11.3 — PostgreSQL Integration & Daily Operations
+# Bar Ops v0.11.4 — PostgreSQL Integration & Daily Operations
 
 ## Daily Operations persistence
 

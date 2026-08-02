@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, ArrowRight, Boxes, CalendarDays, ChevronRight, CircleDollarSign, ClipboardList, Clock3, MoreHorizontal, ShoppingCart, Sparkles, Truck, UserRoundPlus, Users, type LucideIcon } from "lucide-react";
-import { KpiCard } from "@/components/ui-primitives";
+import { KpiCard, PanelTitle } from "@/components/ui-primitives";
 import { PageHeader } from "@/components/app-shell";
 import type { NavKey, Product, Shift } from "@/lib/data";
 
@@ -42,5 +42,4 @@ export function Dashboard({ shifts, products, onNavigate }: { shifts: Shift[]; p
 function Metric({ icon: Icon, label, value, detail, trend, warning }: { icon: LucideIcon; label: string; value: string; detail: string; trend: string; warning?: boolean }) {
   return <KpiCard icon={<Icon size={20} />} label={label} value={value} detail={detail} warning={warning} footer={<>{warning ? <AlertTriangle size={13} /> : <Sparkles size={13} />}{trend}</>} />;
 }
-function PanelTitle({ title, subtitle, action }: { title: string; subtitle: string; action?: React.ReactNode }) { return <div className="panel-title"><div><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>{action}</div>; }
 function Quick({ icon: Icon, label, detail, onClick }: { icon: LucideIcon; label: string; detail: string; onClick: () => void }) { return <button className="quick-action" onClick={onClick}><span><Icon size={19} /></span><div><strong>{label}</strong><small>{detail}</small></div><ArrowRight size={17} /></button>; }

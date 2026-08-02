@@ -6,7 +6,7 @@ const tokens=read("app/design-tokens.css");
 const system=read("app/design-system.css");
 const feature=read("app/globals.css");
 const checks=[
-  [["0.10.6","0.11.0","0.11.1","0.11.2","0.11.3"].includes(pkg.version),"package version"],
+  [["0.10.6","0.11.0","0.11.1","0.11.2","0.11.3","0.11.4"].includes(pkg.version),"package version"],
   [layout.includes('import "./design-tokens.css"') && layout.includes('import "./design-system.css"'),"canonical design imports"],
   [!fs.existsSync("app/mono-tokens.css") && !fs.existsSync("app/mono-components.css"),"superseded design files removed"],
   [tokens.includes("--color-canvas") && tokens.includes("--control-height") && tokens.includes("--sidebar-width"),"central semantic tokens"],

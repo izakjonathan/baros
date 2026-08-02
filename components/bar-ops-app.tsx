@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { days, initialProducts, initialShifts, orders, team, type NavKey, type Product, type Shift, type ShiftRole } from "@/lib/data";
 import { DevRoleSwitcher } from "@/components/dev-role-switcher";
-import { ActionButton, ActionGroup, DialogFooter, FilterBar, InputField, KpiCard, SegmentedControl, SelectField } from "@/components/ui-primitives";
+import { ActionButton, ActionGroup, DialogFooter, FilterBar, InputField, KpiCard, PanelTitle, SegmentedControl, SelectField } from "@/components/ui-primitives";
 import { Sidebar, Topbar, PageHeader } from "@/components/app-shell";
 import { Dashboard } from "@/features/overview/dashboard";
 import { Team } from "@/features/team/team";

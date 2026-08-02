@@ -52,3 +52,7 @@ export function StatusPill({ children, tone = "neutral", className = "" }: { chi
 export function EmptyState({ title, description, action }: { title: string; description: string; action?: ReactNode }) {
   return <div className="empty-state"><strong>{title}</strong><p>{description}</p>{action}</div>;
 }
+
+export function PanelTitle({ title, subtitle, action }: { title: string; subtitle?: string; action?: ReactNode }) {
+  return <div className="panel-title"><div><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>{action}</div>;
+}
