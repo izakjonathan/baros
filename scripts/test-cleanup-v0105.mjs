@@ -4,10 +4,10 @@ const root=process.cwd();
 const pkg=JSON.parse(fs.readFileSync(path.join(root,"package.json"),"utf8"));
 const read=(p)=>fs.readFileSync(path.join(root,p),"utf8");
 const checks=[
-  [["0.10.5","0.10.6","0.11.0","0.11.1","0.11.2"].includes(pkg.version),"package version"],
-  [/v0\.(?:10\.[56]|11\.[01])/.test(read("README.md")),"current README"],
+  [["0.10.5","0.10.6","0.11.0","0.11.1","0.11.2","0.11.3"].includes(pkg.version),"package version"],
+  [/v0\.(?:10\.[56]|11\.[0-3])/.test(read("README.md")),"current README"],
   [/^# Implementation status — v0\.(?:10|11)\./.test(read("IMPLEMENTATION_STATUS.md")),"current implementation status"],
-  [/bar-ops-v(?:010[56]|011[01])/.test(read("public/sw.js")),"rotated service-worker cache"],
+  [/bar-ops-v(?:010[56]|0110|0111|0112|0113)/.test(read("public/sw.js")),"rotated service-worker cache"],
   [!read("app/manifest.ts").includes("?module=schedule"),"dead manager shortcut removed"],
   [!read("app/manifest.ts").includes("portrait-primary"),"iPad orientation not locked"],
   [!fs.existsSync(path.join(root,"FULL_SYSTEM_AUDIT.md")),"stale system audit removed"],

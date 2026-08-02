@@ -3,7 +3,7 @@ const css = fs.readFileSync('app/design-tokens.css', 'utf8') + fs.readFileSync('
 const layout = fs.readFileSync('app/layout.tsx', 'utf8');
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const checks = [
-  ['version', ['0.9.8','0.9.9','0.10.0','0.10.1','0.10.2','0.10.3','0.10.4','0.10.5','0.10.6','0.11.0','0.11.1','0.11.2'].includes(pkg.version)],
+  ['version', ['0.9.8','0.9.9','0.10.0','0.10.1','0.10.2','0.10.3','0.10.4','0.10.5','0.10.6','0.11.0','0.11.1','0.11.2','0.11.3'].includes(pkg.version)],
   ['mono imported', layout.includes('import "./design-tokens.css"') && layout.includes('import "./design-system.css"')],
   ['light grey canvas', css.includes('--color-canvas: #f4f4f2')],
   ['white surface', css.includes('--color-surface: #ffffff')],

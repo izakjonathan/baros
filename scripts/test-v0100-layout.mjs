@@ -2,7 +2,7 @@ import fs from 'node:fs';
 const css=fs.readFileSync(new URL('../app/design-system.css',import.meta.url),'utf8');
 const pkg=JSON.parse(fs.readFileSync(new URL('../package.json',import.meta.url),'utf8'));
 const checks=[
- ['version',['0.10.0','0.10.1','0.10.2','0.10.3','0.10.4','0.10.5','0.10.6','0.11.0','0.11.1','0.11.2'].includes(pkg.version)],
+ ['version',['0.10.0','0.10.1','0.10.2','0.10.3','0.10.4','0.10.5','0.10.6','0.11.0','0.11.1','0.11.2','0.11.3'].includes(pkg.version)],
  ['fixed topbar',/\.topbar\s*\{[^}]*position:\s*fixed/.test(css)],
  ['mobile sidebar below header',/\.sidebar\s*\{[^}]*top:\s*var\(--app-header-height\)/.test(css)],
  ['labelled publish width',/compact-publish[^\{]*\{[^}]*min-width:\s*116px/.test(css)],
