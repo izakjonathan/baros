@@ -57,3 +57,176 @@
   .topbar{background:rgba(244,242,235,.97)!important}
   .icon-button,.menu-button{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}
 }
+
+/* v0.9.7 monochrome minimal flat redesign */
+:root{
+  --canvas:#f3f4f6;
+  --surface:#ffffff;
+  --nav-surface:#f3f4f6;
+  --ink:#111214;
+  --muted:#74777d;
+  --line:#e9eaed;
+  --accent:#111214;
+  --accent-dark:#ffffff;
+  --shadow:none;
+}
+html,body,.app-frame,.main-shell,.employee-app{background:var(--canvas)!important;color:var(--ink)}
+
+/* One icon language: black stroke, transparent container. */
+svg{stroke:var(--ink);fill:none}
+.icon-button,.menu-button,.help-button,.text-button,.more,.team-add-button,.week-switch button,.task-check,.shift-card-top button,
+.metric-icon,.attention-icon,.control-icon,.quick-action>span,.employee-nav span,.employee-home-grid a>span:first-child,
+.employee-inbox article>span:first-child,.clock-icon,.notification-list>*>span:first-child{
+  color:var(--ink)!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.metric-icon,.attention-icon,.control-icon,.quick-action>span,.clock-icon{width:auto!important;height:auto!important;min-width:0!important;border-radius:0!important}
+.metric-icon,.attention-icon,.control-icon{margin-bottom:14px}
+.icon-button,.menu-button,.team-add-button,.week-switch button{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;padding:0!important;border-radius:10px!important}
+.icon-button:hover,.menu-button:hover,.team-add-button:hover,.week-switch button:hover,.text-button:hover{background:rgba(17,18,20,.055)!important}
+.icon-button:active,.menu-button:active,.team-add-button:active,.week-switch button:active{background:rgba(17,18,20,.095)!important}
+
+/* Navigation is a continuous surface, not a framed component. */
+.topbar,.employee-header{background:rgba(243,244,246,.94)!important;border:0!important;box-shadow:none!important;backdrop-filter:blur(18px)}
+.profile{border-top:0!important}
+.employee-nav{border:0!important;box-shadow:none!important;background:rgba(243,244,246,.96)!important}
+.employee-nav a{background:transparent!important;border:0!important}
+.employee-nav a.active{background:transparent!important;color:var(--ink)!important}
+.employee-nav a.active svg{stroke:var(--ink)!important}
+
+/* Flat surface hierarchy: contrast and spacing replace outlines. */
+.metric-card,.panel,.team-card,.settings-panel,.portal-form,.request-success,.workspace-loading-card,.dev-access-panel,.login-card,
+.employee-home-grid a,.employee-inbox article,.availability-grid article,.notification-list a,.notification-list article,.order-highlight,
+.inventory-stats,.schedule-toolbar,.calendar-panel,.table-panel,.clock-card,.employee-hero,.top-popover,.modal,.employee-more-sheet,
+.attendance-workflow,.open-shift-note,.series-edit-note,.repeat-panel,.supplier-options label,.employee-error,.empty-portal,
+.filter-bar,.settings-nav,.connection-pill,.stock-card,.product-card,.timesheet-card,.operations-card{
+  border:0!important;
+  box-shadow:none!important;
+}
+.metric-card,.panel,.team-card,.settings-panel,.portal-form,.request-success,.workspace-loading-card,.dev-access-panel,.login-card,
+.employee-home-grid a,.availability-grid article,.notification-list a,.notification-list article,.order-highlight,.inventory-stats,
+.schedule-toolbar,.calendar-panel,.table-panel,.clock-card,.employee-hero,.modal,.employee-more-sheet{
+  background:var(--surface)!important;
+}
+.metric-card,.panel,.team-card,.settings-panel,.portal-form,.order-highlight,.inventory-stats,.table-panel,.clock-card,.employee-hero{border-radius:12px!important}
+
+/* Remove decorative dividers; preserve only dense data-grid structure. */
+.panel-title,.timeline-row,.team-stats,.modal-actions,.toggle-row,.inline-create,.table-toolbar,.profile,.settings-row,
+.employee-section-header,.hours-history article,.request-history article,.task-list article,.notification-list article,
+.notification-list a,.supplier-options label{border:0!important}
+.panel-title{padding-bottom:8px!important}
+.timeline-row,.task-list article,.hours-history article,.request-history article{position:relative}
+.timeline-row+ .timeline-row,.task-list article+article,.hours-history article+article,.request-history article+article{
+  border-top:0!important;
+}
+/* Data tables and calendar columns keep extremely subtle structural rules. */
+.table-row,.day-column,.day-header{border-color:rgba(17,18,20,.065)!important}
+.table-head{border-bottom:1px solid rgba(17,18,20,.08)!important}
+.day-column{border-right:1px solid rgba(17,18,20,.055)!important}
+.day-header{border-bottom:1px solid rgba(17,18,20,.055)!important}
+
+/* Cards use more breathing room, not borders. */
+.metric-grid,.attendance-metrics{gap:12px!important}
+.metric-card{min-height:142px!important;padding:18px!important}
+.panel{overflow:hidden}
+.attention-item,.quick-action{border:0!important;background:transparent!important;box-shadow:none!important}
+.attention-item:hover,.quick-action:hover{background:rgba(17,18,20,.035)!important}
+.quick-grid{gap:4px!important}
+.quick-action{min-height:58px;border-radius:10px!important}
+
+/* Flat monochrome actions. Adjacent controls share size and rhythm. */
+.primary,.secondary,.publish-button,.compact-action,.filter-button,.portal-action,.danger-button,.danger-outline,
+.file-import,.schedule-view-select,.settings-nav button,.assignment-toggle button{
+  min-height:40px!important;
+  height:40px!important;
+  border:0!important;
+  border-radius:10px!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  color:var(--ink)!important;
+  padding:0 13px!important;
+  font-weight:700!important;
+}
+.primary:hover,.secondary:hover,.publish-button:hover,.compact-action:hover,.filter-button:hover,.portal-action:hover,
+.file-import:hover,.schedule-view-select:hover,.settings-nav button:hover,.assignment-toggle button:hover{
+  background:rgba(17,18,20,.055)!important;
+}
+.primary:active,.secondary:active,.publish-button:active,.compact-action:active,.filter-button:active,.portal-action:active{
+  background:rgba(17,18,20,.095)!important;
+}
+.primary:disabled,.secondary:disabled,.publish-button:disabled{opacity:.38;background:transparent!important}
+.danger-button,.danger-outline{color:#9c2828!important}
+.danger-button:hover,.danger-outline:hover{background:rgba(156,40,40,.06)!important}
+
+.header-actions,.schedule-head-actions,.modal-actions,.team-card-actions,.settings-actions,.period-actions,.top-actions,
+.inline-actions,.employee-action-row,.control-actions>div,.dev-data-tools>div{
+  display:flex!important;
+  align-items:center!important;
+  gap:4px!important;
+}
+.header-actions>button,.schedule-head-actions>button,.modal-actions>button,.team-card-actions>button,.settings-actions>button,
+.period-actions>button,.inline-actions>button,.employee-action-row>button{
+  min-height:40px!important;
+  align-self:stretch!important;
+}
+.modal-actions>button,.team-card-actions>button,.employee-action-row>button{flex:1 1 0!important;min-width:0!important}
+
+/* Inputs remain discoverable, but with tonal fill instead of hard outlines. */
+input,select,textarea,.search-field,.custom-range input,.form-grid input,.form-grid select,.availability-times input,.correction-field textarea{
+  border:0!important;
+  background:#f0f1f3!important;
+  box-shadow:none!important;
+  color:var(--ink)!important;
+}
+input:focus,select:focus,textarea:focus,.search-field:focus-within{
+  outline:2px solid rgba(17,18,20,.32)!important;
+  outline-offset:1px!important;
+}
+.search-field svg{stroke:var(--ink)!important}
+
+/* Status uses tonal fill only; no outlined pills. */
+.status,.active-pill,.claim-status,.connection-pill,.shift-card em,.side-nav em{
+  border:0!important;
+  box-shadow:none!important;
+}
+
+/* Schedule surface is cleaner and flatter. */
+.schedule-toolbar{border-radius:12px 12px 0 0!important}
+.calendar-panel{border-radius:0 0 12px 12px!important}
+.day-column.today,.day-header.today,.today .day-header{background:#eceef1!important}
+.today .day-header strong{background:transparent!important;color:var(--ink)!important;border-radius:0!important;width:auto!important;height:auto!important;line-height:normal!important}
+.shift-card{border:0!important;border-left:3px solid var(--ink)!important;box-shadow:none!important;background:#f7f7f8!important}
+.shift-card.role-bartender,.shift-card.role-floor{background:#f7f7f8!important;border-left-color:var(--ink)!important}
+.add-slot{border:0!important;background:transparent!important;color:var(--muted)!important}
+.add-slot:hover{background:rgba(17,18,20,.035)!important;color:var(--ink)!important}
+
+/* Employee portal follows the same monochrome system. */
+.employee-page,.employee-shell{background:var(--canvas)!important}
+.employee-home-grid a,.shift-feed article,.hours-history article,.request-history article,.employee-inbox article,
+.availability-grid article,.notification-list a,.notification-list article{
+  border:0!important;box-shadow:none!important;background:#fff!important;border-radius:12px!important
+}
+.employee-inbox article,.notification-list .unread{background:#f0f1f3!important}
+.employee-loading-inline,.employee-form-message{border:0!important;background:#eceef1!important;color:var(--ink)!important}
+
+/* Eliminate decorative color chips behind icons. */
+.metric-icon.warning,.attention-icon.amber,.attention-icon.violet,.attention-icon.blue,.avatar.sand,
+.employee-home-grid a>span:first-child,.notification-list>*>span:first-child{background:transparent!important;color:var(--ink)!important}
+
+@media(max-width:820px){
+  .page-wrap{padding-left:16px!important;padding-right:16px!important}
+  .topbar{padding-left:12px!important;padding-right:12px!important}
+  .metric-grid,.attendance-metrics{gap:10px!important}
+  .metric-card{padding:15px!important;min-height:132px!important}
+  .header-actions,.schedule-head-actions,.team-card-actions,.modal-actions{gap:2px!important}
+  .header-actions>button,.schedule-head-actions>button{padding-left:10px!important;padding-right:10px!important}
+}
+
+@media(max-width:520px){
+  .metric-card{min-height:122px!important}
+  .primary,.secondary,.publish-button,.compact-action,.filter-button,.portal-action,.schedule-view-select{min-height:38px!important;height:38px!important}
+  .team-card-actions{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(0,1fr))!important;width:100%!important}
+  .team-card-actions>button{width:100%!important;padding:0 7px!important;font-size:10px!important}
+}
