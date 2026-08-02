@@ -1,27 +1,15 @@
-# Bar Ops v0.9.2 — Workspace UI optimization
+# Bar Ops v0.9.4 — Schedule Control & Team Card Layout Fix
 
-This release implements the requested mobile workspace refinements on top of v0.9.1 and includes a build-fix for the malformed Control Centre JSX discovered during Vercel deployment.
+## Schedule workspace
+- Replaced the three-button Week/Month/Custom control with a compact dropdown beside Copy and Add shift.
+- Kept period navigation and publishing in the schedule toolbar.
+- Contained custom From/To fields in a dedicated responsive toolbar row on narrow screens.
+- Prevented date controls from overflowing the viewport or covering navigation and publishing controls.
 
-## Interface changes
-- Removed the Add shift action from Overview.
-- Fixed the top navigation to the viewport and made its three controls square.
-- Added functional workspace search and notifications popovers.
-- Overview and Time & attendance metric cards use a responsive 2×2 grid on mobile.
-- Settings navigation and cards were rescaled for narrow screens; the introductory sentence was removed.
-- Shift plan supports Week, Month and Custom date ranges, with range publishing and a full-cell current-day highlight.
-- Team header and employee cards were condensed; identity, status and actions use less vertical space.
-- Removed the requested descriptive copy from Time & attendance, Team and Edit employee.
+## Team cards
+- Locked every employee identity row to the same structure: avatar on the left, name and role directly beside it, status pill on the right.
+- Added narrow-screen sizing safeguards so employee names and roles do not fall below the avatar.
 
-## Build correction
-- Corrected the malformed closing JSX fragment in the Control Centre component that caused the Vercel “Expression expected” error.
-- Removed stale TypeScript build metadata.
-- Updated regression expectations for package version 0.9.2.
-
-## Database
-No migration is required.
-
-## v0.9.3 build correction
-
-- Typed the PostgreSQL copy-week `saved` collection as `Shift[]`.
-- Fixes the Vercel TypeScript error: `Variable saved implicitly has type any[]`.
-- No database migration required.
+## Validation
+- All bundled regression suites passed, including a new v0.9.4 layout regression test.
+- No database migration is required.
