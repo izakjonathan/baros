@@ -1,26 +1,21 @@
-# Implementation status — v0.10.5
+# Implementation status — v0.10.6
 
-## PostgreSQL-backed and server-confirmed
+## Current baseline
 
-- Employee profiles, invitations and activation
-- Shift creation, recurrence, assignment, movement, publication and employee visibility
-- Location context
-- Employee availability, leave and exchange foundations
-- Clock actions, timesheets, corrections, approval and payroll-export safeguards
-- Products, location inventory, stock adjustments, receipt, waste and transfer foundations
-- Time-clock settings, sessions, audit records and database verification
+v0.10.6 is the current working baseline. It retains all v0.10.5 operational and PWA functionality while consolidating the CSS and design-system architecture.
 
-## Staged or partial workflows
+## Architecture
 
-- Daily Operations tasks and logbook still use browser workspace state.
-- Purchase-order creation is not yet a complete line-item editor.
-- Some dashboard summaries remain illustrative rather than authoritative database reports.
-- The regression suite is broad, but most checks are source assertions rather than disposable-PostgreSQL and browser end-to-end tests.
+- PostgreSQL/Neon runtime and migrations remain unchanged.
+- Manager and employee workflows remain unchanged.
+- PWA manifest, icons, service worker and iOS standalone support remain active.
+- Visual constants are centralized in `app/design-tokens.css`.
+- Shared visual components are centralized in `app/design-system.css`.
+- Structural feature layout remains in `app/globals.css`.
 
-## Engineering rules
+## Remaining architecture work
 
-A mutation must not report success before PostgreSQL confirms it. New work must use immutable UUIDs, selected-location context, tenant-scoped validation, transactional multi-table writes and explicit loading/error states.
-
-## Release integrity
-
-GitHub database and quality workflows are included. A dependency lockfile is not included because the build workspace cannot reliably access the public npm registry; workflows therefore continue to use `npm install`.
+- `components/bar-ops-app.tsx` is still a large manager component and should be split feature-by-feature in a later dedicated release.
+- Some historical regression scripts retain old version names, but now validate current semantic behavior.
+- A dependency lockfile should be generated and committed when a full public npm install is available.
+- Browser end-to-end and disposable PostgreSQL integration tests remain recommended.

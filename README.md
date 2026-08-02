@@ -1,6 +1,6 @@
 # Bar Ops
 
-**Current release: v0.10.5 — Cleanup & Release Consolidation**
+**Current release: v0.10.6 — Code & Design-System Consolidation**
 
 Bar Ops is a Next.js, TypeScript and PostgreSQL hospitality operating system designed for Vercel, Neon and an iPad-first deployment workflow.
 
@@ -12,7 +12,7 @@ Bar Ops is a Next.js, TypeScript and PostgreSQL hospitality operating system des
 
 ## Database
 
-Use `DATABASE_URL` for the pooled Neon runtime connection and `DATABASE_DIRECT_URL` for migrations. v0.10.5 adds no migration.
+Use `DATABASE_URL` for the pooled Neon runtime connection and `DATABASE_DIRECT_URL` for migrations. v0.10.6 adds no migration.
 
 ## Install on iPhone or iPad
 
@@ -21,3 +21,12 @@ Open the deployed site in Safari and choose **Share → Add to Home Screen**. Ba
 ## Release boundaries
 
 Core scheduling, employee access, attendance, payroll foundations, products and inventory use PostgreSQL-backed routes. Daily Operations and the full purchase-order editor remain staged workflows; see `IMPLEMENTATION_STATUS.md`.
+
+
+## Design-system architecture
+
+- `app/design-tokens.css` is the single source of global visual constants.
+- `app/design-system.css` defines shared component appearance and interaction states.
+- `app/globals.css` is reserved for structural and feature-specific layout.
+
+Avoid `!important`, competing `:root` definitions, and release-specific override layers.

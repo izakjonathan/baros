@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
-import "./mono-tokens.css";
-import "./mono-components.css";
+import "./design-tokens.css";
+import "./design-system.css";
 import { PwaRegister } from "./pwa-register";
 
 const inter = Inter({

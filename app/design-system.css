@@ -1,8 +1,8 @@
-/* Bar Ops Mono component primitives — current release v0.10.5. Loaded after legacy feature CSS.
+/* Bar Ops design-system components — v0.10.6. Visual rules consume design-tokens.css. */
 html, body, .app-frame, .main-shell, .employee-app, .employee-shell,
 .employee-page, .workspace-loading, .login-shell {
-  background: var(--mono-canvas);
-  color: var(--mono-ink);
+  background: var(--color-canvas);
+  color: var(--color-text);
 }
 
 body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
@@ -14,29 +14,29 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
   z-index: 80;
   border: 0;
   box-shadow: none;
-  background: color-mix(in srgb, var(--mono-canvas) 94%, transparent);
+  background: color-mix(in srgb, var(--color-canvas) 94%, transparent);
   backdrop-filter: saturate(150%) blur(18px);
   -webkit-backdrop-filter: saturate(150%) blur(18px);
 }
 .topbar::after, .employee-header::after { display: none; }
 
 /* One icon system: black outline, no tile, no chrome. */
-:where(.lucide, .icon-button svg, .menu-button svg, .team-add-button svg, .metric-icon svg, .attention-icon svg, .control-icon svg, .clock-icon svg) { color: var(--mono-ink); stroke: currentColor; fill: none; }
+:where(.lucide, .icon-button svg, .menu-button svg, .team-add-button svg, .metric-icon svg, .attention-icon svg, .control-icon svg, .clock-icon svg) { color: var(--color-text); stroke: currentColor; fill: none; }
 .icon-button, .menu-button, .team-add-button, .week-switch button,
 .help-button, .more, .text-button, .shift-card-top button,
 .employee-nav a > span:first-child, .metric-icon, .attention-icon,
 .control-icon, .clock-icon, .quick-action > span:first-child {
-  width: var(--mono-control);
-  height: var(--mono-control);
-  min-width: var(--mono-control);
-  min-height: var(--mono-control);
+  width: var(--control-height);
+  height: var(--control-height);
+  min-width: var(--control-height);
+  min-height: var(--control-height);
   padding: 0;
   display: inline-grid;
   place-items: center;
   border: 0;
   border-radius: 12px;
   background: transparent;
-  color: var(--mono-ink);
+  color: var(--color-text);
   box-shadow: none;
 }
 .metric-icon, .attention-icon, .control-icon, .clock-icon,
@@ -55,10 +55,10 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 }
 
 /* Page rhythm. */
-.page-wrap, .employee-main { max-width: var(--mono-content); }
+.page-wrap, .employee-main { max-width: var(--content-max); }
 .page-header { margin-bottom: 22px; }
 .page-header h1 { letter-spacing: -.035em; }
-.page-header p, .panel-title p, .settings-note, .muted-note { color: var(--mono-secondary); }
+.page-header p, .panel-title p, .settings-note, .muted-note { color: var(--color-text-secondary); }
 
 /* Tonal surface hierarchy. Cards do not need outlines or shadows. */
 .metric-card, .panel, .team-card, .settings-panel, .portal-form,
@@ -72,16 +72,16 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 .attendance-workflow, .open-shift-note, .series-edit-note, .repeat-panel {
   border: 0;
   box-shadow: none;
-  background: var(--mono-surface);
+  background: var(--color-surface);
 }
 .metric-card, .panel, .team-card, .settings-panel, .portal-form,
 .employee-home-grid a, .availability-grid article, .notification-list a,
 .notification-list article, .table-panel, .clock-card, .employee-hero,
 .shift-feed article, .hours-history article, .request-history article {
-  border-radius: var(--mono-radius-md);
+  border-radius: var(--radius-md);
 }
 .top-popover, .modal, .employee-more-sheet {
-  border-radius: var(--mono-radius-lg);
+  border-radius: var(--radius-lg);
   box-shadow: 0 24px 70px rgba(17,17,17,.14);
 }
 
@@ -92,8 +92,8 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 .supplier-options label, .profile, .employee-nav, .employee-header, .topbar {
   border: 0;
 }
-.table-head { border-bottom: 1px solid var(--mono-separator); }
-.table-row + .table-row { border-top: 1px solid var(--mono-separator); }
+.table-head { border-bottom: 1px solid var(--color-separator); }
+.table-row + .table-row { border-top: 1px solid var(--color-separator); }
 .day-column { border-right: 1px solid rgba(17,17,17,.055); }
 .day-column:last-child { border-right: 0; }
 .day-header { border-bottom: 1px solid rgba(17,17,17,.06); }
@@ -101,9 +101,9 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 /* Metrics and overview use density and alignment rather than decoration. */
 .metric-grid, .attendance-metrics { gap: 12px; }
 .metric-card { min-height: 126px; padding: 17px; }
-.metric-card strong { color: var(--mono-ink); letter-spacing: -.035em; }
-.metric-label, .metric-card small { color: var(--mono-secondary); }
-.metric-trend { color: var(--mono-tertiary); background: transparent; border: 0; }
+.metric-card strong { color: var(--color-text); letter-spacing: -.035em; }
+.metric-label, .metric-card small { color: var(--color-text-secondary); }
+.metric-trend { color: var(--color-text-tertiary); background: transparent; border: 0; }
 .attention-item, .quick-action { border: 0; background: transparent; box-shadow: none; }
 .attention-item:hover, .quick-action:hover { background: rgba(17,17,17,.035); }
 
@@ -112,17 +112,17 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 .portal-action, .danger-button, .danger-outline, .file-import,
 .schedule-view-select, .settings-nav button, .assignment-toggle button,
 .button, button[type="submit"] {
-  min-height: 42px;
-  height: 42px;
+  min-height: var(--control-height-compact);
+  height: var(--control-height-compact);
   border: 0;
-  border-radius: var(--mono-radius-sm);
+  border-radius: var(--radius-sm);
   box-shadow: none;
   padding: 0 14px;
   background: transparent;
-  color: var(--mono-ink);
+  color: var(--color-text);
   font-weight: 650;
 }
-.primary { background: var(--mono-ink); color: #fff; }
+.primary { background: var(--color-text); color: #fff; }
 .primary svg { color: #fff; }
 .primary:hover { background: #2a2a28; }
 .secondary:hover, .publish-button:hover, .compact-action:hover,
@@ -131,7 +131,7 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 .file-import:hover { background: rgba(17,17,17,.055); }
 .secondary:active, .publish-button:active, .compact-action:active,
 .filter-button:active, .portal-action:active { background: rgba(17,17,17,.10); }
-.danger-button, .danger-outline { color: var(--mono-danger); }
+.danger-button, .danger-outline { color: var(--color-danger); }
 .danger-button:hover, .danger-outline:hover { background: rgba(155,40,40,.065); }
 
 .header-actions, .schedule-head-actions, .modal-actions, .team-card-actions,
@@ -144,7 +144,7 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 .header-actions > *, .schedule-head-actions > *, .modal-actions > button,
 .team-card-actions > button, .team-actions > button, .settings-actions > *,
 .period-actions > *, .inline-actions > *, .employee-action-row > button {
-  min-height: 42px;
+  min-height: var(--control-height-compact);
 }
 .modal-actions > button, .team-card-actions > button, .team-actions > button,
 .employee-action-row > button { flex: 1 1 0; min-width: 0; }
@@ -154,72 +154,72 @@ input, select, textarea, .search-field, .custom-range input,
 .form-grid input, .form-grid select, .availability-times input,
 .correction-field textarea {
   border: 0;
-  background: var(--mono-inset);
+  background: var(--color-surface-muted);
   box-shadow: none;
-  color: var(--mono-ink);
-  border-radius: var(--mono-radius-sm);
+  color: var(--color-text);
+  border-radius: var(--radius-sm);
 }
 input:focus, select:focus, textarea:focus, .search-field:focus-within {
-  outline: 2px solid var(--mono-ink);
+  outline: 2px solid var(--color-text);
   outline-offset: 1px;
-  background: var(--mono-surface);
+  background: var(--color-surface);
 }
-input::placeholder, textarea::placeholder { color: var(--mono-tertiary); }
+input::placeholder, textarea::placeholder { color: var(--color-text-tertiary); }
 
 /* Native-settings-inspired grouping. */
 .settings-layout { gap: 18px; }
 .settings-panel { padding: 0; overflow: hidden; }
 .settings-panel > h2, .settings-panel > .panel-title { padding: 18px 18px 10px; }
 .settings-row { padding: 14px 18px; }
-.settings-row + .settings-row { border-top: 1px solid var(--mono-separator); }
+.settings-row + .settings-row { border-top: 1px solid var(--color-separator); }
 .settings-nav { background: transparent; border: 0; gap: 4px; }
-.settings-nav button.active { background: var(--mono-inset); }
+.settings-nav button.active { background: var(--color-surface-muted); }
 
 /* Employee rows/cards: identity first, administration secondary. */
-.team-card { padding: 16px; }
+
 .team-card-head { align-items: flex-start; gap: 12px; }
 .team-identity { min-width: 0; align-items: center; }
 .team-identity h2 { margin: 0; letter-spacing: -.025em; }
-.team-identity p { margin: 3px 0 0; color: var(--mono-secondary); }
+.team-identity p { margin: 3px 0 0; color: var(--color-text-secondary); }
 .team-status, .status, .active-pill, .claim-status, .connection-pill,
 .shift-card em, .side-nav em {
   border: 0;
   box-shadow: none;
-  background: var(--mono-inset);
-  color: var(--mono-ink);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
   border-radius: 999px;
   height: auto;
   line-height: 1;
   padding: 6px 9px;
 }
-.team-stats { padding: 12px 0; }
+
 .portal-access { margin-top: 8px; }
 
 /* Schedule: calm structure, strong content. */
-.schedule-toolbar { border-radius: var(--mono-radius-md) var(--mono-radius-md) 0 0; }
-.calendar-panel { border-radius: 0 0 var(--mono-radius-md) var(--mono-radius-md); }
-.day-column.today, .day-header.today, .today .day-header { background: var(--mono-inset); }
-.today .day-header strong { background: transparent; color: var(--mono-ink); }
+.schedule-toolbar { border-radius: var(--radius-md) var(--radius-md) 0 0; }
+.calendar-panel { border-radius: 0 0 var(--radius-md) var(--radius-md); }
+.day-column.today, .day-header.today, .today .day-header { background: var(--color-surface-muted); }
+.today .day-header strong { background: transparent; color: var(--color-text); }
 .shift-card {
   border: 0;
-  border-left: 3px solid var(--mono-ink);
+  border-left: 3px solid var(--color-text);
   box-shadow: none;
   background: #f7f7f5;
   border-radius: 9px;
 }
 .shift-card.is-draft { opacity: .72; }
-.add-slot { border: 0; background: transparent; color: var(--mono-tertiary); }
-.add-slot:hover { background: rgba(17,17,17,.035); color: var(--mono-ink); }
+.add-slot { border: 0; background: transparent; color: var(--color-text-tertiary); }
+.add-slot:hover { background: rgba(17,17,17,.035); color: var(--color-text); }
 
 /* Employee product shares the system. */
-.employee-nav { background: color-mix(in srgb, var(--mono-canvas) 96%, transparent); box-shadow: none; }
-.employee-nav a { border: 0; background: transparent; color: var(--mono-secondary); }
-.employee-nav a.active { color: var(--mono-ink); }
-.employee-nav a.active::before { background: var(--mono-ink); }
+.employee-nav { background: color-mix(in srgb, var(--color-canvas) 96%, transparent); box-shadow: none; }
+.employee-nav a { border: 0; background: transparent; color: var(--color-text-secondary); }
+.employee-nav a.active { color: var(--color-text); }
+.employee-nav a.active::before { background: var(--color-text); }
 .employee-home-grid a, .shift-feed article, .hours-history article,
 .request-history article, .employee-inbox article, .availability-grid article,
-.notification-list a, .notification-list article { background: var(--mono-surface); }
-.employee-inbox article, .notification-list .unread { background: var(--mono-inset); }
+.notification-list a, .notification-list article { background: var(--color-surface); }
+.employee-inbox article, .notification-list .unread { background: var(--color-surface-muted); }
 
 /* Explicit state language survives the flattened visual treatment. */
 .assignment-toggle button.selected,
@@ -229,20 +229,20 @@ input::placeholder, textarea::placeholder { color: var(--mono-tertiary); }
 .employee-nav a.active,
 .employee-nav button.active,
 .schedule-view-select:focus-within {
-  background: var(--mono-pressed);
-  color: var(--mono-ink);
+  background: var(--color-pressed);
+  color: var(--color-text);
 }
 
 button[aria-pressed="true"],
 [role="tab"][aria-selected="true"] {
-  background: var(--mono-pressed);
-  color: var(--mono-ink);
+  background: var(--color-pressed);
+  color: var(--color-text);
 }
 
 button:disabled,
 .button:disabled,
 [aria-disabled="true"] {
-  color: var(--mono-disabled);
+  color: var(--color-disabled);
   opacity: .58;
   cursor: not-allowed;
 }
@@ -251,7 +251,7 @@ button:disabled,
 
 /* Focus is never removed. */
 :where(button, a, input, select, textarea):focus-visible {
-  outline: 2px solid var(--mono-ink);
+  outline: 2px solid var(--color-text);
   outline-offset: 2px;
 }
 
@@ -264,7 +264,7 @@ button:disabled,
 
 @media (max-width: 520px) {
   .primary, .secondary, .publish-button, .compact-action, .filter-button,
-  .portal-action, .schedule-view-select { height: var(--mono-control); min-height: var(--mono-control); }
+  .portal-action, .schedule-view-select { height: var(--control-height); min-height: var(--control-height); }
   .team-actions { display: grid; grid-template-columns: repeat(auto-fit,minmax(0,1fr)); width: 100%; }
   .team-actions > button { width: 100%; font-size: 11px; padding: 0 8px; }
 }
@@ -273,14 +273,12 @@ button:disabled,
   *, *::before, *::after { scroll-behavior: auto; transition-duration: .01ms; animation-duration: .01ms; animation-iteration-count: 1; }
 }
 
-/* v0.10.0 — fixed app shell and compact operational layouts */
-:root { --app-header-height: 66px; }
-
+/* App shell and compact operational layouts */
 /* A real fixed shell: the page scrolls beneath one persistent header. */
 .topbar {
   position: fixed;
   top: 0;
-  left: 246px;
+  left: var(--sidebar-width);
   right: 0;
   width: auto;
   height: var(--app-header-height);
@@ -305,22 +303,22 @@ button:disabled,
 }
 .schedule-head-actions {
   display: grid;
-  grid-template-columns: minmax(112px, auto) 44px 44px;
+  
   align-items: center;
   gap: 6px;
   flex: none;
 }
 .schedule-view-select {
-  width: 118px;
-  min-width: 118px;
+  
+  
   height: 44px;
-  background: var(--mono-inset);
+  
   border: 0;
-  border-radius: var(--mono-radius-md);
+  border-radius: var(--radius-md);
 }
 .schedule-view-select select {
   font-size: 13px;
-  padding-inline: 13px 34px;
+  
 }
 .schedule-head-actions .compact-action {
   width: 44px;
@@ -330,11 +328,11 @@ button:disabled,
   display: inline-grid;
   place-items: center;
   background: transparent;
-  color: var(--mono-ink);
+  color: var(--color-text);
 }
 .schedule-head-actions .compact-action span { display: none; }
 .schedule-head-actions .compact-action:hover,
-.schedule-head-actions .compact-action:active { background: var(--mono-inset); }
+.schedule-head-actions .compact-action:active { background: var(--color-surface-muted); }
 
 .compact-schedule-toolbar,
 .compact-schedule-toolbar.has-custom-range {
@@ -379,9 +377,9 @@ button:disabled,
   align-items: center;
   justify-content: center;
   gap: 7px;
-  background: var(--mono-ink);
+  background: var(--color-text);
   color: #fff;
-  border-radius: var(--mono-radius-md);
+  border-radius: var(--radius-md);
 }
 .compact-publish span { display: inline; }
 .compact-schedule-toolbar.has-custom-range .custom-range {
@@ -435,12 +433,11 @@ button:disabled,
   min-height: 40px;
   height: 40px;
   border: 0;
-  background: var(--mono-inset);
+  background: var(--color-surface-muted);
 }
 
 @media (max-width: 900px) {
-  :root { --app-header-height: 66px; }
-  .topbar {
+    .topbar {
     left: 0;
     right: 0;
     height: var(--app-header-height);
@@ -532,10 +529,10 @@ button:disabled,
     grid-template-columns: minmax(0, 1fr) auto;
   }
   .schedule-head-actions {
-    grid-template-columns: 96px 42px 42px;
+    grid-template-columns: 96px var(--control-height-compact) var(--control-height-compact);
   }
   .schedule-view-select { width: 96px; min-width: 96px; }
-  .schedule-head-actions .compact-action { width: 42px; min-width: 42px; }
+  .schedule-head-actions .compact-action { width: var(--control-height-compact); min-width: var(--control-height-compact); }
   .compact-publish,
   .publish-button.compact-publish {
     min-width: 94px;
@@ -544,7 +541,7 @@ button:disabled,
   }
 }
 
-/* v0.10.2 compact forms and control correction */
+/* Compact forms and control alignment */
 .schedule-view-select {
   width: 132px;
   min-width: 132px;
@@ -596,7 +593,7 @@ button:disabled,
 }
 .attendance-filters label { min-width: 0; gap: 4px; }
 .attendance-filters input,
-.attendance-filters select { width: 100%; min-width: 0; height: 42px; }
+.attendance-filters select { width: 100%; min-width: 0; height: var(--control-height-compact); }
 
 /* Shift dialogs: date full-width, times side-by-side even on mobile. */
 .shift-dialog-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
@@ -613,7 +610,7 @@ button:disabled,
 .frequency-toggle button,
 .weekday-picker button { background: transparent; }
 .frequency-toggle button.selected,
-.weekday-picker button.selected { background: var(--mono-inset); }
+.weekday-picker button.selected { background: var(--color-surface-muted); }
 
 @media (max-width: 760px) {
   .attendance-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -631,7 +628,7 @@ button:disabled,
 }
 
 @media (max-width: 430px) {
-  .schedule-head-actions { grid-template-columns: 116px 42px 42px; }
+  .schedule-head-actions { grid-template-columns: 116px var(--control-height-compact) var(--control-height-compact); }
   .schedule-view-select { width: 116px; min-width: 116px; }
   .schedule-view-select select { font-size: 12px; }
   .attendance-filters { padding-inline: 0; background: transparent; }
@@ -639,7 +636,7 @@ button:disabled,
   .custom-range input[type="date"] { font-size: 12px; }
 }
 
-/* v0.10.3 — Safari-safe schedule selector and custom date sizing */
+/* Safari-safe schedule controls */
 .schedule-head-actions .schedule-view-select {
   inline-size: 126px;
   min-inline-size: 126px;
@@ -650,7 +647,7 @@ button:disabled,
   overflow: hidden;
   background: transparent;
   border: 0;
-  border-radius: var(--mono-radius-md);
+  border-radius: var(--radius-md);
   display: block;
   position: relative;
 }
@@ -666,10 +663,10 @@ button:disabled,
   padding: 0 32px 0 10px;
   overflow: hidden;
   border: 0;
-  border-radius: var(--mono-radius-md);
+  border-radius: var(--radius-md);
   background: transparent;
   background-image: none;
-  color: var(--mono-ink);
+  color: var(--color-text);
   font-size: 14px;
   font-weight: 700;
   line-height: 44px;
@@ -678,9 +675,9 @@ button:disabled,
   box-shadow: none;
 }
 .schedule-head-actions .schedule-view-select select:focus {
-  outline: 2px solid var(--mono-focus);
+  outline: 2px solid var(--color-text);
   outline-offset: -2px;
-  background: var(--mono-inset);
+  background: var(--color-surface-muted);
 }
 .schedule-head-actions .schedule-view-select svg {
   position: absolute;
@@ -722,9 +719,9 @@ button:disabled,
   margin: 0;
   padding: 0 10px;
   border: 0;
-  border-radius: var(--mono-radius-md);
-  background: var(--mono-inset);
-  color: var(--mono-ink);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
   font-size: 14px;
   line-height: 44px;
   text-align: center;
@@ -762,7 +759,7 @@ button:disabled,
 
 @media (max-width: 390px) {
   .schedule-head-actions {
-    grid-template-columns: 116px 42px 42px;
+    grid-template-columns: 116px var(--control-height-compact) var(--control-height-compact);
   }
   .schedule-head-actions .schedule-view-select {
     inline-size: 116px;
@@ -782,9 +779,9 @@ button:disabled,
   }
 }
 
-/* v0.10.4 — installed PWA and iOS standalone shell */
+/* Installed PWA and iOS standalone shell */
 @media (display-mode: standalone) {
-  html, body { min-height: 100%; background: var(--mono-canvas, #f4f4f2); }
+  html, body { min-height: 100%; background: var(--color-canvas); }
   body { overscroll-behavior-y: none; }
   .app-frame, .employee-app { min-height: 100dvh; }
   .topbar, .employee-header {
