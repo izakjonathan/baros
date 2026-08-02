@@ -1,4 +1,6 @@
-# Bar Ops v0.9.1
+# Bar Ops
+
+**Current release: v0.10.1 — Functional Stabilization** v0.9.1
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 

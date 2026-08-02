@@ -2,7 +2,7 @@ import fs from 'node:fs';
 const css=fs.readFileSync('app/globals.css','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const checks=[
- ['version',['0.9.7','0.9.8','0.9.9','0.10.0'].includes(pkg.version)],
+ ['version',['0.9.7','0.9.8','0.9.9','0.10.0','0.10.1'].includes(pkg.version)],
  ['light grey canvas',css.includes('--canvas:#f3f4f6')],
  ['black icon stroke',css.includes('svg{stroke:var(--ink);fill:none}')],
  ['transparent icon buttons',css.includes('.icon-button,.menu-button,.help-button')&&css.includes('background:transparent!important')],
