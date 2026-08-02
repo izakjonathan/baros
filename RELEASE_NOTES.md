@@ -1,25 +1,27 @@
-# Bar Ops v0.11.4 — UI Architecture Build Fix
+# Bar Ops v0.11.5 — Floating Navigation
 
-This release corrects the Vercel TypeScript failure in v0.11.2 by completing the Time & Attendance migration from the removed local `Metric` component to the shared `KpiCard` primitive. All v0.11.2 Daily Operations and PostgreSQL integration features are retained.
+## Floating manager navigation
 
-# Bar Ops v0.11.4 — PostgreSQL Integration & Daily Operations
+The former fixed sidebar has been replaced with a bottom-left floating navigation control.
 
-## Daily Operations persistence
+- Collapsed state: fixed black circle with a white menu icon.
+- Expanded state: the circle remains fixed, changes to a white close icon, and a white menu panel opens smoothly to the right.
+- The menu remains expanded while moving between manager workspaces.
+- The page list scrolls vertically inside the panel while the black toggle remains fixed.
+- The panel respects iPhone and iPad safe areas.
+- Navigation has accessible open/close labels, expanded state and keyboard focus handling.
 
-- Added migration `011_daily_operations.sql`.
-- Opening, closing, maintenance and general operational tasks are stored per organization and location.
-- Task completion and deletion are transactional and audited.
-- Manager logbook entries are permanent PostgreSQL records with author and timestamp.
-- Manager bootstrap loads tasks and logbook entries with the rest of the selected-location workspace.
-- Development mode retains local persistence.
+## Navigation naming
 
-## Live PostgreSQL integration testing
+The manager navigation item **Time & attendance** is now named **Timesheets**. The workspace functionality and route key remain unchanged.
 
-- GitHub Quality Checks now starts a disposable PostgreSQL 17 service.
-- All migrations are applied in sequence on every quality run.
-- A behavioral integration suite verifies Daily Operations transactions, audit entries and cross-tenant guards.
-- Integration tests use an isolated test organization and clean up their records.
+## App shell
 
-## Deployment
+- The manager content no longer reserves desktop space for the removed sidebar.
+- The top bar spans the complete viewport and keeps the location centred.
+- Additional bottom spacing prevents the floating menu from covering page controls.
+- The previous mobile sidebar, scrim and duplicate sidebar branding are no longer rendered.
 
-Migration 011 is required. After deployment, run the Database administration workflow with `migrate`, followed by `verify`.
+## Validation
+
+The complete bundled regression suite passed, including the new floating-navigation checks. No database migration is required.
