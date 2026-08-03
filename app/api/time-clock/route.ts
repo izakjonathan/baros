@@ -6,16 +6,7 @@ import { ApiError, jsonError, readJsonObject } from "@/lib/http";
 export async function GET() {
   try {
     const user = await requireUser();
-    if (!user.employeeId || !user.locationId) {
-      return NextResponse.json({
-        active: null,
-        breakActive: false,
-        eligible: false,
-        eligibilityError: !user.employeeId
-          ? "A linked employee profile is required"
-          : "An assigned active location is required",
-      });
-    }
+    if (!user.employeeId) return NextResponse.json({ active: null, breakActive: false, eligible: false });
     const [active] = await db()`
       select t.id,t.shift_id,t.location_id,t.work_date,t.clocked_in_at,t.clocked_out_at,t.status,t.break_minutes,
              l.name location_name,

@@ -21,3 +21,7 @@ The service worker does not cache authenticated API responses or operational pag
 
 The CSS cleanup release removes historical redesign blocks, repeated exact selectors and `!important` declarations while preserving the v0.10.4 project architecture. See `CSS_OWNERSHIP_REPORT_V0105.md`.
 
+
+### v0.10.7 employee workspace integrity
+
+Employee routes derive their employee and location context centrally from the authenticated session. An active session location is preferred; employee accounts use their primary active `employee_locations` assignment when the stored session location is missing or stale. Development employee previews require a seeded, activated employee account and resolve that real database identity instead of using placeholder UUID values.

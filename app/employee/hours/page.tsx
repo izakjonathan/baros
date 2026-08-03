@@ -3,15 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarDays, CheckCircle2, Clock3, MessageSquareWarning, Pause, Play, Square } from "lucide-react";
 
-type TimeClockResponse = {
-  active?: ActiveClock | null;
-  breakActive?: boolean;
-  eligible?: boolean;
-  eligibilityError?: string;
-  requireLocationCheck?: boolean;
-  timezone?: string;
-};
-
 type ActiveClock = {
   id: string;
   clocked_in_at: string;
@@ -79,16 +70,13 @@ export default function HoursPage() {
       fetch("/api/time-clock", { cache: "no-store" }),
       fetch(`/api/employee/hours-summary?from=${range.from}&to=${range.to}`, { cache: "no-store" }),
     ]);
-    const clockData: TimeClockResponse & { error?: string } = await clockResponse.json().catch(() => ({}));
+    const clockData = await clockResponse.json().catch(() => ({}));
     const hoursData = await hoursResponse.json().catch(() => ({}));
     if (!clockResponse.ok) throw new Error(clockData.error || "Could not load time clock");
     if (!hoursResponse.ok) throw new Error(hoursData.error || "Could not load hours");
     setActive(clockData.active || null);
     setBreakActive(Boolean(clockData.breakActive));
     setEligible(clockData.eligible !== false);
-    if (clockData.eligible === false && clockData.eligibilityError) {
-      setError(clockData.eligibilityError);
-    }
     setRequireLocationCheck(Boolean(clockData.requireLocationCheck));
     setTimezone(clockData.timezone || "Europe/Copenhagen");
     setTimesheets(hoursData.timesheets || []);
