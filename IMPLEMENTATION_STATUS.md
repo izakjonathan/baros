@@ -1,3 +1,7 @@
+## v0.11.2 build syntax fix
+
+The v0.11.1 self-service integrity behavior is preserved. The manager top-bar inventory notification JSX syntax is corrected so the production build can parse the active manager component.
+
 ## v0.11.1 self-service integrity
 
 The employee self-service foundation is implemented and production hardening now covers bounded submissions, employee-specific swap choices, discoverable manager review, and UUID-safe timesheet approval. Dependency-backed build, typecheck, lint, and production browser verification remain deployment checks.

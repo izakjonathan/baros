@@ -7,7 +7,7 @@ const bootstrap=read("app/api/manager/bootstrap/route.ts");
 const app=read("components/bar-ops-app.tsx");
 const clock=read("app/api/time-clock/route.ts");
 const checks=[
- [["0.10.10","0.10.11","0.11.0","0.11.1"].includes(pkg.version),"release version"],
+ [["0.10.10","0.10.11","0.11.0","0.11.1","0.11.2"].includes(pkg.version),"release version"],
  [hours.includes("date_part('epoch', s.ends_at - s.starts_at)")&&!hours.includes("extract(epoch from (s.ends_at-s.starts_at)"),"runtime-safe scheduled-hours SQL"],
  [hours.includes("const [approved]")&&hours.includes("const summary ="),"separate typed summary queries"],
  [employees.includes("body.locationId !== undefined")&&employees.includes("delete from employee_locations")&&employees.includes("primary_location) values"),"transactional location reassignment"],

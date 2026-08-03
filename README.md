@@ -1,6 +1,6 @@
 # Bar Ops
 
-**Current release: v0.11.1 — Self-Service Integrity**
+**Current release: v0.11.2 — Build Syntax Fix**
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 

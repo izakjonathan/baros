@@ -7,7 +7,7 @@ const timesheets=read('app/api/timesheets/route.ts');
 const transferApi=read('app/api/shift-transfers/route.ts');
 const pkg=JSON.parse(read('package.json'));
 const checks=[
- ['release version',pkg.version==='0.11.1'],
+ ['release version',['0.11.1','0.11.2'].includes(pkg.version)],
  ['transfer requests always settle',actions.includes('finally{window.clearTimeout(timeout)}')&&actions.includes("setState('error')")&&actions.includes("setState('saving')")],
  ['request timeout and inline API errors',actions.includes('AbortController')&&actions.includes('The request timed out')&&actions.includes('data?.error')&&actions.includes('role="alert"')],
  ['duplicate transfer submissions blocked',actions.includes("if(state==='saving')return")],
