@@ -90,6 +90,18 @@ export async function PATCH(request: Request) {
         kiosk_pin_hash=${pin},active=${body.active===undefined?before.active:Boolean(body.active)},updated_at=now()
         where id=${id} and organization_id=${user.organizationId} returning *`;
       const employee = rows[0];
+      if (body.locationId !== undefined) {
+        const locationId = body.locationId ? uuid(body.locationId, "locationId") : null;
+        if (locationId) {
+          const [location] = await tx`select id from locations where id=${locationId} and organization_id=${user.organizationId} and active=true`;
+          if (!location) throw new ApiError(400, "Location does not belong to this organization or is inactive");
+          await tx`delete from employee_locations where employee_id=${employee.id}`;
+          await tx`insert into employee_locations(employee_id,location_id,primary_location) values(${employee.id},${locationId},true)`;
+        } else {
+          if (employee.user_id) throw new ApiError(409, "Portal-enabled employees must have an assigned location");
+          await tx`delete from employee_locations where employee_id=${employee.id}`;
+        }
+      }
       await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,before_data,after_data) values(${user.organizationId},${user.locationId},${user.userId},'EMPLOYEE_UPDATED','employee',${employee.id},${JSON.stringify(before)}::jsonb,${JSON.stringify(employee)}::jsonb)`;
       return employee;
     });

@@ -10,17 +10,22 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const from = url.searchParams.get("from") || new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
     const to = url.searchParams.get("to") || new Date().toISOString().slice(0, 10);
-    const [summary] = await db()`
-      select
-        coalesce((select sum(extract(epoch from (s.ends_at-s.starts_at))/60)::int)
-          from shifts s
-          where s.organization_id=${user.organizationId} and s.employee_id=${user.employeeId}
-            and s.status='PUBLISHED' and s.starts_at::date between ${from}::date and ${to}::date),0) scheduled_minutes,
-        coalesce((select sum(t.worked_minutes)
-          from timesheets t
-          where t.organization_id=${user.organizationId} and t.employee_id=${user.employeeId}
-            and t.status='APPROVED' and t.work_date between ${from}::date and ${to}::date),0) approved_minutes
+    const [scheduled] = await db()<Array<{ scheduled_minutes: number }>>`
+      select coalesce(sum((date_part('epoch', s.ends_at - s.starts_at) / 60)::int), 0)::int scheduled_minutes
+      from shifts s
+      where s.organization_id=${user.organizationId} and s.employee_id=${user.employeeId}
+        and s.status='PUBLISHED' and s.starts_at::date between ${from}::date and ${to}::date
     `;
+    const [approved] = await db()<Array<{ approved_minutes: number }>>`
+      select coalesce(sum(t.worked_minutes), 0)::int approved_minutes
+      from timesheets t
+      where t.organization_id=${user.organizationId} and t.employee_id=${user.employeeId}
+        and t.status='APPROVED' and t.work_date between ${from}::date and ${to}::date
+    `;
+    const summary = {
+      scheduled_minutes: Number(scheduled?.scheduled_minutes || 0),
+      approved_minutes: Number(approved?.approved_minutes || 0),
+    };
     const timesheets = await db()<Array<{
       id: string;
       work_date: string | Date;

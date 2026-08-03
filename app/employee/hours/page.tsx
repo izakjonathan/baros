@@ -51,6 +51,7 @@ export default function HoursPage() {
   const [active, setActive] = useState<ActiveClock | null>(null);
   const [breakActive, setBreakActive] = useState(false);
   const [eligible, setEligible] = useState(true);
+  const [eligibilityReason, setEligibilityReason] = useState("");
   const [timesheets, setTimesheets] = useState<Timesheet[]>([]);
   const [scheduledMinutes, setScheduledMinutes] = useState(0);
   const [approvedMinutes, setApprovedMinutes] = useState(0);
@@ -77,6 +78,7 @@ export default function HoursPage() {
     setActive(clockData.active || null);
     setBreakActive(Boolean(clockData.breakActive));
     setEligible(clockData.eligible !== false);
+    setEligibilityReason(clockData.eligibilityReason || "");
     setRequireLocationCheck(Boolean(clockData.requireLocationCheck));
     setTimezone(clockData.timezone || "Europe/Copenhagen");
     setTimesheets(hoursData.timesheets || []);
@@ -155,7 +157,7 @@ export default function HoursPage() {
         </div>
 
         {!eligible ? (
-          <p className="clock-unavailable">Your account needs a linked employee profile before time can be recorded.</p>
+          <p className="clock-unavailable">{eligibilityReason || "Your account needs a linked employee profile and location before time can be recorded."}</p>
         ) : loading ? null : !active ? (
           <button disabled={busy} onClick={() => clockAction("CLOCK_IN")}><Play size={19} />{busy ? "Starting…" : "Clock in"}</button>
         ) : (

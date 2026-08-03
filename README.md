@@ -1,12 +1,12 @@
 # Bar Ops
 
-**Current release: v0.10.9 — Production Typecheck Gate**
+**Current release: v0.10.10 — Employee Hours and Location Assignment**
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 
-## v0.10.9 production typecheck gate
+## v0.10.10 employee hours and location assignment
 
-v0.10.9 fixes the concrete Vercel TypeScript failure in the employee hours-summary route. The timesheet SQL result is now explicitly typed at the query boundary, so response mapping can safely access `item.id` without an incompatible callback-only annotation. See `RELEASE_NOTES_V0109.md`.
+v0.10.10 fixes the production employee-hours SQL failure and adds manager-controlled primary location assignment for employees. See `RELEASE_NOTES_V01010.md`.
 
 ## v0.10.8 baseline audit
 
