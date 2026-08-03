@@ -1,6 +1,6 @@
 # Bar Ops
 
-**Current release: v0.10.11 — Employee Timesheet Rendering**
+**Current release: v0.11.0 — Employee Timesheet Rendering**
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 

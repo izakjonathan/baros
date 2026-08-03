@@ -1,3 +1,7 @@
+## v0.11.0 employee self-service
+
+Manager review queue, time-off decisions, open-shift/transfer lifecycle notifications, and server validation are implemented. No migration required.
+
 # Implementation status — v0.9.1
 
 ## Persistent and server-confirmed

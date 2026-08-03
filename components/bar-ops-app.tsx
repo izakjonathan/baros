@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { days, initialProducts, initialShifts, orders, team, type NavKey, type Product, type Shift, type ShiftRole } from "@/lib/data";
 import { DevRoleSwitcher } from "@/components/dev-role-switcher";
+import { RequestsWorkspace } from "@/components/requests-workspace";
 
 const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Overview", icon: LayoutDashboard },
@@ -18,6 +19,7 @@ const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = 
   { id: "orders", label: "Orders", icon: ShoppingCart },
   { id: "operations", label: "Daily operations", icon: NotebookPen },
   { id: "team", label: "Team", icon: Users },
+  { id: "requests", label: "Requests", icon: ClipboardList },
   { id: "control", label: "Control centre", icon: Settings },
 ];
 
@@ -63,6 +65,7 @@ function mapDatabaseShift(x: any): Shift {
 
 export function BarOpsApp({ userName, userRole, devMode }: { userName: string; userRole: string; devMode: boolean }) {
   const [active, setActive] = useState<NavKey>("dashboard");
+  useEffect(() => { if (new URLSearchParams(window.location.search).get("workspace") === "requests") setActive("requests"); }, []);
   const [locations, setLocations] = useState<Location[]>(devMode ? [{ id: "dev-temple", name: "Temple Bar" }] : []);
   const [selectedLocationId, setSelectedLocationId] = useState<string>(devMode ? "dev-temple" : "");
   const [mobileNav, setMobileNav] = useState(false);
@@ -203,6 +206,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
               }}
             />
           )}
+          {active === "requests" && <RequestsWorkspace devMode={devMode} notify={notify} />}
           {active === "control" && <ControlCenter devMode={devMode} databaseStatus={databaseStatus} notify={notify} />}
           {active === "settings" && <SettingsWorkspace locations={locations} selectedLocationId={selectedLocationId} userRole={userRole} devMode={devMode} notify={notify} />}
         </div>

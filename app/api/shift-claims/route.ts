@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, enumValue, jsonError, optionalString, readJsonObject, uuid } from "@/lib/http";
+import { notifyEmployee, notifyManagers } from "@/lib/services/notifications";
 
 export async function GET() {
   try {
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
       const [shift] = await tx`select * from shifts where id=${shiftId} and organization_id=${user.organizationId} and is_open=true and employee_id is null for update`;
       if (!shift) throw new ApiError(409, "This shift is no longer available");
       const [claim] = await tx`insert into shift_claims(organization_id,shift_id,employee_id,note) values(${user.organizationId},${shiftId},${user.employeeId},${optionalString(body,"note",500)}) on conflict(shift_id,employee_id) do update set status='PENDING',note=excluded.note,reviewed_by=null,reviewed_at=null returning *`;
+      await notifyManagers(tx, { organizationId:user.organizationId, actorUserId:user.userId, type:"SHIFT_CLAIM_CREATED", title:"Open shift request", body:"An employee requested an available shift.", href:"/?workspace=requests" });
       await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,after_data) values(${user.organizationId},${shift.location_id},${user.userId},'OPEN_SHIFT_REQUESTED','shift_claim',${claim.id},${JSON.stringify(claim)}::jsonb)`;
       return claim;
     });
@@ -49,6 +51,7 @@ export async function PATCH(req: Request) {
         await tx`update shift_claims set status='REJECTED',reviewed_by=${user.userId},reviewed_at=now() where shift_id=${claim.shift_id} and id<>${claim.id} and status='PENDING'`;
       }
       const [reviewed] = await tx`update shift_claims set status=${status},reviewed_by=${user.userId},reviewed_at=now() where id=${claim.id} returning *`;
+      await notifyEmployee(tx, { organizationId:user.organizationId, employeeId:claim.employee_id, actorUserId:user.userId, type:"SHIFT_CLAIM_REVIEWED", title:`Shift request ${status.toLowerCase()}`, body:status === "APPROVED" ? "The available shift is now assigned to you." : "Your available-shift request was not approved.", href:"/employee/shifts" });
       await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,after_data) values(${user.organizationId},${claim.location_id},${user.userId},'SHIFT_CLAIM_REVIEWED','shift_claim',${claim.id},${JSON.stringify(reviewed)}::jsonb)`;
       return reviewed;
     });

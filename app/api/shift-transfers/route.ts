@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, enumValue, jsonError, optionalString, readJsonObject, uuid } from "@/lib/http";
+import { notifyEmployee, notifyManagers } from "@/lib/services/notifications";
 
 export async function GET() {
   try {
     const user = await getSessionUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const rows = await db()`select t.*,s.starts_at,s.ends_at,s.role,e.first_name||' '||e.last_name target_name from shift_transfers t join shifts s on s.id=t.shift_id left join employees e on e.id=t.target_employee_id where t.organization_id=${user.organizationId} and (${user.role}<>'EMPLOYEE' or t.requested_by_employee_id=${user.employeeId} or t.target_employee_id=${user.employeeId}) order by t.created_at desc`;
+    const rows = await db()`select t.*,s.starts_at,s.ends_at,s.role,te.first_name||' '||te.last_name target_name,re.first_name||' '||re.last_name requested_by_name from shift_transfers t join shifts s on s.id=t.shift_id join employees re on re.id=t.requested_by_employee_id left join employees te on te.id=t.target_employee_id where t.organization_id=${user.organizationId} and (${user.role}<>'EMPLOYEE' or t.requested_by_employee_id=${user.employeeId} or t.target_employee_id=${user.employeeId}) order by t.created_at desc`;
     return NextResponse.json(rows);
   } catch (error) { return jsonError(error); }
 }
@@ -33,6 +34,7 @@ export async function POST(req: Request) {
         if (!swap) throw new ApiError(400, "Swap shift is not assigned to the target employee");
       }
       const [transfer] = await tx`insert into shift_transfers(organization_id,shift_id,requested_by_employee_id,target_employee_id,swap_shift_id,type,status,note) values(${user.organizationId},${shiftId},${user.employeeId},${targetEmployeeId},${swapShiftId},${type},'PENDING_EMPLOYEE',${optionalString(body,"note",500)}) returning *`;
+      await notifyEmployee(tx, { organizationId:user.organizationId, employeeId:targetEmployeeId!, actorUserId:user.userId, type:"SHIFT_TRANSFER_REQUESTED", title:type === "SWAP" ? "Shift swap request" : "Shift handover request", body:"A colleague is waiting for your response.", href:"/employee/shifts" });
       await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,after_data) values(${user.organizationId},${shift.location_id},${user.userId},'SHIFT_TRANSFER_REQUESTED','shift_transfer',${transfer.id},${JSON.stringify(transfer)}::jsonb)`;
       return transfer;
     });
@@ -52,6 +54,8 @@ export async function PATCH(req: Request) {
         const [transfer] = await tx`select * from shift_transfers where id=${transferId} and organization_id=${user.organizationId} for update`;
         if (!transfer || transfer.target_employee_id !== user.employeeId || transfer.status !== "PENDING_EMPLOYEE") throw new ApiError(403, "This transfer is not awaiting your response");
         const [updated] = await tx`update shift_transfers set status=${accept ? "PENDING_MANAGER" : "REJECTED"},target_responded_at=now() where id=${transfer.id} returning *`;
+        await notifyEmployee(tx, { organizationId:user.organizationId, employeeId:transfer.requested_by_employee_id, actorUserId:user.userId, type:"SHIFT_TRANSFER_RESPONSE", title:accept ? "Shift change accepted by colleague" : "Shift change declined", body:accept ? "The request is now waiting for manager approval." : "The colleague declined the request.", href:"/employee/shifts" });
+        if (accept) await notifyManagers(tx, { organizationId:user.organizationId, actorUserId:user.userId, type:"SHIFT_TRANSFER_MANAGER_REVIEW", title:"Shift change awaiting approval", body:"Both employees have accepted a shift change.", href:"/?workspace=requests" });
         return updated;
       });
       return NextResponse.json(result);
@@ -79,6 +83,8 @@ export async function PATCH(req: Request) {
         }
       }
       const [updated] = await tx`update shift_transfers set status=${status},reviewed_by=${user.userId},reviewed_at=now() where id=${transfer.id} returning *`;
+      await notifyEmployee(tx, { organizationId:user.organizationId, employeeId:transfer.requested_by_employee_id, actorUserId:user.userId, type:"SHIFT_TRANSFER_REVIEWED", title:`Shift change ${status.toLowerCase()}`, body:status === "APPROVED" ? "The shift assignment has been updated." : "The shift change was not approved.", href:"/employee/shifts" });
+      if (transfer.target_employee_id) await notifyEmployee(tx, { organizationId:user.organizationId, employeeId:transfer.target_employee_id, actorUserId:user.userId, type:"SHIFT_TRANSFER_REVIEWED", title:`Shift change ${status.toLowerCase()}`, body:status === "APPROVED" ? "The shift assignment has been updated." : "The shift change was not approved.", href:"/employee/shifts" });
       await tx`insert into audit_logs(organization_id,actor_user_id,action,entity_type,entity_id,after_data) values(${user.organizationId},${user.userId},'SHIFT_TRANSFER_REVIEWED','shift_transfer',${transfer.id},${JSON.stringify(updated)}::jsonb)`;
       return updated;
     });
