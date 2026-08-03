@@ -1,42 +1,25 @@
-# Bar Ops v0.10.6 — Code & Design-System Consolidation
+# Bar Ops v0.11.4 — UI Architecture Build Fix
 
-This release is a code-architecture cleanup built on v0.10.5. It does not add a database migration.
+This release corrects the Vercel TypeScript failure in v0.11.2 by completing the Time & Attendance migration from the removed local `Metric` component to the shared `KpiCard` primitive. All v0.11.2 Daily Operations and PostgreSQL integration features are retained.
 
-## Design-system consolidation
+# Bar Ops v0.11.4 — PostgreSQL Integration & Daily Operations
 
-- Replaced `mono-tokens.css` and `mono-components.css` with the canonical files:
-  - `app/design-tokens.css`
-  - `app/design-system.css`
-- Centralized colour, typography, spacing, radius, control, icon, transition and app-shell values.
-- Kept compatibility aliases so existing feature layouts can migrate gradually without visual regressions.
-- Removed the legacy `:root` token block from `globals.css`.
-- Removed all `!important` declarations from application CSS.
-- Removed superseded v0.9.6 and v0.9.7 visual override layers from `globals.css`.
-- Removed duplicate declarations where a later identical selector already supplied the final value.
-- Fixed the malformed opening comment that previously swallowed the first design-system rule.
-- Removed an undefined legacy focus token.
+## Daily Operations persistence
 
-## CSS responsibilities
+- Added migration `011_daily_operations.sql`.
+- Opening, closing, maintenance and general operational tasks are stored per organization and location.
+- Task completion and deletion are transactional and audited.
+- Manager logbook entries are permanent PostgreSQL records with author and timestamp.
+- Manager bootstrap loads tasks and logbook entries with the rest of the selected-location workspace.
+- Development mode retains local persistence.
 
-- `design-tokens.css`: the only source of global visual constants.
-- `design-system.css`: shared component appearance and cross-feature responsive behavior.
-- `globals.css`: structural and feature-specific layout only.
+## Live PostgreSQL integration testing
 
-## Regression-suite cleanup
+- GitHub Quality Checks now starts a disposable PostgreSQL 17 service.
+- All migrations are applied in sequence on every quality run.
+- A behavioral integration suite verifies Daily Operations transactions, audit entries and cross-tenant guards.
+- Integration tests use an isolated test organization and clean up their records.
 
-Historical tests now check current semantic outcomes instead of requiring old filenames, `!important`, or obsolete release-comment strings.
+## Deployment
 
-Added `npm run test:design-system` to prevent the architecture from drifting back toward competing token roots and override layers.
-
-## PWA
-
-- Rotated the service-worker cache namespace to v0.10.6.
-- Retained standalone iPhone/iPad behavior and secure API cache exclusions.
-
-## Validation
-
-- Full `npm run test:all` passed.
-- CSS parsed without syntax errors.
-- All JavaScript test and service-worker files passed syntax validation.
-- Both GitHub Actions workflows remain included.
-- ZIP integrity and duplicate-entry checks passed.
+Migration 011 is required. After deployment, run the Database administration workflow with `migrate`, followed by `verify`.

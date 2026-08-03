@@ -4,7 +4,7 @@ const migration=read("db/migrations/007_employee_portal_access.sql");
 const invite=read("app/api/employee-invitations/route.ts");
 const activate=read("app/api/auth/activate/route.ts");
 const page=read("app/activate/[token]/page.tsx");
-const ui=read("components/bar-ops-app.tsx");
+const ui=read("components/bar-ops-app.tsx")+read("features/team/team.tsx");
 const checks=[
  ["invitation table",migration.includes("create table employee_invitations")],
  ["single pending invitation",migration.includes("employee_invitations_one_pending_idx")],

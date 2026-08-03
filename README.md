@@ -1,32 +1,41 @@
 # Bar Ops
 
-**Current release: v0.18.0 — Stable Interface Recovery**
+**Current release: v0.11.4 — PostgreSQL Integration & Daily Operations**
 
-Bar Ops is a Next.js, TypeScript and PostgreSQL hospitality operating system designed for Vercel, Neon and an iPad-first deployment workflow.
+Bar Ops is a Next.js hospitality operating system for scheduling, employees, attendance, payroll, inventory, ordering and daily bar operations. It is designed for Vercel, Neon PostgreSQL and iPhone/iPad standalone PWA use.
 
-## Deploy from iPad
+## Development
 
-1. Commit the flat ZIP to the private `baros` repository with the Commit app.
-2. GitHub Quality Checks installs dependencies, runs the regression suite, lint, type-check and production build.
-3. Vercel deploys the accepted commit.
+```bash
+npm install
+npm run dev
+```
+
+## Validation
+
+```bash
+npm run test:all
+npm run lint
+npm run typecheck
+npm run build
+```
+
+Browser smoke tests:
+
+```bash
+npx playwright install
+npm run test:e2e
+```
+
+Live PostgreSQL integration checks require a disposable database:
+
+```bash
+TEST_DATABASE_URL=postgres://... DATABASE_URL=$TEST_DATABASE_URL npm run db:migrate
+TEST_DATABASE_URL=postgres://... npm run test:postgres-integration
+```
 
 ## Database
 
-Use `DATABASE_URL` for the pooled Neon runtime connection and `DATABASE_DIRECT_URL` for migrations. v0.18.0 is a presentation-layer recovery based on v0.10.6 and adds no migration.
+Use `DATABASE_URL` for the pooled Neon runtime connection and `DATABASE_DIRECT_URL` for migrations. v0.11.4 adds migration `011_daily_operations.sql`.
 
-## Install on iPhone or iPad
-
-Open the deployed site in Safari and choose **Share → Add to Home Screen**. Bar Ops launches in standalone mode with Apple Home Screen metadata, app icons and a safe network-first service worker. Authenticated APIs and operational page responses are never cached.
-
-## Release boundaries
-
-Core scheduling, employee access, attendance, payroll foundations, products and inventory use PostgreSQL-backed routes. Daily Operations and the full purchase-order editor remain staged workflows; see `IMPLEMENTATION_STATUS.md`.
-
-
-## Design-system architecture
-
-- `app/design-tokens.css` is the single source of global visual constants.
-- `app/design-system.css` defines shared component appearance and interaction states.
-- `app/globals.css` is reserved for structural and feature-specific layout.
-
-Avoid `!important`, competing `:root` definitions, and release-specific override layers.
+After deploying this release, run **Database administration → migrate**, then **verify**.

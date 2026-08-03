@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-const app=fs.readFileSync('components/bar-ops-app.tsx','utf8');
+const app=fs.readFileSync('components/bar-ops-app.tsx','utf8')+fs.readFileSync('lib/schedule-utils.ts','utf8');
 const bootstrap=fs.readFileSync('app/api/manager/bootstrap/route.ts','utf8');
 const shifts=fs.readFileSync('app/api/shifts/route.ts','utf8');
 const clock=fs.readFileSync('app/api/time-clock/route.ts','utf8');

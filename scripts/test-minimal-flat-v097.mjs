@@ -3,7 +3,7 @@ const tokens=fs.readFileSync('app/design-tokens.css','utf8');
 const css=fs.readFileSync('app/design-system.css','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const checks=[
- ['version',['0.9.7','0.9.8','0.9.9','0.10.0','0.10.1','0.10.2','0.10.3','0.10.4','0.10.5','0.10.6'].includes(pkg.version)],
+ ['version',['0.9.7','0.9.8','0.9.9','0.10.0','0.10.1','0.10.2','0.10.3','0.10.4','0.10.5','0.10.6','0.11.0','0.11.1','0.11.2','0.11.3','0.11.4'].includes(pkg.version)],
  ['light grey canvas',tokens.includes('--color-canvas: #f4f4f2')],
  ['black icon stroke',css.includes(':where(.lucide')&&css.includes('stroke: currentColor')],
  ['transparent icon buttons',css.includes('.icon-button, .menu-button')&&css.includes('background: transparent')],

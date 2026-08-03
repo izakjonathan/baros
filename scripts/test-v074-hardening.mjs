@@ -4,7 +4,7 @@ const employees=read('app/api/employees/route.ts');
 const activate=read('app/api/auth/activate/route.ts');
 const invitations=read('app/api/employee-invitations/route.ts');
 const shifts=read('app/api/shifts/route.ts');
-const ui=read('components/bar-ops-app.tsx');
+const ui=read('components/bar-ops-app.tsx')+read('features/team/team.tsx');
 const checks=[
  ['employee PINs use scrypt',employees.includes('hashKioskPin')&&!employees.includes("createHash('sha256')")],
  ['employee writes are transactional',employees.includes('db().begin')],

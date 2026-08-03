@@ -1,50 +1,22 @@
-# Bar Ops design system — v0.10.6
+# Bar Ops design system — v0.11.0
 
-Bar Ops uses a token-led, monochrome and flat interface. The design system is intentionally split by responsibility so central changes remain predictable.
+## Source of truth
 
-## Canonical files
+1. `app/design-tokens.css` defines semantic values.
+2. `components/ui-primitives.tsx` defines shared interactive controls.
+3. `app/design-system.css` defines their visual and responsive behavior.
+4. Feature CSS should only define domain-specific layout.
 
-### `app/design-tokens.css`
+## Semantic rhythm tokens
 
-This is the single source of truth for:
+- `--space-inline`
+- `--space-field`
+- `--space-card`
+- `--space-section`
+- `--space-page`
 
-- colour roles,
-- typography scale,
-- spacing scale,
-- radii,
-- control and icon dimensions,
-- focus and transition behavior,
-- sidebar, header and content dimensions.
+Changing these values realigns the product centrally.
 
-Make application-wide visual changes here first.
+## Canonical controls
 
-### `app/design-system.css`
-
-This contains reusable visual behavior for:
-
-- surfaces,
-- buttons and icon actions,
-- forms,
-- status pills,
-- navigation,
-- cards,
-- schedule controls,
-- Team cards,
-- employee portal components,
-- responsive and standalone-PWA states.
-
-It must consume semantic tokens and must not define a competing `:root` palette or use `!important`.
-
-### `app/globals.css`
-
-This contains structural and feature layout. It can define grids, positioning and feature-specific geometry, but must not become a second global design system.
-
-## Rules
-
-1. Do not add a new global colour or dimension directly to feature CSS when an existing semantic token fits.
-2. Add new tokens only for reusable design decisions, not one-off fixes.
-3. Do not use `!important`.
-4. Do not add unscoped SVG rules.
-5. Keep interaction targets at least `--control-height`.
-6. Keep selected, disabled, loading, pressed and focus states visible.
-7. Prefer removing obsolete declarations over appending another release-specific override section.
+Use `ActionButton`, `ActionGroup`, `InputField`, `SelectField`, `SegmentedControl`, `FilterBar`, `KpiCard`, and `DialogFooter`. Do not create new page-specific button, field, or footer systems when one of these applies.
