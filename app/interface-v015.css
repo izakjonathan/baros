@@ -351,3 +351,192 @@ body .page-wrap { padding-bottom: 94px; }
   body .schedule-view-select { min-width: 104px; }
   body .floating-navigation.is-open .floating-navigation-shell { width: calc(100vw - 20px); }
 }
+
+/* v0.15.0 cascade repair — one final ownership layer. */
+:root {
+  --ui-header: 72px;
+  --ui-gutter: 16px;
+  --ui-radius-card: 22px;
+  --ui-radius-control: 14px;
+  --floating-nav-bottom-browser: 8px;
+}
+
+/* Remove legacy visual residue without disturbing feature behaviour. */
+body .topbar,
+body .employee-header {
+  height: calc(var(--ui-header) + env(safe-area-inset-top));
+  min-height: 0;
+  padding: env(safe-area-inset-top) 16px 0;
+}
+body .page-wrap {
+  padding: calc(var(--ui-header) + env(safe-area-inset-top) + 22px) 16px calc(92px + env(safe-area-inset-bottom));
+}
+body .page-header,
+body .schedule-head {
+  margin-bottom: 18px;
+}
+body .page-header h1,
+body .schedule-head h1 {
+  font-size: clamp(34px, 10vw, 44px);
+  line-height: .98;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+
+/* Team cards: remove all old separators and compressed metadata rows. */
+body .team-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+body .team-card { padding: 18px; overflow: hidden; }
+body .team-card::before,
+body .team-card::after,
+body .team-card *::before,
+body .team-card *::after { box-sizing: border-box; }
+body .team-card-head { padding: 0; border: 0; }
+body .team-identity { grid-template-columns: 54px minmax(0,1fr); gap: 14px; }
+body .team-card .avatar { width: 54px; height: 54px; }
+body .team-card h2 { margin: 0 0 3px; font-size: 19px; line-height: 1.15; }
+body .team-card p { margin: 0; color: var(--ui-muted); }
+body .team-stats {
+  margin: 16px 0 12px;
+  padding: 0;
+  border: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+body .team-stats > * { border: 0; padding: 0; min-width: 0; }
+body .team-stats > :last-child { text-align: left; overflow-wrap: anywhere; }
+body .portal-access { width: max-content; max-width: 100%; margin: 0 0 12px; }
+body .team-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+body .team-actions button { width: 100%; min-width: 0; }
+
+/* Timesheets: compact actions and predictable 2x2 controls. */
+body .page-header:has(+ .attendance-filters) { align-items: flex-end; }
+body .timesheet-actions,
+body .page-header .timesheet-actions,
+body .page-header .header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: auto;
+}
+body .timesheet-actions button,
+body .page-header .timesheet-actions button {
+  width: auto;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 13px;
+}
+body .attendance-filters {
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 10px;
+}
+body .attendance-filters input,
+body .attendance-filters select { width: 100%; min-width: 0; font-size: 15px; }
+body .attendance-metrics .metric-card { min-height: 168px; }
+body .hours-by-employee .panel-title { padding: 0; }
+body .hours-by-employee .team-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+body .hours-by-employee .team-card { display: grid; grid-template-columns: 54px minmax(0,1fr); column-gap: 14px; align-items: center; }
+body .hours-by-employee .team-card > h2,
+body .hours-by-employee .team-card > p,
+body .hours-by-employee .team-card > .hours-compare,
+body .hours-by-employee .team-card > .export-count { grid-column: 2; }
+body .hours-by-employee .team-card > .avatar { grid-row: 1 / span 2; }
+body .hours-compare { margin-top: 14px; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+
+/* Schedule: prevent heading wrap and control collisions. */
+body .schedule-head {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+body .schedule-head > div:first-child { min-width: 0; }
+body .schedule-head-actions { display: flex; align-items: center; gap: 8px; }
+body .schedule-view-select { width: 128px; min-width: 128px; }
+body .schedule-view-select select { width: 100%; min-height: 48px; padding-right: 36px; }
+body .schedule-head-actions .compact-action { width: 48px; min-width: 48px; padding: 0; }
+body .schedule-head-actions .compact-action span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+body .schedule-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: 10px;
+  padding: 12px;
+}
+body .period-controls { min-width: 0; display: grid; grid-template-columns: 48px minmax(0,1fr) 48px; align-items: center; gap: 8px; }
+body .period-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
+body .schedule-toolbar-right { display: flex; align-items: center; gap: 8px; }
+body .schedule-counts { display: none; }
+body .publish-button { min-width: 142px; }
+body .custom-range { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+body .custom-range label { min-width: 0; }
+body .custom-range input { width: 100%; min-width: 0; }
+body .calendar-panel { overflow: hidden; }
+body .calendar-grid { max-width: 100%; }
+
+/* Dialogs: own the viewport, scroll internally, and never inherit page/nav geometry. */
+body .modal-layer { padding: max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom)); align-items: center; }
+body .modal {
+  width: min(760px,100%);
+  max-height: calc(100dvh - max(24px,env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+  padding: 22px;
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr);
+  overflow: hidden;
+  border-radius: 28px;
+}
+body .modal-head { margin-bottom: 16px; }
+body .modal-head h2 { font-size: clamp(34px,9vw,44px); }
+body .modal-content { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: 2px; }
+body .shift-dialog-fields { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+body .shift-dialog-fields .full-field,
+body .shift-dialog-fields .shift-date-field { grid-column: 1 / -1; }
+body .dialog-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  margin: 18px -2px 0;
+  padding: 14px 0 0;
+  background: linear-gradient(to bottom,rgba(255,255,255,0),#fff 18px);
+  backdrop-filter: none;
+}
+body .dialog-footer.has-danger { gap: 10px; }
+body .dialog-footer .danger-button { width: 100%; }
+body .dialog-footer-actions { display: grid; grid-template-columns: minmax(0,.8fr) minmax(0,1.2fr); gap: 10px; }
+
+/* Floating navigation: fixed to the actual viewport bottom, not document flow. */
+body .floating-navigation {
+  position: fixed;
+  left: max(10px,env(safe-area-inset-left));
+  bottom: calc(8px + env(safe-area-inset-bottom));
+  z-index: 100;
+}
+body .floating-navigation-shell { max-width: calc(100vw - 20px - env(safe-area-inset-left) - env(safe-area-inset-right)); }
+body .floating-navigation.is-open .floating-navigation-shell { width: calc(100vw - 20px - env(safe-area-inset-left) - env(safe-area-inset-right)); }
+
+@media (max-width: 760px) {
+  body .team-grid,
+  body .hours-by-employee .team-grid { grid-template-columns: 1fr; }
+  body .dashboard-grid { grid-template-columns: 1fr; }
+  body .attendance-filters { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  body .schedule-toolbar { grid-template-columns: 1fr; }
+  body .schedule-toolbar-right { width: 100%; }
+  body .publish-button { width: 100%; }
+}
+
+@media (max-width: 520px) {
+  body .page-header:has(.header-actions),
+  body .page-header:has(.action-group) { display: block; }
+  body .page-header .header-actions,
+  body .page-header .action-group,
+  body .timesheet-actions { width: 100%; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); margin-top: 14px; }
+  body .page-header .header-actions button,
+  body .page-header .action-group button,
+  body .timesheet-actions button { width: 100%; padding-inline: 6px; font-size: 13px; }
+  body .schedule-head h1 { font-size: 38px; white-space: nowrap; }
+  body .schedule-view-select { width: 116px; min-width: 116px; }
+  body .custom-range { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  body .modal { padding: 18px; border-radius: 24px; }
+  body .shift-dialog-fields { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  body .dialog-footer-actions { grid-template-columns: .8fr 1.2fr; }
+}
