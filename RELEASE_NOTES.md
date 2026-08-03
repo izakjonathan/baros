@@ -1,25 +1,25 @@
-# Bar Ops v0.11.4 — UI Architecture Build Fix
+# Bar Ops v0.10.5 — CSS Ownership Cleanup
 
-This release corrects the Vercel TypeScript failure in v0.11.2 by completing the Time & Attendance migration from the removed local `Metric` component to the shared `KpiCard` primitive. All v0.11.2 Daily Operations and PostgreSQL integration features are retained.
+Built directly from the uploaded v0.10.4 PWA baseline.
 
-# Bar Ops v0.11.4 — PostgreSQL Integration & Daily Operations
+## Purpose
 
-## Daily Operations persistence
+Remove historical CSS override layers and establish deterministic ownership without redesigning components or changing application functionality.
 
-- Added migration `011_daily_operations.sql`.
-- Opening, closing, maintenance and general operational tasks are stored per organization and location.
-- Task completion and deletion are transactional and audited.
-- Manager logbook entries are permanent PostgreSQL records with author and timestamp.
-- Manager bootstrap loads tasks and logbook entries with the rest of the selected-location workspace.
-- Development mode retains local persistence.
+## Completed
 
-## Live PostgreSQL integration testing
+- Removed the historical v0.9.6 and v0.9.7 redesign sections from `globals.css`.
+- Reduced `!important` declarations from 227 to 0.
+- Reduced repeated exact selectors in the same stylesheet/scope from 131 to 0.
+- Consolidated the root token system from six base definitions to one.
+- Made `mono-components.css` the canonical owner of `.topbar` and `.metric-card` appearance.
+- Preserved genuine responsive variants.
+- Added `npm run test:css-ownership` to prevent reintroduction of historical layers, duplicate exact selectors, multiple token roots, or `!important`.
+- Updated CSS-aware tests to validate semantic rules rather than obsolete minified strings and release comments.
+- Rotated the PWA service-worker cache namespace to v0.10.5.
 
-- GitHub Quality Checks now starts a disposable PostgreSQL 17 service.
-- All migrations are applied in sequence on every quality run.
-- A behavioral integration suite verifies Daily Operations transactions, audit entries and cross-tenant guards.
-- Integration tests use an isolated test organization and clean up their records.
+See `CSS_OWNERSHIP_REPORT_V0105.md` for the detailed before/after audit.
 
-## Deployment
+## Database
 
-Migration 011 is required. After deployment, run the Database administration workflow with `migrate`, followed by `verify`.
+No migration is required.

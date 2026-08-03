@@ -1,15 +1,16 @@
-# Implementation status — v0.11.4
+# Implementation status — v0.9.1
 
-## Production-backed manager modules
+## Persistent and server-confirmed
+Employee profiles and invitations, shifts and publications, products and location inventory, payroll/timesheet APIs, employee clock actions, settings, stock receipt/waste/transfer APIs, and audit records.
 
-Scheduling, employees, invitations, attendance, payroll, products, inventory transactions, settings and Daily Operations are backed by PostgreSQL.
+## Development-local or partially integrated
+Daily operations editor, complete purchase-order editor, some dashboard summary cards, and some manager approval surfaces still use presentation state or incomplete UI flows. They are not represented as completed production workflows.
 
-Daily Operations now includes persistent location-scoped tasks and permanent manager logbook entries. Create, complete and delete operations are audited.
+## Operational rule
+A manager action must not show success before its PostgreSQL request succeeds. New work should use UUIDs, selected location context, tenant-scoped queries, shared validation helpers, and a transaction for multi-table writes.
 
-## Testing
 
-The source regression suite runs on every quality build. GitHub Actions also provisions disposable PostgreSQL 17, applies all migrations and runs behavioral integration checks. Playwright mobile and iPad smoke tests remain available through `npm run test:e2e` but are not yet part of the default workflow.
-
-## Remaining major staged area
-
-Purchase-order creation remains an initial supplier-selection flow. Receiving, waste and stock-transfer posting are PostgreSQL-backed, but the complete line-item order editor is planned for a later release.
+## v0.10.0 release integrity
+- GitHub database and quality workflows are restored.
+- Mono is split into tokens and component primitives with no `!important` declarations in the Mono layer.
+- A dependency lockfile is still not included because the release workspace could not reach the public npm registry reliably. GitHub currently uses `npm install`; generate and commit `package-lock.json` from a successful public-registry install before changing workflows to `npm ci`.

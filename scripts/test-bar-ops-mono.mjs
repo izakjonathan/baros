@@ -1,17 +1,17 @@
 import fs from 'node:fs';
-const css = fs.readFileSync('app/design-tokens.css', 'utf8') + fs.readFileSync('app/design-system.css', 'utf8');
+const css = fs.readFileSync('app/mono-tokens.css', 'utf8') + fs.readFileSync('app/mono-components.css', 'utf8');
 const layout = fs.readFileSync('app/layout.tsx', 'utf8');
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const checks = [
-  ['version', ['0.9.8','0.9.9','0.10.0','0.10.1','0.10.2','0.10.3','0.10.4','0.10.5','0.10.6','0.11.0','0.11.1','0.11.2','0.11.3','0.11.4'].includes(pkg.version)],
-  ['mono imported', layout.includes('import "./design-tokens.css"') && layout.includes('import "./design-system.css"')],
-  ['light grey canvas', css.includes('--color-canvas: #f4f4f2')],
-  ['white surface', css.includes('--color-surface: #ffffff')],
+  ['version', ['0.9.8','0.9.9','0.10.0','0.10.1','0.10.2','0.10.3','0.10.4','0.10.5'].includes(pkg.version)],
+  ['mono imported', layout.includes('import "./mono-tokens.css"') && layout.includes('import "./mono-components.css"')],
+  ['light grey canvas', css.includes('--mono-canvas: #f4f4f2')],
+  ['white surface', css.includes('--mono-surface: #ffffff')],
   ['black icon system', css.includes('One icon system: black outline')],
   ['borderless surfaces', css.includes('border: 0')],
-  ['tonal fields', css.includes('background: var(--color-surface-muted)')],
+  ['tonal fields', css.includes('background: var(--mono-inset)')],
   ['focus visible', css.includes(':focus-visible')],
-  ['44px touch target', css.includes('--control-height: 44px')],
+  ['44px touch target', css.includes('--mono-control: 44px')],
   ['reduced motion', css.includes('prefers-reduced-motion')],
 ];
 for (const [name, ok] of checks) {

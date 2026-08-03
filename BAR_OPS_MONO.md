@@ -1,22 +1,17 @@
-# Bar Ops design system — v0.11.0
+# Bar Ops Mono v0.10.0
 
-## Source of truth
+Bar Ops Mono is a token-led monochrome interface. Hierarchy comes from tone, spacing, typography and state—not decorative borders or shadows.
 
-1. `app/design-tokens.css` defines semantic values.
-2. `components/ui-primitives.tsx` defines shared interactive controls.
-3. `app/design-system.css` defines their visual and responsive behavior.
-4. Feature CSS should only define domain-specific layout.
+## Source files
+- `app/mono-tokens.css`: canonical neutral palette, radii, control sizes and compatibility aliases.
+- `app/mono-components.css`: application-level surface, toolbar, form, schedule, employee and interaction primitives.
 
-## Semantic rhythm tokens
-
-- `--space-inline`
-- `--space-field`
-- `--space-card`
-- `--space-section`
-- `--space-page`
-
-Changing these values realigns the product centrally.
-
-## Canonical controls
-
-Use `ActionButton`, `ActionGroup`, `InputField`, `SelectField`, `SegmentedControl`, `FilterBar`, `KpiCard`, and `DialogFooter`. Do not create new page-specific button, field, or footer systems when one of these applies.
+## Rules
+1. Grey canvas, white surfaces, one inset grey.
+2. No decorative border where tone or spacing already separates content.
+3. Structural separators only for dense data and same-tone rows.
+4. Black outline icons scoped to icon components; never mutate every SVG globally.
+5. Minimum 44px interaction targets on touch devices.
+6. Explicit selected, pressed, disabled, loading and focus-visible states.
+7. One dominant primary action per context.
+8. Semantic colour is reserved for danger, warning and success meaning.

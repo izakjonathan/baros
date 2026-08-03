@@ -1,41 +1,23 @@
 # Bar Ops
 
-**Current release: v0.11.4 — PostgreSQL Integration & Daily Operations**
+**Current release: v0.10.1 — Functional Stabilization** v0.9.1
 
-Bar Ops is a Next.js hospitality operating system for scheduling, employees, attendance, payroll, inventory, ordering and daily bar operations. It is designed for Vercel, Neon PostgreSQL and iPhone/iPad standalone PWA use.
+Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 
-## Development
-
-```bash
-npm install
-npm run dev
-```
-
-## Validation
-
-```bash
-npm run test:all
-npm run lint
-npm run typecheck
-npm run build
-```
-
-Browser smoke tests:
-
-```bash
-npx playwright install
-npm run test:e2e
-```
-
-Live PostgreSQL integration checks require a disposable database:
-
-```bash
-TEST_DATABASE_URL=postgres://... DATABASE_URL=$TEST_DATABASE_URL npm run db:migrate
-TEST_DATABASE_URL=postgres://... npm run test:postgres-integration
-```
+## iPad workflow
+Commit the flat ZIP to the private `baros` repository using the Commit app. GitHub Quality Checks installs dependencies, runs tests/type checking/build, and Vercel deploys the commit.
 
 ## Database
+Use `DATABASE_URL` for the pooled Neon runtime URL and `DATABASE_DIRECT_URL` for migrations.
 
-Use `DATABASE_URL` for the pooled Neon runtime connection and `DATABASE_DIRECT_URL` for migrations. v0.11.4 adds migration `011_daily_operations.sql`.
+For this release no new migration is required.
 
-After deploying this release, run **Database administration → migrate**, then **verify**.
+## Install as an iPhone or iPad app
+
+Bar Ops v0.10.4 includes a web app manifest, Apple metadata, app icons and a service worker. In Safari, open the deployed site, choose **Share → Add to Home Screen**, then launch Bar Ops from its icon. If an older shortcut was installed before v0.10.4, delete it and add it again so iOS picks up the new standalone configuration.
+
+The service worker does not cache authenticated API responses or operational pages. When offline, Bar Ops shows a controlled reconnect screen rather than stale schedule, payroll or inventory data.
+## v0.10.5 CSS ownership
+
+The CSS cleanup release removes historical redesign blocks, repeated exact selectors and `!important` declarations while preserving the v0.10.4 project architecture. See `CSS_OWNERSHIP_REPORT_V0105.md`.
+

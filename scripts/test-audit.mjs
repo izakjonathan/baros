@@ -9,7 +9,7 @@ const checks=[
  ['exception detection',app.includes('Variance, no break, or edited')],
  ['export history',app.includes('Export history')],
  ['responsive attendance filters',css.includes('grid-template-columns:repeat(4,minmax(150px,1fr))')],
- ['mobile single-column forms',/\.form-grid\s*\{[^}]*grid-template-columns\s*:\s*1fr/.test(css)],
+ ['mobile single-column forms',css.includes('.form-grid{grid-template-columns:1fr}')],
  ['reduced motion support',css.includes('prefers-reduced-motion')],
  ['visible focus styles',css.includes(':focus-visible')],
 ];

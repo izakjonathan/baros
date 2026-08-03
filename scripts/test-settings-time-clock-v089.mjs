@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read = p => fs.readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
-const app = read('components/bar-ops-app.tsx') + read('components/app-shell.tsx');
+const app = read('components/bar-ops-app.tsx');
 const hours = read('app/employee/hours/page.tsx');
 const api = read('app/api/time-clock/route.ts');
 const settings = read('app/api/settings/time-clock/route.ts');

@@ -12,6 +12,7 @@ export default function manifest(): MetadataRoute.Manifest {
     display_override: ["standalone", "minimal-ui"],
     background_color: "#f4f4f2",
     theme_color: "#f4f4f2",
+    orientation: "portrait-primary",
     categories: ["business", "productivity"],
     icons: [
       {
@@ -34,6 +35,13 @@ export default function manifest(): MetadataRoute.Manifest {
       },
     ],
     shortcuts: [
+      {
+        name: "Shift plan",
+        short_name: "Schedule",
+        description: "Open the manager shift plan",
+        url: "/?module=schedule",
+        icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+      },
       {
         name: "Employee clock",
         short_name: "Clock",

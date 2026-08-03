@@ -17,23 +17,7 @@ concurrency:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_USER: baros
-          POSTGRES_PASSWORD: baros
-          POSTGRES_DB: baros_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U baros -d baros_test"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-    env:
-      TEST_DATABASE_URL: postgres://baros:baros@localhost:5432/baros_test
+    timeout-minutes: 20
     steps:
       - name: Check out baros
         uses: actions/checkout@v4
@@ -48,14 +32,6 @@ jobs:
 
       - name: Run regression suites
         run: npm run test:all
-
-      - name: Apply migrations to disposable PostgreSQL
-        env:
-          DATABASE_URL: ${{ env.TEST_DATABASE_URL }}
-        run: npm run db:migrate
-
-      - name: Run PostgreSQL integration tests
-        run: npm run test:postgres-integration
 
       - name: Lint
         run: npm run lint
