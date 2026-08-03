@@ -86,7 +86,16 @@ export default function HoursPage() {
   }, [period]);
 
   useEffect(() => {
-    load().catch((reason) => setError(reason instanceof Error ? reason.message : "Could not load hours"));
+    let cancelled = false;
+    setLoading(true);
+    load()
+      .catch((reason) => {
+        if (!cancelled) setError(reason instanceof Error ? reason.message : "Could not load hours");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, [load]);
 
   async function clockAction(action: "CLOCK_IN" | "BREAK_START" | "BREAK_END" | "CLOCK_OUT") {

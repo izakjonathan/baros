@@ -278,7 +278,11 @@ button:disabled,
   width: auto;
   height: var(--app-header-height);
   z-index: 80;
-  padding-top: env(safe-area-inset-top, 0px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: env(safe-area-inset-top, 0px) 34px 0;
 }
 .main-shell {
   padding-top: var(--app-header-height);

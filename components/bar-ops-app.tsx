@@ -5,7 +5,7 @@ import {
   ArrowRight, Bell, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight,
   CircleDollarSign, ClipboardList, Clock3, Coffee, LayoutDashboard, Menu, Package, Plus,
   Search, Settings, ShoppingCart, Sparkles, Users, X, AlertTriangle, Truck, MoreHorizontal,
-  Copy, Send, Boxes, Wine, UserRoundPlus, Timer, Play, Square, FileCheck2, FileDown, CheckCheck, RotateCcw, Ban, Pencil, ShieldAlert, History, DownloadCloud, LockKeyhole, UnlockKeyhole, Database, KeyRound, MapPin, FileArchive, ShieldCheck, ReceiptText, Trash2, ArrowLeftRight, TrendingUp, NotebookPen, Wrench, Save, Upload, Undo2, CheckCircle2
+  Copy, Send, Boxes, Wine, UserRoundPlus, Timer, Play, Square, FileCheck2, FileDown, CheckCheck, RotateCcw, Ban, Pencil, ShieldAlert, History, DownloadCloud, LockKeyhole, UnlockKeyhole, Database, KeyRound, MapPin, FileArchive, ShieldCheck, ReceiptText, Trash2, ArrowLeftRight, TrendingUp, NotebookPen, Wrench, Save, Upload, Undo2, CheckCircle2, LogOut
 } from "lucide-react";
 import { days, initialProducts, initialShifts, orders, team, type NavKey, type Product, type Shift, type ShiftRole } from "@/lib/data";
 import { DevRoleSwitcher } from "@/components/dev-role-switcher";
@@ -258,6 +258,10 @@ function Sidebar({ active, onChange, open, onClose, userName, userRole, devMode 
       </nav>
       <div className="side-bottom">
         <button className={active === "settings" ? "active" : ""} onClick={() => onChange("settings")}><Settings size={19} /><span>Settings</span></button>
+        <button onClick={async () => {
+          await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
+          window.location.assign("/login");
+        }}><LogOut size={19} /><span>Sign out</span></button>
         {devMode && <DevRoleSwitcher currentRole={userRole} />}<div className="profile"><div className="avatar dark">{userName.split(" ").map(part => part[0]).join("").slice(0,2)}</div><div><strong>{userName}</strong><span>{userRole.replace("_", " ").toLowerCase()}</span></div><ChevronDown size={16} /></div>
       </div>
     </aside>
