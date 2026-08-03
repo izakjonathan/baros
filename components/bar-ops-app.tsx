@@ -286,7 +286,7 @@ function Topbar({ onMenu, locations, selectedLocationId, onLocationChange, onNav
       <button className="icon-button" onClick={()=>{setSearchOpen(v=>!v);setNotificationsOpen(false)}} aria-label="Search workspace"><Search size={19} /></button>
       <button className="icon-button notification" onClick={()=>{setNotificationsOpen(v=>!v);setSearchOpen(false)}} aria-label="Open notifications"><Bell size={19} /><i /></button>
       {searchOpen&&<div className="top-popover search-popover"><label><Search size={16}/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search workspace"/></label><div>{matches.map(item=><button key={item.id} onClick={()=>go(item.id)}><item.icon size={17}/><span>{item.label}</span><ArrowRight size={14}/></button>)}</div></div>}
-      {notificationsOpen&&<div className="top-popover notifications-popover"><strong>Notifications</strong><button onClick={()=>go("schedule")}><CalendarDays size={17}/><span><b>Draft schedule</b><small>Review and publish upcoming shifts</small></span></button><button onClick={()=>go("attendance")}><Clock3 size={17}/><span><b>Timesheet review</b><small>Open time and attendance</small></span></button><button onClick={()=>go("inventory")}><Package size={17}/><span><b>Stock attention</b><small>Review products below par</small></span></button></div>}
+      {notificationsOpen&&<div className="top-popover notifications-popover"><strong>Notifications</strong><button onClick={()=>go("schedule")}><CalendarDays size={17}/><span><b>Draft schedule</b><small>Review and publish upcoming shifts</small></span></button><button onClick={()=>go("attendance")}><Clock3 size={17}/><span><b>Timesheet review</b><small>Open time and attendance</small></span></button><button onClick={()=>go("requests")}><ClipboardList size={17}/><span><b>Employee requests</b><small>Review leave, open shifts and shift changes</small></span></button><button onClick={()=>go("inventory")><Package size={17}/><span><b>Stock attention</b><small>Review products below par</small></span></button></div>}
     </div>
   </header>
 }
@@ -315,14 +315,14 @@ function Dashboard({ shifts, products, onNavigate }: { shifts: Shift[]; products
       <section className="panel attention-panel"><PanelTitle title="Attention needed" subtitle="Prioritised for you" />
         <button className="attention-item" onClick={() => onNavigate("inventory")}><span className="attention-icon amber"><Boxes size={19} /></span><div><strong>{lowStock.length} products below par</strong><small>Pilsner, house red and more</small></div><ChevronRight size={18} /></button>
         <button className="attention-item" onClick={() => onNavigate("schedule")}><span className="attention-icon violet"><CalendarDays size={19} /></span><div><strong>{draftCount} unpublished shifts</strong><small>Complete and publish this week</small></div><ChevronRight size={18} /></button>
-        <button className="attention-item" onClick={() => onNavigate("orders")}><span className="attention-icon blue"><Truck size={19} /></span><div><strong>Delivery tomorrow</strong><small>Nordic Drinks · 4 items</small></div><ChevronRight size={18} /></button>
+        <button className="attention-item" onClick={() => onNavigate("requests")}><span className="attention-icon violet"><ClipboardList size={19} /></span><div><strong>Employee requests</strong><small>Review leave, open shifts and shift changes</small></div><ChevronRight size={18} /></button><button className="attention-item" onClick={() => onNavigate("orders")}><span className="attention-icon blue"><Truck size={19} /></span><div><strong>Delivery tomorrow</strong><small>Nordic Drinks · 4 items</small></div><ChevronRight size={18} /></button>
       </section>
     </div>
     <section className="panel quick-panel"><PanelTitle title="Quick actions" subtitle="Common management tasks" /><div className="quick-grid">
       <Quick icon={CalendarDays} label="Open shift plan" detail="Create and publish shifts" onClick={() => onNavigate("schedule")} />
       <Quick icon={ClipboardList} label="Start stock count" detail="Update inventory levels" onClick={() => onNavigate("inventory")} />
       <Quick icon={ShoppingCart} label="Create order" detail="Build a purchase order" onClick={() => onNavigate("orders")} />
-      <Quick icon={UserRoundPlus} label="Invite employee" detail="Add someone to the team" onClick={() => onNavigate("team")} />
+      <Quick icon={ClipboardList} label="Review requests" detail="Approve employee self-service requests" onClick={() => onNavigate("requests")} /><Quick icon={UserRoundPlus} label="Invite employee" detail="Add someone to the team" onClick={() => onNavigate("team")} />
     </div></section>
   </>
 }

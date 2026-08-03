@@ -1,3 +1,7 @@
+## v0.11.1 self-service integrity
+
+The employee self-service foundation is implemented and production hardening now covers bounded submissions, employee-specific swap choices, discoverable manager review, and UUID-safe timesheet approval. Dependency-backed build, typecheck, lint, and production browser verification remain deployment checks.
+
 ## v0.11.0 employee self-service
 
 Manager review queue, time-off decisions, open-shift/transfer lifecycle notifications, and server validation are implemented. No migration required.

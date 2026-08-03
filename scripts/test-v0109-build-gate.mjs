@@ -4,7 +4,7 @@ const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
 const route = fs.readFileSync("app/api/employee/hours-summary/route.ts", "utf8");
 
 const checks = [
-  [["0.10.9", "0.10.10","0.10.11","0.11.0"].includes(pkg.version), "release version"],
+  [["0.10.9", "0.10.10","0.10.11","0.11.0","0.11.1"].includes(pkg.version), "release version"],
   [route.includes("const timesheets = await db()<Array<{"), "timesheet query has an explicit result contract"],
   [route.includes("id: string;"), "timesheet result contract guarantees id"],
   [route.includes("timesheets.map((item) => ({"), "mapping relies on query-boundary inference"],

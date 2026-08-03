@@ -26,7 +26,7 @@ export async function PATCH(req:Request){
    }
    const effectiveBreak=breakMinutes??Number(sheet.break_minutes||0);
    const worked=correctedOut?Math.max(0,Math.round((new Date(correctedOut).getTime()-new Date(correctedIn).getTime())/60000)-effectiveBreak):sheet.worked_minutes;
-   const updated=await sql`update timesheets set status=${status},clocked_in_at=${correctedIn},clocked_out_at=${correctedOut},break_minutes=${effectiveBreak},worked_minutes=${worked},approved_by=case when ${status}='APPROVED' then ${u.userId} else null end,approved_at=case when ${status}='APPROVED' then now() else null end,manager_note=${managerNote},updated_at=now() where id=${id} and organization_id=${u.organizationId} returning *`;
+   const updated=await sql`update timesheets set status=${status},clocked_in_at=${correctedIn},clocked_out_at=${correctedOut},break_minutes=${effectiveBreak},worked_minutes=${worked},approved_by=case when ${status}='APPROVED' then ${u.userId}::uuid else null::uuid end,approved_at=case when ${status}='APPROVED' then now() else null end,manager_note=${managerNote},updated_at=now() where id=${id} and organization_id=${u.organizationId} returning *`;
    await sql`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,before_data,after_data) values(${u.organizationId},${sheet.location_id},${u.userId},'TIMESHEET_CORRECTED','timesheet',${id},${JSON.stringify(sheet)}::jsonb,${JSON.stringify(updated[0])}::jsonb)`;
    return updated;
   });
