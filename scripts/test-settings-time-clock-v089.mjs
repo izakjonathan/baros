@@ -18,7 +18,7 @@ const checks = [
   ['published shift linking', api.includes("status='PUBLISHED'") && api.includes('nextShift?.id')],
   ['hours summary', summary.includes('scheduled_minutes') && summary.includes('approved_minutes')],
   ['correction persistence', corrections.includes('timesheet_correction_requests')],
-  ['settings ui styles', read('app/globals.css').includes('.settings-layout')],
+  ['settings ui styles', read('app/styles/legacy-geometry.css').includes('.settings-layout') || read('app/styles/components.css').includes('.settings-layout')],
 ];
 const failed = checks.filter(([,ok])=>!ok);
 for (const [name,ok] of checks) console.log(`${ok?'✓':'✗'} ${name}`);

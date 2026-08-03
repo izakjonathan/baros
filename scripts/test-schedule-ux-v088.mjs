@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 const source = fs.readFileSync('components/bar-ops-app.tsx', 'utf8');
-const css = fs.readFileSync('app/globals.css', 'utf8');
+import { readStyles } from './read-styles.mjs';
+const css = readStyles();
 const checks = [
   ['day tile passes its ISO date', 'onClick={() => onNewShift(day.iso)}'],
   ['dialog accepts an initial date', 'initialDate?: string'],

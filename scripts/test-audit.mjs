@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 const app=fs.readFileSync(new URL('../components/bar-ops-app.tsx',import.meta.url),'utf8');
-const css=fs.readFileSync(new URL('../app/globals.css',import.meta.url),'utf8')+fs.readFileSync(new URL('../app/product-system.css',import.meta.url),'utf8');
+import { readStyles } from './read-styles.mjs';
+const css=readStyles();
 const checks=[
  ['approved-only export',app.includes('filter(e=>e.status==="Approved")')],
  ['timesheet correction',app.includes('Correct timesheet')&&app.includes('edited:true')],

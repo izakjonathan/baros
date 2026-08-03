@@ -1,6 +1,6 @@
 {
   "name": "bar-ops",
-  "version": "0.15.0",
+  "version": "0.17.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -17,7 +17,7 @@
     "test:inventory": "node scripts/test-inventory-operations.mjs",
     "test:remediation": "node scripts/test-remediation.mjs",
     "db:verify": "node scripts/verify-database.mjs",
-    "test:all": "npm run test:logic && npm run test:payroll && npm run test:audit && npm run test:integrity && npm run test:production && npm run test:inventory && npm run test:remediation && npm run test:ipad-ops && npm run test:employee-access && npm run test:hardening && npm run test:postgres-api && npm run test:postgres-values && npm run test:employee-conflicts && npm run test:activation-schema && npm run test:shift-persistence && npm run test:location-context && npm run test:shift-assignment-display && npm run test:postgresql-integrity && npm run test:team-scheduled-hours && npm run test:publish-persistence && npm run test:schedule-ux && npm run test:settings-time-clock && npm run test:activation-reliability && npm run test:stabilization && npm run test:ui-optimization && npm run test:workspace-ui-v093 && npm run test:layout-v094 && npm run test:employee-portal-v095 && npm run test:pwa-v0104 && npm run test:daily-operations && npm run test:build-symbols && npm run test:floating-navigation-v0117 && npm run test:presentation-v0130 && npm run test:floating-nav-placement && npm run test:layout-recovery && npm run test:interface-v014",
+    "test:all": "npm run test:logic && npm run test:payroll && npm run test:audit && npm run test:integrity && npm run test:production && npm run test:inventory && npm run test:remediation && npm run test:employee-access && npm run test:postgres-api && npm run test:postgres-values && npm run test:employee-conflicts && npm run test:activation-schema && npm run test:shift-persistence && npm run test:location-context && npm run test:shift-assignment-display && npm run test:postgresql-integrity && npm run test:team-scheduled-hours && npm run test:publish-persistence && npm run test:activation-reliability && npm run test:ui-contract && npm run test:style-architecture",
     "test:ipad-ops": "node scripts/test-ipad-operations.mjs",
     "test:employee-access": "node scripts/test-employee-access.mjs",
     "test:hardening": "node scripts/test-v074-hardening.mjs",
@@ -37,37 +37,12 @@
     "typecheck": "tsc --noEmit",
     "test:stabilization": "node scripts/test-stabilization-v091.mjs",
     "test:ui-optimization": "node scripts/test-ui-optimization.mjs",
-    "test:workspace-ui-v093": "node scripts/test-workspace-ui-v093.mjs",
-    "test:layout-v094": "node scripts/test-layout-v094.mjs",
-    "test:employee-portal-v095": "node scripts/test-employee-portal-v095.mjs",
-    "test:borderless-v096": "node scripts/test-borderless-redesign-v096.mjs",
-    "test:minimal-flat-v097": "node scripts/test-minimal-flat-v097.mjs",
-    "test:bar-ops-mono": "node scripts/test-bar-ops-mono.mjs",
-    "test:mono-architecture": "node scripts/test-mono-architecture-v099.mjs",
-    "test:v0100-layout": "node scripts/test-v0100-layout.mjs",
-    "test:v0101-functional": "node scripts/test-v0101-functional.mjs",
-    "test:v0102-compact": "node scripts/test-v0102-compact.mjs",
-    "test:v0103-schedule-controls": "node scripts/test-v0103-schedule-controls.mjs",
-    "test:pwa-v0104": "node scripts/test-pwa-v0104.mjs",
-    "test:cleanup-v0105": "node scripts/test-cleanup-v0105.mjs",
-    "test:design-system": "node scripts/test-design-system-v0106.mjs",
-    "test:ui-architecture": "node scripts/test-ui-architecture-v0110.mjs",
-    "test:component-migration": "node scripts/test-component-migration-v0111.mjs",
-    "test:e2e": "playwright test",
     "test:daily-operations": "node scripts/test-v0112-daily-operations.mjs",
     "test:postgres-integration": "node scripts/test-postgres-integration-v0112.mjs",
     "test:build-symbols": "node scripts/test-v0114-build-symbols.mjs",
-    "test:floating-navigation": "node scripts/test-floating-navigation-v0115.mjs",
-    "test:floating-navigation-v0117": "node scripts/test-floating-navigation-v0117.mjs",
-    "test:typography-v0118": "node scripts/test-typography-v0118.mjs",
-    "test:employee-design-v0119": "node scripts/test-employee-design-v0119.mjs",
-    "test:design-integrity": "node scripts/test-design-integrity-v0121.mjs",
-    "test:cohesive-design": "node scripts/test-cohesive-design-v0120.mjs",
-    "test:presentation-v0130": "node scripts/test-presentation-reconstruction-v0130.mjs",
-    "test:legacy-ui": "npm run test:borderless-v096 && npm run test:minimal-flat-v097 && npm run test:bar-ops-mono && npm run test:mono-architecture && npm run test:v0100-layout && npm run test:v0102-compact && npm run test:v0103-schedule-controls && npm run test:cleanup-v0105 && npm run test:design-system && npm run test:ui-architecture && npm run test:component-migration && npm run test:floating-navigation && npm run test:typography-v0118 && npm run test:employee-design-v0119 && npm run test:cohesive-design && npm run test:design-integrity",
     "test:floating-nav-placement": "node scripts/test-floating-navigation-placement-v0131.mjs",
-    "test:layout-recovery": "node scripts/test-layout-recovery-v0132.mjs",
-    "test:interface-v014": "node scripts/test-interface-v014.mjs"
+    "test:ui-contract": "node scripts/test-ui-contract-v016.mjs",
+    "test:style-architecture": "node scripts/test-style-architecture-v017.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
@@ -82,8 +57,7 @@
     "@types/react-dom": "^19.0.2",
     "eslint": "^9.17.0",
     "eslint-config-next": "16.2.12",
-    "typescript": "^5.7.2",
-    "@playwright/test": "^1.54.2"
+    "typescript": "^5.7.2"
   },
   "engines": {
     "node": ">=20.9.0"

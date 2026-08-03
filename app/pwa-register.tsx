@@ -4,22 +4,21 @@ import { useEffect } from "react";
 
 export function PwaRegister() {
   useEffect(() => {
-    if (!("serviceWorker" in navigator) || process.env.NODE_ENV !== "production") return;
-
-    const register = async () => {
+    const clearLegacyRuntime = async () => {
       try {
-        const registration = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
-        registration.update().catch(() => undefined);
+        if ("serviceWorker" in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map((registration) => registration.unregister()));
+        }
+        if ("caches" in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.filter((key) => key.startsWith("bar-ops-")).map((key) => caches.delete(key)));
+        }
       } catch (error) {
-        console.error("Bar Ops service worker registration failed", error);
+        console.error("Bar Ops runtime cleanup failed", error);
       }
     };
-
-    if (document.readyState === "complete") void register();
-    else window.addEventListener("load", register, { once: true });
-
-    return () => window.removeEventListener("load", register);
+    void clearLegacyRuntime();
   }, []);
-
   return null;
 }

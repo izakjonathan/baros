@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 const ui=fs.readFileSync('components/bar-ops-app.tsx','utf8')+fs.readFileSync('components/app-shell.tsx','utf8')+fs.readFileSync('features/team/team.tsx','utf8');
-const css=fs.readFileSync('app/globals.css','utf8')+fs.readFileSync('app/product-system.css','utf8');
+import { readStyles } from './read-styles.mjs';
+const css=readStyles();
 const checks=[
  ['overview add-shift removed',!ui.includes('Good evening, Izak')&&!ui.includes('onNewShift={() => openShiftDialog()}')],
  ['fixed top navigation',css.includes('.topbar{position:fixed')||css.includes('.topbar {\n  position: fixed')],
