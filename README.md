@@ -1,8 +1,12 @@
 # Bar Ops
 
-**Current release: v0.10.10 — Employee Hours and Location Assignment**
+**Current release: v0.10.11 — Employee Timesheet Rendering**
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
+
+## v0.10.11 employee timesheet rendering
+
+v0.10.11 prevents Clock-page crashes when PostgreSQL date values are returned as full ISO timestamps and keeps geolocation failures inline. See `RELEASE_NOTES_V01011.md`.
 
 ## v0.10.10 employee hours and location assignment
 

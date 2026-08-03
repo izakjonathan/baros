@@ -39,12 +39,30 @@ function periodRange(period: string) {
   const iso = (date: Date) => date.toISOString().slice(0, 10);
   return { from: iso(start), to: iso(end) };
 }
-function time(value?: string | null) {
-  if (!value) return "—";
-  return new Intl.DateTimeFormat("en-DK", { hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(value));
+function validDate(value?: string | null, dateOnly = false) {
+  if (!value) return null;
+  const datePart = value.match(/^\d{4}-\d{2}-\d{2}/)?.[0];
+  const parsed = new Date(dateOnly && datePart ? `${datePart}T12:00:00` : value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
-function dateLabel(value: string) {
-  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(new Date(`${value}T12:00:00`));
+function time(value?: string | null) {
+  const parsed = validDate(value);
+  if (!parsed) return "—";
+  return new Intl.DateTimeFormat("en-DK", { hour: "2-digit", minute: "2-digit", hour12: false }).format(parsed);
+}
+function dateLabel(value?: string | null) {
+  const parsed = validDate(value, true);
+  if (!parsed) return "Unknown date";
+  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(parsed);
+}
+
+function geolocationErrorMessage(reason: unknown) {
+  if (typeof GeolocationPositionError !== "undefined" && reason instanceof GeolocationPositionError) {
+    if (reason.code === reason.PERMISSION_DENIED) return "Location access was denied. Allow location access in Safari settings and try again.";
+    if (reason.code === reason.POSITION_UNAVAILABLE) return "Your location could not be determined. Check Location Services and try again.";
+    if (reason.code === reason.TIMEOUT) return "Location check timed out. Move somewhere with a clearer signal and try again.";
+  }
+  return reason instanceof Error ? reason.message : "Location check failed. Please try again.";
 }
 
 export default function HoursPage() {
@@ -81,7 +99,7 @@ export default function HoursPage() {
     setEligibilityReason(clockData.eligibilityReason || "");
     setRequireLocationCheck(Boolean(clockData.requireLocationCheck));
     setTimezone(clockData.timezone || "Europe/Copenhagen");
-    setTimesheets(hoursData.timesheets || []);
+    setTimesheets(Array.isArray(hoursData.timesheets) ? hoursData.timesheets : []);
     setScheduledMinutes(Number(hoursData.summary?.scheduled_minutes || 0));
     setApprovedMinutes(Number(hoursData.summary?.approved_minutes || 0));
     setLoading(false);
@@ -107,8 +125,14 @@ export default function HoursPage() {
       let location: { latitude?: number; longitude?: number; accuracy?: number } = {};
       if (action === "CLOCK_IN" && requireLocationCheck) {
         if (!navigator.geolocation) throw new Error("Location services are not available on this device");
-        const position = await new Promise<GeolocationPosition>((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }));
-        location = { latitude: position.coords.latitude, longitude: position.coords.longitude, accuracy: position.coords.accuracy };
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 });
+          });
+          location = { latitude: position.coords.latitude, longitude: position.coords.longitude, accuracy: position.coords.accuracy };
+        } catch (reason) {
+          throw new Error(geolocationErrorMessage(reason));
+        }
       }
       const response = await fetch("/api/time-clock", {
         method: "POST",
@@ -159,13 +183,13 @@ export default function HoursPage() {
         {!eligible ? (
           <p className="clock-unavailable">{eligibilityReason || "Your account needs a linked employee profile and location before time can be recorded."}</p>
         ) : loading ? null : !active ? (
-          <button disabled={busy} onClick={() => clockAction("CLOCK_IN")}><Play size={19} />{busy ? "Starting…" : "Clock in"}</button>
+          <button type="button" disabled={busy} onClick={() => clockAction("CLOCK_IN")}><Play size={19} />{busy ? "Starting…" : "Clock in"}</button>
         ) : (
           <div className="clock-actions">
-            <button disabled={busy} onClick={() => clockAction(breakActive ? "BREAK_END" : "BREAK_START")}>
+            <button type="button" disabled={busy} onClick={() => clockAction(breakActive ? "BREAK_END" : "BREAK_START")}>
               <Pause size={18} />{breakActive ? "End break" : "Start break"}
             </button>
-            <button disabled={busy} className="clock-out" onClick={() => clockAction("CLOCK_OUT")}><Square size={18} />Clock out</button>
+            <button type="button" disabled={busy} className="clock-out" onClick={() => clockAction("CLOCK_OUT")}><Square size={18} />Clock out</button>
           </div>
         )}
       </section>
@@ -191,7 +215,7 @@ export default function HoursPage() {
               <span className={item.status === "APPROVED" ? "approved" : "pending"}>{item.status === "APPROVED" && <CheckCircle2 size={13} />} {item.status[0] + item.status.slice(1).toLowerCase()}</span>
               <small>{time(item.clocked_in_at)}–{time(item.clocked_out_at)} · {item.break_minutes || 0}m break</small>
               {item.status !== "OPEN" && (
-                <button disabled={busy || item.correction_pending} className="correction-request" onClick={() => { setCorrection(item); setCorrectionReason(""); }}>
+                <button type="button" disabled={busy || item.correction_pending} className="correction-request" onClick={() => { setCorrection(item); setCorrectionReason(""); }}>
                   <MessageSquareWarning size={14} />{item.correction_pending ? "Correction pending" : "Request correction"}
                 </button>
               )}
@@ -202,7 +226,7 @@ export default function HoursPage() {
       </section>
 
       <p className="hours-note">Worked hours become payroll-ready only after manager approval.</p>
-      {correction && <div className="modal-layer"><button className="modal-scrim" aria-label="Close" onClick={()=>setCorrection(null)}/><section className="modal" role="dialog" aria-modal="true" aria-labelledby="correction-title"><div className="modal-head"><div><h2 id="correction-title">Request a correction</h2><p>{dateLabel(correction.work_date)} · {time(correction.clocked_in_at)}–{time(correction.clocked_out_at)}</p></div></div><label className="correction-field">What needs correcting?<textarea rows={5} value={correctionReason} onChange={e=>setCorrectionReason(e.target.value)} placeholder="Describe the correct clock-in, clock-out or break time"/></label><div className="modal-actions"><button className="secondary" onClick={()=>setCorrection(null)}>Cancel</button><button className="primary" disabled={busy||!correctionReason.trim()} onClick={requestCorrection}>{busy?'Sending…':'Send request'}</button></div></section></div>}
+      {correction && <div className="modal-layer"><button type="button" className="modal-scrim" aria-label="Close" onClick={()=>setCorrection(null)}/><section className="modal" role="dialog" aria-modal="true" aria-labelledby="correction-title"><div className="modal-head"><div><h2 id="correction-title">Request a correction</h2><p>{dateLabel(correction.work_date)} · {time(correction.clocked_in_at)}–{time(correction.clocked_out_at)}</p></div></div><label className="correction-field">What needs correcting?<textarea rows={5} value={correctionReason} onChange={e=>setCorrectionReason(e.target.value)} placeholder="Describe the correct clock-in, clock-out or break time"/></label><div className="modal-actions"><button type="button" className="secondary" onClick={()=>setCorrection(null)}>Cancel</button><button type="button" className="primary" disabled={busy||!correctionReason.trim()} onClick={requestCorrection}>{busy?'Sending…':'Send request'}</button></div></section></div>}
     </div>
   );
 }
