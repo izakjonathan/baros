@@ -5,7 +5,7 @@ const pkg=JSON.parse(fs.readFileSync(path.join(root,"package.json"),"utf8"));
 const tokens=fs.readFileSync(path.join(root,"app/design-tokens.css"),"utf8");
 const product=fs.readFileSync(path.join(root,"app/product-system.css"),"utf8");
 const checks=[
-  [["0.13.1","0.13.2"].includes(pkg.version),"release version"],
+  [["0.13.1","0.13.2","0.14.0"].includes(pkg.version),"release version"],
   [tokens.includes("--floating-nav-bottom-browser: 2px"),"browser bottom token"],
   [tokens.includes("--floating-nav-bottom-standalone"),"standalone bottom token"],
   [product.includes("bottom: var(--floating-nav-bottom-browser)"),"floating nav uses one browser token"],

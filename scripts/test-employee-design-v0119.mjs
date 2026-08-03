@@ -6,5 +6,5 @@ const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
 for (const value of ["employee-location","employee-header-actions","clamp(2rem, 4.6vw, 2.5rem)","var(--color-canvas)","var(--control-height)","employee-nav"]) if(!css.includes(value)&&!shell.includes(value)) throw new Error(`Missing aligned employee design: ${value}`);
 if(!layout.includes("select name from locations")) throw new Error("Employee shell does not use location context");
 if(!shell.includes("IconButton")||!shell.includes("status-dot")) throw new Error("Employee header is not using shared design primitives");
-if(!["0.11.9","0.12.0","0.12.1","0.13.0","0.13.1","0.13.2"].includes(pkg.version)) throw new Error("Incorrect release version");
+if(!["0.11.9","0.12.0","0.12.1","0.13.0","0.13.1","0.13.2","0.14.0"].includes(pkg.version)) throw new Error("Incorrect release version");
 console.log("Employee design alignment v0.11.9 checks passed");

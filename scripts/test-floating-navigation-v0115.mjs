@@ -6,7 +6,7 @@ const app=fs.readFileSync(path.join(root,'components/bar-ops-app.tsx'),'utf8');
 const css=fs.readFileSync(path.join(root,'app/product-system.css'),'utf8');
 const pkg=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
 const checks=[
-  [['0.11.6','0.11.7','0.11.8','0.11.9','0.12.0','0.12.1','0.13.0','0.13.1','0.13.2'].includes(pkg.version),'package version'],
+  [['0.11.6','0.11.7','0.11.8','0.11.9','0.12.0','0.12.1','0.13.0','0.13.1','0.13.2','0.14.0'].includes(pkg.version),'package version'],
   [shell.includes('export function FloatingNavigation'),'floating navigation component'],
   [!shell.includes('export function Sidebar'),'legacy sidebar component removed'],
   [shell.includes('label: "Timesheets"'),'attendance renamed Timesheets'],

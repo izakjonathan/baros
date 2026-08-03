@@ -5,7 +5,7 @@ const tokens=fs.readFileSync('app/design-tokens.css','utf8');
 const structural=fs.readFileSync('app/globals.css','utf8');
 const product=fs.readFileSync('app/product-system.css','utf8');
 const checks=[
- [['0.13.0','0.13.1','0.13.2'].includes(pkg.version),'0.13.1','version'],
+ [['0.13.0','0.13.1','0.13.2','0.14.0'].includes(pkg.version),'0.13.1','version'],
  [layout.includes('./design-tokens.css')&&layout.includes('./globals.css')&&layout.includes('./product-system.css'),'stylesheet order'],
  [!fs.existsSync('app/design-system.css'),'old design stylesheet removed'],
  [product.includes('Bar Ops v0.13.2 canonical product interface'),'canonical presentation layer'],

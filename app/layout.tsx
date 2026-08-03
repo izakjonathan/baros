@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import "./design-tokens.css";
 import "./globals.css";
 import "./product-system.css";
+import "./interface-v014.css";
 import { PwaRegister } from "./pwa-register";
 
 const inter = Inter({
