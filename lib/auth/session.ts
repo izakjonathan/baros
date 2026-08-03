@@ -50,13 +50,58 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   if (!token) return null;
 
   const rows = await db()<SessionUser[]>`
-    select u.id as "userId", u.email, u.name, m.role, s.organization_id as "organizationId",
-           s.location_id as "locationId", e.id as "employeeId"
+    select
+      u.id as "userId",
+      u.email,
+      u.name,
+      m.role,
+      s.organization_id as "organizationId",
+      coalesce(
+        (
+          select l.id
+          from locations l
+          where l.id = s.location_id
+            and l.organization_id = s.organization_id
+            and l.active = true
+          limit 1
+        ),
+        employee_access.location_id,
+        (
+          select min(l.id)
+          from locations l
+          where l.organization_id = s.organization_id
+            and l.active = true
+          having count(*) = 1
+        )
+      ) as "locationId",
+      employee_access.employee_id as "employeeId"
     from sessions s
     join users u on u.id = s.user_id
     join memberships m on m.user_id = u.id and m.organization_id = s.organization_id
-    left join employees e on e.user_id = u.id and e.organization_id = s.organization_id
-    where s.token_hash = ${tokenHash(token)} and s.expires_at > now() and u.status = 'ACTIVE'
+    left join lateral (
+      select
+        e.id as employee_id,
+        (
+          select el.location_id
+          from employee_locations el
+          join locations l
+            on l.id = el.location_id
+           and l.organization_id = e.organization_id
+           and l.active = true
+          where el.employee_id = e.id
+          order by el.primary_location desc, l.created_at asc
+          limit 1
+        ) as location_id
+      from employees e
+      where e.user_id = u.id
+        and e.organization_id = s.organization_id
+        and e.active = true
+      order by e.updated_at desc nulls last, e.created_at desc
+      limit 1
+    ) employee_access on true
+    where s.token_hash = ${tokenHash(token)}
+      and s.expires_at > now()
+      and u.status = 'ACTIVE'
     limit 1`;
   return rows[0] || null;
 }
