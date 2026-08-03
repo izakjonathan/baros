@@ -1,5 +1,5 @@
 import fs from "node:fs";
-const app = fs.readFileSync("components/bar-ops-app.tsx", "utf8") + fs.readFileSync("features/team/team.tsx", "utf8") + fs.readFileSync("lib/schedule-utils.ts", "utf8");
+const app = fs.readFileSync("components/bar-ops-app.tsx", "utf8");
 const data = fs.readFileSync("lib/data.ts", "utf8");
 const checks = [
   [data.includes("employeeId?: string"), "Shift type keeps employee UUID"],

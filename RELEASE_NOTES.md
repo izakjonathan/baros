@@ -1,20 +1,42 @@
-# Bar Ops v0.17.0 — Explicit Style Ownership
+# Bar Ops v0.10.6 — Code & Design-System Consolidation
 
-v0.17.0 replaces the v0.16.1 concatenated stylesheet with an explicit cascade architecture.
+This release is a code-architecture cleanup built on v0.10.5. It does not add a database migration.
 
-## Changes
+## Design-system consolidation
 
-- Added `app/styles/tokens.css`, `reset.css`, `legacy-geometry.css` and `components.css`.
-- Reduced `app/globals.css` to a six-line CSS entrypoint with declared cascade-layer order.
-- Removed the obsolete `app/design-tokens.css` and `app/interface-v016.css` files.
-- Merged the embedded v0.15 repair section and v0.16 safeguards into their owning component selectors.
-- Removed all `!important` declarations from the canonical component layer.
-- Added a shared stylesheet reader for regression tests.
-- Added `test:style-architecture` to catch missing files, obsolete style layers, undefined variables and cascade regressions.
-- Updated active tests so they inspect the complete style architecture rather than obsolete filenames.
+- Replaced `mono-tokens.css` and `mono-components.css` with the canonical files:
+  - `app/design-tokens.css`
+  - `app/design-system.css`
+- Centralized colour, typography, spacing, radius, control, icon, transition and app-shell values.
+- Kept compatibility aliases so existing feature layouts can migrate gradually without visual regressions.
+- Removed the legacy `:root` token block from `globals.css`.
+- Removed all `!important` declarations from application CSS.
+- Removed superseded v0.9.6 and v0.9.7 visual override layers from `globals.css`.
+- Removed duplicate declarations where a later identical selector already supplied the final value.
+- Fixed the malformed opening comment that previously swallowed the first design-system rule.
+- Removed an undefined legacy focus token.
 
-## Scope
+## CSS responsibilities
 
-This release completes the first structural stage of the design-system reconstruction. Existing feature geometry remains isolated in the low-priority `legacy` layer so working layouts are preserved while individual modules are migrated safely. It does not claim that every legacy rule has already been deleted.
+- `design-tokens.css`: the only source of global visual constants.
+- `design-system.css`: shared component appearance and cross-feature responsive behavior.
+- `globals.css`: structural and feature-specific layout only.
 
-No database migration is required.
+## Regression-suite cleanup
+
+Historical tests now check current semantic outcomes instead of requiring old filenames, `!important`, or obsolete release-comment strings.
+
+Added `npm run test:design-system` to prevent the architecture from drifting back toward competing token roots and override layers.
+
+## PWA
+
+- Rotated the service-worker cache namespace to v0.10.6.
+- Retained standalone iPhone/iPad behavior and secure API cache exclusions.
+
+## Validation
+
+- Full `npm run test:all` passed.
+- CSS parsed without syntax errors.
+- All JavaScript test and service-worker files passed syntax validation.
+- Both GitHub Actions workflows remain included.
+- ZIP integrity and duplicate-entry checks passed.

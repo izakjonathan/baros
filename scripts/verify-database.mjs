@@ -20,12 +20,12 @@ try {
     if (!stored) throw new Error(`Migration has no checksum: ${name}. Run migrate once to backfill it.`);
     if (stored !== checksum) throw new Error(`Migration checksum mismatch: ${name}`);
   }
-  const [counts] = await sql`select (select count(*)::int from organizations) organizations,(select count(*)::int from locations) locations,(select count(*)::int from users) users,(select count(*)::int from employees) employees,(select count(*)::int from products) products,(select count(*)::int from stock_transactions) stock_transactions,(select count(*)::int from operational_tasks) operational_tasks,(select count(*)::int from manager_log_entries) manager_log_entries`;
+  const [counts] = await sql`select (select count(*)::int from organizations) organizations,(select count(*)::int from locations) locations,(select count(*)::int from users) users,(select count(*)::int from employees) employees,(select count(*)::int from products) products,(select count(*)::int from stock_transactions) stock_transactions`;
   const [guards] = await sql`select count(*)::int tenant_guards from pg_trigger where tgname like 'tenant_guard_%' and not tgisinternal`;
   console.log("Database connection verified. Migration checksums verified.");
   console.log(`Database: ${server.database_name}`);
   console.log(`PostgreSQL: ${server.server_version}`);
   console.log(`Applied migrations: ${migrations.length}`);
   console.log(`Tenant guards: ${guards.tenant_guards}`);
-  console.log(`Rows — organizations: ${counts.organizations}, locations: ${counts.locations}, users: ${counts.users}, employees: ${counts.employees}, products: ${counts.products}, stock transactions: ${counts.stock_transactions}, operational tasks: ${counts.operational_tasks}, manager log entries: ${counts.manager_log_entries}`);
+  console.log(`Rows — organizations: ${counts.organizations}, locations: ${counts.locations}, users: ${counts.users}, employees: ${counts.employees}, products: ${counts.products}, stock transactions: ${counts.stock_transactions}`);
 } finally { await sql.end({ timeout: 5 }); }

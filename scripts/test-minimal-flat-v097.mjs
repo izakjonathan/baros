@@ -1,0 +1,16 @@
+import fs from 'node:fs';
+const tokens=fs.readFileSync('app/design-tokens.css','utf8');
+const css=fs.readFileSync('app/design-system.css','utf8');
+const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+const checks=[
+ ['version',['0.9.7','0.9.8','0.9.9','0.10.0','0.10.1','0.10.2','0.10.3','0.10.4','0.10.5','0.10.6'].includes(pkg.version)],
+ ['light grey canvas',tokens.includes('--color-canvas: #f4f4f2')],
+ ['black icon stroke',css.includes(':where(.lucide')&&css.includes('stroke: currentColor')],
+ ['transparent icon buttons',css.includes('.icon-button, .menu-button')&&css.includes('background: transparent')],
+ ['flat cards',css.includes('Tonal surface hierarchy')&&css.includes('border: 0')],
+ ['equal action height',tokens.includes('--control-height-compact: 40px')&&css.includes('.modal-actions > button')],
+ ['tonal inputs',css.includes('background: var(--color-surface-muted)')],
+ ['subtle data rules',css.includes('rgba(17,17,17,.055)')],
+];
+for(const [name,ok] of checks){if(!ok) throw new Error(`v0.9.7 check failed: ${name}`)}
+console.log(`v0.9.7 minimal flat checks passed (${checks.length})`);

@@ -9,18 +9,62 @@ import {
 } from "lucide-react";
 import { days, initialProducts, initialShifts, orders, team, type NavKey, type Product, type Shift, type ShiftRole } from "@/lib/data";
 import { DevRoleSwitcher } from "@/components/dev-role-switcher";
-import { ActionButton, ActionGroup, DialogFooter, FilterBar, InputField, KpiCard, PanelTitle, SegmentedControl, SelectField } from "@/components/ui-primitives";
-import { FloatingNavigation, Topbar, PageHeader } from "@/components/app-shell";
-import { Dashboard } from "@/features/overview/dashboard";
-import { Team } from "@/features/team/team";
-import type { Employee, Location, LogEntry, OpsTask, StockAdjustment, TimeEntry } from "@/lib/workspace-types";
-import { BASE_MONDAY, canonicalShiftDate, conflictIds, dateFromSerial, dateFromShift, dateSerial, hoursBetween, isOvernight, mapDatabaseShift, shiftPositionFromDate, toIsoDate, workedHours } from "@/lib/schedule-utils";
+
+const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = [
+  { id: "dashboard", label: "Overview", icon: LayoutDashboard },
+  { id: "schedule", label: "Shift plan", icon: CalendarDays },
+  { id: "attendance", label: "Time & attendance", icon: Timer },
+  { id: "inventory", label: "Inventory", icon: Package },
+  { id: "orders", label: "Orders", icon: ShoppingCart },
+  { id: "operations", label: "Daily operations", icon: NotebookPen },
+  { id: "team", label: "Team", icon: Users },
+  { id: "control", label: "Control centre", icon: Settings },
+];
+
+type Location = { id: string; name: string; timezone?: string };
+type Employee = { id?: string; name: string; initials: string; role: string; hours: number; status: string; active: boolean; email?: string; phone?: string; payrollId?: string; salaryCode?: string; costCentre?: string; hourlyRate?: number; portalStatus?: "NONE" | "INVITED" | "ACTIVE" | "EXPIRED" };
+type StockAdjustment = { id: string; productId: string; productName: string; delta: number; reason: string; createdAt: string };
+type OpsTask = { id: string; title: string; type: "Opening" | "Closing" | "Task" | "Maintenance"; owner: string; due: string; done: boolean; note?: string };
+type LogEntry = { id: string; title: string; body: string; author: string; createdAt: string };
+type TimeEntry = { id: string; employee: string; date: string; clockIn: string; clockOut?: string; breakMinutes: number; status: "Running" | "Pending" | "Approved" | "Rejected"; scheduledHours: number; note?: string; edited?: boolean };
+const todayAtNoon = new Date(); todayAtNoon.setHours(12,0,0,0);
+const BASE_MONDAY = new Date(todayAtNoon); BASE_MONDAY.setDate(todayAtNoon.getDate() - ((todayAtNoon.getDay() + 6) % 7));
+function toIsoDate(date: Date) { const y = date.getFullYear(); const m = String(date.getMonth()+1).padStart(2,"0"); const d = String(date.getDate()).padStart(2,"0"); return `${y}-${m}-${d}`; }
+function dateSerial(value: string) { const [year, month, day] = value.split("-").map(Number); return Date.UTC(year, month - 1, day) / 86400000; }
+const BASE_DATE_SERIAL = dateSerial(toIsoDate(BASE_MONDAY));
+function dateFromSerial(serial: number) { const date = new Date(serial * 86400000); return date.toISOString().slice(0, 10); }
+function shiftInterval(shift: Shift) { const startDay = dateSerial(canonicalShiftDate(shift)); const [sh, sm] = shift.start.split(":").map(Number); const [eh, em] = shift.end.split(":").map(Number); const start = startDay * 1440 + sh * 60 + sm; let end = startDay * 1440 + eh * 60 + em; if (end <= start) end += 1440; return { start, end }; }
+function shiftsOverlap(a: Shift, b: Shift) { const x = shiftInterval(a); const y = shiftInterval(b); return x.start < y.end && y.start < x.end; }
+function conflictIds(shifts: Shift[]) { const ids = new Set<string>(); const assigned = shifts.filter((s) => !s.isOpen); for (let i=0;i<assigned.length;i++) for (let j=i+1;j<assigned.length;j++) if (assigned[i].employee === assigned[j].employee && shiftsOverlap(assigned[i], assigned[j])) { ids.add(assigned[i].id); ids.add(assigned[j].id); } return ids; }
+function shiftPositionFromDate(value: string) { const diffDays = dateSerial(value) - BASE_DATE_SERIAL; return { day: ((diffDays % 7) + 7) % 7, weekOffset: Math.floor(diffDays / 7) }; }
+function dateFromShift(weekOffset = 0, day = 0) { const date = new Date(BASE_MONDAY); date.setDate(BASE_MONDAY.getDate() + weekOffset * 7 + day); return toIsoDate(date); }
+function canonicalShiftDate(shift: Shift) { return shift.date ?? dateFromShift(shift.weekOffset ?? 0, shift.day); }
+function isOvernight(start: string, end: string) { return end <= start; }
+function mapDatabaseShift(x: any): Shift {
+  const startText = String(x.starts_at);
+  const endText = String(x.ends_at);
+  const startDate = new Date(startText);
+  const endDate = new Date(endText);
+  const timezone = x.location_timezone || "Europe/Copenhagen";
+  const parts = (date: Date) => Object.fromEntries(new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", hourCycle:"h23" }).formatToParts(date).map(part => [part.type, part.value]));
+  const startParts = parts(startDate);
+  const endParts = parts(endDate);
+  const date = `${startParts.year}-${startParts.month}-${startParts.day}`;
+  const pos = shiftPositionFromDate(date);
+  const employeeName = x.is_open ? "Available shift" : x.employee_name || "Unassigned";
+  return {
+    id: x.id, date, day: pos.day, weekOffset: pos.weekOffset, employee: employeeName, employeeId: x.employee_id || undefined,
+    initials: x.is_open ? "+" : employeeName.split(" ").map((word: string) => word[0]).join(""),
+    start: `${startParts.hour}:${startParts.minute}`, end: `${endParts.hour}:${endParts.minute}`,
+    role: x.role, status: x.status === "DRAFT" ? "Draft" : "Published", isOpen: x.is_open,
+    recurrenceGroupId: x.recurrence_group_id, locationId: x.location_id
+  };
+}
 
 export function BarOpsApp({ userName, userRole, devMode }: { userName: string; userRole: string; devMode: boolean }) {
   const [active, setActive] = useState<NavKey>("dashboard");
   const [locations, setLocations] = useState<Location[]>(devMode ? [{ id: "dev-temple", name: "Temple Bar" }] : []);
   const [selectedLocationId, setSelectedLocationId] = useState<string>(devMode ? "dev-temple" : "");
-  const [lastLocationName, setLastLocationName] = useState<string>(devMode ? "Temple Bar" : "Workspace");
   const [mobileNav, setMobileNav] = useState(false);
   const [shifts, setShifts] = useState(initialShifts);
   const [products, setProducts] = useState(initialProducts);
@@ -81,16 +125,12 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       const data = await response.json();
       const availableLocations: Location[] = data.locations || [];
       setLocations(availableLocations);
-      const resolvedLocationName = availableLocations.find((location) => location.id === (data.selectedLocationId || selectedLocationId))?.name || availableLocations[0]?.name;
-      if (resolvedLocationName) setLastLocationName(resolvedLocationName);
       const resolvedLocationId = data.selectedLocationId || availableLocations[0]?.id || "";
       if (resolvedLocationId && resolvedLocationId !== selectedLocationId) setSelectedLocationId(resolvedLocationId);
       setEmployees((data.employees || []).map((e: any) => ({ id:e.id, name:`${e.first_name} ${e.last_name}`, initials:`${e.first_name?.[0]||""}${e.last_name?.[0]||""}`, role:e.employment_title||"Employee", hours:Number(e.contracted_hours||0), status:e.active?"Active":"Inactive", active:e.active, email:e.email||"", phone:e.phone||"", payrollId:e.payroll_id||"", salaryCode:e.salary_code||"", costCentre:e.cost_centre||"", hourlyRate:Number(e.hourly_rate||0), portalStatus:e.portal_status||"NONE" })));
       setShifts((data.shifts || []).map(mapDatabaseShift));
       setProducts((data.products || []).map((x:any)=>({id:x.id,name:x.name,category:x.category,supplier:x.supplier||"Unassigned",stock:Number(x.quantity||0),par:Number(x.par_level||0),unit:x.unit,price:Number(x.purchase_price||0)})));
       setTimeEntries((data.timesheets || []).map((x:any)=>({id:x.id,employee:x.employee_name,date:String(x.work_date).slice(0,10),clockIn:String(x.clocked_in_at).slice(11,16),clockOut:x.clocked_out_at?String(x.clocked_out_at).slice(11,16):undefined,breakMinutes:x.break_minutes,status:(x.status==="OPEN"?"Running":x.status[0]+x.status.slice(1).toLowerCase()) as TimeEntry["status"],scheduledHours:Number(x.scheduled_minutes||0)/60,note:x.manager_note})));
-      setOpsTasks((data.operationalTasks || []).map((x:any)=>({id:x.id,title:x.title,type:x.task_type,owner:x.owner_label,due:x.due_label,done:Boolean(x.done),note:x.note||undefined})));
-      setLogEntries((data.managerLogs || []).map((x:any)=>({id:x.id,title:x.title,body:x.body,author:x.author,createdAt:new Date(x.created_at).toLocaleString("en-GB")})));
       setDatabaseStatus(resolvedLocationId ? "PostgreSQL connected" : "No active location configured");
       hasBootstrappedRef.current = true;
       setDataReady(true);
@@ -116,16 +156,16 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
 
   return (
     <div className="app-frame">
-      <FloatingNavigation active={active} onChange={setActive} open={mobileNav} onToggle={() => setMobileNav((value) => !value)} userName={userName} userRole={userRole} devMode={devMode} />
+      <Sidebar active={active} onChange={(value) => { setActive(value); setMobileNav(false); }} open={mobileNav} onClose={() => setMobileNav(false)} userName={userName} userRole={userRole} devMode={devMode} />
       <main className="main-shell">
-        <Topbar locations={locations} selectedLocationId={selectedLocationId} onLocationChange={setSelectedLocationId} onNavigate={setActive} fallbackLocationName={lastLocationName} />
+        <Topbar onMenu={() => setMobileNav(true)} locations={locations} selectedLocationId={selectedLocationId} onLocationChange={setSelectedLocationId} onNavigate={setActive} />
         <div className="page-wrap">
           {active === "dashboard" && <Dashboard shifts={shifts} products={products} onNavigate={setActive} />}
           {active === "schedule" && <Schedule shifts={shifts} setShifts={setShifts} employees={employees} onNewShift={openShiftDialog} onEditShift={setEditingShift} notify={notify} currentWeekOffset={currentWeekOffset} setCurrentWeekOffset={setCurrentWeekOffset} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
           {active === "attendance" && <Attendance employees={employees} shifts={shifts} entries={timeEntries} setEntries={setTimeEntries} notify={notify} onEdit={setEditingTimeEntry} />}
           {active === "inventory" && <Inventory products={products} setProducts={setProducts} onNewProduct={() => setDialog("product")} onEditProduct={setEditingProduct} onStockCount={() => setDialog("stockCount")} adjustments={stockAdjustments} setAdjustments={setStockAdjustments} notify={notify} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
           {active === "orders" && <Orders products={products} setProducts={setProducts} onNewOrder={() => setDialog("order")} notify={notify} />}
-          {active === "operations" && <DailyOperations tasks={opsTasks} setTasks={setOpsTasks} logs={logEntries} setLogs={setLogEntries} notify={notify} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
+          {active === "operations" && <DailyOperations tasks={opsTasks} setTasks={setOpsTasks} logs={logEntries} setLogs={setLogEntries} notify={notify} />}
           {active === "team" && (
             <Team
               employees={employees}
@@ -206,6 +246,84 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
     </div>
   );
 }
+
+function Sidebar({ active, onChange, open, onClose, userName, userRole, devMode }: { active: NavKey; onChange: (id: NavKey) => void; open: boolean; onClose: () => void; userName: string; userRole: string; devMode: boolean }) {
+  return <>
+    {open && <button className="scrim" aria-label="Close navigation" onClick={onClose} />}
+    <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
+      <div className="brand"><div className="brand-mark"><Wine size={22} /></div><div><strong>Bar Ops</strong><span>Temple Bar</span></div><button type="button" className="sidebar-close" onClick={onClose} aria-label="Close navigation"><X size={20} /></button></div>
+      <nav className="side-nav">
+        <p>Workspace</p>
+        {navItems.map((item) => <button key={item.id} className={active === item.id ? "active" : ""} onClick={() => onChange(item.id)}><item.icon size={19} /><span>{item.label}</span>{item.id === "inventory" && <em>5</em>}</button>)}
+      </nav>
+      <div className="side-bottom">
+        <button className={active === "settings" ? "active" : ""} onClick={() => onChange("settings")}><Settings size={19} /><span>Settings</span></button>
+        {devMode && <DevRoleSwitcher currentRole={userRole} />}<div className="profile"><div className="avatar dark">{userName.split(" ").map(part => part[0]).join("").slice(0,2)}</div><div><strong>{userName}</strong><span>{userRole.replace("_", " ").toLowerCase()}</span></div><ChevronDown size={16} /></div>
+      </div>
+    </aside>
+  </>
+}
+
+function Topbar({ onMenu, locations, selectedLocationId, onLocationChange, onNavigate }: { onMenu: () => void; locations: Location[]; selectedLocationId: string; onLocationChange: (id: string) => void; onNavigate: (id: NavKey) => void }) {
+  const selected = locations.find(location => location.id === selectedLocationId);
+  const [searchOpen,setSearchOpen]=useState(false);
+  const [notificationsOpen,setNotificationsOpen]=useState(false);
+  const [query,setQuery]=useState("");
+  const matches=navItems.filter(item=>item.label.toLowerCase().includes(query.toLowerCase()));
+  const go=(id:NavKey)=>{onNavigate(id);setSearchOpen(false);setQuery("");};
+  return <header className="topbar">
+    <button className="menu-button" onClick={onMenu} aria-label="Open navigation"><Menu size={21} /></button>
+    <label className="location-switch" aria-label="Current location"><span className="status-dot" />{locations.length > 1 ? <><select value={selectedLocationId} onChange={event => onLocationChange(event.target.value)}>{locations.map(location => <option key={location.id} value={location.id}>{location.name}</option>)}</select><ChevronDown size={15} /></> : <span>{selected?.name || "No active location"}</span>}</label>
+    <div className="top-actions">
+      <button className="icon-button" onClick={()=>{setSearchOpen(v=>!v);setNotificationsOpen(false)}} aria-label="Search workspace"><Search size={19} /></button>
+      <button className="icon-button notification" onClick={()=>{setNotificationsOpen(v=>!v);setSearchOpen(false)}} aria-label="Open notifications"><Bell size={19} /><i /></button>
+      {searchOpen&&<div className="top-popover search-popover"><label><Search size={16}/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search workspace"/></label><div>{matches.map(item=><button key={item.id} onClick={()=>go(item.id)}><item.icon size={17}/><span>{item.label}</span><ArrowRight size={14}/></button>)}</div></div>}
+      {notificationsOpen&&<div className="top-popover notifications-popover"><strong>Notifications</strong><button onClick={()=>go("schedule")}><CalendarDays size={17}/><span><b>Draft schedule</b><small>Review and publish upcoming shifts</small></span></button><button onClick={()=>go("attendance")}><Clock3 size={17}/><span><b>Timesheet review</b><small>Open time and attendance</small></span></button><button onClick={()=>go("inventory")}><Package size={17}/><span><b>Stock attention</b><small>Review products below par</small></span></button></div>}
+    </div>
+  </header>
+}
+
+function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; title: string; subtitle?: string; action?: React.ReactNode }) {
+  return <div className="page-header"><div>{eyebrow && <p className="eyebrow">{eyebrow}</p>}<h1>{title}</h1>{subtitle&&<p>{subtitle}</p>}</div>{action}</div>
+}
+
+function Dashboard({ shifts, products, onNavigate }: { shifts: Shift[]; products: Product[]; onNavigate: (id: NavKey) => void }) {
+  const lowStock = products.filter((product) => product.stock < product.par);
+  const draftCount = shifts.filter((shift) => shift.status === "Draft").length;
+  return <>
+    <PageHeader eyebrow={new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})} title="Overview" subtitle="Here’s what needs your attention across the bar." />
+    <section className="metric-grid">
+      <Metric icon={Users} label="On shift today" value="3 people" detail="Next shift starts at 17:00" trend="Fully covered" />
+      <Metric icon={Clock3} label="Scheduled this week" value="139 hours" detail="Across 14 shifts" trend="8% vs last week" />
+      <Metric icon={CircleDollarSign} label="Estimated labour" value="22,480 kr." detail="16.2% of forecast sales" trend="On target" />
+      <Metric icon={AlertTriangle} label="Needs attention" value={`${lowStock.length + draftCount} items`} detail={`${lowStock.length} low stock · ${draftCount} draft shifts`} trend="Review now" warning />
+    </section>
+    <div className="dashboard-grid">
+      <section className="panel today-panel"><PanelTitle title="Today at the bar" subtitle={new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})} action={<button className="text-button" onClick={() => onNavigate("schedule")}>View shift plan <ArrowRight size={15} /></button>} />
+        <div className="timeline">
+          {[{ time: "15:00", title: "Maya Chen", role: "Manager", initials: "MC", end: "00:00" }, { time: "17:00", title: "Jonas Berg", role: "Bartender", initials: "JB", end: "03:00" }, { time: "19:00", title: "Sofia Lund", role: "Floor · confirmation pending", initials: "SL", end: "02:00", pending: true }].map((item) => <div className="timeline-row" key={item.title}><time>{item.time}</time><div className={`avatar ${item.pending ? "sand" : ""}`}>{item.initials}</div><div className="grow"><strong>{item.title}</strong><span>{item.role}</span></div><span className="shift-time">{item.time}–{item.end}</span><button className="more"><MoreHorizontal size={19} /></button></div>)}
+        </div>
+      </section>
+      <section className="panel attention-panel"><PanelTitle title="Attention needed" subtitle="Prioritised for you" />
+        <button className="attention-item" onClick={() => onNavigate("inventory")}><span className="attention-icon amber"><Boxes size={19} /></span><div><strong>{lowStock.length} products below par</strong><small>Pilsner, house red and more</small></div><ChevronRight size={18} /></button>
+        <button className="attention-item" onClick={() => onNavigate("schedule")}><span className="attention-icon violet"><CalendarDays size={19} /></span><div><strong>{draftCount} unpublished shifts</strong><small>Complete and publish this week</small></div><ChevronRight size={18} /></button>
+        <button className="attention-item" onClick={() => onNavigate("orders")}><span className="attention-icon blue"><Truck size={19} /></span><div><strong>Delivery tomorrow</strong><small>Nordic Drinks · 4 items</small></div><ChevronRight size={18} /></button>
+      </section>
+    </div>
+    <section className="panel quick-panel"><PanelTitle title="Quick actions" subtitle="Common management tasks" /><div className="quick-grid">
+      <Quick icon={CalendarDays} label="Open shift plan" detail="Create and publish shifts" onClick={() => onNavigate("schedule")} />
+      <Quick icon={ClipboardList} label="Start stock count" detail="Update inventory levels" onClick={() => onNavigate("inventory")} />
+      <Quick icon={ShoppingCart} label="Create order" detail="Build a purchase order" onClick={() => onNavigate("orders")} />
+      <Quick icon={UserRoundPlus} label="Invite employee" detail="Add someone to the team" onClick={() => onNavigate("team")} />
+    </div></section>
+  </>
+}
+
+function Metric({ icon: Icon, label, value, detail, trend, warning }: { icon: typeof Users; label: string; value: string; detail: string; trend: string; warning?: boolean }) {
+  return <div className="metric-card"><div className={`metric-icon ${warning ? "warning" : ""}`}><Icon size={20} /></div><span className="metric-label">{label}</span><strong>{value}</strong><small>{detail}</small><div className={`metric-trend ${warning ? "warn" : ""}`}>{warning ? <AlertTriangle size={13} /> : <Sparkles size={13} />}{trend}</div></div>
+}
+function PanelTitle({ title, subtitle, action }: { title: string; subtitle: string; action?: React.ReactNode }) { return <div className="panel-title"><div><h2>{title}</h2>{subtitle&&<p>{subtitle}</p>}</div>{action}</div> }
+function Quick({ icon: Icon, label, detail, onClick }: { icon: typeof CalendarDays; label: string; detail: string; onClick: () => void }) { return <button className="quick-action" onClick={onClick}><span><Icon size={19} /></span><div><strong>{label}</strong><small>{detail}</small></div><ArrowRight size={17} /></button> }
 
 function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notify, currentWeekOffset, setCurrentWeekOffset, devMode, selectedLocationId, persist }: { shifts: Shift[]; setShifts: React.Dispatch<React.SetStateAction<Shift[]>>; employees: Employee[]; onNewShift: (date?: string) => void; onEditShift: (shift: Shift) => void; notify: (s: string) => void; currentWeekOffset: number; setCurrentWeekOffset: React.Dispatch<React.SetStateAction<number>>; devMode: boolean; selectedLocationId: string; persist: (path:string, options:RequestInit) => Promise<any> }) {
   const [publishing, setPublishing] = useState(false);
@@ -291,6 +409,8 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
 }
 function ShiftCard({ shift, conflict, onOpen, onDragStart }: { shift: Shift; conflict?: boolean; onOpen: () => void; onDragStart?: (event: React.DragEvent<HTMLButtonElement>) => void }) { const overnight = isOvernight(shift.start, shift.end); return <button type="button" draggable onDragStart={onDragStart} className={`shift-card shift-card-button role-${shift.role.toLowerCase()} ${shift.status === "Draft" ? "is-draft" : ""} ${conflict ? "has-conflict" : ""}`} onClick={onOpen} aria-label={`Open ${shift.isOpen ? "available" : shift.employee} shift ${shift.start} to ${shift.end}${overnight ? " next day" : ""}`}><div className="shift-card-top"><span>{shift.start}–{shift.end}{overnight ? " +1" : ""}</span><ChevronRight size={14} /></div><strong>{shift.isOpen ? "Available shift" : shift.employee}</strong><small>{shift.role}{overnight ? " · Overnight" : ""}{shift.recurrenceLabel ? ` · ${shift.recurrenceLabel}` : ""}</small>{shift.isOpen && <em>Open</em>}{shift.status === "Draft" && <em>Draft</em>}{conflict && <em className="conflict-badge">Conflict</em>}</button> }
 
+function hoursBetween(start: string, end: string) { const [sh,sm]=start.split(":").map(Number); const [eh,em]=end.split(":").map(Number); let mins=(eh*60+em)-(sh*60+sm); if(mins<=0) mins+=1440; return mins/60; }
+function workedHours(entry: TimeEntry) { return entry.clockOut ? Math.max(0, hoursBetween(entry.clockIn, entry.clockOut) - entry.breakMinutes/60) : 0; }
 function Attendance({ employees, shifts, entries, setEntries, notify, onEdit }: { employees: Employee[]; shifts: Shift[]; entries: TimeEntry[]; setEntries: React.Dispatch<React.SetStateAction<TimeEntry[]>>; notify:(s:string)=>void; onEdit:(entry:TimeEntry)=>void }) {
   const [fromDate, setFromDate] = useState("2026-07-27");
   const [toDate, setToDate] = useState("2026-08-02");
@@ -323,9 +443,9 @@ function Attendance({ employees, shifts, entries, setEntries, notify, onEdit }: 
     const total=rows.reduce((sum,row)=>sum+row.total,0);setExportHistory(cur=>[{id:crypto.randomUUID(),period:`${fromDate}–${toDate}`,employees:rows.length,hours:total,created:new Date().toLocaleString("en-GB")},...cur]); notify(`${rows.length} employee summaries exported`);
   }
   return <>
-  <PageHeader title="Timesheets" action={<ActionGroup className="header-actions"><ActionButton variant="secondary" className={periodLocked ? "locked-period" : ""} onClick={()=>{setPeriodLocked(v=>!v);notify(periodLocked?"Payroll period unlocked":"Payroll period locked for export")}}>{periodLocked?<><LockKeyhole size={17}/> Period locked</>:<><UnlockKeyhole size={17}/> Lock period</>}</ActionButton><ActionButton variant="secondary" onClick={approveAllVisible} disabled={periodLocked||!visible.some(e=>e.status==="Pending")}><CheckCheck size={18}/>Approve visible</ActionButton><ActionButton variant="primary" onClick={exportApproved} disabled={!approved.length||!periodLocked}><FileDown size={18}/>Export approved</ActionButton></ActionGroup>}/>
-  <FilterBar className="attendance-filters"><InputField label="From" type="date" value={fromDate} onChange={e=>setFromDate(e.target.value)}/><InputField label="To" type="date" value={toDate} min={fromDate} onChange={e=>setToDate(e.target.value)}/><SelectField label="Employee" value={employeeFilter} onChange={e=>setEmployeeFilter(e.target.value)}><option>All employees</option>{employees.map(e=><option key={e.name}>{e.name}</option>)}</SelectField><SelectField label="Status" value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option>Needs review</option><option>All</option><option>Pending</option><option>Approved</option><option>Rejected</option><option>Running</option></SelectField></FilterBar>
-  <section className="metric-grid attendance-metrics"><KpiCard icon={<CalendarDays size={20}/>} label="Scheduled" value={`${scheduled.toFixed(1)}h`} detail="Assigned shifts in period" footer={<><Sparkles size={13}/>{fromDate}–{toDate}</>}/><KpiCard icon={<Clock3 size={20}/>} label="Approved worked" value={`${worked.toFixed(1)}h`} detail="Included in export" footer={<><Sparkles size={13}/>Payroll ready</>}/><KpiCard icon={<FileCheck2 size={20}/>} label="Awaiting approval" value={String(pending)} detail="Excluded from export" footer={<><Sparkles size={13}/>{pending?"Action needed":"Clear"}</>}/><KpiCard icon={<ShieldAlert size={20}/>} label="Exceptions" value={String(exceptions.length)} detail="Variance, no break, or edited" footer={<><AlertTriangle size={13}/>{exceptions.length?"Review":"Clear"}</>} warning={!!exceptions.length}/></section>
+  <PageHeader title="Time & attendance" action={<div className="header-actions"><button className={periodLocked ? "secondary locked-period" : "secondary"} onClick={()=>{setPeriodLocked(v=>!v);notify(periodLocked?"Payroll period unlocked":"Payroll period locked for export")}}>{periodLocked?<><LockKeyhole size={17}/> Period locked</>:<><UnlockKeyhole size={17}/> Lock period</>}</button><button className="secondary" onClick={approveAllVisible} disabled={periodLocked||!visible.some(e=>e.status==="Pending")}><CheckCheck size={18}/>Approve visible</button><button className="primary" onClick={exportApproved} disabled={!approved.length||!periodLocked}><FileDown size={18}/>Export approved</button></div>}/>
+  <div className="attendance-filters"><label>From<input type="date" value={fromDate} onChange={e=>setFromDate(e.target.value)}/></label><label>To<input type="date" value={toDate} min={fromDate} onChange={e=>setToDate(e.target.value)}/></label><label>Employee<select value={employeeFilter} onChange={e=>setEmployeeFilter(e.target.value)}><option>All employees</option>{employees.map(e=><option key={e.name}>{e.name}</option>)}</select></label><label>Status<select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option>Needs review</option><option>All</option><option>Pending</option><option>Approved</option><option>Rejected</option><option>Running</option></select></label></div>
+  <section className="metric-grid attendance-metrics"><Metric icon={CalendarDays} label="Scheduled" value={`${scheduled.toFixed(1)}h`} detail="Assigned shifts in period" trend={`${fromDate}–${toDate}`}/><Metric icon={Clock3} label="Approved worked" value={`${worked.toFixed(1)}h`} detail="Included in export" trend="Payroll ready"/><Metric icon={FileCheck2} label="Awaiting approval" value={String(pending)} detail="Excluded from export" trend={pending?"Action needed":"Clear"}/><Metric icon={ShieldAlert} label="Exceptions" value={String(exceptions.length)} detail="Variance, no break, or edited" trend={exceptions.length?"Review":"Clear"} warning={!!exceptions.length}/></section>
   <section className="panel table-panel"><PanelTitle title="Timesheets" subtitle="Approval is reversible. Corrections return a record to pending and remain visibly marked."/><div className="data-table attendance-table"><div className="table-row table-head"><span>Employee</span><span>Date</span><span>Clocked</span><span>Break</span><span>Variance</span><span>Status & actions</span></div>{visible.map(e=>{const actual=e.clockOut?workedHours(e):0;const variance=actual-e.scheduledHours;const exception=e.status!=="Running"&&(Math.abs(variance)>=.5||e.breakMinutes===0||e.edited);return <div className={`table-row ${exception?"exception-row":""}`} key={e.id}><span><b>{e.employee}</b>{e.edited&&<small>Manager corrected</small>}</span><span>{e.date}</span><span>{e.clockIn}–{e.clockOut||"Now"}<small>{e.clockOut?actual.toFixed(2)+"h":"Running"}</small></span><span>{e.breakMinutes} min</span><span className={Math.abs(variance)>=.5?"variance-alert":""}>{e.clockOut?`${variance>=0?"+":""}${variance.toFixed(2)}h`:"—"}</span><span className="timesheet-actions"><i className={`status status-${e.status.toLowerCase()}`}>{e.status}</i>{e.status==="Pending"&&<><button title="Edit" onClick={()=>onEdit(e)}><Pencil size={14}/></button><button title="Reject" onClick={()=>rejectTimesheet(e.id)}><Ban size={14}/></button><button className="approve-mini" onClick={()=>approveTimesheet(e.id)}>Approve</button></>}{e.status==="Approved"&&<button title="Reopen" onClick={()=>reopenTimesheet(e.id)}><RotateCcw size={14}/></button>}{e.status==="Rejected"&&<button title="Return to review" onClick={()=>reopenTimesheet(e.id)}><RotateCcw size={14}/></button>}</span></div>})}{!visible.length&&<div className="attendance-empty">No timesheets match these filters.</div>}</div></section>
   <section className="hours-by-employee"><PanelTitle title="Payroll export preview" subtitle="One row per employee; only approved hours in the selected period are counted."/><div className="team-grid">{employees.map(emp=>{const scheduledEmp=visibleShifts.filter(s=>s.employee===emp.name).reduce((n,s)=>n+hoursBetween(s.start,s.end),0);const approvedEntries=approved.filter(e=>e.employee===emp.name);const workedEmp=approvedEntries.reduce((n,e)=>n+workedHours(e),0);return <article className="team-card" key={emp.name}><div className="avatar large">{emp.initials}</div><h2>{emp.name}</h2><p>{emp.role}</p><div className="hours-compare"><span>Scheduled<b>{scheduledEmp.toFixed(1)}h</b></span><span>Approved export<b>{workedEmp.toFixed(2)}h</b></span></div><small className="export-count">{approvedEntries.length} approved timesheet{approvedEntries.length===1?"":"s"}</small></article>})}</div></section>
   <section className="panel export-history"><PanelTitle title="Export history" subtitle="Development-mode audit trail for payroll files generated in this session." action={<History size={18}/>}/>{exportHistory.length?<div>{exportHistory.map(x=><article key={x.id}><DownloadCloud size={17}/><span><b>{x.period}</b><small>{x.created}</small></span><span>{x.employees} employees</span><strong>{x.hours.toFixed(2)}h</strong></article>)}</div>:<p>No payroll exports generated in this session.</p>}</section></>;
@@ -361,18 +481,27 @@ function Orders({ products, setProducts, onNewOrder, notify }: { products:Produc
   </>
 }
 
-function DailyOperations({tasks,setTasks,logs,setLogs,notify,devMode,selectedLocationId,persist}:{tasks:OpsTask[];setTasks:React.Dispatch<React.SetStateAction<OpsTask[]>>;logs:LogEntry[];setLogs:React.Dispatch<React.SetStateAction<LogEntry[]>>;notify:(s:string)=>void;devMode:boolean;selectedLocationId:string;persist:(path:string,options:RequestInit)=>Promise<any>}){
- const [title,setTitle]=useState(""); const [type,setType]=useState<OpsTask["type"]>("Task"); const [logText,setLogText]=useState(""); const [saving,setSaving]=useState(false);
+function DailyOperations({tasks,setTasks,logs,setLogs,notify}:{tasks:OpsTask[];setTasks:React.Dispatch<React.SetStateAction<OpsTask[]>>;logs:LogEntry[];setLogs:React.Dispatch<React.SetStateAction<LogEntry[]>>;notify:(s:string)=>void}){
+ const [title,setTitle]=useState(""); const [type,setType]=useState<OpsTask["type"]>("Task"); const [logText,setLogText]=useState("");
  const complete=tasks.filter(t=>t.done).length;
- async function addTask(){if(!title.trim()||saving)return;setSaving(true);try{const result=await persist("/api/daily-operations",{method:"POST",body:JSON.stringify({action:"CREATE_TASK",locationId:selectedLocationId,title:title.trim(),taskType:type})});const row=result?.record;const task:OpsTask=row?{id:row.id,title:row.title,type:row.task_type,owner:row.owner_label,due:row.due_label,done:Boolean(row.done),note:row.note||undefined}:{id:crypto.randomUUID(),title:title.trim(),type,owner:"Unassigned",due:"Today",done:false};setTasks(cur=>[...cur,task]);setTitle("");notify("Operational task added");}catch(error){notify(error instanceof Error?error.message:"Could not add operational task");}finally{setSaving(false)}}
- async function addLog(){if(!logText.trim()||saving)return;setSaving(true);try{const result=await persist("/api/daily-operations",{method:"POST",body:JSON.stringify({action:"CREATE_LOG",locationId:selectedLocationId,body:logText.trim()})});const row=result?.record;const entry:LogEntry=row?{id:row.id,title:row.title,body:row.body,author:row.author||"Current manager",createdAt:new Date(row.created_at).toLocaleString("en-GB")}:{id:crypto.randomUUID(),title:"Shift handover",body:logText.trim(),author:"Current manager",createdAt:new Date().toLocaleString("en-GB")};setLogs(cur=>[entry,...cur]);setLogText("");notify("Handover note saved");}catch(error){notify(error instanceof Error?error.message:"Could not save handover");}finally{setSaving(false)}}
- async function toggleTask(task:OpsTask){try{await persist("/api/daily-operations",{method:"PATCH",body:JSON.stringify({id:task.id,done:!task.done})});setTasks(cur=>cur.map(x=>x.id===task.id?{...x,done:!x.done}:x));}catch(error){notify(error instanceof Error?error.message:"Could not update task")}}
- async function removeTask(task:OpsTask){try{await persist("/api/daily-operations",{method:"DELETE",body:JSON.stringify({id:task.id})});setTasks(cur=>cur.filter(x=>x.id!==task.id));notify("Operational task removed");}catch(error){notify(error instanceof Error?error.message:"Could not remove task")}}
+ function addTask(){if(!title.trim())return;setTasks(cur=>[...cur,{id:crypto.randomUUID(),title:title.trim(),type,owner:"Unassigned",due:"Today",done:false}]);setTitle("");notify("Operational task added");}
+ function addLog(){if(!logText.trim())return;setLogs(cur=>[{id:crypto.randomUUID(),title:"Shift handover",body:logText.trim(),author:"Current manager",createdAt:new Date().toLocaleString("en-GB")},...cur]);setLogText("");notify("Handover note saved");}
  return <><PageHeader title="Daily operations" subtitle="Opening, closing, handovers and maintenance in one live manager workspace." action={<span className="connection-pill dev">{complete}/{tasks.length} complete</span>}/>
  <section className="operations-summary"><div><ClipboardList/><span>Opening & closing<strong>{tasks.filter(t=>t.type==="Opening"||t.type==="Closing").length} checks</strong></span></div><div><Wrench/><span>Maintenance<strong>{tasks.filter(t=>t.type==="Maintenance"&&!t.done).length} open</strong></span></div><div><NotebookPen/><span>Logbook<strong>{logs.length} entries</strong></span></div></section>
- <div className="operations-layout"><section className="panel ops-checklist"><PanelTitle title="Today’s checklist" subtitle="Tap a task to mark it complete."/><div className="task-list">{tasks.map(t=><article key={t.id} className={t.done?"task-done":""}><button className="task-check" aria-label={t.done?`Mark ${t.title} incomplete`:`Mark ${t.title} complete`} onClick={()=>toggleTask(t)}>{t.done?<Check size={16}/>:null}</button><span><b>{t.title}</b><small>{t.type} · {t.owner} · {t.due}</small></span><button className="icon-button" aria-label={`Delete ${t.title}`} onClick={()=>removeTask(t)}><Trash2 size={15}/></button></article>)}</div><div className="inline-create"><input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Add an operational task"/><select value={type} onChange={e=>setType(e.target.value as OpsTask["type"])}><option>Task</option><option>Opening</option><option>Closing</option><option>Maintenance</option></select><button className="primary" disabled={saving||!title.trim()} onClick={addTask}><Plus size={16}/>Add</button></div></section>
- <section className="panel logbook"><PanelTitle title="Manager logbook" subtitle="Permanent shift handovers and important operational context."/><div className="log-compose"><textarea value={logText} onChange={e=>setLogText(e.target.value)} placeholder="What does the next manager need to know?"/><button className="primary" disabled={saving||!logText.trim()} onClick={addLog}><Send size={16}/>Save handover</button></div><div className="log-list">{logs.map(l=><article key={l.id}><div><b>{l.title}</b><small>{l.author} · {l.createdAt}</small></div><p>{l.body}</p></article>)}</div></section></div></>
+ <div className="operations-layout"><section className="panel ops-checklist"><PanelTitle title="Today’s checklist" subtitle="Tap a task to mark it complete."/><div className="task-list">{tasks.map(t=><article key={t.id} className={t.done?"task-done":""}><button className="task-check" onClick={()=>setTasks(cur=>cur.map(x=>x.id===t.id?{...x,done:!x.done}:x))}>{t.done?<Check size={16}/>:null}</button><span><b>{t.title}</b><small>{t.type} · {t.owner} · {t.due}</small></span><button className="icon-button" onClick={()=>setTasks(cur=>cur.filter(x=>x.id!==t.id))}><Trash2 size={15}/></button></article>)}</div><div className="inline-create"><input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Add an operational task"/><select value={type} onChange={e=>setType(e.target.value as OpsTask["type"])}><option>Task</option><option>Opening</option><option>Closing</option><option>Maintenance</option></select><button className="primary" onClick={addTask}><Plus size={16}/>Add</button></div></section>
+ <section className="panel logbook"><PanelTitle title="Manager logbook" subtitle="Permanent shift handovers and important operational context."/><div className="log-compose"><textarea value={logText} onChange={e=>setLogText(e.target.value)} placeholder="What does the next manager need to know?"/><button className="primary" onClick={addLog}><Send size={16}/>Save handover</button></div><div className="log-list">{logs.map(l=><article key={l.id}><div><b>{l.title}</b><small>{l.author} · {l.createdAt}</small></div><p>{l.body}</p></article>)}</div></section></div></>
 }
+
+function Team({ employees, shifts, devMode, onAdd, onEdit, onInvite, onRevoke }: { employees: Employee[]; shifts: Shift[]; devMode:boolean; onAdd: () => void; onEdit: (employee: Employee) => void; onInvite:(employee:Employee)=>void; onRevoke:(employee:Employee)=>void }) {
+  const today = dateSerial(toIsoDate(new Date()));
+  const windowEnd = today + 28;
+  const scheduledHours = (person: Employee) => shifts.filter((shift) => {
+    const shiftDay = dateSerial(canonicalShiftDate(shift));
+    const matchesEmployee = person.id ? shift.employeeId === person.id || (!shift.employeeId && shift.employee === person.name) : shift.employee === person.name;
+    return matchesEmployee && !shift.isOpen && shift.status === "Published" && shiftDay >= today && shiftDay < windowEnd;
+  }).reduce((total, shift) => total + hoursBetween(shift.start, shift.end), 0);
+  return <><PageHeader title="Team" action={<button className="icon-button team-add-button" onClick={onAdd} aria-label="Add employee" title="Add employee"><UserRoundPlus size={19} /></button>} />
+  <section className="team-grid">{employees.map((person) => { const upcomingHours = scheduledHours(person); return <article className={`team-card ${!person.active ? "employee-inactive" : ""}`} key={person.id||person.name}><div className="team-card-head"><div className="team-identity"><div className="avatar large">{person.initials}</div><div><h2>{person.name}</h2><p>{person.role}</p></div></div><span className={`status team-status ${person.active ? "status-submitted" : "status-draft"}`}>{person.active ? "Active" : "Inactive"}</span></div><div className="team-stats"><span>Scheduled next 4 weeks <b>{upcomingHours.toFixed(upcomingHours % 1 ? 1 : 0)}h</b></span><span>{person.email || person.status}</span></div><div className="portal-access"><span className={`status ${person.portalStatus==="ACTIVE"?"status-submitted":person.portalStatus==="INVITED"?"status-pending":"status-draft"}`}>{person.portalStatus==="ACTIVE"?"Portal active":person.portalStatus==="INVITED"?"Invitation pending":person.portalStatus==="EXPIRED"?"Invitation expired":"No portal access"}</span></div><div className={`team-actions ${person.portalStatus==="INVITED"?"three-actions":"two-actions"}`}><button className="secondary" onClick={() => onEdit(person)}>Edit</button><button className="secondary" disabled={devMode||!person.email||person.portalStatus==="ACTIVE"} onClick={()=>onInvite(person)}>{person.portalStatus==="INVITED"?"Resend":"Invite"}</button>{person.portalStatus==="INVITED"&&<button className="secondary danger-outline" disabled={devMode} onClick={()=>onRevoke(person)}>Revoke</button>}</div>{devMode&&<small className="muted-note">Connect PostgreSQL to create real employee logins.</small>}</article>})}</section></> }
 
 type ClockSettings = {
   allowMobileClock: boolean;
@@ -450,40 +579,7 @@ function ControlCenter({devMode,databaseStatus,notify}:{devMode:boolean;database
   {title:"Stock operations",icon:ReceiptText,items:["Delivery receiving and partial/disputed receipts","Invoice number, total and discrepancy matching","Waste logs with stock ledger entries","Draft, in-transit and received location transfers"]},
   {title:"Security & compliance",icon:ShieldCheck,items:["MFA factor foundation and recovery records","Password-reset tokens and rate limiting","Managed backup/restore runbook and health events","GDPR export, deletion and rectification requests"]}
  ];
- return <><PageHeader title="Control centre" subtitle="Production controls plus development-data tools for realistic testing before database setup." action={<span className={`connection-pill ${devMode?"dev":"live"}`}>{databaseStatus}</span>}/>{devMode&&<section className="panel dev-data-tools"><PanelTitle title="Development data" subtitle="Your workspace is saved in this browser. Export a backup or reset to the original demo data."/><div><button className="secondary" onClick={()=>{const raw=localStorage.getItem("barops-dev-v0101") || localStorage.getItem("barops-dev-v091") || localStorage.getItem("barops-dev-v070")||"{}";const blob=new Blob([raw],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="bar-ops-development-data.json";a.click();URL.revokeObjectURL(url);notify("Development data exported")}}><DownloadCloud size={17}/>Export JSON</button><label className="secondary file-import"><Upload size={17}/>Import JSON<input type="file" accept="application/json" onChange={async e=>{const file=e.target.files?.[0];if(!file)return;try{JSON.parse(await file.text());localStorage.setItem("barops-dev-v0101",await file.text());location.reload()}catch{notify("That file is not valid Bar Ops JSON")}}}/></label><button className="secondary danger-outline" onClick={()=>{if(confirm("Reset all development data to the original demo workspace?")){localStorage.removeItem("barops-dev-v0101"); localStorage.removeItem("barops-dev-v091"); localStorage.removeItem("barops-dev-v070");location.reload()}}}><RotateCcw size={17}/>Reset demo data</button></div></section>}<div className="control-grid">{groups.map(g=>{const Icon=g.icon;return <section className="panel control-card" key={g.title}><div className="control-icon"><Icon size={20}/></div><h2>{g.title}</h2>{g.items.map(i=><p key={i}><Check size={15}/>{i}</p>)}</section>})}</div><section className="panel control-actions"><PanelTitle title="Production status" subtitle="Only workflows connected to a complete manager interface are presented as operational. Backend foundations remain documented in Implementation status."/><p className="settings-note">Use Timesheets for payroll and clock review, Inventory for product and stock controls, and Settings for location time-clock configuration.</p></section></>;
-}
-
-function ShiftCoreFields({ assignment, setAssignment, activeEmployees, employee, setEmployee, shiftDate, setShiftDate, role, setRole, start, setStart, end, setEnd, status, setStatus, onDateChange, openMessage }: {
-  assignment: "employee" | "open";
-  setAssignment: (value: "employee" | "open") => void;
-  activeEmployees: Employee[];
-  employee: string;
-  setEmployee: (value: string) => void;
-  shiftDate: string;
-  setShiftDate: (value: string) => void;
-  role: ShiftRole;
-  setRole: (value: ShiftRole) => void;
-  start: string;
-  setStart: (value: string) => void;
-  end: string;
-  setEnd: (value: string) => void;
-  status?: "Draft" | "Published";
-  setStatus?: (value: "Draft" | "Published") => void;
-  onDateChange?: (value: string) => void;
-  openMessage: string;
-}) {
-  return <>
-    <SegmentedControl className="assignment-toggle" ariaLabel="Shift assignment" value={assignment} onChange={setAssignment} options={[{value:"employee",label:"Assign employee"},{value:"open",label:"Available shift"}]} />
-    <div className="form-grid shift-dialog-fields">
-      {assignment === "employee" && <SelectField label="Employee" className="full-field" value={employee} onChange={(event) => setEmployee(event.target.value)}>{activeEmployees.map(person => <option key={person.name}>{person.name}</option>)}</SelectField>}
-      {assignment === "open" && <div className="open-shift-note full-field"><Users size={18}/><div><strong>Employees can request this shift</strong><span>{openMessage}</span></div></div>}
-      <InputField label="Shift date" className="full-field shift-date-field" type="date" value={shiftDate} onChange={(event) => { setShiftDate(event.target.value); onDateChange?.(event.target.value); }} />
-      <SelectField label="Role" value={role} onChange={(event) => setRole(event.target.value as ShiftRole)}><option>Manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></SelectField>
-      <InputField label="Starts" className="shift-time-field" type="time" value={start} onChange={(event) => setStart(event.target.value)} />
-      <InputField label="Ends" className="shift-time-field" type="time" value={end} onChange={(event) => setEnd(event.target.value)} helper={isOvernight(start, end) ? "Ends the following day" : "Ends the same day"} />
-      {status && setStatus && <SelectField label="Schedule status" className="full-field" value={status} onChange={(event) => setStatus(event.target.value as "Draft" | "Published")}><option>Draft</option><option>Published</option></SelectField>}
-    </div>
-  </>;
+ return <><PageHeader title="Control centre" subtitle="Production controls plus development-data tools for realistic testing before database setup." action={<span className={`connection-pill ${devMode?"dev":"live"}`}>{databaseStatus}</span>}/>{devMode&&<section className="panel dev-data-tools"><PanelTitle title="Development data" subtitle="Your workspace is saved in this browser. Export a backup or reset to the original demo data."/><div><button className="secondary" onClick={()=>{const raw=localStorage.getItem("barops-dev-v0101") || localStorage.getItem("barops-dev-v091") || localStorage.getItem("barops-dev-v070")||"{}";const blob=new Blob([raw],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="bar-ops-development-data.json";a.click();URL.revokeObjectURL(url);notify("Development data exported")}}><DownloadCloud size={17}/>Export JSON</button><label className="secondary file-import"><Upload size={17}/>Import JSON<input type="file" accept="application/json" onChange={async e=>{const file=e.target.files?.[0];if(!file)return;try{JSON.parse(await file.text());localStorage.setItem("barops-dev-v0101",await file.text());location.reload()}catch{notify("That file is not valid Bar Ops JSON")}}}/></label><button className="secondary danger-outline" onClick={()=>{if(confirm("Reset all development data to the original demo workspace?")){localStorage.removeItem("barops-dev-v0101"); localStorage.removeItem("barops-dev-v091"); localStorage.removeItem("barops-dev-v070");location.reload()}}}><RotateCcw size={17}/>Reset demo data</button></div></section>}<div className="control-grid">{groups.map(g=>{const Icon=g.icon;return <section className="panel control-card" key={g.title}><div className="control-icon"><Icon size={20}/></div><h2>{g.title}</h2>{g.items.map(i=><p key={i}><Check size={15}/>{i}</p>)}</section>})}</div><section className="panel control-actions"><PanelTitle title="Production status" subtitle="Only workflows connected to a complete manager interface are presented as operational. Backend foundations remain documented in Implementation status."/><p className="settings-note">Use Time & attendance for payroll and clock review, Inventory for product and stock controls, and Settings for location time-clock configuration.</p></section></>;
 }
 
 function ShiftDialog({ onClose, onSave, currentWeekOffset, initialDate, employees, locations, selectedLocationId }: { onClose: () => void; onSave: (shifts: Shift[]) => void; currentWeekOffset: number; initialDate?: string; employees: Employee[]; locations: Location[]; selectedLocationId: string }) {
@@ -514,9 +610,16 @@ function ShiftDialog({ onClose, onSave, currentWeekOffset, initialDate, employee
   }
   return <Modal title="Add shift" subtitle="Create one shift or a repeating series." onClose={onClose}>
     {locations.length > 1 && <label className="location-field">Location<select value={locationId} onChange={event=>setLocationId(event.target.value)}>{locations.map(location=><option key={location.id} value={location.id}>{location.name}</option>)}</select></label>}
-    <ShiftCoreFields assignment={assignment} setAssignment={setAssignment} activeEmployees={activeEmployees} employee={employee} setEmployee={setEmployee} shiftDate={shiftDate} setShiftDate={setShiftDate} role={role} setRole={setRole} start={start} setStart={setStart} end={end} setEnd={setEnd} onDateChange={(value)=>setWeekdays([shiftPositionFromDate(value).day])} openMessage="A manager approves the employee who receives it." />
+    <div className="assignment-toggle"><button className={assignment === "employee" ? "selected" : ""} onClick={() => setAssignment("employee")}>Assign employee</button><button className={assignment === "open" ? "selected" : ""} onClick={() => setAssignment("open")}>Available shift</button></div>
+    <div className="form-grid shift-dialog-fields">
+      {assignment === "employee" && <label className="full-field">Employee<select value={employee} onChange={(e) => setEmployee(e.target.value)}>{activeEmployees.map((p) => <option key={p.name}>{p.name}</option>)}</select></label>}
+      {assignment === "open" && <div className="open-shift-note full-field"><Users size={18}/><div><strong>Employees can request this shift</strong><span>A manager approves the employee who receives it.</span></div></div>}
+      <label className="full-field shift-date-field">Shift date<input type="date" value={shiftDate} onChange={(e) => { setShiftDate(e.target.value); setWeekdays([shiftPositionFromDate(e.target.value).day]); }} /></label>
+      <label>Role<select value={role} onChange={(e) => setRole(e.target.value as ShiftRole)}><option>Manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label>
+      <label className="shift-time-field">Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} /></label><label className="shift-time-field">Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /><small className="field-help">{isOvernight(start, end) ? "Ends the following day" : "Ends the same day"}</small></label>
+    </div>
     <label className="repeat-switch"><input type="checkbox" checked={repeat} onChange={(e) => setRepeat(e.target.checked)}/><span><strong>Repeat shift</strong><small>Create a daily or weekly series</small></span></label>
-    {repeat && <div className="repeat-panel"><SegmentedControl className="frequency-toggle" ariaLabel="Repeat frequency" value={frequency} onChange={setFrequency} options={[{value:"daily",label:"Daily"},{value:"weekly",label:"Weekly"}]} />
+    {repeat && <div className="repeat-panel"><div className="frequency-toggle"><button className={frequency === "daily" ? "selected" : ""} onClick={() => setFrequency("daily")}>Daily</button><button className={frequency === "weekly" ? "selected" : ""} onClick={() => setFrequency("weekly")}>Weekly</button></div>
       {frequency === "weekly" && <div className="weekday-picker">{weekdayNames.map((name, index) => <button key={name} className={weekdays.includes(index) ? "selected" : ""} onClick={() => setWeekdays((current) => current.includes(index) ? current.filter((d) => d !== index) : [...current, index].sort())}>{name}</button>)}</div>}
       <label className="repeat-count">Repeat for <input type="number" min="1" max={frequency === "daily" ? 31 : 52} value={count} onChange={(e) => setCount(Number(e.target.value))}/><span>{frequency === "daily" ? "days" : "weeks"}</span></label>
     </div>}
@@ -539,9 +642,17 @@ function EditShiftDialog({ shift, employees, onClose, onSave, onDelete }: { shif
     onSave({ ...shift, date: shiftDate, day: position.day, weekOffset: position.weekOffset, employee: selectedEmployee, initials: assignment === "open" ? "+" : employee.split(" ").map((word) => word[0]).join(""), role, start, end, status, isOpen: assignment === "open" }, scope);
   }
   return <Modal title="Edit shift" subtitle="Update this shift occurrence, its assignment or availability." onClose={onClose}>
-    <ShiftCoreFields assignment={assignment} setAssignment={setAssignment} activeEmployees={activeEmployees} employee={employee} setEmployee={setEmployee} shiftDate={shiftDate} setShiftDate={setShiftDate} role={role} setRole={setRole} start={start} setStart={setStart} end={end} setEnd={setEnd} status={status} setStatus={setStatus} openMessage="The current employee is removed. A manager approves the employee who receives it." />
+    <div className="assignment-toggle"><button type="button" className={assignment === "employee" ? "selected" : ""} onClick={() => setAssignment("employee")}>Assign employee</button><button type="button" className={assignment === "open" ? "selected" : ""} onClick={() => setAssignment("open")}>Available shift</button></div>
+    <div className="form-grid shift-dialog-fields">
+      {assignment === "employee" && <label className="full-field">Employee<select value={employee} onChange={(e) => setEmployee(e.target.value)}>{activeEmployees.map((person) => <option key={person.name}>{person.name}</option>)}</select></label>}
+      {assignment === "open" && <div className="open-shift-note full-field"><Users size={18}/><div><strong>Employees can request this shift</strong><span>The current employee is removed. A manager approves the employee who receives it.</span></div></div>}
+      <label className="full-field shift-date-field">Shift date<input type="date" value={shiftDate} onChange={(e) => setShiftDate(e.target.value)} /></label>
+      <label>Role<select value={role} onChange={(e) => setRole(e.target.value as ShiftRole)}><option>Manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label>
+      <label className="shift-time-field">Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} /></label><label className="shift-time-field">Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /><small className="field-help">{isOvernight(start, end) ? "Ends the following day" : "Ends the same day"}</small></label>
+      <label className="full-field">Schedule status<select value={status} onChange={(e) => setStatus(e.target.value as "Draft" | "Published")}><option>Draft</option><option>Published</option></select></label>
+    </div>
     {shift.recurrenceGroupId && <div className="series-edit-note"><CalendarDays size={17}/><div><strong>Apply changes to</strong><span>Choose whether this edit affects one occurrence or the wider repeating series.</span><select value={scope} onChange={(e)=>setScope(e.target.value as "occurrence"|"future"|"series")}><option value="occurrence">This shift only</option><option value="future">This and future shifts</option><option value="series">Entire series</option></select></div></div>}
-    <DialogFooter onCancel={onClose} onConfirm={save} confirmLabel="Save changes" dangerAction={<ActionButton variant="danger" type="button" onClick={onDelete}>Delete shift</ActionButton>} />
+    <div className="edit-shift-actions"><button type="button" className="danger-button" onClick={onDelete}>Delete shift</button><div><button type="button" className="secondary" onClick={onClose}>Cancel</button><button type="button" className="primary" onClick={save}>Save changes</button></div></div>
   </Modal>
 }
 
@@ -557,7 +668,7 @@ function EmployeeDialog({ employee, onClose, onSave }: { employee?: Employee; on
   const [phone, setPhone] = useState(employee?.phone ?? "");
   const [active, setActive] = useState(employee?.active ?? true); const [hourlyRate,setHourlyRate]=useState(employee?.hourlyRate??0); const [payrollId,setPayrollId]=useState(employee?.payrollId??""); const [salaryCode,setSalaryCode]=useState(employee?.salaryCode??""); const [costCentre,setCostCentre]=useState(employee?.costCentre??"");
   function save() { const cleanName = name.trim() || "New employee"; onSave({ name: cleanName, initials: cleanName.split(" ").map((part) => part[0]).join("").slice(0,2).toUpperCase(), role, email, phone, active, hours: employee?.hours ?? 0, status: active ? "No shifts scheduled" : "Inactive", hourlyRate, payrollId, salaryCode, costCentre }); }
-  return <Modal title={employee ? "Edit employee" : "Add employee"} onClose={onClose}><div className="form-grid employee-dialog"><label className="full-field">Full name<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Employee name" /></label><label>Role<select value={role} onChange={(e) => setRole(e.target.value)}><option>General manager</option><option>Bar manager</option><option>Shift manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label><label>Status<select value={active ? "active" : "inactive"} onChange={(e) => setActive(e.target.value === "active")}><option value="active">Active</option><option value="inactive">Inactive</option></select></label><label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" /></label><label>Phone<input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+45 ..." /></label><label>Hourly pay (DKK)<input type="number" min="0" step="0.01" inputMode="decimal" value={hourlyRate} onChange={e=>setHourlyRate(Number(e.target.value))} /></label><label>Payroll ID<input value={payrollId} onChange={e=>setPayrollId(e.target.value)} /></label><label>Salary code<input value={salaryCode} onChange={e=>setSalaryCode(e.target.value)} /></label><label className="full-field">Cost centre<input value={costCentre} onChange={e=>setCostCentre(e.target.value)} /></label></div><ModalActions onClose={onClose} onSave={save} label={employee ? "Save employee" : "Add employee"} /></Modal>
+  return <Modal title={employee ? "Edit employee" : "Add employee"} onClose={onClose}><div className="form-grid"><label className="full-field">Full name<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Employee name" /></label><label>Role<select value={role} onChange={(e) => setRole(e.target.value)}><option>General manager</option><option>Bar manager</option><option>Shift manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label><label>Status<select value={active ? "active" : "inactive"} onChange={(e) => setActive(e.target.value === "active")}><option value="active">Active</option><option value="inactive">Inactive</option></select></label><label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" /></label><label>Phone<input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+45 ..." /></label><label>Hourly pay (DKK)<input type="number" min="0" step="0.01" inputMode="decimal" value={hourlyRate} onChange={e=>setHourlyRate(Number(e.target.value))} /></label><label>Payroll ID<input value={payrollId} onChange={e=>setPayrollId(e.target.value)} /></label><label>Salary code<input value={salaryCode} onChange={e=>setSalaryCode(e.target.value)} /></label><label className="full-field">Cost centre<input value={costCentre} onChange={e=>setCostCentre(e.target.value)} /></label></div><ModalActions onClose={onClose} onSave={save} label={employee ? "Save employee" : "Add employee"} /></Modal>
 }
 
 function ProductDialog({ product, onClose, onSave }: { product?:Product; onClose: () => void; onSave: (product: Product) => void }) {
@@ -571,7 +682,6 @@ function StockCountDialog({products,onClose,onSave}:{products:Product[];onClose:
 }
 function OrderDialog({ onClose, onSave }: { onClose: () => void; onSave: () => void }) { return <Modal title="Create purchase order" subtitle="Choose a supplier to begin an order." onClose={onClose}><div className="supplier-options">{["Nordic Drinks", "Vin & Co.", "Bar Supply DK", "City Produce"].map((supplier, i) => <label key={supplier}><input type="radio" name="supplier" defaultChecked={i === 0} /><span className="attention-icon blue"><Truck size={18} /></span><b>{supplier}</b><ChevronRight size={17} /></label>)}</div><ModalActions onClose={onClose} onSave={onSave} label="Continue" /></Modal> }
 function Modal({ title, subtitle, onClose, children }: { title: string; subtitle?: string; onClose: () => void; children: React.ReactNode }) {
-  const modalRef = useRef<HTMLElement>(null);
   useEffect(() => {
     const scrollY = window.scrollY;
     const body = document.body;
@@ -580,11 +690,10 @@ function Modal({ title, subtitle, onClose, children }: { title: string; subtitle
     body.style.position = "fixed";
     body.style.top = `-${scrollY}px`;
     body.style.width = "100%";
-    requestAnimationFrame(() => modalRef.current?.scrollTo({ top: 0, behavior: "instant" }));
     return () => { body.style.overflow = previous.overflow; body.style.position = previous.position; body.style.top = previous.top; body.style.width = previous.width; window.scrollTo(0, scrollY); };
   }, []);
 
-  return <div className="modal-layer" role="presentation"><button className="modal-scrim" onClick={onClose} aria-label="Close dialog" /><section ref={modalRef} className="modal" role="dialog" aria-modal="true" aria-label={title}><div className="modal-head"><div><h2>{title}</h2>{subtitle&&<p>{subtitle}</p>}</div><button className="icon-button" onClick={onClose} aria-label="Close"><X size={19} /></button></div><div className="modal-content">{children}</div></section></div>
+  return <div className="modal-layer" role="presentation"><button className="modal-scrim" onClick={onClose} aria-label="Close dialog" /><section className="modal" role="dialog" aria-modal="true" aria-label={title}><div className="modal-head"><div><h2>{title}</h2>{subtitle&&<p>{subtitle}</p>}</div><button className="icon-button" onClick={onClose} aria-label="Close"><X size={19} /></button></div>{children}</section></div>
 }
-function ModalActions({ onClose, onSave, label }: { onClose: () => void; onSave: () => void; label: string }) { return <DialogFooter onCancel={onClose} onConfirm={onSave} confirmLabel={label} /> }
+function ModalActions({ onClose, onSave, label }: { onClose: () => void; onSave: () => void; label: string }) { return <div className="modal-actions"><button className="secondary" onClick={onClose}>Cancel</button><button className="primary" onClick={onSave}>{label}</button></div> }
 function money(value: number) { return new Intl.NumberFormat("da-DK", { style: "currency", currency: "DKK", maximumFractionDigits: 0 }).format(value); }

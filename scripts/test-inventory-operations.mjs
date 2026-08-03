@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 const app=fs.readFileSync(new URL('../components/bar-ops-app.tsx',import.meta.url),'utf8');
-import { readStyles } from './read-styles.mjs';
-const css=readStyles();
+const css=fs.readFileSync(new URL('../app/globals.css',import.meta.url),'utf8');
 const data=fs.readFileSync(new URL('../lib/data.ts',import.meta.url),'utf8');
 const checks=[
  ['product editing', app.includes('Edit product') && app.includes('Reorder level')],
