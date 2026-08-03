@@ -65,6 +65,7 @@ export default function HoursPage() {
 
   const load = useCallback(async () => {
     setError("");
+    setLoading(true);
     const range = periodRange(period);
     const [clockResponse, hoursResponse] = await Promise.all([
       fetch("/api/time-clock", { cache: "no-store" }),
@@ -82,11 +83,12 @@ export default function HoursPage() {
     setTimesheets(hoursData.timesheets || []);
     setScheduledMinutes(Number(hoursData.summary?.scheduled_minutes || 0));
     setApprovedMinutes(Number(hoursData.summary?.approved_minutes || 0));
-    setLoading(false);
   }, [period]);
 
   useEffect(() => {
-    load().catch((reason) => setError(reason instanceof Error ? reason.message : "Could not load hours"));
+    let activeRequest = true;
+    load().catch((reason) => { if (activeRequest) setError(reason instanceof Error ? reason.message : "Could not load hours"); }).finally(() => { if (activeRequest) setLoading(false); });
+    return () => { activeRequest = false; };
   }, [load]);
 
   async function clockAction(action: "CLOCK_IN" | "BREAK_START" | "BREAK_END" | "CLOCK_OUT") {
