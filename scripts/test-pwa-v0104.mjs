@@ -11,7 +11,7 @@ const sw=read('public/sw.js');
 const config=read('next.config.ts');
 
 const checks=[
-  [['0.10.4','0.10.5','0.10.6','0.10.7'].includes(pkg.version),'package version is PWA-compatible'],
+  [['0.10.4','0.10.5','0.10.6','0.10.7','0.10.8','0.10.9'].includes(pkg.version),'package version is PWA-compatible'],
   [manifest.includes('display: "standalone"'),'manifest uses standalone display'],
   [manifest.includes('icon-maskable-512.png'),'manifest includes maskable icon'],
   [layout.includes('appleWebApp'),'Apple standalone metadata exists'],

@@ -1,8 +1,17 @@
 # Bar Ops
 
-**Current release: v0.10.1 — Functional Stabilization** v0.9.1
+**Current release: v0.10.9 — Production Typecheck Gate**
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
+
+## v0.10.9 production typecheck gate
+
+v0.10.9 fixes the concrete Vercel TypeScript failure in the employee hours-summary route. The timesheet SQL result is now explicitly typed at the query boundary, so response mapping can safely access `item.id` without an incompatible callback-only annotation. See `RELEASE_NOTES_V0109.md`.
+
+## v0.10.8 baseline audit
+
+v0.10.8 is an audit-only package based on v0.10.7. It adds a complete SHA-256 manifest, classified repository inventory, functional verification matrix, validation log and prioritized audit report. Application behavior is unchanged. See `AUDIT_REPORT_V0108.md`.
+
 
 ## iPad workflow
 Commit the flat ZIP to the private `baros` repository using the Commit app. GitHub Quality Checks installs dependencies, runs tests/type checking/build, and Vercel deploys the commit.
