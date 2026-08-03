@@ -3,6 +3,19 @@ import { requireUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, jsonError } from "@/lib/http";
 
+type EmployeeTimesheetRow = {
+  id: string;
+  work_date: string | Date;
+  clocked_in_at: string | Date | null;
+  clocked_out_at: string | Date | null;
+  scheduled_minutes: number | null;
+  worked_minutes: number | null;
+  break_minutes: number | null;
+  status: string;
+  employee_note: string | null;
+  manager_note: string | null;
+};
+
 export async function GET(request: Request) {
   try {
     const user = await requireUser();
@@ -21,7 +34,7 @@ export async function GET(request: Request) {
           where t.organization_id=${user.organizationId} and t.employee_id=${user.employeeId}
             and t.status='APPROVED' and t.work_date between ${from}::date and ${to}::date),0) approved_minutes
     `;
-    const timesheets = await db()`
+    const timesheets = await db()<EmployeeTimesheetRow[]>`
       select t.id,t.work_date,t.clocked_in_at,t.clocked_out_at,t.scheduled_minutes,t.worked_minutes,t.break_minutes,t.status,t.employee_note,t.manager_note
       from timesheets t
       where t.organization_id=${user.organizationId} and t.employee_id=${user.employeeId}
@@ -45,7 +58,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       summary,
-      timesheets: timesheets.map((item: { id: string }) => ({
+      timesheets: timesheets.map((item) => ({
         ...item,
         correction_pending: pendingCorrectionIds.has(item.id),
       })),

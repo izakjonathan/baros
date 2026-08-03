@@ -1,3 +1,9 @@
+# v0.10.7 — Employee hours TypeScript build fix
+
+- Typed the employee timesheet query result at the database call site.
+- Removed the incompatible narrower callback annotation from `timesheets.map`.
+- No schema, UI, CSS, or runtime behavior changes.
+
 # Bar Ops v0.10.6 — Targeted runtime and shell fixes
 
 Built directly from the approved v0.10.5 CSS ownership cleanup release.
