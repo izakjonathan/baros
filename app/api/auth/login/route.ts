@@ -27,7 +27,6 @@ export async function POST(request: Request) {
     await createSession(user.id,user.organization_id,user.location_id);
     return NextResponse.json({ok:true,redirect:user.role==='EMPLOYEE'?'/employee':'/'});
   } catch (error) {
-    if (error instanceof Error && error.message === "RATE_LIMITED") return NextResponse.json({ error: "Too many login attempts. Try again later." }, { status: 429 });
-    return jsonError(error);
+    return jsonError(error, request);
   }
 }

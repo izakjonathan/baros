@@ -1,27 +1,31 @@
-## v0.16.1.1 — TypeScript Build Hotfix
+# Bar Ops v0.16.3 — Production Hardening III & IV
 
-- Replaced the invalid `const isToday = isToday` initializer in Daily Operations with a date comparison against `serviceDate`.
-- Updated the v0.16.1 regression assertion to accept patch-level hotfix versions.
-- No functional, permission, database, or API changes.
+Built from the approved v0.16.1.1 TypeScript Build Hotfix baseline.
 
-# Release Notes
+## v0.16.2 — Request Abuse Protection
 
-## v0.16.1 — Production Hardening I & II
+- Replaced string-based rate-limit failures with a typed `RateLimitError`.
+- Added accurate `Retry-After` response headers for throttled requests.
+- Added request IDs and `no-store` headers to shared 429 responses.
+- Applied the shared rate-limit response path to login, employee activation, kiosk verification and security actions.
+- Preserved existing limits and permissions.
 
-This combined build includes the first two Production Hardening releases:
+## v0.16.3 — Runtime & Health Probes
 
-### v0.16.0 — Runtime Resilience
-- Added application-level, root-level and not-found recovery screens.
-- Added safe retry guidance that avoids implying a failed mutation succeeded.
-- Added structured server error logging with request identifiers.
-- Added request identifiers to shared API error responses.
-- Added a non-sensitive `/api/health` database-readiness endpoint with no-store caching.
+- Added a dependency-free liveness endpoint at `/api/health/live`.
+- Added a bounded database-readiness endpoint at `/api/health/ready`.
+- Kept `/api/health` backwards compatible as the readiness endpoint.
+- Added a four-second readiness timeout to avoid hanging health checks.
+- Sanitized inbound request IDs before they are included in logs or responses.
+- Disabled the `X-Powered-By` response header.
+- Added HSTS and DNS-prefetch security headers.
+- Pinned the production Node.js runtime to Node 20 instead of allowing automatic major-version upgrades.
 
-### v0.16.1 — Deployment & Operational Guardrails
-- Added production environment validation for database, application URL, development authentication and session TTL configuration.
-- Added the environment contract to the GitHub quality workflow.
-- Added focused regression suites for both Production Hardening releases.
-- Preserved `public/sw.js` and confirmed that `public/offline.html` and `vercel.json` remain absent.
-- Updated inherited forward-release assertions without weakening their functional checks.
+## Compatibility
 
-No database migration, permission change, API contract change or new business module is included.
+- No database migration.
+- No permission changes.
+- No business feature changes.
+- No breaking API changes.
+- `public/sw.js` remains included.
+- `public/offline.html` and `vercel.json` remain absent.

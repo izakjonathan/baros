@@ -4,7 +4,7 @@ export type LogContext = Record<string, unknown>;
 
 export function requestIdFrom(request?: Request) {
   const supplied = request?.headers.get("x-request-id")?.trim();
-  return supplied && supplied.length <= 128 ? supplied : randomUUID();
+  return supplied && supplied.length <= 128 && /^[A-Za-z0-9._:-]+$/.test(supplied) ? supplied : randomUUID();
 }
 
 export function logServerError(error: unknown, context: LogContext = {}) {

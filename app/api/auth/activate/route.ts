@@ -208,12 +208,9 @@ export async function POST(request: Request) {
     if (error instanceof Error && error.message === "ACCOUNT_CONFLICT") {
       return NextResponse.json({ error: "This email is already used by a management account" }, { status: 409 });
     }
-    if (error instanceof Error && error.message === "RATE_LIMITED") {
-      return NextResponse.json({ error: "Too many attempts. Try again later." }, { status: 429 });
-    }
     if (error instanceof Error && ["USER_CREATE_FAILED", "EMPLOYEE_LINK_FAILED"].includes(error.message)) {
       return NextResponse.json({ error: "The employee account could not be linked. Ask a manager to resend the invitation." }, { status: 409 });
     }
-    return jsonError(error);
+    return jsonError(error, request);
   }
 }
