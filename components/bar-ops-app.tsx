@@ -28,7 +28,7 @@ type Employee = { id?: string; name: string; initials: string; role: string; hou
 type StockAdjustment = { id: string; productId: string; productName: string; delta: number; reason: string; createdAt: string };
 type OpsTask = { id: string; title: string; type: "Opening" | "Closing" | "Task" | "Maintenance"; owner: string; due: string; done: boolean; note?: string };
 type LogEntry = { id: string; title: string; body: string; author: string; createdAt: string };
-type TimeEntry = { id: string; employee: string; date: string; clockIn: string; clockOut?: string; breakMinutes: number; status: "Running" | "Pending" | "Approved" | "Rejected"; scheduledHours: number; note?: string; edited?: boolean };
+type TimeEntry = { id: string; employee: string; date: string; clockIn: string; clockOut?: string; breakMinutes: number; status: "Running" | "Pending" | "Approved" | "Rejected"; scheduledHours: number; note?: string; edited?: boolean; onBreak?: boolean };
 type ScheduleAcknowledgementSummary = { publication: { id: string; version: number; publishedAt: string } | null; employees: Array<{ id: string; name: string; acknowledgedAt: string | null; changeTypes?: string[] }> };
 const todayAtNoon = new Date(); todayAtNoon.setHours(12,0,0,0);
 const BASE_MONDAY = new Date(todayAtNoon); BASE_MONDAY.setDate(todayAtNoon.getDate() - ((todayAtNoon.getDay() + 6) % 7));
@@ -134,7 +134,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       setEmployees((data.employees || []).map((e: any) => ({ id:e.id, name:`${e.first_name} ${e.last_name}`, initials:`${e.first_name?.[0]||""}${e.last_name?.[0]||""}`, role:e.employment_title||"Employee", hours:Number(e.contracted_hours||0), status:e.active?"Active":"Inactive", active:e.active, email:e.email||"", phone:e.phone||"", payrollId:e.payroll_id||"", salaryCode:e.salary_code||"", costCentre:e.cost_centre||"", hourlyRate:Number(e.hourly_rate||0), locationId:(e.locations||[]).find((location:any)=>location.primary)?.id||(e.locations||[])[0]?.id||"", locations:e.locations||[], portalStatus:e.portal_status||"NONE" })));
       setShifts((data.shifts || []).map(mapDatabaseShift));
       setProducts((data.products || []).map((x:any)=>({id:x.id,name:x.name,category:x.category,supplier:x.supplier||"Unassigned",stock:Number(x.quantity||0),par:Number(x.par_level||0),unit:x.unit,price:Number(x.purchase_price||0)})));
-      setTimeEntries((data.timesheets || []).map((x:any)=>({id:x.id,employee:x.employee_name,date:String(x.work_date).slice(0,10),clockIn:String(x.clocked_in_at).slice(11,16),clockOut:x.clocked_out_at?String(x.clocked_out_at).slice(11,16):undefined,breakMinutes:x.break_minutes,status:(x.status==="OPEN"?"Running":x.status[0]+x.status.slice(1).toLowerCase()) as TimeEntry["status"],scheduledHours:Number(x.scheduled_minutes||0)/60,note:x.manager_note})));
+      setTimeEntries((data.timesheets || []).map((x:any)=>({id:x.id,employee:x.employee_name,date:String(x.work_date).slice(0,10),clockIn:String(x.clocked_in_at).slice(11,16),clockOut:x.clocked_out_at?String(x.clocked_out_at).slice(11,16):undefined,breakMinutes:x.break_minutes,status:(x.status==="OPEN"?"Running":x.status[0]+x.status.slice(1).toLowerCase()) as TimeEntry["status"],scheduledHours:Number(x.scheduled_minutes||0)/60,note:x.manager_note,onBreak:Boolean(x.on_break)})));
       setDatabaseStatus(resolvedLocationId ? "PostgreSQL connected" : "No active location configured");
       hasBootstrappedRef.current = true;
       setDataReady(true);
@@ -342,6 +342,28 @@ function Dashboard({ shifts, products, employees, timeEntries, tasks, devMode, o
   }, [devMode]);
 
   const timeline = [...todaysShifts].sort((a,b) => a.start.localeCompare(b.start));
+  const liveBoard = assignedToday.map((shift) => {
+    const running = runningEntries.find((entry) => entry.employee === shift.employee && entry.date === today);
+    const [startHours, startMinutes] = shift.start.split(":").map(Number);
+    const [endHours, endMinutes] = shift.end.split(":").map(Number);
+    const startTotal = startHours * 60 + startMinutes;
+    let endTotal = endHours * 60 + endMinutes;
+    if (endTotal <= startTotal) endTotal += 1440;
+    let comparableNow = nowMinutes;
+    if (endTotal > 1440 && nowMinutes < startTotal) comparableNow += 1440;
+    if (running?.onBreak) return { shift, status: "On break", tone: "break", detail: `Since ${running.clockIn}` };
+    if (running && comparableNow > endTotal + 60) return { shift, status: "Missing clock-out", tone: "danger", detail: `Shift ended ${shift.end}` };
+    if (running) return { shift, status: "Clocked in", tone: "live", detail: `Since ${running.clockIn}` };
+    if (comparableNow > startTotal + 10 && comparableNow <= endTotal) return { shift, status: "Late", tone: "warning", detail: `Expected ${shift.start}` };
+    if (comparableNow < startTotal) {
+      const minutesUntil = startTotal - comparableNow;
+      return { shift, status: "Expected", tone: "expected", detail: minutesUntil < 60 ? `In ${minutesUntil} min` : `At ${shift.start}` };
+    }
+    return { shift, status: "Shift ended", tone: "muted", detail: `${shift.start}–${shift.end}` };
+  }).sort((a,b) => {
+    const priority: Record<string, number> = { danger: 0, warning: 1, break: 2, live: 3, expected: 4, muted: 5 };
+    return priority[a.tone] - priority[b.tone] || a.shift.start.localeCompare(b.shift.start);
+  });
   const attentionTotal = openToday.length + late.length + lowStock.length + pendingRequests + conflicts.size + availabilityConflicts;
   return <>
     <PageHeader eyebrow={new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})} title="Today’s operations" subtitle={`Live overview for the current location · updated ${lastUpdated.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}`} />
@@ -350,6 +372,14 @@ function Dashboard({ shifts, products, employees, timeEntries, tasks, devMode, o
       <Metric icon={Clock3} label="Expected next" value={upcoming[0]?.start || "—"} detail={upcoming[0]?.employee || "No more arrivals"} trend={`${upcoming.length} upcoming`} />
       <Metric icon={ClipboardList} label="Pending requests" value={`${pendingRequests}`} detail="Leave, claims and transfers" trend={pendingRequests ? "Review queue" : "All clear"} warning={pendingRequests > 0} />
       <Metric icon={AlertTriangle} label="Needs attention" value={`${attentionTotal}`} detail={`${late.length} late · ${openToday.length} open · ${lowStock.length} low stock`} trend={attentionTotal ? "Review now" : "All clear"} warning={attentionTotal > 0} />
+    </section>
+    <section className="panel live-shift-board"><PanelTitle title="Live shift board" subtitle={`${runningEntries.length} clocked in · ${late.length} late · ${upcoming.length} expected`} action={<button type="button" className="text-button" onClick={() => onNavigate("attendance")}>Open attendance <ArrowRight size={15} /></button>} />
+      <div className="live-board-list">
+        {liveBoard.length === 0 && <div className="daily-empty">No employees are assigned today.</div>}
+        {liveBoard.map(({ shift, status, tone, detail }) => <button type="button" className="live-board-row" key={shift.id} onClick={() => onNavigate("attendance")}>
+          <div className="avatar">{shift.initials}</div><div className="live-board-person"><strong>{shift.employee}</strong><small>{shift.role} · {shift.start}–{shift.end}</small></div><div className={`live-board-status ${tone}`}><span>{status}</span><small>{detail}</small></div><ChevronRight size={18}/>
+        </button>)}
+      </div>
     </section>
     <div className="dashboard-grid daily-dashboard-grid">
       <section className="panel today-panel"><PanelTitle title="Today’s timeline" subtitle={`${assignedToday.length} assigned · ${openToday.length} open`} action={<button className="text-button" onClick={() => onNavigate("schedule")}>Open shift plan <ArrowRight size={15} /></button>} />

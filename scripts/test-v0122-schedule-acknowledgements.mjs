@@ -12,6 +12,6 @@ const checks=[
  ['employee sees latest assigned publications',employee.includes('schedule_publications')&&employee.includes('pendingPublications')&&employee.includes('Schedule updates')],
  ['employee action posts and refreshes',action.includes('/api/schedule-acknowledgements')&&action.includes('router.refresh()')],
  ['manager can inspect acknowledgement status',manager.includes('Acknowledged {acknowledgedCount}')&&manager.includes('Schedule acknowledgements')&&manager.includes('loadAcknowledgements')],
- ['release version',['0.12.2','0.12.3','0.12.4','0.13.0'].includes(JSON.parse(fs.readFileSync('package.json','utf8')).version)],
+ ['release version',['0.12.2','0.12.3','0.12.4','0.13.0','0.13.1'].includes(JSON.parse(fs.readFileSync('package.json','utf8')).version)],
 ];
 for(const [name,ok] of checks){if(!ok)throw new Error(`FAIL: ${name}`);console.log(`PASS: ${name}`)}

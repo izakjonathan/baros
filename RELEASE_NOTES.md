@@ -1,3 +1,5 @@
-# Bar Ops release notes
+# Release notes
 
-See `RELEASE_NOTES_V0124.md` for v0.13.0.
+Current release: **v0.13.1 — Live Shift Board**.
+
+See `RELEASE_NOTES_V0131.md` for the current release details.
