@@ -1,7 +1,7 @@
 import fs from "node:fs";
 const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
 const readme = fs.readFileSync("README.md", "utf8");
-if (pkg.version !== "0.16.21") throw new Error("package version must be v0.16.21");
+if (!/^0\.16\.(?:2[1-9]|[3-9]\d)(?:\.\d+)?$/.test(pkg.version)) throw new Error("package version must be v0.16.21 or newer");
 const declarations = [...readme.matchAll(/^Current release:\s*\*\*v([^*]+)\*\*/gm)];
 if (declarations.length !== 1) throw new Error("README contains duplicate current-release declarations");
 if (declarations[0][1] !== pkg.version) throw new Error("README current release does not match package version");

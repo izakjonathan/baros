@@ -1,4 +1,4 @@
-# Bar Ops Implementation Status — v0.16.21
+# Bar Ops Implementation Status — v0.16.21.1
 
 ## Baseline
 
@@ -27,3 +27,10 @@ Built from approved v0.16.19 — Production Hardening XIX & XX.
 - No role or permission change.
 - No business-feature change.
 - `public/sw.js` remains included.
+
+
+## v0.16.21.1 — SQL Transaction Type Hotfix
+
+- Replaced the custom SQL template-tag type with the PostgreSQL driver’s native `Sql<{}>` contract.
+- Restored type compatibility for organization-scope guards called with transaction clients.
+- Preserved the v0.16.19 prohibition on transaction `any` casts.

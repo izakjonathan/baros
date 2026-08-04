@@ -1,3 +1,11 @@
+# Release Notes — v0.16.21.1
+
+## v0.16.21.1 — SQL Transaction Type Hotfix
+
+- Fixed the Vercel TypeScript failure when passing a `TransactionSql` client into organization-scope guards.
+- Replaced the hand-written SQL executor signature with the native `postgres` `Sql<{}>` type.
+- No migration, API, permission, or workflow changes.
+
 # Release Notes — v0.16.21
 
 ## Combined releases

@@ -1,7 +1,8 @@
+import type { Sql } from "postgres";
 import { ApiError } from "@/lib/http";
 
 export type SqlRow = Record<string, unknown>;
-export type SqlExecutor = (strings: TemplateStringsArray, ...values: unknown[]) => Promise<SqlRow[]>;
+export type SqlExecutor = Sql<{}>;
 
 export async function requireOrganizationLocation(
   sql: SqlExecutor,
