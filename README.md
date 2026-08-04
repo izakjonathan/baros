@@ -1,6 +1,6 @@
 # Bar Ops
 
-**Current release: v0.16.7 — Session Lifecycle & CI Runtime Alignment
+**Current release: v0.16.9.1 — Session Cookie TypeScript Hotfix**
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 
@@ -40,7 +40,9 @@ The CSS cleanup release removes historical redesign blocks, repeated exact selec
 Employee routes derive their employee and location context centrally from the authenticated session. An active session location is preferred; employee accounts use their primary active `employee_locations` assignment when the stored session location is missing or stale. Development employee previews require a seeded, activated employee account and resolve that real database identity instead of using placeholder UUID values.
 ## Current release
 
-**v0.16.5 — Request Boundary & Configuration Integrity** combines two focused production-hardening releases. API requests now receive consistent request IDs and no-store policy at the network boundary, while cross-site mutation requests and mismatched browser origins are rejected before reaching business routes. Production configuration validation now verifies URL schemes, HTTPS, PostgreSQL connection formats, session TTL bounds and cookie-name safety. No database migration or business-workflow change is required.
+**v0.16.9.1 — Session Cookie TypeScript Hotfix** preserves the v0.16.9 production-hardening release and corrects the shared cookie option types for Next.js 16. No database migration or workflow change is required.
+
+The preceding **v0.16.9 — Production Hardening IX & X** release combines API Payload Integrity and Database Operations Guardrails. API requests now receive consistent request IDs and no-store policy at the network boundary, while cross-site mutation requests and mismatched browser origins are rejected before reaching business routes. Production configuration validation now verifies URL schemes, HTTPS, PostgreSQL connection formats, session TTL bounds and cookie-name safety. No database migration or business-workflow change is required.
 
 Operational readiness remains available through the health endpoints below. Production configuration can be checked with `npm run validate:env`.
 

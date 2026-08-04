@@ -14,9 +14,46 @@ export function jsonError(error: unknown, request?: Request) {
   return NextResponse.json({ error: "Internal server error", requestId }, { status: 500, headers });
 }
 export async function readJsonObject(request: Request, maxBytes = 32_000): Promise<Record<string, unknown>> {
-  const length = Number(request.headers.get("content-length") || 0);
-  if (length > maxBytes) throw new ApiError(413, "Request body is too large");
-  const value = await request.json().catch(() => { throw new ApiError(400, "Invalid JSON body"); });
+  const contentType = request.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase();
+  if (contentType !== "application/json") throw new ApiError(415, "Content-Type must be application/json");
+
+  const lengthHeader = request.headers.get("content-length");
+  if (lengthHeader) {
+    const length = Number(lengthHeader);
+    if (!Number.isSafeInteger(length) || length < 0) throw new ApiError(400, "Invalid Content-Length header");
+    if (length > maxBytes) throw new ApiError(413, "Request body is too large");
+  }
+
+  if (!request.body) throw new ApiError(400, "JSON body is required");
+  const reader = request.body.getReader();
+  const decoder = new TextDecoder("utf-8", { fatal: true });
+  let received = 0;
+  let text = "";
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      received += value.byteLength;
+      if (received > maxBytes) {
+        await reader.cancel();
+        throw new ApiError(413, "Request body is too large");
+      }
+      text += decoder.decode(value, { stream: true });
+    }
+    text += decoder.decode();
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    throw new ApiError(400, "Invalid UTF-8 request body");
+  } finally {
+    reader.releaseLock();
+  }
+
+  let value: unknown;
+  try {
+    value = JSON.parse(text);
+  } catch {
+    throw new ApiError(400, "Invalid JSON body");
+  }
   if (!value || Array.isArray(value) || typeof value !== "object") throw new ApiError(400, "JSON object required");
   return value as Record<string, unknown>;
 }

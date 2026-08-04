@@ -20,11 +20,11 @@ export function sessionCookieOptions(expires = sessionExpiry()) {
   return {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "lax" as const,
     path: "/",
     expires,
     maxAge: Math.max(0, Math.floor((expires.getTime() - Date.now()) / 1000)),
-    priority: "high",
+    priority: "high" as const,
   };
 }
 
@@ -32,10 +32,10 @@ export function expiredSessionCookieOptions() {
   return {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "lax" as const,
     path: "/",
     expires: new Date(0),
     maxAge: 0,
-    priority: "high",
+    priority: "high" as const,
   };
 }

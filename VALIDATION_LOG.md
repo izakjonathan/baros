@@ -1,22 +1,43 @@
-# Validation Log — v0.16.7
+# Validation Log
 
-Baseline: v0.16.5
+## Release
 
-## Completed
+v0.16.9.1 — Session Cookie TypeScript Hotfix
 
-- v0.16.5 configuration-integrity regression
-- v0.16.6 session-lifecycle regression
-- v0.16.7 CI-runtime regression
-- Source inspection for duplicated session-cookie implementations
-- Node 24 alignment check for `package.json` and GitHub Actions
-- Exact direct-dependency version check
-- Confirmed `public/sw.js` remains present
-- Confirmed `public/offline.html` remains absent
-- Confirmed `vercel.json` remains absent
-- Release ZIP integrity check
+## Baseline
 
-## Limitations
+v0.16.7 — Production Hardening VII & VIII
 
-A complete dependency installation, ESLint run, TypeScript check and Next.js production build could not be executed in this environment because its npm mirror returned 404 for `@types/node`. Vercel or GitHub Actions must run the dependency-based gates.
+## Passed
 
-The approved baseline contains no `package-lock.json`. CI therefore continues to use `npm install`; all direct dependency versions are pinned, but transitive dependency resolution is not fully lockfile-reproducible yet.
+- Shared session cookie options retain literal Next.js-compatible `sameSite` and `priority` types
+- Invalid widened string cookie options are absent
+
+- v0.16.4 Request Boundary Protection regression
+- v0.16.5 Configuration Integrity regression
+- v0.16.6 Session Lifecycle Hardening regression
+- v0.16.7 CI Runtime Alignment regression
+- v0.16.8 API Payload Integrity regression
+- v0.16.9 Database Operations Guardrails regression
+- Confirmed `public/sw.js` is present
+- Confirmed `public/offline.html` is absent
+- Confirmed `vercel.json` is absent
+- ZIP archive integrity
+
+## Source review
+
+- Shared JSON parsing no longer uses unbounded `Request.json()`.
+- Streamed byte counts enforce maximum body sizes when `Content-Length` is missing.
+- Database migrations acquire and release a PostgreSQL advisory lock.
+- Database administration and quality workflows both target Node.js 24.
+
+## Not run in this environment
+
+- Full dependency installation
+- ESLint
+- TypeScript compiler
+- Complete Next.js production build
+- Live PostgreSQL migration concurrency test
+- Vercel deployment
+
+These dependency- and infrastructure-backed gates must run through GitHub Actions, Vercel and the managed PostgreSQL environment.
