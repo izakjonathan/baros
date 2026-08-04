@@ -1,6 +1,6 @@
 # Bar Ops Implementation Status
 
-Current approved release: **v0.16.3 — Production Hardening III & IV**
+Current approved release: **v0.16.3.1 — Production Build Hotfix**
 
 ## Completed refinement releases
 
@@ -16,11 +16,12 @@ Current approved release: **v0.16.3 — Production Hardening III & IV**
 - v0.16.1.1 TypeScript Build Hotfix
 - v0.16.2 Request Abuse Protection
 - v0.16.3 Runtime & Health Probes
+- v0.16.3.1 Next.js health alias and Node 24 deployment hotfix
 
 ## Current guarantees
 
 - Existing role permissions and business workflows are preserved.
-- No database migration is required for v0.16.3.
+- No database migration is required for v0.16.3.1.
 - Throttled API responses include request IDs and retry metadata.
 - Liveness and database readiness can be monitored independently.
 - Production is pinned to the Node 20 runtime line.

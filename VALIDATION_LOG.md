@@ -1,4 +1,13 @@
-# Validation Log — v0.16.3
+# Validation Log — v0.16.3.1
+
+- Confirmed `app/api/health/route.ts` declares `dynamic` locally rather than re-exporting route config.
+- Confirmed the compatibility route delegates `GET` to the readiness implementation.
+- Confirmed `package.json` pins Node `24.x`.
+- Focused v0.16.3 regression executed after updating its forward-compatible version/runtime assertion.
+- v0.16.0, v0.16.1, and v0.16.2 focused regressions passed.
+- Full local `next build` could not run because the available npm mirror returned 404 for `@types/node`; Vercel must perform the dependency-based build gate.
+
+## Previous v0.16.3 validation
 
 Baseline: v0.16.1.1 TypeScript Build Hotfix.
 

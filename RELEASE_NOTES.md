@@ -1,4 +1,13 @@
-# Bar Ops v0.16.3 — Production Hardening III & IV
+# Bar Ops v0.16.3.1 — Production Build Hotfix
+
+## Hotfix
+
+- Replaced the re-exported route segment config in `app/api/health/route.ts` with a literal local `dynamic` export and wrapper `GET` handler, satisfying Next.js/Turbopack static analysis.
+- Updated the production Node engine from deprecated `20.x` to Vercel-supported `24.x`.
+- Preserved `/api/health` as a backwards-compatible alias of `/api/health/ready`.
+- No database, permission, API contract, or business-workflow changes.
+
+## Included v0.16.3 scope
 
 Built from the approved v0.16.1.1 TypeScript Build Hotfix baseline.
 

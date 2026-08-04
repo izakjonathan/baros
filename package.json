@@ -1,6 +1,6 @@
 {
   "name": "bar-ops",
-  "version": "0.16.3",
+  "version": "0.16.3.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -104,6 +104,6 @@
     "typescript": "^5.7.2"
   },
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
   }
 }
