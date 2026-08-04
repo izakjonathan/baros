@@ -1,40 +1,32 @@
-# Bar Ops v0.16.3.1 — Production Build Hotfix
+# Bar Ops v0.16.5 — Production Hardening V & VI
 
-## Hotfix
+Built from the approved v0.16.3.1 Vercel Build Hotfix baseline.
 
-- Replaced the re-exported route segment config in `app/api/health/route.ts` with a literal local `dynamic` export and wrapper `GET` handler, satisfying Next.js/Turbopack static analysis.
-- Updated the production Node engine from deprecated `20.x` to Vercel-supported `24.x`.
-- Preserved `/api/health` as a backwards-compatible alias of `/api/health/ready`.
-- No database, permission, API contract, or business-workflow changes.
+## v0.16.4 — Request Boundary Protection
 
-## Included v0.16.3 scope
+- Added a Next.js 16 `proxy.ts` boundary for all `/api/*` requests.
+- Propagates a sanitized `x-request-id` into route handlers and responses.
+- Applies `Cache-Control: no-store` to API boundary responses.
+- Rejects browser mutation requests marked as cross-site.
+- Rejects mutation requests whose `Origin` does not match the deployed request origin.
+- Returns safe JSON 403 responses with request IDs.
+- Leaves same-origin requests and non-browser requests without an Origin header compatible.
 
-Built from the approved v0.16.1.1 TypeScript Build Hotfix baseline.
+## v0.16.5 — Configuration Integrity
 
-## v0.16.2 — Request Abuse Protection
-
-- Replaced string-based rate-limit failures with a typed `RateLimitError`.
-- Added accurate `Retry-After` response headers for throttled requests.
-- Added request IDs and `no-store` headers to shared 429 responses.
-- Applied the shared rate-limit response path to login, employee activation, kiosk verification and security actions.
-- Preserved existing limits and permissions.
-
-## v0.16.3 — Runtime & Health Probes
-
-- Added a dependency-free liveness endpoint at `/api/health/live`.
-- Added a bounded database-readiness endpoint at `/api/health/ready`.
-- Kept `/api/health` backwards compatible as the readiness endpoint.
-- Added a four-second readiness timeout to avoid hanging health checks.
-- Sanitized inbound request IDs before they are included in logs or responses.
-- Disabled the `X-Powered-By` response header.
-- Added HSTS and DNS-prefetch security headers.
-- Pinned the production Node.js runtime to Node 20 instead of allowing automatic major-version upgrades.
+- Validates `DATABASE_URL` as a PostgreSQL URL.
+- Requires production `APP_URL` to use HTTPS.
+- Rejects credentials embedded in `APP_URL`.
+- Restricts `SESSION_TTL_DAYS` to an integer from 1 through 365.
+- Validates `SESSION_COOKIE_NAME` characters and length.
+- Preserves development warnings for missing databases and insecure non-local HTTP URLs.
+- Added focused regression gates for both releases.
 
 ## Compatibility
 
 - No database migration.
 - No permission changes.
-- No business feature changes.
-- No breaking API changes.
+- No business-feature changes.
+- No breaking API contract changes for same-origin clients.
 - `public/sw.js` remains included.
 - `public/offline.html` and `vercel.json` remain absent.

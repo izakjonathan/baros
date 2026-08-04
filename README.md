@@ -1,6 +1,6 @@
 # Bar Ops
 
-**Current release: v0.16.3.1 — Production Build Hotfix**
+**Current release: v0.16.5 — Request Boundary & Configuration Integrity**
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 
@@ -40,11 +40,9 @@ The CSS cleanup release removes historical redesign blocks, repeated exact selec
 Employee routes derive their employee and location context centrally from the authenticated session. An active session location is preferred; employee accounts use their primary active `employee_locations` assignment when the stored session location is missing or stale. Development employee previews require a seeded, activated employee account and resolve that real database identity instead of using placeholder UUID values.
 ## Current release
 
-**v0.16.3.1 — Production Build Hotfix** preserves the v0.16.3 hardening scope while correcting the health alias route for Next.js static analysis and aligning Vercel deployments with Node 24.x. It preserves all existing business behavior and requires no database migration.
+**v0.16.5 — Request Boundary & Configuration Integrity** combines two focused production-hardening releases. API requests now receive consistent request IDs and no-store policy at the network boundary, while cross-site mutation requests and mismatched browser origins are rejected before reaching business routes. Production configuration validation now verifies URL schemes, HTTPS, PostgreSQL connection formats, session TTL bounds and cookie-name safety. No database migration or business-workflow change is required.
 
-Operational readiness is available at `GET /api/health`. Production configuration can be checked with `npm run validate:env`.
-
-
+Operational readiness remains available through the health endpoints below. Production configuration can be checked with `npm run validate:env`.
 
 ## Production health checks
 
