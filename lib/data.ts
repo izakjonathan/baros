@@ -18,6 +18,7 @@ export type Shift = {
   recurrenceLabel?: string;
   recurrenceGroupId?: string;
   locationId?: string;
+  availabilityConflict?: "APPROVED_TIME_OFF" | "OUTSIDE_AVAILABILITY";
 };
 
 export type Product = {

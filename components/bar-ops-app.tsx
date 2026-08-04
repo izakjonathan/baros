@@ -59,7 +59,7 @@ function mapDatabaseShift(x: any): Shift {
     initials: x.is_open ? "+" : employeeName.split(" ").map((word: string) => word[0]).join(""),
     start: `${startParts.hour}:${startParts.minute}`, end: `${endParts.hour}:${endParts.minute}`,
     role: x.role, status: x.status === "DRAFT" ? "Draft" : "Published", isOpen: x.is_open,
-    recurrenceGroupId: x.recurrence_group_id, locationId: x.location_id
+    recurrenceGroupId: x.recurrence_group_id, locationId: x.location_id, availabilityConflict: x.employee_availability_conflict || undefined
   };
 }
 
@@ -340,6 +340,7 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
   const customDefaultEnd=new Date(BASE_MONDAY); customDefaultEnd.setDate(customDefaultEnd.getDate()+13);
   const [customTo,setCustomTo]=useState(toIsoDate(customDefaultEnd));
   const [monthOffset, setMonthOffset] = useState(0);
+  const [showConflictsOnly, setShowConflictsOnly] = useState(false);
   const weekMonday = new Date(BASE_MONDAY); weekMonday.setDate(BASE_MONDAY.getDate() + currentWeekOffset * 7);
   const monthAnchor = new Date(BASE_MONDAY.getFullYear(), BASE_MONDAY.getMonth() + monthOffset, 1, 12);
   const periodStart = viewMode === "week" ? weekMonday : viewMode === "month" ? new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), 1, 12) : new Date(`${customFrom}T12:00:00`);
@@ -355,12 +356,16 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
   const visibleShifts = shifts.filter((shift) => { const date = canonicalShiftDate(shift); return !!startIso && !!endIso && date >= startIso && date <= endIso; });
   const drafts = visibleShifts.filter((shift) => shift.status === "Draft").length;
   const conflicts = conflictIds(visibleShifts);
+  const availabilityConflicts = new Set(visibleShifts.filter((shift) => shift.availabilityConflict).map((shift) => shift.id));
+  const conflictShiftIds = new Set([...conflicts, ...availabilityConflicts]);
+  const displayedShifts = showConflictsOnly ? visibleShifts.filter((shift) => conflictShiftIds.has(shift.id)) : visibleShifts;
   const rangeLabel = viewMode === "month" ? periodStart.toLocaleDateString("en-GB", { month: "long", year: "numeric" }) : `${periodStart.toLocaleDateString("en-GB", { day: "numeric", month: "long" })} – ${periodEnd.toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`;
   const weekLabel = currentWeekOffset === 0 ? "This week" : currentWeekOffset === -1 ? "Last week" : currentWeekOffset === 1 ? "Next week" : rangeLabel;
   function movePeriod(direction: number) { if (viewMode === "week") setCurrentWeekOffset((week) => week + direction); else if(viewMode === "month") setMonthOffset((month) => month + direction); else { const days=Math.max(1,dateSerial(customTo)-dateSerial(customFrom)+1); setCustomFrom(dateFromSerial(dateSerial(customFrom)+direction*days)); setCustomTo(dateFromSerial(dateSerial(customTo)+direction*days)); } }
   async function publish() {
     if (!drafts) { notify("This period is already published"); return; }
     if (conflicts.size) { notify(`Resolve ${conflicts.size} conflicting shift${conflicts.size === 1 ? "" : "s"} before publishing`); return; }
+    if (availabilityConflicts.size) { notify(`Resolve ${availabilityConflicts.size} employee availability conflict${availabilityConflicts.size === 1 ? "" : "s"} before publishing`); return; }
     if (!devMode && !selectedLocationId) { notify("Select a location before publishing"); return; }
     setPublishing(true);
     try {
@@ -400,22 +405,23 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
     <section className={`schedule-toolbar compact-schedule-toolbar ${viewMode === "custom" ? "has-custom-range" : ""}`}>
       <div className="period-controls"><button onClick={() => movePeriod(-1)} aria-label={`Previous ${viewMode}`}><ChevronLeft size={17}/></button><strong>{viewMode === "week" ? weekLabel : rangeLabel}</strong><button onClick={() => movePeriod(1)} aria-label={`Next ${viewMode}`}><ChevronRight size={17}/></button></div>
       {viewMode==="custom"&&<div className="custom-range"><label><span>From</span><input type="date" value={customFrom} onChange={e=>setCustomFrom(e.target.value)}/></label><label><span>To</span><input type="date" value={customTo} min={customFrom} onChange={e=>setCustomTo(e.target.value)}/></label></div>}
-      <div className="schedule-toolbar-right"><span className="schedule-counts"><b>{visibleShifts.length}</b> shifts · <b>{drafts}</b> drafts{conflicts.size ? <> · <b className="conflict-count">{conflicts.size}</b> conflicts</> : null}</span><button className="publish-button compact-publish" onClick={publish} disabled={!drafts || publishing}><Send size={15}/><span>{publishing ? "Publishing…" : drafts ? `Publish (${drafts})` : "Published"}</span></button></div>
+      <div className="schedule-toolbar-right"><span className="schedule-counts"><b>{visibleShifts.length}</b> shifts · <b>{drafts}</b> drafts{conflicts.size ? <> · <b className="conflict-count">{conflicts.size}</b> overlaps</> : null}{availabilityConflicts.size ? <> · <b className="conflict-count">{availabilityConflicts.size}</b> availability</> : null}</span>{conflictShiftIds.size ? <button type="button" className="secondary compact-action" aria-pressed={showConflictsOnly} onClick={() => setShowConflictsOnly((value) => !value)}><AlertTriangle size={15}/><span>{showConflictsOnly ? "Show all" : `Review conflicts (${conflictShiftIds.size})`}</span></button> : null}<button className="publish-button compact-publish" onClick={publish} disabled={!drafts || publishing}><Send size={15}/><span>{publishing ? "Publishing…" : drafts ? `Publish (${drafts})` : "Published"}</span></button></div>
     </section>
     <section className={`calendar-panel schedule-calendar ${viewMode === "month" ? "month-view" : "week-view"}`}><div className="calendar-grid">
       {displayDays.map((day) => {
         const isToday = day.iso === toIsoDate(new Date());
-        const dayShifts = visibleShifts.filter((shift) => canonicalShiftDate(shift) === day.iso);
+        const dayShifts = displayedShifts.filter((shift) => canonicalShiftDate(shift) === day.iso);
         return <div className={`day-column ${isToday ? "today" : ""}`} key={day.iso} onDragOver={(e)=>e.preventDefault()} onDrop={async (e)=>{e.preventDefault();const id=e.dataTransfer.getData("text/shift-id");const original=shifts.find(x=>x.id===id);if(!original||canonicalShiftDate(original)===day.iso)return;const moved={...original,date:day.iso,day:day.pos.day,weekOffset:day.pos.weekOffset,status:"Draft" as const};try{if(!devMode){const rows=await persist("/api/shifts",{method:"PATCH",body:JSON.stringify({id:original.id,scope:"occurrence",employeeId:original.employeeId,isOpen:original.isOpen,role:original.role,startsAt:`${day.iso}T${original.start}:00`,endsAt:`${dateFromSerial(dateSerial(day.iso)+(isOvernight(original.start,original.end)?1:0))}T${original.end}:00`,status:"DRAFT"})});const mapped=(rows||[]).map(mapDatabaseShift);setShifts(cur=>[...cur.filter(x=>x.id!==id),...mapped]);}else setShifts(cur=>cur.map(x=>x.id===id?moved:x));notify("Shift moved and returned to draft");}catch(error){notify(error instanceof Error?error.message:"Could not move shift");}}}>
           <div className="day-header"><span>{day.short}</span><strong>{day.date}</strong></div>
-          <div className="day-body">{dayShifts.map((shift) => <ShiftCard key={shift.id} shift={shift} conflict={conflicts.has(shift.id)} onOpen={() => onEditShift(shift)} onDragStart={(e)=>e.dataTransfer.setData("text/shift-id",shift.id)} />)}<button className="add-slot" onClick={() => onNewShift(day.iso)}><Plus size={15}/> Add shift</button></div>
+          <div className="day-body">{dayShifts.map((shift) => <ShiftCard key={shift.id} shift={shift} conflict={conflicts.has(shift.id) || availabilityConflicts.has(shift.id)} onOpen={() => onEditShift(shift)} onDragStart={(e)=>e.dataTransfer.setData("text/shift-id",shift.id)} />)}<button className="add-slot" onClick={() => onNewShift(day.iso)}><Plus size={15}/> Add shift</button></div>
         </div>;
       })}
     </div></section>
+    {showConflictsOnly && !displayedShifts.length ? <div className="empty-state"><AlertTriangle size={20}/><strong>No conflicts in this period</strong><span>Show all shifts to continue editing the schedule.</span></div> : null}
     <div className="legend compact-legend"><span><i className="manager"/> Manager</span><span><i className="bartender"/> Bartender</span><span><i className="floor"/> Floor</span><span><i className="draft"/> Draft</span></div>
   </>
 }
-function ShiftCard({ shift, conflict, onOpen, onDragStart }: { shift: Shift; conflict?: boolean; onOpen: () => void; onDragStart?: (event: React.DragEvent<HTMLButtonElement>) => void }) { const overnight = isOvernight(shift.start, shift.end); return <button type="button" draggable onDragStart={onDragStart} className={`shift-card shift-card-button role-${shift.role.toLowerCase()} ${shift.status === "Draft" ? "is-draft" : ""} ${conflict ? "has-conflict" : ""}`} onClick={onOpen} aria-label={`Open ${shift.isOpen ? "available" : shift.employee} shift ${shift.start} to ${shift.end}${overnight ? " next day" : ""}`}><div className="shift-card-top"><span>{shift.start}–{shift.end}{overnight ? " +1" : ""}</span><ChevronRight size={14} /></div><strong>{shift.isOpen ? "Available shift" : shift.employee}</strong><small>{shift.role}{overnight ? " · Overnight" : ""}{shift.recurrenceLabel ? ` · ${shift.recurrenceLabel}` : ""}</small>{shift.isOpen && <em>Open</em>}{shift.status === "Draft" && <em>Draft</em>}{conflict && <em className="conflict-badge">Conflict</em>}</button> }
+function ShiftCard({ shift, conflict, onOpen, onDragStart }: { shift: Shift; conflict?: boolean; onOpen: () => void; onDragStart?: (event: React.DragEvent<HTMLButtonElement>) => void }) { const overnight = isOvernight(shift.start, shift.end); return <button type="button" draggable onDragStart={onDragStart} className={`shift-card shift-card-button role-${shift.role.toLowerCase()} ${shift.status === "Draft" ? "is-draft" : ""} ${conflict ? "has-conflict" : ""}`} onClick={onOpen} aria-label={`Open ${shift.isOpen ? "available" : shift.employee} shift ${shift.start} to ${shift.end}${overnight ? " next day" : ""}`}><div className="shift-card-top"><span>{shift.start}–{shift.end}{overnight ? " +1" : ""}</span><ChevronRight size={14} /></div><strong>{shift.isOpen ? "Available shift" : shift.employee}</strong><small>{shift.role}{overnight ? " · Overnight" : ""}{shift.recurrenceLabel ? ` · ${shift.recurrenceLabel}` : ""}</small>{shift.isOpen && <em>Open</em>}{shift.status === "Draft" && <em>Draft</em>}{shift.availabilityConflict && <em className="conflict-badge">{shift.availabilityConflict === "APPROVED_TIME_OFF" ? "Time off" : "Unavailable"}</em>}{conflict && !shift.availabilityConflict && <em className="conflict-badge">Conflict</em>}</button> }
 
 function hoursBetween(start: string, end: string) { const [sh,sm]=start.split(":").map(Number); const [eh,em]=end.split(":").map(Number); let mins=(eh*60+em)-(sh*60+sm); if(mins<=0) mins+=1440; return mins/60; }
 function workedHours(entry: TimeEntry) { return entry.clockOut ? Math.max(0, hoursBetween(entry.clockIn, entry.clockOut) - entry.breakMinutes/60) : 0; }
@@ -649,8 +655,10 @@ function EditShiftDialog({ shift, employees, onClose, onSave, onDelete }: { shif
     const position = shiftPositionFromDate(shiftDate);
     onSave({ ...shift, date: shiftDate, day: position.day, weekOffset: position.weekOffset, employee: selectedEmployee, initials: assignment === "open" ? "+" : employee.split(" ").map((word) => word[0]).join(""), role, start, end, status, isOpen: assignment === "open" }, scope);
   }
+  const conflictLabel = shift.availabilityConflict === "APPROVED_TIME_OFF" ? "This employee has approved time off during the shift." : shift.availabilityConflict === "OUTSIDE_AVAILABILITY" ? "This shift is outside the employee’s saved availability." : null;
   return <Modal title="Edit shift" subtitle="Update this shift occurrence, its assignment or availability." onClose={onClose}>
-    <div className="assignment-toggle"><button type="button" className={assignment === "employee" ? "selected" : ""} onClick={() => setAssignment("employee")}>Assign employee</button><button type="button" className={assignment === "open" ? "selected" : ""} onClick={() => setAssignment("open")}>Available shift</button></div>
+    {conflictLabel ? <div className="open-shift-note full-field"><AlertTriangle size={18}/><div><strong>Availability conflict</strong><span>{conflictLabel} Reassign the shift, adjust the time, or make it available.</span></div></div> : null}
+    <div className="assignment-toggle"><button type="button" className={assignment === "employee" ? "selected" : ""} onClick={() => setAssignment("employee")}>Assign employee</button><button type="button" className={assignment === "open" ? "selected" : ""} onClick={() => setAssignment("open")}>{shift.availabilityConflict ? "Make available" : "Available shift"}</button></div>
     <div className="form-grid shift-dialog-fields">
       {assignment === "employee" && <label className="full-field">Employee<select value={employee} onChange={(e) => setEmployee(e.target.value)}>{activeEmployees.map((person) => <option key={person.name}>{person.name}</option>)}</select></label>}
       {assignment === "open" && <div className="open-shift-note full-field"><Users size={18}/><div><strong>Employees can request this shift</strong><span>The current employee is removed. A manager approves the employee who receives it.</span></div></div>}

@@ -1,3 +1,3 @@
 # Release notes
 
-See `RELEASE_NOTES_V0115.md` for v0.11.6.
+See `RELEASE_NOTES_V0121.md` for v0.12.1.

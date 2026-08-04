@@ -20,11 +20,41 @@ export async function GET(request: Request) {
     const from = query.get("from") || new Date().toISOString();
     const to = query.get("to") || new Date(Date.now() + 14 * 864e5).toISOString();
     return NextResponse.json(await db()`select s.*,e.first_name||' '||e.last_name employee_name,
-      (select count(*)::int from shift_claims c where c.shift_id=s.id and c.status='PENDING') pending_claims
+      (select count(*)::int from shift_claims c where c.shift_id=s.id and c.status='PENDING') pending_claims,
+      case
+        when s.employee_id is null then null
+        when exists(select 1 from requests r where r.organization_id=s.organization_id and r.employee_id=s.employee_id and r.type='TIME_OFF' and r.status='APPROVED' and r.starts_at<s.ends_at and r.ends_at>s.starts_at) then 'APPROVED_TIME_OFF'
+        when exists(
+          select 1 from lateral (
+            select ar.available,ar.available_from,ar.available_to from availability_rules ar
+            where ar.organization_id=s.organization_id and ar.employee_id=s.employee_id
+              and ((ar.valid_from=s.starts_at::date and ar.valid_until=s.starts_at::date)
+                or (ar.valid_from is null and ar.valid_until is null and ar.weekday=extract(dow from s.starts_at)::int))
+            order by (ar.valid_from is not null) desc limit 1
+          ) availability
+          where not availability.available
+             or (availability.available_from is not null and s.starts_at::time < availability.available_from)
+             or (availability.available_to is not null and s.ends_at::time > availability.available_to and s.ends_at::date=s.starts_at::date)
+        ) then 'OUTSIDE_AVAILABILITY'
+        else null
+      end employee_availability_conflict
       from shifts s left join employees e on e.id=s.employee_id
       where s.organization_id=${user.organizationId} and (${user.locationId}::uuid is null or s.location_id=${user.locationId})
       and s.starts_at>=${from} and s.starts_at<${to} order by starts_at`);
   } catch (error) { return jsonError(error); }
+}
+
+async function assertEmployeeAvailability(tx: any, organizationId: string, employeeId: string, start: Date, end: Date, override = false) {
+  if (override) return;
+  const timeOff = await tx`select id from requests where organization_id=${organizationId} and employee_id=${employeeId} and type='TIME_OFF' and status='APPROVED' and starts_at<${end.toISOString()} and ends_at>${start.toISOString()} limit 1`;
+  if (timeOff.length) throw new ApiError(409, "Employee has approved time off during this shift", { code: "APPROVED_TIME_OFF" });
+  const availability = await tx`select available,available_from,available_to from availability_rules where organization_id=${organizationId} and employee_id=${employeeId} and ((valid_from=${start.toISOString().slice(0,10)}::date and valid_until=${start.toISOString().slice(0,10)}::date) or (valid_from is null and valid_until is null and weekday=${start.getUTCDay()})) order by (valid_from is not null) desc limit 1`;
+  const rule = availability[0];
+  if (!rule) return;
+  const startTime = start.toISOString().slice(11,16);
+  const endTime = end.toISOString().slice(11,16);
+  const outside = !rule.available || (rule.available_from && startTime < String(rule.available_from).slice(0,5)) || (rule.available_to && start.toISOString().slice(0,10) === end.toISOString().slice(0,10) && endTime > String(rule.available_to).slice(0,5));
+  if (outside) throw new ApiError(409, "Shift is outside the employee's availability", { code: "OUTSIDE_AVAILABILITY" });
 }
 
 export async function POST(request: Request) {
@@ -62,6 +92,7 @@ export async function POST(request: Request) {
       const created: any[] = [];
       for (const start of starts) {
         const end = new Date(start.getTime() + duration);
+        if (employeeId) await assertEmployeeAvailability(tx, user.organizationId, employeeId, start, end, Boolean(body.overrideAvailability));
         const rows = await tx`insert into shifts(organization_id,location_id,employee_id,role,starts_at,ends_at,break_minutes,status,notes,created_by,recurrence_group_id,is_open)
           values(${user.organizationId},${locationId},${employeeId},${role},${start.toISOString()},${end.toISOString()},${Number(body.breakMinutes || 0)},${String(body.status || "DRAFT")},${body.notes ? String(body.notes).slice(0,2000) : null},${user.userId},${recurrenceId},${isOpen}) returning *`;
         created.push({ ...rows[0], employee_name: employeeName, location_timezone: location[0].timezone });
@@ -127,6 +158,7 @@ export async function PATCH(request: Request) {
         if (employeeId) {
           const conflicts = await tx`select id from shifts where organization_id=${user.organizationId} and employee_id=${employeeId} and id<>${item.id} and status<>'CANCELLED' and starts_at<${end.toISOString()} and ends_at>${start.toISOString()} limit 1`;
           if (conflicts.length && !body.overrideConflicts) throw new ApiError(409, "Employee has scheduling conflicts", conflicts);
+          await assertEmployeeAvailability(tx, user.organizationId, employeeId, start, end, Boolean(body.overrideAvailability));
         }
         const changed = await tx`update shifts set employee_id=${employeeId},is_open=${isOpen},role=${body.role ? String(body.role).slice(0,100) : item.role},starts_at=${start.toISOString()},ends_at=${end.toISOString()},status=${body.status ? String(body.status) : item.status},notes=${body.notes===undefined?item.notes:String(body.notes).slice(0,2000)},updated_at=now() where id=${item.id} and organization_id=${user.organizationId} returning *`;
         updated.push({ ...changed[0], employee_name: employeeName, location_timezone: location?.timezone || 'Europe/Copenhagen' });
