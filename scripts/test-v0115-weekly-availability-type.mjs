@@ -4,7 +4,7 @@ const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.ur
 const route = fs.readFileSync(new URL("../app/api/availability/route.ts", import.meta.url), "utf8");
 
 const checks = [
-  ["release version", pkg.version === "0.11.5"],
+  ["release version", pkg.version === "0.11.6"],
   ["weekday narrowed to number", route.includes('typeof weekday !== "number"')],
   ["weekly rules normalized before transaction", route.includes("const weeklyRules = rules.map")],
   ["optional weekly times use null", route.includes("availableFrom: available ? rule.availableFrom ?? null : null") && route.includes("availableTo: available ? rule.availableTo ?? null : null")],
@@ -14,5 +14,5 @@ const checks = [
 ];
 for (const [name, ok] of checks) {
   console.log(`${ok ? "PASS" : "FAIL"} ${name}`);
-  if (!ok) throw new Error(`v0.11.5 check failed: ${name}`);
+  if (!ok) throw new Error(`v0.11.6 check failed: ${name}`);
 }

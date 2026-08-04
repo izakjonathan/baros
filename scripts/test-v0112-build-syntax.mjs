@@ -3,7 +3,7 @@ import fs from 'node:fs';
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const source = fs.readFileSync('components/bar-ops-app.tsx', 'utf8');
 const checks = [
-  ['release version', ['0.11.2','0.11.3','0.11.4','0.11.5'].includes(pkg.version)],
+  ['release version', ['0.11.2','0.11.3','0.11.4','0.11.6'].includes(pkg.version)],
   ['inventory notification handler has a closed expression', source.includes('onClick={()=>go("inventory")}><Package')],
   ['malformed inventory notification handler is absent', !source.includes('onClick={()=>go("inventory")><Package')],
   ['notification popover remains present', source.includes('notifications-popover')],

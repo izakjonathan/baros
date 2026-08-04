@@ -3,7 +3,7 @@ import fs from "node:fs";
 const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
 const route = fs.readFileSync("app/api/availability/route.ts", "utf8");
 const checks = [
-  ["release version", ["0.11.4", "0.11.5"].includes(pkg.version)],
+  ["release version", ["0.11.4", "0.11.6"].includes(pkg.version)],
   ["monthly date is narrowed", route.includes("const date = rule.date as string")],
   ["availability is normalized", route.includes("const available = rule.available !== false")],
   ["optional start is null-safe", route.includes("const availableFrom: string | null = available ? rule.availableFrom ?? null : null")],

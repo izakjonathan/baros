@@ -8,7 +8,9 @@ export async function GET() {
   try {
     const user = await getSessionUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const rows = await db()`select t.*,s.starts_at,s.ends_at,s.role,te.first_name||' '||te.last_name target_name,re.first_name||' '||re.last_name requested_by_name from shift_transfers t join shifts s on s.id=t.shift_id join employees re on re.id=t.requested_by_employee_id left join employees te on te.id=t.target_employee_id where t.organization_id=${user.organizationId} and (${user.role}<>'EMPLOYEE' or t.requested_by_employee_id=${user.employeeId} or t.target_employee_id=${user.employeeId}) order by t.created_at desc`;
+    const rows = user.role === "EMPLOYEE"
+      ? await db()`select t.*,s.starts_at,s.ends_at,s.role,te.first_name||' '||te.last_name target_name,re.first_name||' '||re.last_name requested_by_name from shift_transfers t join shifts s on s.id=t.shift_id join employees re on re.id=t.requested_by_employee_id left join employees te on te.id=t.target_employee_id where t.organization_id=${user.organizationId} and (t.requested_by_employee_id=${user.employeeId} or t.target_employee_id=${user.employeeId}) order by t.created_at desc`
+      : await db()`select t.*,s.starts_at,s.ends_at,s.role,te.first_name||' '||te.last_name target_name,re.first_name||' '||re.last_name requested_by_name from shift_transfers t join shifts s on s.id=t.shift_id join employees re on re.id=t.requested_by_employee_id left join employees te on te.id=t.target_employee_id left join shifts ss on ss.id=t.swap_shift_id where t.organization_id=${user.organizationId} and t.status='PENDING_MANAGER' and s.employee_id=t.requested_by_employee_id and (t.type='HANDOVER' or (ss.id is not null and ss.employee_id=t.target_employee_id)) order by t.created_at asc`;
     return NextResponse.json(rows);
   } catch (error) { return jsonError(error); }
 }

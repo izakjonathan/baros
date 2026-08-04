@@ -10,7 +10,7 @@ export async function GET() {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const rows = user.role === "EMPLOYEE"
       ? await db()`select c.*,s.starts_at,s.ends_at,s.role,l.name location_name from shift_claims c join shifts s on s.id=c.shift_id join locations l on l.id=s.location_id where c.organization_id=${user.organizationId} and c.employee_id=${user.employeeId} order by c.created_at desc`
-      : await db()`select c.*,s.starts_at,s.ends_at,s.role,e.first_name||' '||e.last_name employee_name from shift_claims c join shifts s on s.id=c.shift_id join employees e on e.id=c.employee_id where c.organization_id=${user.organizationId} order by c.created_at desc`;
+      : await db()`select c.*,s.starts_at,s.ends_at,s.role,e.first_name||' '||e.last_name employee_name from shift_claims c join shifts s on s.id=c.shift_id join employees e on e.id=c.employee_id where c.organization_id=${user.organizationId} and c.status='PENDING' and s.is_open=true and s.employee_id is null order by c.created_at asc`;
     return NextResponse.json(rows);
   } catch (error) { return jsonError(error); }
 }

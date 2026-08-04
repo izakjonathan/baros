@@ -10,7 +10,7 @@ export async function GET() {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const rows = user.role === "EMPLOYEE"
       ? await db()`select * from requests where organization_id=${user.organizationId} and employee_id=${user.employeeId} order by created_at desc`
-      : await db()`select r.*,e.first_name||' '||e.last_name employee_name,l.name location_name from requests r join employees e on e.id=r.employee_id left join locations l on l.id=r.location_id where r.organization_id=${user.organizationId} order by case when r.status='PENDING' then 0 else 1 end,r.created_at desc`;
+      : await db()`select r.*,e.first_name||' '||e.last_name employee_name,l.name location_name from requests r join employees e on e.id=r.employee_id left join locations l on l.id=r.location_id where r.organization_id=${user.organizationId} and r.status='PENDING' order by r.created_at asc`;
     return NextResponse.json(rows);
   } catch (error) { return jsonError(error); }
 }
