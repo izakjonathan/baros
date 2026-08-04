@@ -1,17 +1,17 @@
-# Release Notes — v0.18.4.3
+# Release Notes — v0.18.4.4
 
-## Mobile Dialog & Cross-Screen Consistency
+## Color Architecture & Page Composition
 
-- Rebuilt the employee editor as a viewport-safe mobile dialog with fixed heading, independently scrolling form content and safe-area-aware sticky actions.
-- Removed the white dialog heading, backdrop blur, shadow treatment and oversized mobile controls.
-- Restored a visible icon inside the mobile Add employee action.
-- Tightened Team card spacing and metadata density.
-- Aligned scheduling with the approved pink shift identity and removed blue, green, grey, white-card and shadow treatments.
-- Compacted schedule period controls and retained touch-safe horizontal scrolling.
-- Converted Shift execution metrics into a compact two-column functional-colour grid.
-- Simplified Operational summary into one black surface with divided metrics rather than rounded cards within a card.
-- Compacted mobile dashboard panel actions and normalized metric-card rhythm.
-- No business logic, permissions, APIs, database schema or workflow behavior changed.
+- Added large editorial title blocks for Dashboard, Team and Shift Execution.
+- Integrated the Team action into the neon title composition.
+- Changed Team summary cards from one repeated neon treatment to neon, pink and blue.
+- Changed the Team filter surface to orange and varied employee-card colours while keeping employee identity consistent.
+- Rebuilt Shift Plan composition around a pink title block, orange period controls and neon/orange calendar surfaces.
+- Removed grey/white schedule surfaces and legacy status colouring.
+- Replaced beige outlined Dashboard panels with pink, orange, neon and blue functional sections.
+- Rebuilt Quick Actions as compact coloured actions instead of outlined cards inside an outlined container.
+- Applied blue and neon functional sections to Shift Execution.
+- Preserved all existing business logic, permissions, APIs, database behavior and workflows.
 
 # Release Notes — v0.18.4.2 Visual System Alignment Pass
 

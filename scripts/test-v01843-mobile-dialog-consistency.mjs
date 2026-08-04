@@ -6,7 +6,7 @@ const dashboard=fs.readFileSync("features/dashboard/Dashboard.module.css","utf8"
 const team=fs.readFileSync("features/employees/TeamWorkspace.module.css","utf8");
 const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
 const checks=[
- [pkg.version==="0.18.4.3","package version is 0.18.4.3"],
+ [pkg.version.startsWith("0.18.4.") && Number(pkg.version.split(".")[3]||0)>=3,"package version is v0.18.4.3 or newer"],
  [app.includes('className="employee-dialog"'),"employee dialog has dedicated mobile class"],
  [css.includes("grid-template-rows:auto minmax(0,1fr) auto"),"dialog uses fixed header/scroll body/actions layout"],
  [css.includes("env(safe-area-inset-bottom)"),"dialog and long screens preserve bottom safe area"],

@@ -1,8 +1,8 @@
-# Bar Ops v0.18.4.1 — Employees & Team Redesign
+# Bar Ops v0.18.4.4 — Color Architecture & Page Composition
 
-Current release: **v0.18.4.1**
+Current release: **v0.18.4.4**
 
-The approved Phase D visual system is formalized in `docs/phase-d-visual-design-system.md`. The Team workspace now uses the neon employee identity, bold typography, compact two-column cards, borderless coloured surfaces and locally scoped CSS Modules while preserving all employee data, access and permission behavior.
+This Phase D correction rebalances the application away from beige outline-only composition. Major workspace introductions now use approved editorial colour blocks, functional sections use pink, orange, blue, neon and black deliberately, and repeated nested borders have been reduced. Team, Shift Plan, Shift Execution and Dashboard retain their existing workflows and data behavior.
 
 # Bar Ops v0.18.2 — Dashboard & Overview Redesign
 
