@@ -1,6 +1,6 @@
 # Bar Ops Implementation Status
 
-Current approved release: **v0.16.5 — Request Boundary & Configuration Integrity**
+Current approved release: **v0.16.7 — Session Lifecycle & CI Runtime Alignment**
 
 ## Completed refinement releases
 
@@ -19,14 +19,16 @@ Current approved release: **v0.16.5 — Request Boundary & Configuration Integri
 - v0.16.3.1 Next.js health alias and Node 24 deployment hotfix
 - v0.16.4 Request Boundary Protection
 - v0.16.5 Configuration Integrity
+- v0.16.6 Session Lifecycle Hardening
+- v0.16.7 CI Runtime Alignment
 
 ## Current guarantees
 
 - Existing role permissions and business workflows are preserved.
-- No database migration is required for v0.16.5.
-- API traffic receives sanitized request IDs and no-store response policy at the network boundary.
-- Cross-site mutation requests and mismatched browser origins are blocked before route execution.
-- Production configuration validates HTTPS, PostgreSQL URLs, session duration and cookie naming.
-- Liveness and database readiness remain independently monitorable.
-- Production is pinned to Node 24.x.
+- No database migration is required for v0.16.7.
+- All session creation and removal paths share one cookie policy.
+- Session cookies are HTTP-only, production-secure, same-site protected and high priority.
+- GitHub Actions and Vercel target Node 24.x.
+- Direct dependency versions are pinned against accidental range drift.
+- API request-boundary, readiness, rate-limit and configuration protections remain active.
 - The PWA service worker remains present.

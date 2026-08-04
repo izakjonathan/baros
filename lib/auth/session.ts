@@ -3,45 +3,38 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db/client";
 import { createDevSessionToken, getDevSessionUser, isDevAuthEnabled, verifyDevSessionToken } from "@/lib/auth/dev-auth";
+import { expiredSessionCookieOptions, sessionCookieName, sessionCookieOptions, sessionExpiry } from "@/lib/auth/session-cookie";
 
 export type AppRole = "OWNER" | "ADMIN" | "MANAGER" | "SHIFT_MANAGER" | "EMPLOYEE";
 export type SessionUser = { userId: string; email: string; name: string; role: AppRole; organizationId: string; locationId: string | null; employeeId: string | null };
-const cookieName = () => process.env.SESSION_COOKIE_NAME || "bar_ops_session";
 const tokenHash = (token: string) => createHash("sha256").update(token).digest("hex");
 
 export async function createSession(userId: string, organizationId: string, locationId: string | null, devRole: AppRole = "OWNER") {
   const store = await cookies();
-  const days = Number(process.env.SESSION_TTL_DAYS || 30);
-  const expiresAt = new Date(Date.now() + days * 86400000);
+  const expiresAt = sessionExpiry();
 
   if (isDevAuthEnabled() && userId === "dev-user") {
-    store.set(cookieName(), createDevSessionToken(devRole), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      expires: expiresAt,
-    });
+    store.set(sessionCookieName(), createDevSessionToken(devRole), sessionCookieOptions(expiresAt));
     return;
   }
 
   const token = randomBytes(32).toString("base64url");
   await db()`insert into sessions (user_id, organization_id, location_id, token_hash, expires_at) values (${userId}, ${organizationId}, ${locationId}, ${tokenHash(token)}, ${expiresAt})`;
-  store.set(cookieName(), token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", expires: expiresAt });
+  store.set(sessionCookieName(), token, sessionCookieOptions(expiresAt));
 }
 
 export async function destroySession() {
   const store = await cookies();
-  const token = store.get(cookieName())?.value;
+  const token = store.get(sessionCookieName())?.value;
   if (token && !isDevAuthEnabled()) {
     await db()`delete from sessions where token_hash = ${tokenHash(token)}`;
   }
-  store.delete(cookieName());
+  store.set(sessionCookieName(), "", expiredSessionCookieOptions());
 }
 
 export async function getSessionUser(): Promise<SessionUser | null> {
   const store = await cookies();
-  const token = store.get(cookieName())?.value;
+  const token = store.get(sessionCookieName())?.value;
   if (isDevAuthEnabled()) {
     if (!token) return null;
     const devUser = verifyDevSessionToken(token);

@@ -5,10 +5,10 @@ import { db } from "@/lib/db/client";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
 import { jsonError, readJsonObject, requiredString } from "@/lib/http";
+import { sessionCookieName, sessionCookieOptions, sessionExpiry } from "@/lib/auth/session-cookie";
 
 const tokenHash = (token: string) => createHash("sha256").update(token).digest("hex");
 const sessionTokenHash = (token: string) => createHash("sha256").update(token).digest("hex");
-const cookieName = () => process.env.SESSION_COOKIE_NAME || "bar_ops_session";
 
 type InvitationRow = {
   id: string;
@@ -33,8 +33,7 @@ export async function POST(request: Request) {
     await enforceRateLimit(`activate:${ip}:${tokenHash(token).slice(0, 16)}`, 8, 15 * 60);
 
     const rawSessionToken = randomBytes(32).toString("base64url");
-    const days = Number(process.env.SESSION_TTL_DAYS || 30);
-    const expiresAt = new Date(Date.now() + days * 86_400_000);
+    const expiresAt = sessionExpiry();
 
     const result = await db().begin(async (tx) => {
       const invitations = await tx<InvitationRow[]>`
@@ -186,13 +185,7 @@ export async function POST(request: Request) {
     });
 
     const store = await cookies();
-    store.set(cookieName(), rawSessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      expires: expiresAt,
-    });
+    store.set(sessionCookieName(), rawSessionToken, sessionCookieOptions(expiresAt));
 
     return NextResponse.json({ ok: true, redirect: "/employee", userId: result.userId });
   } catch (error) {

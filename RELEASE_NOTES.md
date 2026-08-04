@@ -1,32 +1,24 @@
-# Bar Ops v0.16.5 — Production Hardening V & VI
+# Bar Ops v0.16.7 — Production Hardening VII & VIII
 
-Built from the approved v0.16.3.1 Vercel Build Hotfix baseline.
+Built from the approved v0.16.5 baseline. This package combines two focused production-hardening releases.
 
-## v0.16.4 — Request Boundary Protection
+## v0.16.6 — Session Lifecycle Hardening
 
-- Added a Next.js 16 `proxy.ts` boundary for all `/api/*` requests.
-- Propagates a sanitized `x-request-id` into route handlers and responses.
-- Applies `Cache-Control: no-store` to API boundary responses.
-- Rejects browser mutation requests marked as cross-site.
-- Rejects mutation requests whose `Origin` does not match the deployed request origin.
-- Returns safe JSON 403 responses with request IDs.
-- Leaves same-origin requests and non-browser requests without an Origin header compatible.
+- Centralized session-cookie naming, expiry and security options in one shared module.
+- Applied the same cookie policy to normal login, development login and employee activation.
+- Added explicit high-priority cookies with both `expires` and `maxAge` values.
+- Made logout expire the cookie with matching path and security attributes instead of relying on a generic deletion call.
+- Preserved the existing `SameSite=Lax`, HTTP-only and production-secure behavior.
+- No database migration or permission change.
 
-## v0.16.5 — Configuration Integrity
+## v0.16.7 — CI Runtime Alignment
 
-- Validates `DATABASE_URL` as a PostgreSQL URL.
-- Requires production `APP_URL` to use HTTPS.
-- Rejects credentials embedded in `APP_URL`.
-- Restricts `SESSION_TTL_DAYS` to an integer from 1 through 365.
-- Validates `SESSION_COOKIE_NAME` characters and length.
-- Preserves development warnings for missing databases and insecure non-local HTTP URLs.
-- Added focused regression gates for both releases.
+- Aligned GitHub Actions with the production Node 24 runtime.
+- Pinned every direct production and development dependency to an exact version.
+- Added regression gates for Node-version drift, dependency ranges and session-cookie duplication.
+- Retained `npm install` because the approved baseline does not include a package lock; introducing `npm ci` without a generated lock would break CI.
+- Preserved all existing lint, typecheck, regression, environment and production-build gates.
 
 ## Compatibility
 
-- No database migration.
-- No permission changes.
-- No business-feature changes.
-- No breaking API contract changes for same-origin clients.
-- `public/sw.js` remains included.
-- `public/offline.html` and `vercel.json` remain absent.
+No business workflow, role permission, API contract or database schema was intentionally changed.

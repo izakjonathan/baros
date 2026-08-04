@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createDevSessionToken, isDevAuthEnabled, normalizeDevRole } from "@/lib/auth/dev-auth";
+import { sessionCookieName, sessionCookieOptions, sessionExpiry } from "@/lib/auth/session-cookie";
 
-const cookieName = () => process.env.SESSION_COOKIE_NAME || "bar_ops_session";
 
 export async function POST(request: Request) {
   if (!isDevAuthEnabled()) {
@@ -12,12 +12,6 @@ export async function POST(request: Request) {
   const role = normalizeDevRole(form.get("role"));
   const destination = role === "EMPLOYEE" ? "/employee" : "/";
   const response = NextResponse.redirect(new URL(destination, request.url), 303);
-  response.cookies.set(cookieName(), createDevSessionToken(role), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 30,
-  });
+  response.cookies.set(sessionCookieName(), createDevSessionToken(role), sessionCookieOptions(sessionExpiry()));
   return response;
 }

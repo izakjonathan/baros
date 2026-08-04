@@ -1,6 +1,6 @@
 # Bar Ops
 
-**Current release: v0.16.5 — Request Boundary & Configuration Integrity**
+**Current release: v0.16.7 — Session Lifecycle & CI Runtime Alignment
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 

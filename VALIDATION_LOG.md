@@ -1,27 +1,22 @@
-# Validation Log — v0.16.5
+# Validation Log — v0.16.7
 
-Baseline: v0.16.3.1 Vercel Build Hotfix.
+Baseline: v0.16.5
 
-## Passed
+## Completed
 
-- `node scripts/test-v0160-runtime-resilience.mjs`
-- `node scripts/test-v0161-operational-guardrails.mjs`
-- `node scripts/test-v0162-request-abuse-protection.mjs`
-- `node scripts/test-v0163-health-runtime.mjs`
-- `node scripts/test-v0164-request-boundary.mjs`
-- `node scripts/test-v0165-config-integrity.mjs`
-- Valid production configuration accepted by `scripts/validate-environment.mjs`
-- Production HTTP `APP_URL` correctly rejected
-- Confirmed Node engine remains `24.x`
-- Confirmed `public/sw.js` remains included
+- v0.16.5 configuration-integrity regression
+- v0.16.6 session-lifecycle regression
+- v0.16.7 CI-runtime regression
+- Source inspection for duplicated session-cookie implementations
+- Node 24 alignment check for `package.json` and GitHub Actions
+- Exact direct-dependency version check
+- Confirmed `public/sw.js` remains present
 - Confirmed `public/offline.html` remains absent
 - Confirmed `vercel.json` remains absent
-- ZIP integrity verification
+- Release ZIP integrity check
 
-## Not executed locally
+## Limitations
 
-- `npm run lint`
-- `npm run typecheck`
-- `npm run build`
+A complete dependency installation, ESLint run, TypeScript check and Next.js production build could not be executed in this environment because its npm mirror returned 404 for `@types/node`. Vercel or GitHub Actions must run the dependency-based gates.
 
-The approved source package does not include installed dependencies or a lockfile. Dependency-based checks must run in GitHub Actions or Vercel. No claim is made that they passed locally.
+The approved baseline contains no `package-lock.json`. CI therefore continues to use `npm install`; all direct dependency versions are pinned, but transitive dependency resolution is not fully lockfile-reproducible yet.
