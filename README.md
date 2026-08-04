@@ -1,6 +1,6 @@
 # Bar Ops
 
-**Current release: v0.11.4 — Monthly Availability Type Fix**
+**Current release: v0.11.5 — Weekly Availability Type Fix**
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 

@@ -2,7 +2,7 @@ import fs from "node:fs";
 const css=["app/globals.css","app/mono-tokens.css","app/mono-components.css"].map((file)=>fs.readFileSync(file,"utf8")).join("\n");
 const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
 const checks=[
- ["version",["0.9.7","0.9.8","0.9.9","0.10.0","0.10.1","0.10.2","0.10.3","0.10.4","0.10.5","0.10.6","0.10.7","0.10.8","0.10.9","0.10.10","0.10.11","0.11.0","0.11.1","0.11.2","0.11.3","0.11.4"].includes(pkg.version)],
+ ["version",["0.9.7","0.9.8","0.9.9","0.10.0","0.10.1","0.10.2","0.10.3","0.10.4","0.10.5","0.10.6","0.10.7","0.10.8","0.10.9","0.10.10","0.10.11","0.11.0","0.11.1","0.11.2","0.11.3","0.11.4","0.11.5"].includes(pkg.version)],
  ["light grey canvas",css.includes("--mono-canvas: #f4f4f2")],
  ["black icon stroke",css.includes(":where(.lucide")&&css.includes("stroke: currentColor")],
  ["transparent icon buttons",/\.icon-button[^}]*background\s*:\s*transparent/s.test(css)],

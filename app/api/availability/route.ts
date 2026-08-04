@@ -91,12 +91,27 @@ export async function PUT(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    for (const rule of rules) if (!Number.isInteger(rule.weekday) || Number(rule.weekday) < 0 || Number(rule.weekday) > 6) throw new ApiError(400, "weekday must be between 0 and 6");
+    const weeklyRules = rules.map(rule => {
+      const weekday = rule.weekday;
+      if (typeof weekday !== "number" || !Number.isInteger(weekday) || weekday < 0 || weekday > 6) {
+        throw new ApiError(400, "weekday must be between 0 and 6");
+      }
+      const available = rule.available !== false;
+      return {
+        weekday,
+        availableFrom: available ? rule.availableFrom ?? null : null,
+        availableTo: available ? rule.availableTo ?? null : null,
+        available,
+        note: rule.note ?? null,
+      };
+    });
     await db().begin(async tx => {
       await tx`delete from availability_rules where organization_id=${user.organizationId} and employee_id=${user.employeeId} and valid_from is null and valid_until is null`;
-      for (const rule of rules) await tx`insert into availability_rules(organization_id,employee_id,weekday,available_from,available_to,available,note) values(${user.organizationId},${user.employeeId},${rule.weekday},${rule.availableFrom || null},${rule.availableTo || null},${rule.available !== false},${rule.note || null})`;
+      for (const rule of weeklyRules) {
+        await tx`insert into availability_rules(organization_id,employee_id,weekday,available_from,available_to,available,note) values(${user.organizationId},${user.employeeId},${rule.weekday},${rule.availableFrom},${rule.availableTo},${rule.available},${rule.note})`;
+      }
     });
-    await writeAudit({ organizationId: user.organizationId, actorUserId: user.userId, action: "AVAILABILITY_UPDATED", entityType: "employee", entityId: user.employeeId, after: rules });
+    await writeAudit({ organizationId: user.organizationId, actorUserId: user.userId, action: "AVAILABILITY_UPDATED", entityType: "employee", entityId: user.employeeId, after: weeklyRules });
     return NextResponse.json({ ok: true });
   } catch (error) {
     return jsonError(error);

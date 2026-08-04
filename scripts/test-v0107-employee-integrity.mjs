@@ -6,7 +6,7 @@ const hours = fs.readFileSync("app/api/employee/hours-summary/route.ts", "utf8")
 const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
 
 const checks = [
-  ["release version", ["0.10.7", "0.10.8","0.10.9","0.10.10","0.10.11","0.11.0","0.11.1","0.11.2","0.11.3","0.11.4"].includes(pkg.version)],
+  ["release version", ["0.10.7", "0.10.8","0.10.9","0.10.10","0.10.11","0.11.0","0.11.1","0.11.2","0.11.3","0.11.4","0.11.5"].includes(pkg.version)],
   ["development employee resolves a real linked profile", session.includes('devUser.role === "EMPLOYEE"') && session.includes("from employee_locations")],
   ["development session no longer exposes fake location to database routes", session.includes("{ ...devUser, locationId: null }")],
   ["real session validates the stored location", session.includes("valid_session_location.active=true")],

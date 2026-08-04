@@ -6,7 +6,7 @@ const availability=fs.readFileSync('app/employee/availability/availability-edito
 const api=fs.readFileSync('app/api/availability/route.ts','utf8');
 const css=fs.readFileSync('app/mono-components.css','utf8');
 const checks=[
-  ['release version',['0.11.3','0.11.4'].includes(pkg.version)],
+  ['release version',['0.11.3','0.11.4','0.11.5'].includes(pkg.version)],
   ['incoming transfer is target scoped',shifts.includes("t.target_employee_id===u.employeeId")],
   ['transfer query exposes target id',shifts.includes('t.target_employee_id,t.requested_by_employee_id')],
   ['monthly availability mode exists',availability.includes('mode === "monthly"')&&availability.includes('type="month"')],
