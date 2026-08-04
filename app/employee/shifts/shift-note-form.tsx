@@ -1,9 +1,0 @@
-'use client';
-import { useState } from 'react';
-import { MessageSquarePlus } from 'lucide-react';
-
-export function ShiftNoteForm({ shiftId }: { shiftId: string }) {
-  const [open,setOpen]=useState(false); const [note,setNote]=useState(''); const [category,setCategory]=useState('NOTE'); const [busy,setBusy]=useState(false); const [message,setMessage]=useState('');
-  async function submit(){ if(!note.trim())return; setBusy(true);setMessage('');try{const response=await fetch('/api/shift-notes',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({shiftId,note:note.trim(),category})});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||'Could not save note');setNote('');setOpen(false);setMessage('Shift note saved');}catch(error){setMessage(error instanceof Error?error.message:'Could not save note');}finally{setBusy(false);}}
-  return <div className="shift-note-form">{!open?<button type="button" className="secondary compact" onClick={()=>setOpen(true)}><MessageSquarePlus size={15}/> Add shift note</button>:<div className="shift-note-editor"><select value={category} onChange={e=>setCategory(e.target.value)}><option value="NOTE">Note</option><option value="INCIDENT">Incident</option><option value="EQUIPMENT">Equipment</option><option value="STOCK">Stock</option></select><textarea rows={3} maxLength={2000} value={note} onChange={e=>setNote(e.target.value)} placeholder="Add useful information for managers and the next shift"/><div><button type="button" className="secondary compact" onClick={()=>{setOpen(false);setNote('')}}>Cancel</button><button type="button" className="primary compact" disabled={busy||!note.trim()} onClick={()=>void submit()}>{busy?'Saving…':'Save note'}</button></div></div>}{message&&<small role="status">{message}</small>}</div>;
-}

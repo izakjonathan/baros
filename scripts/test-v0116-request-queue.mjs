@@ -7,7 +7,7 @@ const transfers=fs.readFileSync('app/api/shift-transfers/route.ts','utf8');
 const workspace=fs.readFileSync('components/requests-workspace.tsx','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 
-assert.ok(['0.11.6','0.12.0','0.12.1','0.12.2','0.12.3','0.12.4','0.13.0','0.13.1','0.13.2','0.13.3'].includes(pkg.version));
+assert.ok(['0.11.6','0.12.0','0.12.1','0.12.2','0.12.3','0.12.4','0.13.0','0.13.1','0.13.2'].includes(pkg.version));
 assert.match(requests,/r\.status='PENDING'/);
 assert.match(claims,/c\.status='PENDING'/);
 assert.match(claims,/s\.is_open=true and s\.employee_id is null/);
