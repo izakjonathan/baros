@@ -63,3 +63,29 @@ html,body,.app-frame,.main-shell,.page-wrap{background:#fff4c4}body .page-header
 @media(max-width:700px){
   .page-wrap[data-workspace="execution"] .execution-actions{padding:var(--space-4)}
 }
+
+
+/* v0.18.4.5 topbar + attendance refinement */
+.page-wrap[data-workspace="attendance"] > .page-header{padding:clamp(1.25rem,4vw,2.25rem);border:0;border-radius:var(--radius-panel);background:#f47add;color:#000}
+.page-wrap[data-workspace="attendance"] > .page-header p,
+.page-wrap[data-workspace="attendance"] > .page-header .eyebrow{color:#000}
+.page-wrap[data-workspace="attendance"] > .page-header .page-actions{align-self:center}
+.page-wrap[data-workspace="attendance"] > .page-header .page-actions .secondary{background:#000;color:#fff4c4;border:0}
+.page-wrap[data-workspace="attendance"] > .page-header .page-actions .primary{background:#4e4ced;color:#fff4c4;border:0}
+.page-wrap[data-workspace="attendance"] .attendance-filters{background:#feb34a;border:0;border-radius:var(--radius-panel);padding:var(--space-4);gap:var(--space-3)}
+.page-wrap[data-workspace="attendance"] .attendance-filters label{display:grid;gap:6px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#000}
+.page-wrap[data-workspace="attendance"] .attendance-filters input,
+.page-wrap[data-workspace="attendance"] .attendance-filters select{background:#fff4c4;border:0;border-radius:999px;box-shadow:none;color:#000;font-weight:700}
+.page-wrap[data-workspace="attendance"] .attendance-filters .secondary{background:#000;color:#fff4c4;border:0}
+.page-wrap[data-workspace="attendance"] .attendance-filters .result-count{align-self:end;color:#000;font-size:12px;font-weight:800}
+.page-wrap[data-workspace="attendance"] .attendance-metrics{margin:0}
+.page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card{border:0;border-radius:var(--radius-card);color:#000;box-shadow:none}
+.page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card:nth-child(1){background:#dfee4b}
+.page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card:nth-child(2){background:#4e4ced}
+.page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card:nth-child(3){background:#feb34a}
+.page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card:nth-child(4){background:#fff4c4;border:2px solid #000}
+.page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card *,
+.page-wrap[data-workspace="attendance"] .attendance-metrics .metric-trend{color:#000}
+.page-wrap[data-workspace="attendance"] .table-panel{background:#fff4c4;border:0;border-radius:var(--radius-panel)}
+.page-wrap[data-workspace="attendance"] .attendance-empty{padding:2rem 1.5rem;text-align:center;color:#000;font-weight:700}
+@media(max-width:600px){.page-wrap[data-workspace="attendance"] > .page-header{border-radius:2.25rem;padding:1.35rem}.page-wrap[data-workspace="attendance"] .attendance-filters{padding:1rem;border-radius:2rem}.page-wrap[data-workspace="attendance"] .attendance-filters .result-count{grid-column:1/-1;align-self:start}}

@@ -1,0 +1,16 @@
+import fs from "node:fs";
+const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
+const shell=fs.readFileSync("components/shell/ManagerShell.module.css","utf8");
+const schedule=fs.readFileSync("features/scheduling/ScheduleWorkspace.module.css","utf8");
+const globals=fs.readFileSync("app/globals.css","utf8");
+const app=fs.readFileSync("components/bar-ops-app.tsx","utf8");
+const fail=(m)=>{console.error(`v0.18.4.5 regression: ${m}`);process.exit(1)};
+if(pkg.version!=="0.18.4.5") fail("package version mismatch");
+if(!shell.includes("background:linear-gradient(135deg,#5b5af0 0%,#f47add 100%)")) fail("topbar location pill gradient missing");
+if(!shell.includes("background:#000")||!shell.includes(".topbarButton")) fail("topbar button treatment missing");
+if(!app.includes("shellStyles.topbarButton")) fail("topbar buttons are not wired to shellStyles.topbarButton");
+if(app.includes("workspace-context")) fail("legacy workspace-context topbar copy still present");
+if(!globals.includes('data-workspace="attendance"')) fail("attendance workspace styling missing");
+for (const token of ["background:#f47add","background:#feb34a","background:#4e4ced"]) if(!globals.includes(token)) fail(`attendance colour token ${token} missing`);
+if(!schedule.includes("v0.18.4.5 top chrome refinement")) fail("schedule top chrome refinement missing");
+console.log("v0.18.4.5 topbar and attendance regression passed");

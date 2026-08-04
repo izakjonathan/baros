@@ -1,3 +1,16 @@
+# Release Notes — v0.18.4.5
+
+## Top Bar & Attendance Refinement
+
+- Removed the manager top-bar bottom border for a cleaner continuous shell.
+- Restyled top-bar buttons into rounded black controls with light icons.
+- Restyled the location selector into a gradient pill matching the supplied visual reference direction.
+- Hid the extra workspace-context copy in the top bar so the shell reads more cleanly on mobile.
+- Refined Shift Plan header controls to use the same updated chrome language.
+- Added an editorial pink title block to Time & attendance.
+- Added an orange filter surface and clearer coloured attendance metrics.
+- Preserved all existing business logic, permissions, APIs, database behavior and workflows.
+
 # Release Notes — v0.18.4.4
 
 ## Color Architecture & Page Composition

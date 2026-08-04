@@ -1,3 +1,14 @@
+# Implementation Status — v0.18.4.5
+
+**Status:** Top Bar & Attendance Refinement complete.
+
+- Removed the top-bar bottom divider.
+- Restyled the menu, search and notification controls to the approved rounded black button treatment.
+- Restyled the location switcher to a stronger gradient pill matching the supplied references.
+- Improved Time & attendance page composition with an editorial header, a coloured filter surface and stronger metric hierarchy.
+- Refined Shift Plan top controls so the header chrome better matches the updated top bar.
+- No migration, permission, API, workflow or business-logic change is included.
+
 # Implementation Status — v0.18.4.4
 
 **Status:** Color Architecture & Page Composition complete.

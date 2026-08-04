@@ -1,6 +1,14 @@
+# Bar Ops v0.18.4.5 — Top Bar & Attendance Refinement
+
+Current release: **v0.18.4.5**
+
+This release refines the manager top bar and the Time & attendance workspace after the first colour-architecture pass. The persistent top bar now removes the bottom rule, uses the approved rounded black control treatment for menu/search/notification actions, and gives the location switcher a stronger gradient pill treatment based on the supplied references. Time & attendance now receives its own editorial header and functional colour surfaces so it no longer drops back into a flat beige composition.
+
+Rollback checkpoint: **v0.18.4.4**.
+
 # Bar Ops v0.18.4.4 — Color Architecture & Page Composition
 
-Current release: **v0.18.4.4**
+Historic release: **v0.18.4.4**
 
 This Phase D correction rebalances the application away from beige outline-only composition. Major workspace introductions now use approved editorial colour blocks, functional sections use pink, orange, blue, neon and black deliberately, and repeated nested borders have been reduced. Team, Shift Plan, Shift Execution and Dashboard retain their existing workflows and data behavior.
 
