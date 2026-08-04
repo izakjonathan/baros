@@ -4,7 +4,7 @@ const css=["app/globals.css","app/mono-tokens.css","app/mono-components.css"].ma
 const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
 const checks=[
  ["version",isVersionAtLeast(pkg.version, "0.9.7")],
- ["light grey canvas",css.includes("--mono-canvas: #f4f4f2")],
+ ["approved flat canvas",css.includes("--mono-canvas: #fff4c4")],
  ["black icon stroke",css.includes(":where(.lucide")&&css.includes("stroke: currentColor")],
  ["transparent icon buttons",/\.icon-button[^}]*background\s*:\s*transparent/s.test(css)],
  ["flat cards",/\.metric-card[^}]*border\s*:\s*0/s.test(css)],

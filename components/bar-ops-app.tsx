@@ -417,7 +417,7 @@ function ShiftExecution({ shifts, entries, notes, onNavigate }: { shifts: Shift[
 }
 
 function Metric({ icon: Icon, label, value, detail, trend, warning }: { icon: typeof Users; label: string; value: string; detail: string; trend: string; warning?: boolean }) {
-  return <div className="metric-card"><div className={`metric-icon ${warning ? "warning" : ""}`}><Icon size={20} /></div><span className="metric-label">{label}</span><strong>{value}</strong><small>{detail}</small><div className={`metric-trend ${warning ? "warn" : ""}`}>{warning ? <AlertTriangle size={13} /> : <Sparkles size={13} />}{trend}</div></div>
+  return <div className="metric-card"><div className={`metric-icon ${warning ? "warning" : ""}`}><Icon size={20} /></div><span className="metric-label">{label}</span><strong>{value}</strong><small>{detail}</small><div className={`metric-trend ${warning ? "warn" : ""}`}>{warning ? <AlertTriangle size={13} /> : <span aria-hidden="true" className="metric-status-dot" />}{trend}</div></div>
 }
 function PanelTitle({ title, subtitle, action }: { title: string; subtitle: string; action?: React.ReactNode }) { return <div className="panel-title"><div><h2>{title}</h2>{subtitle&&<p>{subtitle}</p>}</div>{action}</div> }
 function Quick({ icon: Icon, label, detail, onClick }: { icon: typeof CalendarDays; label: string; detail: string; onClick: () => void }) { return <button className="quick-action" onClick={onClick}><span><Icon size={19} /></span><div><strong>{label}</strong><small>{detail}</small></div><ArrowRight size={17} /></button> }

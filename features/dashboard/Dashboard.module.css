@@ -1,23 +1,11 @@
-.dashboard{display:grid;gap:var(--space-6)}
-.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-4)}
-.metrics :global(.metric-card){min-height:10.5rem;padding:var(--space-5);background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--radius-card);box-shadow:var(--shadow-sm);transition:transform var(--duration-fast) var(--ease-standard),box-shadow var(--duration-fast) var(--ease-standard)}
-.metrics :global(.metric-card:hover){transform:translateY(-1px);box-shadow:var(--shadow-md)}
-.heroPanel{overflow:hidden;background:linear-gradient(145deg,var(--surface-card),color-mix(in srgb,var(--surface-accent) 9%,var(--surface-card)));border:1px solid color-mix(in srgb,var(--surface-accent) 24%,var(--border-subtle));border-radius:var(--radius-panel);box-shadow:var(--shadow-sm)}
-.heroPanel :global(.panel-title){padding:var(--space-6) var(--space-6) var(--space-4)}
-.heroPanel :global(.live-board-list){border-top:1px solid var(--border-subtle)}
-.heroPanel :global(.live-board-row){padding-inline:var(--space-6)}
-.contentGrid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(20rem,.8fr);gap:var(--space-6);align-items:start}
-.panel{background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--radius-panel);box-shadow:var(--shadow-sm);overflow:hidden}
-.panel :global(.panel-title){padding:var(--space-6) var(--space-6) var(--space-4)}
-.panel :global(.timeline),.panel :global(.attention-item){border-top:1px solid var(--border-subtle)}
-.attention :global(.attention-item){width:100%;padding:var(--space-4) var(--space-6);text-align:left;transition:background var(--duration-fast) var(--ease-standard)}
-.summary{background:var(--surface-inverse);color:var(--text-inverse);border:0;border-radius:var(--radius-panel);overflow:hidden}
-.summary :global(.panel-title){padding:var(--space-6) var(--space-6) var(--space-4)}
-.summary :global(.panel-title h2),.summary :global(.panel-title p){color:inherit}
-.summary :global(.operational-summary-grid){padding:0 var(--space-6) var(--space-6)}
-.quickPanel{background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--radius-panel);padding:var(--space-6);box-shadow:var(--shadow-sm)}
-.quickPanel :global(.panel-title){margin-block-end:var(--space-4)}
-.quickPanel :global(.quick-grid){gap:var(--space-3)}
-.quickPanel :global(.quick-action){border:1px solid var(--border-subtle);border-radius:var(--radius-card);background:var(--surface-card);padding:var(--space-4)}
+.dashboard{display:grid;gap:var(--space-5)}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-3)}
+.metrics :global(.metric-card){display:grid;align-content:start;gap:var(--space-2);min-height:9rem;padding:var(--space-4);border:0;border-radius:var(--radius-card);box-shadow:none;color:#000;transition:transform var(--duration-fast) var(--ease-standard)}
+.metrics :global(.metric-card:nth-child(1)){background:#f47add}.metrics :global(.metric-card:nth-child(2)){background:#feb34a}.metrics :global(.metric-card:nth-child(3)){background:#4e4ced}.metrics :global(.metric-card:nth-child(4)){background:#dfee4b}
+.metrics :global(.metric-card:hover){transform:translateY(-1px);box-shadow:none}.metrics :global(.metric-icon){width:2rem;height:2rem;background:transparent;color:#000}.metrics :global(.metric-label),.metrics :global(.metric-card small),.metrics :global(.metric-trend){color:#000}.metrics :global(.metric-card strong){font-family:var(--font-display);font-size:clamp(2rem,5vw,3rem);line-height:.95}.metrics :global(.metric-trend){margin-top:auto}.metrics :global(.metric-status-dot){width:.55rem;height:.55rem;border:2px solid #000;border-radius:50%}
+.heroPanel,.panel,.quickPanel{overflow:hidden;background:#fff4c4;border:2px solid #000;border-radius:var(--radius-panel);box-shadow:none}.heroPanel :global(.panel-title),.panel :global(.panel-title){padding:var(--space-5) var(--space-5) var(--space-3)}.heroPanel :global(.live-board-list){border-top:2px solid #000}.heroPanel :global(.live-board-row){padding-inline:var(--space-5)}
+.contentGrid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(20rem,.8fr);gap:var(--space-4);align-items:start}.panel :global(.timeline),.panel :global(.attention-item){border-top:1px solid rgba(0,0,0,.22)}.attention :global(.attention-item){width:100%;margin:0;padding:var(--space-4) var(--space-5);text-align:left;background:transparent;border-radius:0}.attention :global(.attention-icon){background:transparent;color:#000}
+.summary{background:#000;color:#fff4c4;border:0;border-radius:var(--radius-panel);overflow:hidden}.summary :global(.panel-title){padding:var(--space-5) var(--space-5) var(--space-3)}.summary :global(.panel-title h2),.summary :global(.panel-title p){color:inherit}.summary :global(.operational-summary-grid){padding:0 var(--space-5) var(--space-5);background:transparent;border:0;gap:var(--space-2)}.summary :global(.operational-summary-grid>div){background:transparent;color:inherit;padding:var(--space-3);border:1px solid #fff4c4;border-radius:var(--radius-card)}.summary :global(.operational-summary-grid span),.summary :global(.operational-summary-grid small){color:inherit}
+.quickPanel{padding:var(--space-5)}.quickPanel :global(.panel-title){margin-block-end:var(--space-3)}.quickPanel :global(.quick-grid){gap:var(--space-2);padding:0}.quickPanel :global(.quick-action){border:2px solid #000;border-radius:var(--radius-pill);background:transparent;padding:var(--space-3)}.quickPanel :global(.quick-action>span){background:transparent}
 @media(max-width:1100px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.contentGrid{grid-template-columns:1fr}}
-@media(max-width:640px){.dashboard{gap:var(--space-4)}.metrics{grid-template-columns:1fr}.metrics :global(.metric-card){min-height:auto}.heroPanel :global(.panel-title),.panel :global(.panel-title),.summary :global(.panel-title){padding:var(--space-5) var(--space-4) var(--space-3)}.heroPanel :global(.live-board-row),.attention :global(.attention-item){padding-inline:var(--space-4)}.quickPanel{padding:var(--space-4)}}
+@media(max-width:640px){.dashboard{gap:var(--space-4)}.metrics{grid-template-columns:1fr 1fr}.metrics :global(.metric-card){min-height:8rem}.heroPanel :global(.panel-title),.panel :global(.panel-title),.summary :global(.panel-title){padding:var(--space-4)}.heroPanel :global(.live-board-row),.attention :global(.attention-item){padding-inline:var(--space-4)}.quickPanel{padding:var(--space-4)}}

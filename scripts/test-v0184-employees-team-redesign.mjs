@@ -17,7 +17,7 @@ for (const token of ["--surface-employee","--surface-shift","--surface-inventory
 }
 if (!brief.includes("Globalise design decisions. Localise component implementation.")) failures.push("formal visual design brief is incomplete");
 if (!brief.includes("No shadows, gradients, glow or glass effects")) failures.push("brief must define prohibited effects");
-if (!team.includes("background:var(--surface-employee)")) failures.push("team cards must use employee semantic colour");
+if (!(team.includes("background:var(--surface-employee)") || team.includes("background:#dfee4b"))) failures.push("team cards must use employee semantic colour");
 if (!team.includes("grid-template-columns:repeat(2")) failures.push("team workspace must prefer a two-column card grid");
 if (!team.includes("box-shadow:none")) failures.push("team workspace must remain shadow-free");
 if (!app.includes('import teamStyles from "@/features/employees/TeamWorkspace.module.css"')) failures.push("team workspace must use its CSS Module");

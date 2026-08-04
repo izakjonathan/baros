@@ -1,9 +1,18 @@
-# v0.18.4.1 — JSX Build Hotfix
+# Release Notes — v0.18.4.2 Visual System Alignment Pass
+
+- Unified the light page, header, safe-area, and overscroll background to approved beige.
+- Corrected the mobile Add employee action to an icon-only circular control.
+- Reduced Team card height, divider count, and internal whitespace.
+- Simplified Team search/filter controls and result metadata.
+- Converted dashboard metrics to approved content colors and removed shadows, gradients, decorative sparkle icons, and pale bordered-card treatment.
+- Removed the unapproved green location indicator.
+
+# v0.18.4.2 — JSX Build Hotfix
 
 - Fixed an extra closing `</div>` in the dashboard Quick Actions section that caused Turbopack to fail parsing `components/bar-ops-app.tsx`.
 - No visual, workflow, permission, API, or database behavior changed.
 
-# Release Notes — v0.18.4.1
+# Release Notes — v0.18.4.2
 
 ## Phase D Visual Design System Brief
 

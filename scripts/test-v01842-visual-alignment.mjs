@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+const read=(p)=>fs.readFileSync(p,'utf8');
+const pkg=JSON.parse(read('package.json'));
+const team=read('features/employees/TeamWorkspace.module.css');
+const dash=read('features/dashboard/Dashboard.module.css');
+const layout=read('app/layout.tsx');
+const manifest=read('app/manifest.ts');
+const globals=read('app/globals.css');
+const fail=(m)=>{console.error(`v0.18.4.2 ERROR: ${m}`);process.exit(1)};
+if(pkg.version!=='0.18.4.2')fail('package version mismatch');
+if(!team.includes('background:#dfee4b')||!team.includes('@media(max-width:600px)'))fail('Team alignment missing');
+if(!dash.includes('background:#f47add')||!dash.includes('background:#feb34a')||!dash.includes('background:#4e4ced'))fail('Dashboard content colors missing');
+if(!layout.includes('themeColor: "#fff4c4"')||!manifest.includes('background_color: "#fff4c4"'))fail('safe-area colors missing');
+if(!globals.includes('html,body,.app-frame,.main-shell,.page-wrap{background:#fff4c4}'))fail('page background alignment missing');
+console.log('v0.18.4.2 visual alignment checks passed.');
