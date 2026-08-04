@@ -1,29 +1,29 @@
-# Implementation Status
+# Bar Ops Implementation Status — v0.16.21
 
-## Current release
+## Baseline
 
-Bar Ops v0.16.19 — Production Hardening XIX & XX
+Built from approved v0.16.19 — Production Hardening XIX & XX.
 
-## v0.16.18 — API Boundary Completion
+## v0.16.20 — Release Metadata Consolidation
 
-- Replaced the remaining direct `Request.json()` calls in attendance alerts, schedule templates and security actions with the shared bounded JSON parser.
-- Added explicit request-size, media-type, UTF-8 and JSON-object enforcement to those routes.
-- Added bounded UUID, string, enum and object-array validation before database access.
-- Added organization-location validation to schedule-template creation.
-- Preserved request IDs and no-store error handling through the shared API error response.
+- Removed duplicated and stale current-release text from README.md.
+- Consolidated the rollback checkpoint on v0.16.17.
+- Aligned package and release documentation on v0.16.21.
+- Preserved all operational setup and health-check guidance.
 
-## v0.16.19 — Type-Safety Stabilization
+## v0.16.21 — Final Stabilization Gate
 
-- Removed transaction `as any` casts from the hardened order and payroll routes.
-- Replaced untyped payroll transaction rows with record-shaped rows.
-- Added a shared SQL row contract for organization-scope guards.
-- Added focused regression gates for remaining unbounded parsers and transaction type escapes.
+- Added `npm run audit:preflight`.
+- Added the preflight to GitHub Actions before the existing quality gates.
+- Checks source packages for generated directories, local environment files and forbidden deployment files.
+- Verifies Node 24 and exact direct dependency versions.
+- Verifies bounded API request parsing and prevents transaction `any` escapes.
+- Runs release-contract and final hardening regressions as one checkpoint.
 
-## Baseline and compatibility
+## Compatibility
 
-- Baseline: approved v0.16.17
-- Database migration: none
-- Permissions: unchanged
-- Business workflows: unchanged
-- Service worker: preserved
-- Rollback checkpoint: v0.16.17
+- No database migration.
+- No API route removal.
+- No role or permission change.
+- No business-feature change.
+- `public/sw.js` remains included.

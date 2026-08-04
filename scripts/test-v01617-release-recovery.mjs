@@ -6,7 +6,7 @@ const parts=pkg.version.split(".").map(Number);
 if(parts.length!==3 || parts[0]!==0 || parts[1]!==16 || parts[2]<17) throw new Error("package version predates v0.16.17");
 if(!pkg.scripts["validate:release"]) throw new Error("release validation script missing");
 if(!quality.includes("npm run validate:release")) throw new Error("CI release gate missing");
-if(!readme.includes("Rollback checkpoint")||!readme.includes("v0.16.15.1")) throw new Error("rollback checkpoint is not documented");
+if(!readme.includes("Rollback checkpoint")||!readme.includes("v0.16.17")) throw new Error("approved rollback checkpoint is not documented");
 for(const forbidden of ["vercel.json","public/offline.html"]) if(fs.existsSync(forbidden)) throw new Error(`${forbidden} must be absent`);
 if(!fs.existsSync("public/sw.js")) throw new Error("public/sw.js must be present");
 console.log("v0.16.17 release and recovery guardrail checks passed");

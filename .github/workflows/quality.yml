@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
+      - name: Run final stabilization preflight
+        run: npm run audit:preflight
+
       - name: Validate release contract
         run: npm run validate:release
 

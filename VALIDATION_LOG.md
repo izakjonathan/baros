@@ -1,25 +1,21 @@
-# Validation Log — Bar Ops v0.16.19
+# Validation Log — v0.16.21
 
 ## Executed
 
 - `node scripts/test-v01618-api-boundary-completion.mjs`
 - `node scripts/test-v01619-type-safety-stabilization.mjs`
-- `node scripts/test-v01614-tenant-scope.mjs`
-- `node scripts/test-v01615-transaction-integrity.mjs`
-- `node scripts/test-v01616-observability.mjs`
-- `node scripts/test-v01617-release-recovery.mjs`
+- `node scripts/test-v01620-release-metadata.mjs`
+- `node scripts/test-v01621-final-stabilization.mjs`
 - `node scripts/validate-release.mjs`
-- JavaScript syntax checks for new regression scripts
-- Source checks for `public/sw.js`, `public/offline.html` and `vercel.json`
-- Release ZIP integrity check
+- `npm run audit:preflight`
+- JavaScript syntax checks for new scripts
+- Service-worker and forbidden-file checks
+- ZIP integrity check
 
-## Not executed here
+## Dependency limitation
 
-- Clean dependency installation (attempted; internal npm mirror returned 404 for `@types/node@22.10.2`)
-- ESLint
-- TypeScript compiler
-- Complete Next.js production build
-- Live database workflow testing
-- Vercel deployment
+A clean lockfile generation/install was attempted with `npm install --package-lock-only --ignore-scripts`, but the available internal npm registry returned 404 for `@types/node@22.10.2`. Therefore ESLint, TypeScript compilation and the complete Next.js production build were not executed locally. GitHub Actions/Vercel must run those dependency-based gates.
 
-These dependency- and infrastructure-based gates remain configured for GitHub Actions and Vercel.
+## Result
+
+Focused source-level and release-contract validation passed. No database migration was introduced.

@@ -1,4 +1,6 @@
-# iPad-only Neon and Vercel setup for `baros`
+# Bar Ops v0.16.21 — iPad, Neon and Vercel Setup
+
+iPad-only Neon and Vercel setup for `baros`
 
 This project is designed to support the following workflow without a desktop computer:
 
