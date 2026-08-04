@@ -57,9 +57,61 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const body = await readJsonObject(request);
+    if (body.action === "REMIND_OUTSTANDING") {
+      const user = await requireUser(["OWNER", "ADMIN", "MANAGER", "SHIFT_MANAGER"]);
+      const publicationId = uuid(body.publicationId, "publicationId");
+      const result = await db().begin(async (sql) => {
+        const publications = await sql<Array<{ id: string; location_id: string; week_start: string; version: number }>>`
+          select id,location_id,week_start,version
+          from schedule_publications
+          where id=${publicationId} and organization_id=${user.organizationId}
+          for update
+        `;
+        const publication = publications[0];
+        if (!publication) throw new ApiError(404, "Schedule publication not found");
+        const rows = await sql<Array<{ employee_id: string }>>`
+          with relevant_employees as (
+            select distinct s.employee_id
+            from shifts s
+            where s.organization_id=${user.organizationId}
+              and s.location_id=${publication.location_id}
+              and s.starts_at>=${publication.week_start}::date
+              and s.starts_at<${publication.week_start}::date + interval '7 days'
+              and s.status in ('PUBLISHED','CONFIRMED')
+              and s.employee_id is not null
+            union
+            select c.employee_id
+            from schedule_publication_changes c
+            where c.publication_id=${publicationId}
+          ), outstanding as (
+            select e.id employee_id,e.user_id
+            from relevant_employees r
+            join employees e on e.id=r.employee_id and e.organization_id=${user.organizationId} and e.active and e.user_id is not null
+            left join schedule_acknowledgements a on a.publication_id=${publicationId} and a.employee_id=e.id
+            where a.employee_id is null
+          )
+          insert into notifications(organization_id,user_id,actor_user_id,type,title,body,href)
+          select ${user.organizationId},o.user_id,${user.userId},'SCHEDULE_ACKNOWLEDGEMENT_REMINDER','Schedule acknowledgement needed',${`Please review and acknowledge schedule version ${publication.version}.`},'/employee/shifts'
+          from outstanding o
+          where not exists (
+            select 1 from notifications n
+            where n.organization_id=${user.organizationId}
+              and n.user_id=o.user_id
+              and n.type='SCHEDULE_ACKNOWLEDGEMENT_REMINDER'
+              and n.href='/employee/shifts'
+              and n.created_at>now()-interval '15 minutes'
+          )
+          returning user_id as employee_id
+        `;
+        await sql`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,after_data) values(${user.organizationId},${publication.location_id},${user.userId},'SCHEDULE_ACKNOWLEDGEMENT_REMINDERS_SENT','schedule_publication',${publicationId},${JSON.stringify({sent:rows.length})}::jsonb)`;
+        return { sent: rows.length };
+      });
+      return NextResponse.json({ ok: true, sent: result.sent });
+    }
+
     const user = await requireUser();
     if (!user.employeeId) throw new ApiError(400, "A linked employee profile is required");
-    const body = await readJsonObject(request);
     const publicationId = uuid(body.publicationId, "publicationId");
     const result = await db().begin(async (sql) => {
       const publications = await sql<Array<{ id: string; location_id: string; week_start: string }>>`

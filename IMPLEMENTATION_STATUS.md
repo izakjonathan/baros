@@ -1,3 +1,3 @@
-## v0.12.3 weekly availability type fix
+## v0.13.0 schedule acknowledgement reminders
 
-Recurring weekly availability values are narrowed and normalized before PostgreSQL insertion. No migration is required.
+Managers can remind only employees with outstanding publication acknowledgements. No migration required.

@@ -12,7 +12,7 @@ import { DevRoleSwitcher } from "@/components/dev-role-switcher";
 import { RequestsWorkspace } from "@/components/requests-workspace";
 
 const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = [
-  { id: "dashboard", label: "Overview", icon: LayoutDashboard },
+  { id: "dashboard", label: "Today’s operations", icon: LayoutDashboard },
   { id: "schedule", label: "Shift plan", icon: CalendarDays },
   { id: "attendance", label: "Time & attendance", icon: Timer },
   { id: "inventory", label: "Inventory", icon: Package },
@@ -164,7 +164,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       <main className="main-shell">
         <Topbar onMenu={() => setMobileNav(true)} locations={locations} selectedLocationId={selectedLocationId} onLocationChange={setSelectedLocationId} onNavigate={setActive} />
         <div className="page-wrap">
-          {active === "dashboard" && <Dashboard shifts={shifts} products={products} onNavigate={setActive} />}
+          {active === "dashboard" && <Dashboard shifts={shifts} products={products} employees={employees} timeEntries={timeEntries} tasks={opsTasks} devMode={devMode} onNavigate={setActive} />}
           {active === "schedule" && <Schedule shifts={shifts} setShifts={setShifts} employees={employees} onNewShift={openShiftDialog} onEditShift={setEditingShift} notify={notify} currentWeekOffset={currentWeekOffset} setCurrentWeekOffset={setCurrentWeekOffset} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
           {active === "attendance" && <Attendance employees={employees} shifts={shifts} entries={timeEntries} setEntries={setTimeEntries} notify={notify} onEdit={setEditingTimeEntry} />}
           {active === "inventory" && <Inventory products={products} setProducts={setProducts} onNewProduct={() => setDialog("product")} onEditProduct={setEditingProduct} onStockCount={() => setDialog("stockCount")} adjustments={stockAdjustments} setAdjustments={setStockAdjustments} notify={notify} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
@@ -296,34 +296,83 @@ function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; ti
   return <div className="page-header"><div>{eyebrow && <p className="eyebrow">{eyebrow}</p>}<h1>{title}</h1>{subtitle&&<p>{subtitle}</p>}</div>{action}</div>
 }
 
-function Dashboard({ shifts, products, onNavigate }: { shifts: Shift[]; products: Product[]; onNavigate: (id: NavKey) => void }) {
+function Dashboard({ shifts, products, employees, timeEntries, tasks, devMode, onNavigate }: { shifts: Shift[]; products: Product[]; employees: Employee[]; timeEntries: TimeEntry[]; tasks: OpsTask[]; devMode: boolean; onNavigate: (id: NavKey) => void }) {
+  const [pendingRequests, setPendingRequests] = useState(0);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const today = toIsoDate(new Date());
+  const todaysShifts = shifts.filter((shift) => canonicalShiftDate(shift) === today);
+  const assignedToday = todaysShifts.filter((shift) => !shift.isOpen);
+  const openToday = todaysShifts.filter((shift) => shift.isOpen);
+  const runningEntries = timeEntries.filter((entry) => entry.status === "Running");
   const lowStock = products.filter((product) => product.stock < product.par);
-  const draftCount = shifts.filter((shift) => shift.status === "Draft").length;
+  const incompleteTasks = tasks.filter((task) => !task.done);
+  const conflicts = conflictIds(todaysShifts);
+  const availabilityConflicts = todaysShifts.filter((shift) => shift.availabilityConflict).length;
+  const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+  const late = assignedToday.filter((shift) => {
+    const [hours, minutes] = shift.start.split(":").map(Number);
+    const hasClockedIn = runningEntries.some((entry) => entry.employee === shift.employee && entry.date === today);
+    return hours * 60 + minutes + 10 < nowMinutes && !hasClockedIn;
+  });
+  const upcoming = assignedToday.filter((shift) => {
+    const [hours, minutes] = shift.start.split(":").map(Number);
+    return hours * 60 + minutes >= nowMinutes;
+  }).sort((a,b) => a.start.localeCompare(b.start));
+
+  useEffect(() => {
+    let cancelled = false;
+    async function refresh() {
+      if (!devMode) {
+        try {
+          const response = await fetch("/api/requests", { cache: "no-store" });
+          const data = await response.json().catch(() => ({}));
+          if (response.ok && !cancelled) {
+            const groups = [data.requests, data.claims, data.transfers];
+            setPendingRequests(groups.reduce((sum, group) => sum + (Array.isArray(group) ? group.length : 0), 0));
+          }
+        } catch {}
+      }
+      if (!cancelled) setLastUpdated(new Date());
+    }
+    void refresh();
+    const interval = window.setInterval(refresh, 30000);
+    const onVisible = () => { if (document.visibilityState === "visible") void refresh(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => { cancelled = true; window.clearInterval(interval); document.removeEventListener("visibilitychange", onVisible); };
+  }, [devMode]);
+
+  const timeline = [...todaysShifts].sort((a,b) => a.start.localeCompare(b.start));
+  const attentionTotal = openToday.length + late.length + lowStock.length + pendingRequests + conflicts.size + availabilityConflicts;
   return <>
-    <PageHeader eyebrow={new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})} title="Overview" subtitle="Here’s what needs your attention across the bar." />
-    <section className="metric-grid">
-      <Metric icon={Users} label="On shift today" value="3 people" detail="Next shift starts at 17:00" trend="Fully covered" />
-      <Metric icon={Clock3} label="Scheduled this week" value="139 hours" detail="Across 14 shifts" trend="8% vs last week" />
-      <Metric icon={CircleDollarSign} label="Estimated labour" value="22,480 kr." detail="16.2% of forecast sales" trend="On target" />
-      <Metric icon={AlertTriangle} label="Needs attention" value={`${lowStock.length + draftCount} items`} detail={`${lowStock.length} low stock · ${draftCount} draft shifts`} trend="Review now" warning />
+    <PageHeader eyebrow={new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})} title="Today’s operations" subtitle={`Live overview for the current location · updated ${lastUpdated.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}`} />
+    <section className="metric-grid daily-metrics">
+      <Metric icon={Users} label="Clocked in" value={`${runningEntries.length}`} detail={`${assignedToday.length} assigned today`} trend={runningEntries.length ? "Live now" : "No active clocks"} />
+      <Metric icon={Clock3} label="Expected next" value={upcoming[0]?.start || "—"} detail={upcoming[0]?.employee || "No more arrivals"} trend={`${upcoming.length} upcoming`} />
+      <Metric icon={ClipboardList} label="Pending requests" value={`${pendingRequests}`} detail="Leave, claims and transfers" trend={pendingRequests ? "Review queue" : "All clear"} warning={pendingRequests > 0} />
+      <Metric icon={AlertTriangle} label="Needs attention" value={`${attentionTotal}`} detail={`${late.length} late · ${openToday.length} open · ${lowStock.length} low stock`} trend={attentionTotal ? "Review now" : "All clear"} warning={attentionTotal > 0} />
     </section>
-    <div className="dashboard-grid">
-      <section className="panel today-panel"><PanelTitle title="Today at the bar" subtitle={new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})} action={<button className="text-button" onClick={() => onNavigate("schedule")}>View shift plan <ArrowRight size={15} /></button>} />
+    <div className="dashboard-grid daily-dashboard-grid">
+      <section className="panel today-panel"><PanelTitle title="Today’s timeline" subtitle={`${assignedToday.length} assigned · ${openToday.length} open`} action={<button className="text-button" onClick={() => onNavigate("schedule")}>Open shift plan <ArrowRight size={15} /></button>} />
         <div className="timeline">
-          {[{ time: "15:00", title: "Maya Chen", role: "Manager", initials: "MC", end: "00:00" }, { time: "17:00", title: "Jonas Berg", role: "Bartender", initials: "JB", end: "03:00" }, { time: "19:00", title: "Sofia Lund", role: "Floor · confirmation pending", initials: "SL", end: "02:00", pending: true }].map((item) => <div className="timeline-row" key={item.title}><time>{item.time}</time><div className={`avatar ${item.pending ? "sand" : ""}`}>{item.initials}</div><div className="grow"><strong>{item.title}</strong><span>{item.role}</span></div><span className="shift-time">{item.time}–{item.end}</span><button className="more"><MoreHorizontal size={19} /></button></div>)}
+          {timeline.length === 0 && <div className="daily-empty">No shifts scheduled today.</div>}
+          {timeline.map((shift) => <button type="button" className="timeline-row timeline-action" key={shift.id} onClick={() => onNavigate("schedule")}><time>{shift.start}</time><div className={`avatar ${shift.isOpen ? "sand" : ""}`}>{shift.isOpen ? "+" : shift.initials}</div><div className="grow"><strong>{shift.employee}</strong><span>{shift.role}{shift.availabilityConflict ? " · availability conflict" : ""}</span></div><span className="shift-time">{shift.start}–{shift.end}</span><ChevronRight size={18}/></button>)}
         </div>
       </section>
-      <section className="panel attention-panel"><PanelTitle title="Attention needed" subtitle="Prioritised for you" />
-        <button className="attention-item" onClick={() => onNavigate("inventory")}><span className="attention-icon amber"><Boxes size={19} /></span><div><strong>{lowStock.length} products below par</strong><small>Pilsner, house red and more</small></div><ChevronRight size={18} /></button>
-        <button className="attention-item" onClick={() => onNavigate("schedule")}><span className="attention-icon violet"><CalendarDays size={19} /></span><div><strong>{draftCount} unpublished shifts</strong><small>Complete and publish this week</small></div><ChevronRight size={18} /></button>
-        <button className="attention-item" onClick={() => onNavigate("requests")}><span className="attention-icon violet"><ClipboardList size={19} /></span><div><strong>Employee requests</strong><small>Review leave, open shifts and shift changes</small></div><ChevronRight size={18} /></button><button className="attention-item" onClick={() => onNavigate("orders")}><span className="attention-icon blue"><Truck size={19} /></span><div><strong>Delivery tomorrow</strong><small>Nordic Drinks · 4 items</small></div><ChevronRight size={18} /></button>
+      <section className="panel attention-panel"><PanelTitle title="Attention needed" subtitle="Prioritised operational actions" />
+        <button className="attention-item" onClick={() => onNavigate("attendance")}><span className="attention-icon amber"><Timer size={19} /></span><div><strong>{late.length} employees late</strong><small>{runningEntries.length} currently clocked in</small></div><ChevronRight size={18} /></button>
+        <button className="attention-item" onClick={() => onNavigate("requests")}><span className="attention-icon violet"><ClipboardList size={19} /></span><div><strong>{pendingRequests} pending requests</strong><small>Leave, open shifts and transfers</small></div><ChevronRight size={18} /></button>
+        <button className="attention-item" onClick={() => onNavigate("schedule")}><span className="attention-icon violet"><CalendarDays size={19} /></span><div><strong>{openToday.length + conflicts.size + availabilityConflicts} schedule issues</strong><small>{openToday.length} open shifts · {conflicts.size + availabilityConflicts} conflicts</small></div><ChevronRight size={18} /></button>
+        <button className="attention-item" onClick={() => onNavigate("inventory")}><span className="attention-icon amber"><Boxes size={19} /></span><div><strong>{lowStock.length} products below par</strong><small>Review stock and suggested orders</small></div><ChevronRight size={18} /></button>
+        <button className="attention-item" onClick={() => onNavigate("operations")}><span className="attention-icon blue"><CheckCircle2 size={19} /></span><div><strong>{incompleteTasks.length} operations tasks open</strong><small>Opening, closing and maintenance</small></div><ChevronRight size={18} /></button>
       </section>
     </div>
-    <section className="panel quick-panel"><PanelTitle title="Quick actions" subtitle="Common management tasks" /><div className="quick-grid">
-      <Quick icon={CalendarDays} label="Open shift plan" detail="Create and publish shifts" onClick={() => onNavigate("schedule")} />
-      <Quick icon={ClipboardList} label="Start stock count" detail="Update inventory levels" onClick={() => onNavigate("inventory")} />
-      <Quick icon={ShoppingCart} label="Create order" detail="Build a purchase order" onClick={() => onNavigate("orders")} />
-      <Quick icon={ClipboardList} label="Review requests" detail="Approve employee self-service requests" onClick={() => onNavigate("requests")} /><Quick icon={UserRoundPlus} label="Invite employee" detail="Add someone to the team" onClick={() => onNavigate("team")} />
+    <section className="panel quick-panel"><PanelTitle title="Quick actions" subtitle="Jump directly into today’s work" /><div className="quick-grid">
+      <Quick icon={Plus} label="Create shift" detail="Add or assign today’s coverage" onClick={() => onNavigate("schedule")} />
+      <Quick icon={ClipboardList} label="Review requests" detail="Approve employee requests" onClick={() => onNavigate("requests")} />
+      <Quick icon={Timer} label="Time & attendance" detail="Review clocks and exceptions" onClick={() => onNavigate("attendance")} />
+      <Quick icon={Boxes} label="Start stock count" detail="Update inventory levels" onClick={() => onNavigate("inventory")} />
+      <Quick icon={Truck} label="Receive delivery" detail="Open purchase orders" onClick={() => onNavigate("orders")} />
+      <Quick icon={NotebookPen} label="Daily operations" detail="Complete opening and closing tasks" onClick={() => onNavigate("operations")} />
     </div></section>
   </>
 }
@@ -344,6 +393,8 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
   const [showConflictsOnly, setShowConflictsOnly] = useState(false);
   const [acknowledgements, setAcknowledgements] = useState<ScheduleAcknowledgementSummary>({ publication: null, employees: [] });
   const [acknowledgementsOpen, setAcknowledgementsOpen] = useState(false);
+  const [remindingAcknowledgements, setRemindingAcknowledgements] = useState(false);
+  const [acknowledgementMessage, setAcknowledgementMessage] = useState("");
   const weekMonday = new Date(BASE_MONDAY); weekMonday.setDate(BASE_MONDAY.getDate() + currentWeekOffset * 7);
   const monthAnchor = new Date(BASE_MONDAY.getFullYear(), BASE_MONDAY.getMonth() + monthOffset, 1, 12);
   const periodStart = viewMode === "week" ? weekMonday : viewMode === "month" ? new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), 1, 12) : new Date(`${customFrom}T12:00:00`);
@@ -375,6 +426,22 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
     } catch { setAcknowledgements({ publication: null, employees: [] }); }
   }
   useEffect(() => { void loadAcknowledgements(); }, [viewMode, selectedLocationId, startIso, devMode]);
+  async function remindOutstandingAcknowledgements() {
+    if (remindingAcknowledgements || !acknowledgements.publication) return;
+    setRemindingAcknowledgements(true);
+    setAcknowledgementMessage("");
+    try {
+      const response = await fetch("/api/schedule-acknowledgements", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "REMIND_OUTSTANDING", publicationId: acknowledgements.publication.id }) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Could not send reminders");
+      const sent = Number(data?.sent || 0);
+      setAcknowledgementMessage(sent ? `Reminder${sent === 1 ? "" : "s"} sent to ${sent} employee${sent === 1 ? "" : "s"}.` : "No new reminders were sent. Employees may already have been reminded recently.");
+    } catch (error) {
+      setAcknowledgementMessage(error instanceof Error ? error.message : "Could not send reminders");
+    } finally {
+      setRemindingAcknowledgements(false);
+    }
+  }
   function movePeriod(direction: number) { if (viewMode === "week") setCurrentWeekOffset((week) => week + direction); else if(viewMode === "month") setMonthOffset((month) => month + direction); else { const days=Math.max(1,dateSerial(customTo)-dateSerial(customFrom)+1); setCustomFrom(dateFromSerial(dateSerial(customFrom)+direction*days)); setCustomTo(dateFromSerial(dateSerial(customTo)+direction*days)); } }
   async function publish() {
     if (!drafts) { notify("This period is already published"); return; }
@@ -434,7 +501,7 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
     </div></section>
     {showConflictsOnly && !displayedShifts.length ? <div className="empty-state"><AlertTriangle size={20}/><strong>No conflicts in this period</strong><span>Show all shifts to continue editing the schedule.</span></div> : null}
     <div className="legend compact-legend"><span><i className="manager"/> Manager</span><span><i className="bartender"/> Bartender</span><span><i className="floor"/> Floor</span><span><i className="draft"/> Draft</span></div>
-    {acknowledgementsOpen&&<div className="modal-layer"><button type="button" className="modal-scrim" onClick={()=>setAcknowledgementsOpen(false)} aria-label="Close acknowledgement status"/><section className="modal acknowledgement-modal" role="dialog" aria-modal="true" aria-labelledby="acknowledgement-title"><div className="modal-head"><div><h2 id="acknowledgement-title">Schedule acknowledgements</h2><p>Version {acknowledgements.publication?.version} · {weekLabel}</p></div><button type="button" className="icon-button" onClick={()=>setAcknowledgementsOpen(false)} aria-label="Close"><X size={18}/></button></div><div className="acknowledgement-list">{acknowledgements.employees.map(employee=><div key={employee.id}><span className={`status-dot ${employee.acknowledgedAt?"is-complete":""}`}/><div><strong>{employee.name}</strong><small>{employee.acknowledgedAt?`Acknowledged ${new Date(employee.acknowledgedAt).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}`:"Awaiting acknowledgement"}{employee.changeTypes?.length?` · ${employee.changeTypes.map((type)=>type.replaceAll("_"," ").toLowerCase()).join(", ")}`:""}</small></div></div>)}{!acknowledgements.employees.length&&<div className="empty-state"><CheckCheck size={20}/><strong>No assigned employees</strong><span>This publication has no employee acknowledgements to collect.</span></div>}</div><div className="modal-actions"><button type="button" className="secondary" onClick={()=>void loadAcknowledgements()}>Refresh</button><button type="button" className="primary" onClick={()=>setAcknowledgementsOpen(false)}>Done</button></div></section></div>}
+    {acknowledgementsOpen&&<div className="modal-layer"><button type="button" className="modal-scrim" onClick={()=>setAcknowledgementsOpen(false)} aria-label="Close acknowledgement status"/><section className="modal acknowledgement-modal" role="dialog" aria-modal="true" aria-labelledby="acknowledgement-title"><div className="modal-head"><div><h2 id="acknowledgement-title">Schedule acknowledgements</h2><p>Version {acknowledgements.publication?.version} · {weekLabel}</p></div><button type="button" className="icon-button" onClick={()=>setAcknowledgementsOpen(false)} aria-label="Close"><X size={18}/></button></div><div className="acknowledgement-list">{acknowledgements.employees.map(employee=><div key={employee.id}><span className={`status-dot ${employee.acknowledgedAt?"is-complete":""}`}/><div><strong>{employee.name}</strong><small>{employee.acknowledgedAt?`Acknowledged ${new Date(employee.acknowledgedAt).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}`:"Awaiting acknowledgement"}{employee.changeTypes?.length?` · ${employee.changeTypes.map((type)=>type.replaceAll("_"," ").toLowerCase()).join(", ")}`:""}</small></div></div>)}{!acknowledgements.employees.length&&<div className="empty-state"><CheckCheck size={20}/><strong>No assigned employees</strong><span>This publication has no employee acknowledgements to collect.</span></div>}</div>{acknowledgementMessage?<p className="form-message" role="status">{acknowledgementMessage}</p>:null}<div className="modal-actions"><button type="button" className="secondary" onClick={()=>void loadAcknowledgements()}>Refresh</button><button type="button" className="secondary" disabled={remindingAcknowledgements || acknowledgedCount===acknowledgements.employees.length} onClick={()=>void remindOutstandingAcknowledgements()}>{remindingAcknowledgements?"Sending…":"Remind outstanding"}</button><button type="button" className="primary" onClick={()=>setAcknowledgementsOpen(false)}>Done</button></div></section></div>}
   </>
 }
 function ShiftCard({ shift, conflict, onOpen, onDragStart }: { shift: Shift; conflict?: boolean; onOpen: () => void; onDragStart?: (event: React.DragEvent<HTMLButtonElement>) => void }) { const overnight = isOvernight(shift.start, shift.end); return <button type="button" draggable onDragStart={onDragStart} className={`shift-card shift-card-button role-${shift.role.toLowerCase()} ${shift.status === "Draft" ? "is-draft" : ""} ${conflict ? "has-conflict" : ""}`} onClick={onOpen} aria-label={`Open ${shift.isOpen ? "available" : shift.employee} shift ${shift.start} to ${shift.end}${overnight ? " next day" : ""}`}><div className="shift-card-top"><span>{shift.start}–{shift.end}{overnight ? " +1" : ""}</span><ChevronRight size={14} /></div><strong>{shift.isOpen ? "Available shift" : shift.employee}</strong><small>{shift.role}{overnight ? " · Overnight" : ""}{shift.recurrenceLabel ? ` · ${shift.recurrenceLabel}` : ""}</small>{shift.isOpen && <em>Open</em>}{shift.status === "Draft" && <em>Draft</em>}{shift.availabilityConflict && <em className="conflict-badge">{shift.availabilityConflict === "APPROVED_TIME_OFF" ? "Time off" : "Unavailable"}</em>}{conflict && !shift.availabilityConflict && <em className="conflict-badge">Conflict</em>}</button> }

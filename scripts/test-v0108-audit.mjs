@@ -12,7 +12,7 @@ const required = [
 ];
 
 const checks = [
-  [["0.10.8", "0.10.9","0.10.10","0.10.11","0.11.0","0.11.1","0.11.2","0.11.3","0.11.4","0.11.6","0.12.0","0.12.1","0.12.2","0.12.3"].includes(pkg.version), "release version"],
+  [["0.10.8", "0.10.9","0.10.10","0.10.11","0.11.0","0.11.1","0.11.2","0.11.3","0.11.4","0.11.6","0.12.0","0.12.1","0.12.2","0.12.3","0.12.4","0.13.0"].includes(pkg.version), "release version"],
   [required.every((file) => fs.existsSync(file)), "audit deliverables exist"],
   [fs.readFileSync("BASELINE_MANIFEST_V0107.sha256", "utf8").includes("components/bar-ops-app.tsx"), "baseline manifest covers application source"],
   [fs.readFileSync("AUDIT_REPORT_V0108.md", "utf8").includes("No application behavior was changed"), "audit-only scope is explicit"],
