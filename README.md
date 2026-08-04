@@ -1,6 +1,6 @@
-# Bar Ops v0.17.0.1
+# Bar Ops v0.18.1
 
-Current release: **v0.17.0.1** — Architecture Cleanup & Redesign Readiness.
+Current release: **v0.18.1** — Architecture Cleanup & Redesign Readiness.
 
 This release creates a safer foundation for Phase D by extracting shared workspace domain contracts and pure schedule logic from the manager application shell, documenting stable redesign boundaries, and adding a complete cross-workspace redesign inventory.
 
@@ -9,6 +9,10 @@ No database migration, permission change, business feature, API contract change,
 Rollback checkpoint: **v0.16.21.3**.
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
+
+## Phase D begins — v0.18.0 + v0.18.1
+
+This combined build establishes the layered design-system foundation and redesigns the manager and employee application shells/navigation. Workspace content remains intentionally unchanged until its planned Phase D release.
 
 ## Architecture foundation
 

@@ -20,3 +20,8 @@ The redesign may change component presentation, tokens, responsive composition a
 ## Refactoring rule
 
 Move code only when it has a clear domain owner or genuine reuse. Avoid mechanical file splitting that adds indirection without reducing responsibility.
+
+
+## Phase D design-system principle
+
+The visual redesign uses a layered design-system architecture consisting of primitive tokens, semantic tokens, foundation styles, shared UI primitives and feature-specific product components. Design decisions are globalised through tokens, while component implementation remains locally scoped through CSS Modules. Components control their internal presentation, while parent layouts control external spacing and placement.

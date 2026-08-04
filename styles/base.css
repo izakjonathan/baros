@@ -1,0 +1,4 @@
+@layer base {
+html{background:var(--surface-page);color:var(--text-primary)} body{min-height:100vh;font-family:var(--font-body);line-height:var(--leading-body);background:var(--surface-page)}
+:focus-visible{outline:2px solid var(--text-primary);outline-offset:3px} ::selection{background:var(--surface-accent);color:var(--text-primary)}
+}

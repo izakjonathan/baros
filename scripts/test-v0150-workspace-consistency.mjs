@@ -7,7 +7,7 @@ const checks=[
   [pkg.version.localeCompare("0.15.0", undefined, {numeric:true})>=0,"package version preserves the v0.15.0+ baseline"],
   [app.includes('aria-current={active === item.id ? "page" : undefined}'),"sidebar exposes active page"],
   [app.includes('data-workspace={active}'),"workspace identity is exposed"],
-  [app.includes('className="workspace-context"'),"topbar includes workspace context"],
+  [app.includes('workspace-context') && app.includes('aria-label="Current workspace"'),"topbar includes workspace context"],
   [ui.includes("export function WorkspaceHeader"),"shared workspace header exists"],
   [ui.includes("export function EmptyState"),"shared empty state exists"],
   [ui.includes("export function LoadingState"),"shared loading state exists"],

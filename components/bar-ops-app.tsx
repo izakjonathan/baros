@@ -13,6 +13,7 @@ import type { ClockSettings, Employee, Location, LogEntry, OpsTask, ScheduleAckn
 import { BASE_MONDAY, canonicalShiftDate, conflictIds, dateFromSerial, dateFromShift, dateSerial, hoursBetween, isOvernight, mapDatabaseShift, shiftPositionFromDate, toIsoDate, type DatabaseShiftRecord } from "@/features/workspace/schedule-utils";
 import { DevRoleSwitcher } from "@/components/dev-role-switcher";
 import { RequestsWorkspace } from "@/components/requests-workspace";
+import shellStyles from "@/components/shell/ManagerShell.module.css";
 
 const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Today’s operations", icon: LayoutDashboard },
@@ -221,19 +222,19 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
 function Sidebar({ active, onChange, open, onClose, userName, userRole, devMode }: { active: NavKey; onChange: (id: NavKey) => void; open: boolean; onClose: () => void; userName: string; userRole: string; devMode: boolean }) {
   return <>
     {open && <button className="scrim" aria-label="Close navigation" onClick={onClose} />}
-    <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
-      <div className="brand"><div className="brand-mark"><Wine size={22} /></div><div><strong>Bar Ops</strong><span>Temple Bar</span></div><button type="button" className="sidebar-close" onClick={onClose} aria-label="Close navigation"><X size={20} /></button></div>
-      <nav className="side-nav">
+    <aside className={`sidebar ${shellStyles.sidebar} ${open ? "sidebar-open" : ""}`}>
+      <div className={`brand ${shellStyles.brand}`}><div className={`brand-mark ${shellStyles.brandMark}`}><Wine size={22} /></div><div><strong>Bar Ops</strong><span>Temple Bar</span></div><button type="button" className="sidebar-close" onClick={onClose} aria-label="Close navigation"><X size={20} /></button></div>
+      <nav className={`side-nav ${shellStyles.navigation}`}>
         <p>Workspace</p>
         {navItems.map((item) => <button type="button" key={item.id} className={active === item.id ? "active" : ""} aria-current={active === item.id ? "page" : undefined} onClick={() => onChange(item.id)}><item.icon size={19} /><span>{item.label}</span>{item.id === "inventory" && <em>5</em>}</button>)}
       </nav>
-      <div className="side-bottom">
+      <div className={`side-bottom ${shellStyles.bottom}`}>
         <button type="button" className={active === "settings" ? "active" : ""} aria-current={active === "settings" ? "page" : undefined} onClick={() => onChange("settings")}><Settings size={19} /><span>Settings</span></button>
         <button type="button" onClick={async () => {
           await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
           window.location.assign("/login");
         }}><LogOut size={19} /><span>Sign out</span></button>
-        {devMode && <DevRoleSwitcher currentRole={userRole} />}<div className="profile"><div className="avatar dark">{userName.split(" ").map(part => part[0]).join("").slice(0,2)}</div><div><strong>{userName}</strong><span>{userRole.replace("_", " ").toLowerCase()}</span></div><ChevronDown size={16} /></div>
+        {devMode && <DevRoleSwitcher currentRole={userRole} />}<div className={`profile ${shellStyles.profile}`}><div className="avatar dark">{userName.split(" ").map(part => part[0]).join("").slice(0,2)}</div><div><strong>{userName}</strong><span>{userRole.replace("_", " ").toLowerCase()}</span></div><ChevronDown size={16} /></div>
       </div>
     </aside>
   </>
@@ -247,11 +248,11 @@ function Topbar({ active, onMenu, locations, selectedLocationId, onLocationChang
   const [query,setQuery]=useState("");
   const matches=navItems.filter(item=>item.label.toLowerCase().includes(query.toLowerCase()));
   const go=(id:NavKey)=>{onNavigate(id);setSearchOpen(false);setQuery("");};
-  return <header className="topbar">
+  return <header className={`topbar ${shellStyles.topbar}`}>
     <button className="menu-button" onClick={onMenu} aria-label="Open navigation"><Menu size={21} /></button>
-    <div className="workspace-context" aria-label="Current workspace"><span>{activeItem?.label || "Workspace"}</span></div>
-    <label className="location-switch" aria-label="Current location"><span className="status-dot" />{locations.length > 1 ? <><select value={selectedLocationId} onChange={event => onLocationChange(event.target.value)}>{locations.map(location => <option key={location.id} value={location.id}>{location.name}</option>)}</select><ChevronDown size={15} /></> : <span>{selected?.name || "No active location"}</span>}</label>
-    <div className="top-actions">
+    <div className={`workspace-context ${shellStyles.workspace}`} aria-label="Current workspace"><span>{activeItem?.label || "Workspace"}</span></div>
+    <label className={`location-switch ${shellStyles.location}`} aria-label="Current location"><span className="status-dot" />{locations.length > 1 ? <><select value={selectedLocationId} onChange={event => onLocationChange(event.target.value)}>{locations.map(location => <option key={location.id} value={location.id}>{location.name}</option>)}</select><ChevronDown size={15} /></> : <span>{selected?.name || "No active location"}</span>}</label>
+    <div className={`top-actions ${shellStyles.actions}`}>
       <button className="icon-button" onClick={()=>{setSearchOpen(v=>!v);setNotificationsOpen(false)}} aria-label="Search workspace"><Search size={19} /></button>
       <button className="icon-button notification" onClick={()=>{setNotificationsOpen(v=>!v);setSearchOpen(false)}} aria-label="Open notifications"><Bell size={19} /><i /></button>
       {searchOpen&&<div className="top-popover search-popover"><label><Search size={16}/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search workspace"/></label><div>{matches.map(item=><button key={item.id} onClick={()=>go(item.id)}><item.icon size={17}/><span>{item.label}</span><ArrowRight size={14}/></button>)}</div></div>}

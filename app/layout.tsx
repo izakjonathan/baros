@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
+import "./design-system.css";
 import "./globals.css";
 import "./mono-tokens.css";
 import "./mono-components.css";
@@ -42,7 +43,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#f4f4f2",
+  themeColor: "#f5f5f2",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

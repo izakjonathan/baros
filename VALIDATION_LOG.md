@@ -1,43 +1,33 @@
-
-## v0.17.0.2 hotfix
-
-- Corrected `DatabaseShiftRecord.employee_availability_conflict` to use `Shift["availabilityConflict"] | null`.
-- Confirmed unsupported arbitrary strings can no longer flow into `Shift.availabilityConflict` at the type boundary.
-- `npm run test:all`: PASS.
-- `npm run audit:preflight`: PASS.
-- `npm run validate:release`: PASS.
-- Full dependency-based TypeScript/Next.js build not rerun locally; Vercel remains the definitive build gate.
-# Bar Ops Validation Log — v0.17.0.2
+# Validation Log — v0.18.1
 
 ## Baseline
 
-Approved `bar-ops-v0.16.21.3-audit-remediation.zip`.
+- Approved baseline: v0.17.0.2
+- Combined release: v0.18.0 + v0.18.1
 
-## Completed validation
+## Passed
 
-- Corrected the `ClockSettings` TypeScript contract reported by the Vercel build.
-- Verified the contract covers every property read or written by the settings workspace.
-- Ran the complete `npm run test:all` regression chain after the hotfix: passed.
-- Ran `npm run audit:preflight`: passed.
-- Ran `npm run validate:release`: passed.
+- `node scripts/test-v0180-design-system.mjs`
+- `node scripts/test-v0181-shell-navigation.mjs`
+- Complete inherited regression chain through v0.15.0
+- Complete v0.15.0–v0.18.1 regression chain
+- `npm run audit:preflight`
+- `npm run validate:release`
+- Release-contract validation
+- Service worker present
+- `public/offline.html` absent
+- `vercel.json` absent
+- ZIP integrity
 
-- Audited repository structure and largest responsibility concentrations.
-- Extracted workspace domain contracts and pure schedule logic.
-- Confirmed extracted schedule utilities contain no `any` usage.
-- Added and ran the v0.17.0.2 redesign-readiness regression.
-- Ran the complete regression suite: passed.
-- Updated architecture-coupled regressions to verify the new feature-owned schedule mapper and forward-compatible v0.17.0.2 version line.
-- Ran JavaScript syntax checks for modified regression scripts: passed.
-- Ran the final stabilization preflight.
-- Ran release-contract validation.
-- Confirmed `public/sw.js` is present.
-- Confirmed `public/offline.html` and `vercel.json` are absent.
-- Verified release archive integrity.
+One inherited v0.15.0 regression was updated to verify the workspace context by semantic class/ARIA presence rather than requiring the exact pre-CSS-Module `className` string. The protected workspace-context behavior remains unchanged.
 
-## Dependency-based validation
+## Not run
 
-A clean dependency installation was attempted with `npm install --no-audit --no-fund` but the internal npm mirror returned 404 for `@types/node@22.10.2`. ESLint, TypeScript compilation and the complete Next.js production build could therefore not be executed locally. GitHub Actions and Vercel remain the authoritative dependency-based gates.
+- Clean dependency installation
+- ESLint
+- TypeScript compilation
+- Complete Next.js production build
+- Vercel deployment
+- Browser/device visual verification
 
-## Compatibility
-
-No database migration, API contract change, permission change, business feature, workflow change or intentional visual redesign.
+These dependency- and browser-based gates were not available in this build environment and must not be inferred from the static regression results.

@@ -1,33 +1,19 @@
-# Release Notes — v0.17.0.2
+# Release Notes — v0.18.1
 
-## Schedule availability type hotfix
+## Combined Phase D build
 
-- Narrowed the extracted database availability-conflict field to the existing `Shift["availabilityConflict"]` union.
-- Preserved the only supported values: `APPROVED_TIME_OFF`, `OUTSIDE_AVAILABILITY`, or no conflict.
-- Fixed the Vercel TypeScript failure in `mapDatabaseShift` without changing runtime behavior.
-- No migration or redesign scope change.
+### v0.18.0 — Design System Foundation
 
-## TypeScript hotfix
+- Added layered CSS architecture: reset, tokens, base, layouts, components and utilities.
+- Added primitive and semantic colour tokens, typography, spacing, radius, shadow, layout, motion and layering tokens.
+- Added compatibility aliases so existing workspace UI remains stable during phased migration.
+- Added locally scoped Button, Card and Badge primitives.
+- Added the agreed Phase D design-system principle to architecture and workflow documentation.
 
-- Corrected the extracted `ClockSettings` contract so it matches the existing time-clock settings UI and API.
-- Restored the fields for mobile, kiosk, unscheduled clocking, location verification, rounding and auto-approval.
-- Removed three stale fields that were never used by the current settings implementation.
-- No runtime behavior or redesign scope changed.
+### v0.18.1 — Application Shell & Navigation
 
-## Architecture Cleanup & Redesign Readiness
+- Applied locally scoped CSS Modules to the manager sidebar/topbar and employee header/bottom navigation.
+- Improved shell hierarchy, active navigation, location context, touch behavior and responsive surfaces.
+- Preserved role permissions, navigation destinations and workspace content.
 
-- Extracted workspace types from the manager application shell into `features/workspace/types.ts`.
-- Extracted date, overnight, overlap, conflict and shift mapping logic into `features/workspace/schedule-utils.ts`.
-- Added a typed `DatabaseShiftRecord` boundary and removed `any` from the extracted pure schedule layer.
-- Documented architecture ownership and stable Phase D boundaries.
-- Added a cross-workspace screen, component and state inventory for the redesign.
-- Added testing and development workflow documentation.
-- Added `test:v0170-redesign-readiness` and included it in the full regression chain.
-
-## Migration
-
-No migration required.
-
-## Rollback
-
-Approved rollback checkpoint: v0.16.21.3.
+No database migration or business-feature change is included.
