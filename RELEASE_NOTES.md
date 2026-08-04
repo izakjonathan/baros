@@ -1,24 +1,27 @@
-# Bar Ops v0.16.13 — Production Hardening XIII & XIV
+# Bar Ops v0.16.15 — Production Hardening XV & XVI
 
-Built from the approved v0.16.11 Production Hardening XI & XII baseline.
+Built from the approved v0.16.13 Production Hardening XIII & XIV baseline.
 
-## v0.16.12 — Shared Session Issuance
+## v0.16.14 — Authorization & Tenant Scope Integrity
 
-- Added a shared session-store module for token hashing, expired-session pruning, insertion and bounded retention.
-- Standard login and employee activation now use the same session persistence rules.
-- Employee activation now retains only the ten newest sessions per user and organization, matching standard login.
-- Removed duplicated session SQL and token-hashing logic from the activation route.
+- Added shared organization-location and organization-entity scope guards.
+- Purchase-order creation now verifies the selected location belongs to the authenticated organization.
+- Purchase-order suppliers and products must belong to the same authenticated organization.
+- Payroll-period creation now verifies its selected location belongs to the authenticated organization.
+- Cross-organization identifiers are rejected before any write occurs.
+- Existing role permissions remain unchanged.
 
-## v0.16.13 — Authentication Endpoint Consistency
+## v0.16.15 — Transaction Integrity
 
-- Added `x-request-id` response headers to employee activation and development login.
-- Added `Cache-Control: no-store` to activation and development-login responses.
-- Included request IDs in activation JSON success and handled failure responses.
-- Preserved redirects, cookies, permissions and existing authentication behavior.
+- Purchase-order creation, line-item insertion and its audit record now run in one database transaction.
+- Payroll-period creation/status transitions and their audit records now run in one database transaction.
+- A failed validation or audit write now rolls back the complete affected mutation.
+- Added bounded order-item input validation and a maximum of 250 submitted lines.
+- Replaced direct unbounded JSON parsing in the affected routes with the shared bounded parser.
 
 ## Compatibility
 
 - No database migration.
 - No permission or role changes.
-- No business-feature changes.
+- No new business features.
 - No route removal or intentional successful-response break.

@@ -1,12 +1,12 @@
 # Bar Ops
 
-**Current release: v0.16.13 — Production Hardening XIII & XIV**
+**Current release: v0.16.15 — Production Hardening XV & XVI**
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 
 ## Current release
 
-v0.16.13 combines shared session issuance with authentication endpoint consistency. Standard login and employee activation now use the same bounded session-store implementation, and activation/development-login responses carry consistent request tracing and no-store cache protection.
+v0.16.15 combines tenant-scope enforcement with transaction-integrity hardening. User-supplied location, supplier and product identifiers are now verified against the authenticated organization before order or payroll writes, and the corresponding audit records are committed atomically with those mutations.
 
 No database migration, permission change or business-workflow change is required.
 
