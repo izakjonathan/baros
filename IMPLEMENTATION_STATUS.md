@@ -1,4 +1,4 @@
-# Bar Ops Implementation Status — v0.16.21.1
+# Bar Ops Implementation Status — v0.16.21.2
 
 ## Baseline
 
@@ -29,8 +29,12 @@ Built from approved v0.16.19 — Production Hardening XIX & XX.
 - `public/sw.js` remains included.
 
 
-## v0.16.21.1 — SQL Transaction Type Hotfix
+## v0.16.21.2 — Payroll Row TypeScript Hotfix
 
 - Replaced the custom SQL template-tag type with the PostgreSQL driver’s native `Sql<{}>` contract.
 - Restored type compatibility for organization-scope guards called with transaction clients.
 - Preserved the v0.16.19 prohibition on transaction `any` casts.
+
+## v0.16.21.2 — Payroll Row TypeScript Hotfix
+
+Typed payroll-period transaction rows so location and entity identifiers are safe SQL parameters in the audit-log insert.

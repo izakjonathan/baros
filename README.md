@@ -1,6 +1,6 @@
-# Bar Ops v0.16.21.1
+# Bar Ops v0.16.21.2
 
-Current release: **v0.16.21.1**.
+Current release: **v0.16.21.2**.
 
 This release combines **v0.16.20 — Release Metadata Consolidation** and **v0.16.21 — Final Stabilization Gate**. It removes stale release information from the operational documentation and adds one consolidated source-package preflight before the existing CI quality gates.
 
@@ -10,7 +10,7 @@ Rollback checkpoint: **v0.16.17**.
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 
-## v0.16.21.1 TypeScript hotfix
+## v0.16.21.2 Payroll Row TypeScript Hotfix
 
 The shared organization-scope SQL executor now uses the `postgres` package’s native `Sql<{}>` type. This accepts both the normal client and transaction clients while preserving typed SQL queries and avoiding `any` casts.
 

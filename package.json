@@ -1,6 +1,6 @@
 {
   "name": "bar-ops",
-  "version": "0.16.21.1",
+  "version": "0.16.21.2",
   "private": true,
   "scripts": {
     "dev": "next dev",

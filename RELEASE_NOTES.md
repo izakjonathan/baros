@@ -1,6 +1,6 @@
-# Release Notes — v0.16.21.1
+# Release Notes — v0.16.21.2
 
-## v0.16.21.1 — SQL Transaction Type Hotfix
+## v0.16.21.2 — Payroll Row TypeScript Hotfix
 
 - Fixed the Vercel TypeScript failure when passing a `TransactionSql` client into organization-scope guards.
 - Replaced the hand-written SQL executor signature with the native `postgres` `Sql<{}>` type.
@@ -25,3 +25,10 @@ No migration required.
 ## Rollback
 
 Approved rollback checkpoint: v0.16.17.
+
+### Payroll route typing correction
+
+- Added an explicit `PayrollPeriodRow` contract.
+- Typed all transaction query results before audit-log interpolation.
+- Removed `unknown` values from typed SQL parameters.
+- No runtime, schema, permission, or workflow change.

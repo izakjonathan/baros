@@ -1,4 +1,4 @@
-# Validation Log — v0.16.21.1
+# Validation Log — v0.16.21.2
 
 ## Executed
 
@@ -21,9 +21,15 @@ A clean lockfile generation/install was attempted with `npm install --package-lo
 Focused source-level and release-contract validation passed. No database migration was introduced.
 
 
-## v0.16.21.1 hotfix validation
+## v0.16.21.2 hotfix validation
 
 - Confirmed `lib/auth/scope.ts` uses the native `postgres` SQL type.
 - Confirmed order and payroll transaction routes contain no `tx as any` casts.
 - Ran focused v0.16.19–v0.16.21 regression scripts.
 - Full dependency-based TypeScript and Next.js build could not be run in this environment because the internal npm mirror does not provide the required packages.
+
+## v0.16.21.2 hotfix validation
+
+- Confirmed payroll transaction queries use `tx<PayrollPeriodRow[]>`.
+- Confirmed audit-log interpolation receives typed string/null values.
+- Confirmed no `any` transaction casts were introduced.
