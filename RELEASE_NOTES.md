@@ -1,17 +1,21 @@
-# Bar Ops v0.15.3 — Mobile & iPad Polish
+# Release Notes
 
-Built from the approved v0.15.2 Search & Productivity baseline.
+## v0.16.1 — Production Hardening I & II
 
-## Changes
-- Removed `public/offline.html`, which caused the reported GitHub commit failure.
-- Preserved the controlled offline reconnect experience as a self-contained service-worker response.
-- Refreshed the service-worker cache version so installed devices receive the corrected assets.
-- Added consistent 44px touch targets for coarse-pointer devices.
-- Added safe-area-aware horizontal spacing for iPhone and iPad.
-- Improved compact action layouts, dialogs, filters, metrics and form fields on narrow phones.
-- Added an iPad breakpoint for workspace padding, metrics, dashboard proportions and dialog height.
-- Improved horizontal scrolling containment for schedules and data tables.
-- Preserved the v0.15.2 removal of `vercel.json`.
+This combined build includes the first two Production Hardening releases:
 
-## Compatibility
-No database migration, API change, permission change or new business feature.
+### v0.16.0 — Runtime Resilience
+- Added application-level, root-level and not-found recovery screens.
+- Added safe retry guidance that avoids implying a failed mutation succeeded.
+- Added structured server error logging with request identifiers.
+- Added request identifiers to shared API error responses.
+- Added a non-sensitive `/api/health` database-readiness endpoint with no-store caching.
+
+### v0.16.1 — Deployment & Operational Guardrails
+- Added production environment validation for database, application URL, development authentication and session TTL configuration.
+- Added the environment contract to the GitHub quality workflow.
+- Added focused regression suites for both Production Hardening releases.
+- Preserved `public/sw.js` and confirmed that `public/offline.html` and `vercel.json` remain absent.
+- Updated inherited forward-release assertions without weakening their functional checks.
+
+No database migration, permission change, API contract change or new business module is included.

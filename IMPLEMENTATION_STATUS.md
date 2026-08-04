@@ -1,14 +1,30 @@
-# Bar Ops implementation status — v0.15.3
+# Implementation Status
 
-Current version: **0.15.2 — Interaction System**
+## Current release
 
-The current product includes scheduling, employee self-service, time and attendance, payroll export, inventory, ordering, daily operations, checklists and schedule publication workflows.
+**v0.16.1 — Production Hardening I & II**
 
-v0.15.2 continues the Refinement & UX phase. It introduces a shared interaction layer for dialogs, actions and form feedback, with improved keyboard accessibility, loading and disabled states, focus handling and cross-workspace consistency. Existing role permissions, APIs, database behavior and business workflows remain unchanged.
+Built from the approved v0.15.3 Mobile & iPad Polish baseline.
 
-Next planned release: **v0.15.2 — Search & Productivity**.
+## Completed roadmap
 
-## v0.15.3 Mobile & iPad Polish
-- Responsive and touch refinements applied across shared manager and employee UI layers.
-- GitHub-sensitive `public/offline.html` removed; offline fallback retained inside the service worker.
-- No migration required.
+- v0.15.0 Navigation & Workspace Consistency
+- v0.15.1 Interaction System
+- v0.15.2 Search & Productivity
+- v0.15.3 Mobile & iPad Polish
+- v0.16.0 Runtime Resilience
+- v0.16.1 Deployment & Operational Guardrails
+
+## Current capabilities added in this build
+
+- Global and workspace-level failure recovery
+- Safe not-found handling
+- Structured server-side error records
+- Correlatable API request IDs
+- Database-readiness health endpoint
+- Production environment contract validation
+- CI enforcement for hardening regressions
+
+## Compatibility
+
+Existing permissions, data models, routes and business workflows are preserved. No migration is required.

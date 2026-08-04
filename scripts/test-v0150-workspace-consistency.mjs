@@ -4,7 +4,7 @@ const ui=fs.readFileSync("components/ui/workspace-ui.tsx","utf8");
 const css=fs.readFileSync("app/mono-components.css","utf8");
 const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
 const checks=[
-  [pkg.version.startsWith("0.15."),"package version preserves the v0.15.x baseline"],
+  [pkg.version.localeCompare("0.15.0", undefined, {numeric:true})>=0,"package version preserves the v0.15.0+ baseline"],
   [app.includes('aria-current={active === item.id ? "page" : undefined}'),"sidebar exposes active page"],
   [app.includes('data-workspace={active}'),"workspace identity is exposed"],
   [app.includes('className="workspace-context"'),"topbar includes workspace context"],

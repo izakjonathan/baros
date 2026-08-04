@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
+import { logServerError, requestIdFrom } from "@/lib/observability";
 
 export class ApiError extends Error {
   constructor(public status: number, message: string, public details?: unknown) { super(message); }
 }
-export function jsonError(error: unknown) {
-  if (error instanceof ApiError) return NextResponse.json({ error: error.message, details: error.details }, { status: error.status });
-  console.error(error);
-  return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+export function jsonError(error: unknown, request?: Request) {
+  const requestId = requestIdFrom(request);
+  const headers = { "x-request-id": requestId, "cache-control": "no-store" };
+  if (error instanceof ApiError) return NextResponse.json({ error: error.message, details: error.details, requestId }, { status: error.status, headers });
+  logServerError(error, { requestId, path: request ? new URL(request.url).pathname : undefined });
+  return NextResponse.json({ error: "Internal server error", requestId }, { status: 500, headers });
 }
 export async function readJsonObject(request: Request, maxBytes = 32_000): Promise<Record<string, unknown>> {
   const length = Number(request.headers.get("content-length") || 0);

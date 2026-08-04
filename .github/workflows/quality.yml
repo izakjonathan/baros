@@ -39,6 +39,14 @@ jobs:
       - name: Type-check
         run: npm run typecheck
 
+      - name: Validate production environment contract
+        env:
+          NODE_ENV: production
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/barops
+          APP_URL: https://barops.example
+          DEV_AUTH_ENABLED: "false"
+        run: npm run validate:env
+
       - name: Production build
         env:
           DEV_AUTH_ENABLED: "true"

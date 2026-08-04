@@ -1,6 +1,6 @@
 # Bar Ops
 
-**Current release: v0.15.3 — Mobile & iPad Polish**
+**Current release: v0.16.1 — Mobile & iPad Polish**
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 
@@ -38,3 +38,9 @@ The CSS cleanup release removes historical redesign blocks, repeated exact selec
 ### v0.10.7 employee workspace integrity
 
 Employee routes derive their employee and location context centrally from the authenticated session. An active session location is preferred; employee accounts use their primary active `employee_locations` assignment when the stored session location is missing or stale. Development employee previews require a seeded, activated employee account and resolve that real database identity instead of using placeholder UUID values.
+## Current release
+
+**v0.16.1 — Production Hardening I & II** combines runtime resilience with deployment and operational guardrails. It preserves all existing business behavior and requires no database migration.
+
+Operational readiness is available at `GET /api/health`. Production configuration can be checked with `npm run validate:env`.
+

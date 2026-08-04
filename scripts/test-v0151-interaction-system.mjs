@@ -6,7 +6,7 @@ const employee=read('app/employee/shifts/shift-actions.tsx');
 const css=read('app/mono-components.css');
 const pkg=JSON.parse(read('package.json'));
 const checks=[
- ['release version',pkg.version.startsWith('0.15.')],
+ ['release version',pkg.version.localeCompare('0.15.1', undefined, {numeric:true})>=0],
  ['shared accessible dialog',interaction.includes('aria-labelledby')&&interaction.includes('aria-describedby')&&interaction.includes('aria-modal="true"')],
  ['escape close',interaction.includes('event.key === "Escape"')],
  ['focus containment',interaction.includes('event.key !== "Tab"')&&interaction.includes('previouslyFocused?.focus()')],
