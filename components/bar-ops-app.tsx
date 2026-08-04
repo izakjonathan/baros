@@ -9,6 +9,8 @@ import {
   Copy, Send, Boxes, Wine, UserRoundPlus, Timer, Play, Square, Activity, FileCheck2, FileDown, CheckCheck, RotateCcw, Ban, Pencil, ShieldAlert, History, DownloadCloud, LockKeyhole, UnlockKeyhole, Database, KeyRound, MapPin, FileArchive, ShieldCheck, ReceiptText, Trash2, ArrowLeftRight, TrendingUp, NotebookPen, Wrench, Save, Upload, Undo2, CheckCircle2, LogOut
 } from "lucide-react";
 import { days, initialProducts, initialShifts, orders, team, type NavKey, type Product, type Shift, type ShiftRole } from "@/lib/data";
+import type { ClockSettings, Employee, Location, LogEntry, OpsTask, ScheduleAcknowledgementSummary, ShiftNote, StockAdjustment, TimeEntry } from "@/features/workspace/types";
+import { BASE_MONDAY, canonicalShiftDate, conflictIds, dateFromSerial, dateFromShift, dateSerial, hoursBetween, isOvernight, mapDatabaseShift, shiftPositionFromDate, toIsoDate, type DatabaseShiftRecord } from "@/features/workspace/schedule-utils";
 import { DevRoleSwitcher } from "@/components/dev-role-switcher";
 import { RequestsWorkspace } from "@/components/requests-workspace";
 
@@ -24,48 +26,6 @@ const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = 
   { id: "requests", label: "Requests", icon: ClipboardList },
   { id: "control", label: "Control centre", icon: Settings },
 ];
-
-type Location = { id: string; name: string; timezone?: string };
-type Employee = { id?: string; name: string; initials: string; role: string; hours: number; status: string; active: boolean; email?: string; phone?: string; payrollId?: string; salaryCode?: string; costCentre?: string; hourlyRate?: number; locationId?: string; locations?: Array<{ id: string; name: string; primary?: boolean }>; portalStatus?: "NONE" | "INVITED" | "ACTIVE" | "EXPIRED" };
-type StockAdjustment = { id: string; productId: string; productName: string; delta: number; reason: string; createdAt: string };
-type OpsTask = { id: string; title: string; type: "Opening" | "Closing" | "Task" | "Maintenance"; owner: string; due: string; done: boolean; note?: string };
-type LogEntry = { id: string; title: string; body: string; author: string; createdAt: string };
-type TimeEntry = { id: string; employee: string; date: string; clockIn: string; clockOut?: string; breakMinutes: number; status: "Running" | "Pending" | "Approved" | "Rejected"; scheduledHours: number; note?: string; edited?: boolean; onBreak?: boolean; breakStartedAt?: string | null };
-type ShiftNote = { id:string; shiftId:string; note:string; category:string; createdAt:string; author:string; role:string; startsAt:string };
-type ScheduleAcknowledgementSummary = { publication: { id: string; version: number; publishedAt: string } | null; employees: Array<{ id: string; name: string; acknowledgedAt: string | null; changeTypes?: string[] }> };
-const todayAtNoon = new Date(); todayAtNoon.setHours(12,0,0,0);
-const BASE_MONDAY = new Date(todayAtNoon); BASE_MONDAY.setDate(todayAtNoon.getDate() - ((todayAtNoon.getDay() + 6) % 7));
-function toIsoDate(date: Date) { const y = date.getFullYear(); const m = String(date.getMonth()+1).padStart(2,"0"); const d = String(date.getDate()).padStart(2,"0"); return `${y}-${m}-${d}`; }
-function dateSerial(value: string) { const [year, month, day] = value.split("-").map(Number); return Date.UTC(year, month - 1, day) / 86400000; }
-const BASE_DATE_SERIAL = dateSerial(toIsoDate(BASE_MONDAY));
-function dateFromSerial(serial: number) { const date = new Date(serial * 86400000); return date.toISOString().slice(0, 10); }
-function shiftInterval(shift: Shift) { const startDay = dateSerial(canonicalShiftDate(shift)); const [sh, sm] = shift.start.split(":").map(Number); const [eh, em] = shift.end.split(":").map(Number); const start = startDay * 1440 + sh * 60 + sm; let end = startDay * 1440 + eh * 60 + em; if (end <= start) end += 1440; return { start, end }; }
-function shiftsOverlap(a: Shift, b: Shift) { const x = shiftInterval(a); const y = shiftInterval(b); return x.start < y.end && y.start < x.end; }
-function conflictIds(shifts: Shift[]) { const ids = new Set<string>(); const assigned = shifts.filter((s) => !s.isOpen); for (let i=0;i<assigned.length;i++) for (let j=i+1;j<assigned.length;j++) if (assigned[i].employee === assigned[j].employee && shiftsOverlap(assigned[i], assigned[j])) { ids.add(assigned[i].id); ids.add(assigned[j].id); } return ids; }
-function shiftPositionFromDate(value: string) { const diffDays = dateSerial(value) - BASE_DATE_SERIAL; return { day: ((diffDays % 7) + 7) % 7, weekOffset: Math.floor(diffDays / 7) }; }
-function dateFromShift(weekOffset = 0, day = 0) { const date = new Date(BASE_MONDAY); date.setDate(BASE_MONDAY.getDate() + weekOffset * 7 + day); return toIsoDate(date); }
-function canonicalShiftDate(shift: Shift) { return shift.date ?? dateFromShift(shift.weekOffset ?? 0, shift.day); }
-function isOvernight(start: string, end: string) { return end <= start; }
-function mapDatabaseShift(x: any): Shift {
-  const startText = String(x.starts_at);
-  const endText = String(x.ends_at);
-  const startDate = new Date(startText);
-  const endDate = new Date(endText);
-  const timezone = x.location_timezone || "Europe/Copenhagen";
-  const parts = (date: Date) => Object.fromEntries(new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", hourCycle:"h23" }).formatToParts(date).map(part => [part.type, part.value]));
-  const startParts = parts(startDate);
-  const endParts = parts(endDate);
-  const date = `${startParts.year}-${startParts.month}-${startParts.day}`;
-  const pos = shiftPositionFromDate(date);
-  const employeeName = x.is_open ? "Available shift" : x.employee_name || "Unassigned";
-  return {
-    id: x.id, date, day: pos.day, weekOffset: pos.weekOffset, employee: employeeName, employeeId: x.employee_id || undefined,
-    initials: x.is_open ? "+" : employeeName.split(" ").map((word: string) => word[0]).join(""),
-    start: `${startParts.hour}:${startParts.minute}`, end: `${endParts.hour}:${endParts.minute}`,
-    role: x.role, status: x.status === "DRAFT" ? "Draft" : "Published", isOpen: x.is_open,
-    recurrenceGroupId: x.recurrence_group_id, locationId: x.location_id, availabilityConflict: x.employee_availability_conflict || undefined
-  };
-}
 
 export function BarOpsApp({ userName, userRole, devMode }: { userName: string; userRole: string; devMode: boolean }) {
   const [active, setActive] = useState<NavKey>("dashboard");
@@ -136,7 +96,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       const resolvedLocationId = data.selectedLocationId || availableLocations[0]?.id || "";
       if (resolvedLocationId && resolvedLocationId !== selectedLocationId) setSelectedLocationId(resolvedLocationId);
       setEmployees((data.employees || []).map((e: any) => ({ id:e.id, name:`${e.first_name} ${e.last_name}`, initials:`${e.first_name?.[0]||""}${e.last_name?.[0]||""}`, role:e.employment_title||"Employee", hours:Number(e.contracted_hours||0), status:e.active?"Active":"Inactive", active:e.active, email:e.email||"", phone:e.phone||"", payrollId:e.payroll_id||"", salaryCode:e.salary_code||"", costCentre:e.cost_centre||"", hourlyRate:Number(e.hourly_rate||0), locationId:(e.locations||[]).find((location:any)=>location.primary)?.id||(e.locations||[])[0]?.id||"", locations:e.locations||[], portalStatus:e.portal_status||"NONE" })));
-      setShifts((data.shifts || []).map(mapDatabaseShift));
+      setShifts((data.shifts || []).map((shift: DatabaseShiftRecord) => mapDatabaseShift(shift)));
       setProducts((data.products || []).map((x:any)=>({id:x.id,name:x.name,category:x.category,supplier:x.supplier||"Unassigned",stock:Number(x.quantity||0),par:Number(x.par_level||0),unit:x.unit,price:Number(x.purchase_price||0)})));
       setTimeEntries((data.timesheets || []).map((x:any)=>({id:x.id,employee:x.employee_name,date:String(x.work_date).slice(0,10),clockIn:String(x.clocked_in_at).slice(11,16),clockOut:x.clocked_out_at?String(x.clocked_out_at).slice(11,16):undefined,breakMinutes:x.break_minutes,status:(x.status==="OPEN"?"Running":x.status[0]+x.status.slice(1).toLowerCase()) as TimeEntry["status"],scheduledHours:Number(x.scheduled_minutes||0)/60,note:x.manager_note,onBreak:Boolean(x.on_break),breakStartedAt:x.open_break_started_at?String(x.open_break_started_at):null})));
       setShiftNotes((data.shiftNotes || []).map((n:any)=>({id:n.id,shiftId:n.shift_id,note:n.note,category:n.category,createdAt:String(n.created_at),author:n.author_name,role:n.role,startsAt:String(n.starts_at)})));
@@ -581,7 +541,6 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
 }
 function ShiftCard({ shift, conflict, onOpen, onDragStart }: { shift: Shift; conflict?: boolean; onOpen: () => void; onDragStart?: (event: React.DragEvent<HTMLButtonElement>) => void }) { const overnight = isOvernight(shift.start, shift.end); return <button type="button" draggable onDragStart={onDragStart} className={`shift-card shift-card-button role-${shift.role.toLowerCase()} ${shift.status === "Draft" ? "is-draft" : ""} ${conflict ? "has-conflict" : ""}`} onClick={onOpen} aria-label={`Open ${shift.isOpen ? "available" : shift.employee} shift ${shift.start} to ${shift.end}${overnight ? " next day" : ""}`}><div className="shift-card-top"><span>{shift.start}–{shift.end}{overnight ? " +1" : ""}</span><ChevronRight size={14} /></div><strong>{shift.isOpen ? "Available shift" : shift.employee}</strong><small>{shift.role}{overnight ? " · Overnight" : ""}{shift.recurrenceLabel ? ` · ${shift.recurrenceLabel}` : ""}</small>{shift.isOpen && <em>Open</em>}{shift.status === "Draft" && <em>Draft</em>}{shift.availabilityConflict && <em className="conflict-badge">{shift.availabilityConflict === "APPROVED_TIME_OFF" ? "Time off" : "Unavailable"}</em>}{conflict && !shift.availabilityConflict && <em className="conflict-badge">Conflict</em>}</button> }
 
-function hoursBetween(start: string, end: string) { const [sh,sm]=start.split(":").map(Number); const [eh,em]=end.split(":").map(Number); let mins=(eh*60+em)-(sh*60+sm); if(mins<=0) mins+=1440; return mins/60; }
 function workedHours(entry: TimeEntry) { return entry.clockOut ? Math.max(0, hoursBetween(entry.clockIn, entry.clockOut) - entry.breakMinutes/60) : 0; }
 function Attendance({ employees, shifts, entries, setEntries, notify, onEdit, devMode, persist }: { employees: Employee[]; shifts: Shift[]; entries: TimeEntry[]; setEntries: React.Dispatch<React.SetStateAction<TimeEntry[]>>; notify:(s:string)=>void; onEdit:(entry:TimeEntry)=>void; devMode:boolean; persist:(path:string,options:RequestInit)=>Promise<any> }) {
   const [fromDate, setFromDate] = useState("2026-07-27");
@@ -693,16 +652,7 @@ function Team({ employees, shifts, devMode, onAdd, onEdit, onInvite, onRevoke }:
   <div className="table-toolbar team-toolbar"><div className="search-field"><Search size={17}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search team" aria-label="Search team"/></div><select value={status} onChange={e=>setStatus(e.target.value as "ALL"|"ACTIVE"|"INACTIVE")} aria-label="Filter team status"><option value="ALL">All employees</option><option value="ACTIVE">Active</option><option value="INACTIVE">Inactive</option></select>{(query||status!=="ALL")&&<button type="button" className="secondary compact" onClick={()=>{setQuery("");setStatus("ALL")}}>Clear</button>}<span className="result-count" role="status" aria-live="polite">{visibleEmployees.length} employee{visibleEmployees.length===1?"":"s"}</span></div>
   <section className="team-grid">{visibleEmployees.map((person) => { const upcomingHours = scheduledHours(person); return <article className={`team-card ${!person.active ? "employee-inactive" : ""}`} key={person.id||person.name}><div className="team-card-head"><div className="team-identity"><div className="avatar large">{person.initials}</div><div><h2>{person.name}</h2><p>{person.role}</p></div></div><span className={`status team-status ${person.active ? "status-submitted" : "status-draft"}`}>{person.active ? "Active" : "Inactive"}</span></div><div className="team-stats"><span>Scheduled next 4 weeks <b>{upcomingHours.toFixed(upcomingHours % 1 ? 1 : 0)}h</b></span><span>{person.email || person.status}</span></div><div className="portal-access"><span className={`status ${person.portalStatus==="ACTIVE"?"status-submitted":person.portalStatus==="INVITED"?"status-pending":"status-draft"}`}>{person.portalStatus==="ACTIVE"?"Portal active":person.portalStatus==="INVITED"?"Invitation pending":person.portalStatus==="EXPIRED"?"Invitation expired":"No portal access"}</span></div><div className={`team-actions ${person.portalStatus==="INVITED"?"three-actions":"two-actions"}`}><button className="secondary" onClick={() => onEdit(person)}>Edit</button><button className="secondary" disabled={devMode||!person.email||person.portalStatus==="ACTIVE"} onClick={()=>onInvite(person)}>{person.portalStatus==="INVITED"?"Resend":"Invite"}</button>{person.portalStatus==="INVITED"&&<button className="secondary danger-outline" disabled={devMode} onClick={()=>onRevoke(person)}>Revoke</button>}</div>{devMode&&<small className="muted-note">Connect PostgreSQL to create real employee logins.</small>}</article>})}{!visibleEmployees.length&&<div className="table-empty">No employees match the current search and filters.</div>}</section></> }
 
-type ClockSettings = {
-  allowMobileClock: boolean;
-  allowKioskClock: boolean;
-  allowUnscheduledClock: boolean;
-  requireLocationCheck: boolean;
-  earlyClockInMinutes: number;
-  lateClockOutMinutes: number;
-  roundingMinutes: number;
-  autoApproveWithinMinutes: number | "";
-};
+
 const defaultClockSettings: ClockSettings = { allowMobileClock:true, allowKioskClock:true, allowUnscheduledClock:false, requireLocationCheck:false, earlyClockInMinutes:15, lateClockOutMinutes:60, roundingMinutes:0, autoApproveWithinMinutes:"" };
 function SettingsWorkspace({ locations, selectedLocationId, userRole, devMode, notify }: { locations: Location[]; selectedLocationId: string; userRole: string; devMode: boolean; notify: (message:string)=>void }) {
   const [section, setSection] = useState<"general"|"time"|"security">("time");

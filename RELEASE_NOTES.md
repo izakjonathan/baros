@@ -1,12 +1,14 @@
-# Release Notes — v0.16.21.3
+# Release Notes — v0.17.0
 
-## Audit Remediation
+## Architecture Cleanup & Redesign Readiness
 
-- Removed `vercel.json`, restoring parity with the approved deployment contract.
-- Updated activation reliability tests to validate shared session persistence rather than obsolete inline SQL strings.
-- Repaired historical regression version checks so later releases and patch-level versions remain valid.
-- Corrected semantic-version parsing for four-part hotfix releases.
-- Consolidated duplicated release metadata and headings.
+- Extracted workspace types from the manager application shell into `features/workspace/types.ts`.
+- Extracted date, overnight, overlap, conflict and shift mapping logic into `features/workspace/schedule-utils.ts`.
+- Added a typed `DatabaseShiftRecord` boundary and removed `any` from the extracted pure schedule layer.
+- Documented architecture ownership and stable Phase D boundaries.
+- Added a cross-workspace screen, component and state inventory for the redesign.
+- Added testing and development workflow documentation.
+- Added `test:v0170-redesign-readiness` and included it in the full regression chain.
 
 ## Migration
 
@@ -14,4 +16,4 @@ No migration required.
 
 ## Rollback
 
-Approved rollback checkpoint: v0.16.17.
+Approved rollback checkpoint: v0.16.21.3.

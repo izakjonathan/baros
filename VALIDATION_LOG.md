@@ -1,29 +1,28 @@
-# Bar Ops Validation Log — v0.16.21.3
+# Bar Ops Validation Log — v0.17.0
 
 ## Baseline
 
-GitHub-downloaded `baros-main.zip` at v0.16.21.2, reconciled against the approved v0.16.21.2 release package.
+Approved `bar-ops-v0.16.21.3-audit-remediation.zip`.
 
 ## Completed validation
 
-- Removed unintended `vercel.json` repository drift.
+- Audited repository structure and largest responsibility concentrations.
+- Extracted workspace domain contracts and pure schedule logic.
+- Confirmed extracted schedule utilities contain no `any` usage.
+- Added and ran the v0.17.0 redesign-readiness regression.
+- Ran the complete regression suite: passed.
+- Updated architecture-coupled regressions to verify the new feature-owned schedule mapper and forward-compatible v0.17.0 version line.
+- Ran JavaScript syntax checks for modified regression scripts: passed.
+- Ran the final stabilization preflight.
+- Ran release-contract validation.
 - Confirmed `public/sw.js` is present.
-- Confirmed `public/offline.html` is absent.
-- Updated activation reliability regression for the shared session-store implementation.
-- Added shared semantic-version comparison for historical regression scripts.
-- Updated 25 historical version assertions while preserving their functional checks.
-- Corrected four-part hotfix version handling in the release/recovery regression.
-- Ran all 93 individual focused regression scripts: passed.
-- Ran `npm run test:all`: passed.
-- Ran `npm run audit:preflight`: passed after this validation log was updated.
-- Ran `npm run validate:release`: passed after this validation log was updated.
-- Verified JavaScript syntax for modified regression scripts.
-- Verified ZIP integrity.
+- Confirmed `public/offline.html` and `vercel.json` are absent.
+- Verified release archive integrity.
 
-## Not completed in this environment
+## Dependency-based validation
 
-A clean dependency installation, ESLint, TypeScript compilation, and complete Next.js production build were not run because the available npm mirror previously returned a 404 for `@types/node@22.10.2`. GitHub Actions and Vercel remain the authoritative dependency-based gates.
+A clean dependency installation was attempted with `npm install --no-audit --no-fund` but the internal npm mirror returned 404 for `@types/node@22.10.2`. ESLint, TypeScript compilation and the complete Next.js production build could therefore not be executed locally. GitHub Actions and Vercel remain the authoritative dependency-based gates.
 
 ## Compatibility
 
-No database migration, API contract change, permission change, business feature, or workflow change.
+No database migration, API contract change, permission change, business feature, workflow change or intentional visual redesign.

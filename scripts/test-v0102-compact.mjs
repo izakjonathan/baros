@@ -2,10 +2,11 @@ import { isVersionAtLeast } from "./version-utils.mjs";
 import fs from 'node:fs';
 const app=fs.readFileSync('components/bar-ops-app.tsx','utf8');
 const css=fs.readFileSync('app/mono-components.css','utf8');
+const workspaceTypes=fs.readFileSync('features/workspace/types.ts','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const checks=[
  ['version',isVersionAtLeast(pkg.version, "0.10.2")],
- ['hourly rate type',app.includes('hourlyRate?: number')],
+ ['hourly rate type',workspaceTypes.includes('hourlyRate?: number')],
  ['hourly rate field',app.includes('Hourly pay (DKK)')],
  ['no employee autofocus',!app.includes('<input autoFocus value={name}')],
  ['bootstrap ref',app.includes('hasBootstrappedRef')],

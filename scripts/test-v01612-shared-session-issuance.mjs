@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
+import { isVersionAtLeast } from "./version-utils.mjs";
 import fs from "node:fs";
 
 const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
-assert.match(pkg.version, /^0\.16\.(?:1[2-9]|[2-9]\d)(?:\.\d+)?$/);
+assert.equal(isVersionAtLeast(pkg.version, "0.16.12"), true);
 
 const session = fs.readFileSync("lib/auth/session.ts", "utf8");
 const store = fs.readFileSync("lib/auth/session-store.ts", "utf8");

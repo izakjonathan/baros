@@ -1,10 +1,10 @@
 import fs from "node:fs";
+import { isVersionAtLeast } from "./version-utils.mjs";
 const read = p => fs.readFileSync(p,"utf8");
 const pkg=JSON.parse(read("package.json")); const next=read("next.config.ts"); const obs=read("lib/observability.ts");
 const live=read("app/api/health/live/route.ts"); const ready=read("app/api/health/ready/route.ts");
 const failures=[];
-const [major,minor,patch]=pkg.version.split(".").map(Number);
-if(major!==0 || minor!==16 || patch<3) failures.push("package version predates v0.16.3");
+if(!isVersionAtLeast(pkg.version, "0.16.3")) failures.push("package version predates v0.16.3");
 if(pkg.engines?.node!=="24.x") failures.push("Node runtime is not pinned to 24.x");
 if(!live.includes('status: "alive"')) failures.push("liveness probe missing");
 if(!ready.includes("TIMEOUT_MS")||!ready.includes("Promise.race")) failures.push("bounded readiness probe missing");

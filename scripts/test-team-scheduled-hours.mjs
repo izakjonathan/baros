@@ -1,9 +1,10 @@
 import fs from "node:fs";
 const app = fs.readFileSync("components/bar-ops-app.tsx", "utf8");
 const data = fs.readFileSync("lib/data.ts", "utf8");
+const scheduleMapper = fs.readFileSync("features/workspace/schedule-utils.ts", "utf8");
 const checks = [
   [data.includes("employeeId?: string"), "Shift type keeps employee UUID"],
-  [app.includes("employeeId: x.employee_id || undefined"), "Database shift mapper keeps employee UUID"],
+  [scheduleMapper.includes("employeeId: record.employee_id || undefined"), "Database shift mapper keeps employee UUID"],
   [app.includes("shifts={shifts}"), "Team receives live shift state"],
   [app.includes("Scheduled next 4 weeks"), "Team labels scheduled-hours period"],
   [app.includes("shift.employeeId === person.id"), "Scheduled hours match immutable employee ID"],

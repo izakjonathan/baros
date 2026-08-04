@@ -27,7 +27,7 @@ const readme = read("README.md");
 const currentReleaseMatches = [...readme.matchAll(/^Current release:\s*\*\*v([^*]+)\*\*/gm)];
 if (currentReleaseMatches.length !== 1) failures.push("README must contain exactly one canonical Current release declaration");
 if (!readme.includes(`v${pkg.version}`)) failures.push("README does not identify the package version");
-if (!readme.includes("Rollback checkpoint: **v0.16.17**")) failures.push("README must identify v0.16.17 as the rollback checkpoint");
+if (!/^Rollback checkpoint: \*\*v\d+\.\d+\.\d+(?:\.\d+)?\*\*\.$/m.test(readme)) failures.push("README must identify one explicit approved rollback checkpoint");
 
 const apiFiles = [];
 function walk(directory) {
