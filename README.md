@@ -1,6 +1,6 @@
 # Bar Ops
 
-**Current release: v0.16.1 — Mobile & iPad Polish**
+**Current release: v0.16.1.1 — Mobile & iPad Polish**
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 

@@ -1,3 +1,9 @@
+## v0.16.1.1 — TypeScript Build Hotfix
+
+- Replaced the invalid `const isToday = isToday` initializer in Daily Operations with a date comparison against `serviceDate`.
+- Updated the v0.16.1 regression assertion to accept patch-level hotfix versions.
+- No functional, permission, database, or API changes.
+
 # Release Notes
 
 ## v0.16.1 — Production Hardening I & II

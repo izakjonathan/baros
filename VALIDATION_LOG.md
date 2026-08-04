@@ -1,3 +1,11 @@
+## v0.16.1.1 Hotfix validation
+
+- Confirmed the invalid self-referential initializer is absent.
+- v0.16.0 runtime resilience regression passed.
+- v0.16.1 operational guardrails regression passed after forward-compatible version assertion update.
+- v0.15.3 mobile/iPad regression passed.
+- Full local Next.js build could not run because the available npm registry returned 404 for `@types/node`; Vercel should rerun the full TypeScript gate.
+
 # Validation Log
 
 ## Release

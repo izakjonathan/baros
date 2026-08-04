@@ -1,6 +1,6 @@
 import fs from "node:fs";
 const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
-if(pkg.version!=="0.16.1") throw new Error(`Expected 0.16.1, found ${pkg.version}`);
+if(!/^0\.16\.1(?:\.\d+)?$/.test(pkg.version)) throw new Error(`Expected 0.16.1 or a 0.16.1.x hotfix, found ${pkg.version}`);
 if(!pkg.scripts["validate:env"]||!pkg.scripts["test:v0160-runtime"]||!pkg.scripts["test:v0161-guardrails"]) throw new Error("Missing production hardening scripts");
 if(fs.existsSync("vercel.json")||fs.existsSync("public/offline.html")) throw new Error("Known deployment-problem files returned");
 if(!fs.existsSync("public/sw.js")) throw new Error("Service worker should remain included");

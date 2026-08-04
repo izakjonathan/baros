@@ -1,3 +1,9 @@
+## v0.16.1.1 TypeScript Build Hotfix
+
+- Fixed the Daily Operations `isToday` self-reference that blocked TypeScript compilation.
+- Preserves all v0.16.1 production-hardening behavior and scope.
+- No database migration or API change.
+
 # Implementation Status
 
 ## Current release
