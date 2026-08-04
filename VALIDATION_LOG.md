@@ -1,4 +1,13 @@
-# Bar Ops Validation Log — v0.17.0.1
+
+## v0.17.0.2 hotfix
+
+- Corrected `DatabaseShiftRecord.employee_availability_conflict` to use `Shift["availabilityConflict"] | null`.
+- Confirmed unsupported arbitrary strings can no longer flow into `Shift.availabilityConflict` at the type boundary.
+- `npm run test:all`: PASS.
+- `npm run audit:preflight`: PASS.
+- `npm run validate:release`: PASS.
+- Full dependency-based TypeScript/Next.js build not rerun locally; Vercel remains the definitive build gate.
+# Bar Ops Validation Log — v0.17.0.2
 
 ## Baseline
 
@@ -15,9 +24,9 @@ Approved `bar-ops-v0.16.21.3-audit-remediation.zip`.
 - Audited repository structure and largest responsibility concentrations.
 - Extracted workspace domain contracts and pure schedule logic.
 - Confirmed extracted schedule utilities contain no `any` usage.
-- Added and ran the v0.17.0.1 redesign-readiness regression.
+- Added and ran the v0.17.0.2 redesign-readiness regression.
 - Ran the complete regression suite: passed.
-- Updated architecture-coupled regressions to verify the new feature-owned schedule mapper and forward-compatible v0.17.0.1 version line.
+- Updated architecture-coupled regressions to verify the new feature-owned schedule mapper and forward-compatible v0.17.0.2 version line.
 - Ran JavaScript syntax checks for modified regression scripts: passed.
 - Ran the final stabilization preflight.
 - Ran release-contract validation.

@@ -1,4 +1,11 @@
-# Release Notes — v0.17.0.1
+# Release Notes — v0.17.0.2
+
+## Schedule availability type hotfix
+
+- Narrowed the extracted database availability-conflict field to the existing `Shift["availabilityConflict"]` union.
+- Preserved the only supported values: `APPROVED_TIME_OFF`, `OUTSIDE_AVAILABILITY`, or no conflict.
+- Fixed the Vercel TypeScript failure in `mapDatabaseShift` without changing runtime behavior.
+- No migration or redesign scope change.
 
 ## TypeScript hotfix
 

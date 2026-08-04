@@ -12,7 +12,7 @@ export type DatabaseShiftRecord = {
   status?: string | null;
   recurrence_group_id?: string | null;
   location_id?: string | null;
-  employee_availability_conflict?: string | null;
+  employee_availability_conflict?: Shift["availabilityConflict"] | null;
 };
 
 const todayAtNoon = new Date();
