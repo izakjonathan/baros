@@ -1,9 +1,9 @@
-# Validation Log — v0.18.4
+# Validation Log — v0.18.4.1
 
 ## Completed
 
 - Complete `npm run test:all`
-- v0.18.4 visual-system and employees/team regression
+- v0.18.4.1 visual-system and employees/team regression
 - Release preflight and release contract checks
 - Inherited employee access, portal invitation, scheduled-hours and permission regressions
 - v0.18.0–v0.18.3 Phase D regressions
@@ -69,3 +69,17 @@ One inherited v0.15.0 regression was updated to verify the workspace context by 
 - Browser/device visual verification
 
 These dependency- and browser-based gates were not available in this build environment and must not be inferred from the static regression results.
+
+## v0.18.4.1 JSX Build Hotfix
+
+Passed:
+- Complete `npm run test:all`
+- `npm run test:v0182-dashboard`
+- `npm run test:v0184-team`
+- `npm run audit:preflight`
+- `npm run validate:release`
+- Confirmed the Quick Actions section has balanced JSX closing elements
+
+Not run locally:
+- Dependency-based Next.js production build
+- Vercel deployment

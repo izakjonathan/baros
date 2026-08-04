@@ -1,6 +1,6 @@
-# Bar Ops v0.18.4 — Employees & Team Redesign
+# Bar Ops v0.18.4.1 — Employees & Team Redesign
 
-Current release: **v0.18.4**
+Current release: **v0.18.4.1**
 
 The approved Phase D visual system is formalized in `docs/phase-d-visual-design-system.md`. The Team workspace now uses the neon employee identity, bold typography, compact two-column cards, borderless coloured surfaces and locally scoped CSS Modules while preserving all employee data, access and permission behavior.
 

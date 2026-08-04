@@ -1,4 +1,9 @@
-# Release Notes — v0.18.4
+# v0.18.4.1 — JSX Build Hotfix
+
+- Fixed an extra closing `</div>` in the dashboard Quick Actions section that caused Turbopack to fail parsing `components/bar-ops-app.tsx`.
+- No visual, workflow, permission, API, or database behavior changed.
+
+# Release Notes — v0.18.4.1
 
 ## Phase D Visual Design System Brief
 

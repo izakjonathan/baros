@@ -393,7 +393,7 @@ function Dashboard({ shifts, products, employees, timeEntries, tasks, shiftNotes
       <Quick icon={Boxes} label="Start stock count" detail="Update inventory levels" onClick={() => onNavigate("inventory")} />
       <Quick icon={Truck} label="Receive delivery" detail="Open purchase orders" onClick={() => onNavigate("orders")} />
       <Quick icon={NotebookPen} label="Daily operations" detail="Complete opening and closing tasks" onClick={() => onNavigate("operations")} />
-    </div></div></section>
+    </div></section>
   </div>
 }
 
