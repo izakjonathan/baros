@@ -1,6 +1,6 @@
 # Bar Ops
 
-**Current release: v0.16.9.1 — Session Cookie TypeScript Hotfix**
+**Current release: v0.16.11
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 

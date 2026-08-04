@@ -19,7 +19,19 @@ export async function createSession(userId: string, organizationId: string, loca
   }
 
   const token = randomBytes(32).toString("base64url");
-  await db()`insert into sessions (user_id, organization_id, location_id, token_hash, expires_at) values (${userId}, ${organizationId}, ${locationId}, ${tokenHash(token)}, ${expiresAt})`;
+  const sql = db();
+  await sql.begin(async transaction => {
+    await transaction`delete from sessions where expires_at <= now()`;
+    await transaction`insert into sessions (user_id, organization_id, location_id, token_hash, expires_at) values (${userId}, ${organizationId}, ${locationId}, ${tokenHash(token)}, ${expiresAt})`;
+    await transaction`
+      delete from sessions
+      where id in (
+        select id from sessions
+        where user_id = ${userId} and organization_id = ${organizationId}
+        order by expires_at desc, id desc
+        offset 10
+      )`;
+  });
   store.set(sessionCookieName(), token, sessionCookieOptions(expiresAt));
 }
 

@@ -1,36 +1,24 @@
-## v0.16.9.1 — Session Cookie TypeScript Hotfix
+# Bar Ops v0.16.11 — Production Hardening XI & XII
 
-Built from the approved v0.16.9 Production Hardening IX & X release.
+Built from the approved v0.16.9.1 session-cookie TypeScript hotfix baseline.
 
-- Preserved the literal Next.js cookie option types for `sameSite: "lax"` and `priority: "high"`.
-- Corrected the Vercel TypeScript build failure in employee activation and all other shared session-cookie consumers.
-- No database migration, API contract, permission or workflow change.
+## v0.16.10 — Authentication Response Hardening
 
-# Release Notes
+- Added consistent `x-request-id` and `Cache-Control: no-store` headers to login and logout responses.
+- Included request IDs in authentication success and failure payloads for operational tracing.
+- Added constant-work password verification for unknown accounts through a valid dummy scrypt hash.
+- Preserved the existing generic invalid-credentials message and login rate limits.
 
-## v0.16.9 — Production Hardening IX & X
+## v0.16.11 — Session Store Hygiene
 
-Built from the approved v0.16.7 Production Hardening VII & VIII baseline.
+- Prunes expired session records during normal production session creation.
+- Limits retained active sessions to the ten newest sessions per user and organization.
+- Performs session pruning, insertion and retention cleanup in one database transaction.
+- Preserves multi-device sign-in and existing session-cookie behavior.
 
-### v0.16.8 — API Payload Integrity
+## Compatibility
 
-- Replaced unbounded `Request.json()` parsing with byte-counted streaming JSON reads.
-- Enforces route-specific body limits even when `Content-Length` is absent or chunked.
-- Rejects unsupported request media types with HTTP 415.
-- Rejects invalid `Content-Length`, malformed UTF-8 and malformed JSON safely.
-- Preserves the existing shared API error format, request IDs and route-specific size limits.
-
-### v0.16.9 — Database Operations Guardrails
-
-- Aligned the database administration workflow with Node.js 24.
-- Added a PostgreSQL advisory lock around migration execution to prevent concurrent migration runs.
-- Added migration connection identification, statement timeout and lock timeout settings.
-- Ensured advisory-lock and connection cleanup runs after both successful and failed migrations.
-- Added focused regression suites for both releases.
-- Updated inherited v0.16.6 and v0.16.7 version assertions to remain valid for later releases.
-
-### Compatibility
-
-- No database migration was added.
-- No business feature, permission, API route or response contract was intentionally changed.
-- Existing JSON API clients must continue sending `Content-Type: application/json`, as the application UI already does.
+- No database migration.
+- No permission or role changes.
+- No business-feature changes.
+- No successful API route removal or breaking response change.
