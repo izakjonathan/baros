@@ -2,7 +2,7 @@ import fs from 'node:fs';
 const app=fs.readFileSync('components/bar-ops-app.tsx','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const checks=[
-  [pkg.version==='0.12.1','package version is v0.12.1'],
+  [['0.12.1','0.12.2','0.12.3'].includes(pkg.version),'package version is v0.12.1'],
   [app.includes('showConflictsOnly'),'schedule can filter to conflicting shifts'],
   [app.includes('Review conflicts ('),'conflict review action is visible'],
   [app.includes('aria-pressed={showConflictsOnly}'),'conflict filter exposes pressed state'],

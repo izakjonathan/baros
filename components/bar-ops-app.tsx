@@ -29,6 +29,7 @@ type StockAdjustment = { id: string; productId: string; productName: string; del
 type OpsTask = { id: string; title: string; type: "Opening" | "Closing" | "Task" | "Maintenance"; owner: string; due: string; done: boolean; note?: string };
 type LogEntry = { id: string; title: string; body: string; author: string; createdAt: string };
 type TimeEntry = { id: string; employee: string; date: string; clockIn: string; clockOut?: string; breakMinutes: number; status: "Running" | "Pending" | "Approved" | "Rejected"; scheduledHours: number; note?: string; edited?: boolean };
+type ScheduleAcknowledgementSummary = { publication: { id: string; version: number; publishedAt: string } | null; employees: Array<{ id: string; name: string; acknowledgedAt: string | null; changeTypes?: string[] }> };
 const todayAtNoon = new Date(); todayAtNoon.setHours(12,0,0,0);
 const BASE_MONDAY = new Date(todayAtNoon); BASE_MONDAY.setDate(todayAtNoon.getDate() - ((todayAtNoon.getDay() + 6) % 7));
 function toIsoDate(date: Date) { const y = date.getFullYear(); const m = String(date.getMonth()+1).padStart(2,"0"); const d = String(date.getDate()).padStart(2,"0"); return `${y}-${m}-${d}`; }
@@ -341,6 +342,8 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
   const [customTo,setCustomTo]=useState(toIsoDate(customDefaultEnd));
   const [monthOffset, setMonthOffset] = useState(0);
   const [showConflictsOnly, setShowConflictsOnly] = useState(false);
+  const [acknowledgements, setAcknowledgements] = useState<ScheduleAcknowledgementSummary>({ publication: null, employees: [] });
+  const [acknowledgementsOpen, setAcknowledgementsOpen] = useState(false);
   const weekMonday = new Date(BASE_MONDAY); weekMonday.setDate(BASE_MONDAY.getDate() + currentWeekOffset * 7);
   const monthAnchor = new Date(BASE_MONDAY.getFullYear(), BASE_MONDAY.getMonth() + monthOffset, 1, 12);
   const periodStart = viewMode === "week" ? weekMonday : viewMode === "month" ? new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), 1, 12) : new Date(`${customFrom}T12:00:00`);
@@ -361,6 +364,17 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
   const displayedShifts = showConflictsOnly ? visibleShifts.filter((shift) => conflictShiftIds.has(shift.id)) : visibleShifts;
   const rangeLabel = viewMode === "month" ? periodStart.toLocaleDateString("en-GB", { month: "long", year: "numeric" }) : `${periodStart.toLocaleDateString("en-GB", { day: "numeric", month: "long" })} – ${periodEnd.toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`;
   const weekLabel = currentWeekOffset === 0 ? "This week" : currentWeekOffset === -1 ? "Last week" : currentWeekOffset === 1 ? "Next week" : rangeLabel;
+  const acknowledgedCount = acknowledgements.employees.filter((employee) => employee.acknowledgedAt).length;
+  async function loadAcknowledgements() {
+    if (devMode || viewMode !== "week" || !selectedLocationId || !startIso) { setAcknowledgements({ publication: null, employees: [] }); return; }
+    try {
+      const response = await fetch(`/api/schedule-acknowledgements?locationId=${encodeURIComponent(selectedLocationId)}&weekStart=${encodeURIComponent(startIso)}`, { cache: "no-store" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Could not load acknowledgements");
+      setAcknowledgements({ publication: data.publication || null, employees: Array.isArray(data.employees) ? data.employees : [] });
+    } catch { setAcknowledgements({ publication: null, employees: [] }); }
+  }
+  useEffect(() => { void loadAcknowledgements(); }, [viewMode, selectedLocationId, startIso, devMode]);
   function movePeriod(direction: number) { if (viewMode === "week") setCurrentWeekOffset((week) => week + direction); else if(viewMode === "month") setMonthOffset((month) => month + direction); else { const days=Math.max(1,dateSerial(customTo)-dateSerial(customFrom)+1); setCustomFrom(dateFromSerial(dateSerial(customFrom)+direction*days)); setCustomTo(dateFromSerial(dateSerial(customTo)+direction*days)); } }
   async function publish() {
     if (!drafts) { notify("This period is already published"); return; }
@@ -375,6 +389,7 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
       }
       setShifts((current) => current.map((shift) => { const date=canonicalShiftDate(shift); return date>=startIso!&&date<=endIso!&&shift.status==="Draft"?{...shift,status:"Published"}:shift; }));
       notify(`${drafts} shift${drafts === 1 ? "" : "s"} published`);
+      await loadAcknowledgements();
     } catch (error) { notify(error instanceof Error ? error.message : "Could not publish schedule"); }
     finally { setPublishing(false); }
   }
@@ -405,7 +420,7 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
     <section className={`schedule-toolbar compact-schedule-toolbar ${viewMode === "custom" ? "has-custom-range" : ""}`}>
       <div className="period-controls"><button onClick={() => movePeriod(-1)} aria-label={`Previous ${viewMode}`}><ChevronLeft size={17}/></button><strong>{viewMode === "week" ? weekLabel : rangeLabel}</strong><button onClick={() => movePeriod(1)} aria-label={`Next ${viewMode}`}><ChevronRight size={17}/></button></div>
       {viewMode==="custom"&&<div className="custom-range"><label><span>From</span><input type="date" value={customFrom} onChange={e=>setCustomFrom(e.target.value)}/></label><label><span>To</span><input type="date" value={customTo} min={customFrom} onChange={e=>setCustomTo(e.target.value)}/></label></div>}
-      <div className="schedule-toolbar-right"><span className="schedule-counts"><b>{visibleShifts.length}</b> shifts · <b>{drafts}</b> drafts{conflicts.size ? <> · <b className="conflict-count">{conflicts.size}</b> overlaps</> : null}{availabilityConflicts.size ? <> · <b className="conflict-count">{availabilityConflicts.size}</b> availability</> : null}</span>{conflictShiftIds.size ? <button type="button" className="secondary compact-action" aria-pressed={showConflictsOnly} onClick={() => setShowConflictsOnly((value) => !value)}><AlertTriangle size={15}/><span>{showConflictsOnly ? "Show all" : `Review conflicts (${conflictShiftIds.size})`}</span></button> : null}<button className="publish-button compact-publish" onClick={publish} disabled={!drafts || publishing}><Send size={15}/><span>{publishing ? "Publishing…" : drafts ? `Publish (${drafts})` : "Published"}</span></button></div>
+      <div className="schedule-toolbar-right"><span className="schedule-counts"><b>{visibleShifts.length}</b> shifts · <b>{drafts}</b> drafts{conflicts.size ? <> · <b className="conflict-count">{conflicts.size}</b> overlaps</> : null}{availabilityConflicts.size ? <> · <b className="conflict-count">{availabilityConflicts.size}</b> availability</> : null}</span>{acknowledgements.publication ? <button type="button" className="secondary compact-action" onClick={() => setAcknowledgementsOpen(true)}><CheckCheck size={15}/><span>Acknowledged {acknowledgedCount}/{acknowledgements.employees.length}</span></button> : null}{conflictShiftIds.size ? <button type="button" className="secondary compact-action" aria-pressed={showConflictsOnly} onClick={() => setShowConflictsOnly((value) => !value)}><AlertTriangle size={15}/><span>{showConflictsOnly ? "Show all" : `Review conflicts (${conflictShiftIds.size})`}</span></button> : null}<button type="button" className="publish-button compact-publish" onClick={publish} disabled={!drafts || publishing}><Send size={15}/><span>{publishing ? "Publishing…" : drafts ? `Publish (${drafts})` : "Published"}</span></button></div>
     </section>
     <section className={`calendar-panel schedule-calendar ${viewMode === "month" ? "month-view" : "week-view"}`}><div className="calendar-grid">
       {displayDays.map((day) => {
@@ -419,6 +434,7 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
     </div></section>
     {showConflictsOnly && !displayedShifts.length ? <div className="empty-state"><AlertTriangle size={20}/><strong>No conflicts in this period</strong><span>Show all shifts to continue editing the schedule.</span></div> : null}
     <div className="legend compact-legend"><span><i className="manager"/> Manager</span><span><i className="bartender"/> Bartender</span><span><i className="floor"/> Floor</span><span><i className="draft"/> Draft</span></div>
+    {acknowledgementsOpen&&<div className="modal-layer"><button type="button" className="modal-scrim" onClick={()=>setAcknowledgementsOpen(false)} aria-label="Close acknowledgement status"/><section className="modal acknowledgement-modal" role="dialog" aria-modal="true" aria-labelledby="acknowledgement-title"><div className="modal-head"><div><h2 id="acknowledgement-title">Schedule acknowledgements</h2><p>Version {acknowledgements.publication?.version} · {weekLabel}</p></div><button type="button" className="icon-button" onClick={()=>setAcknowledgementsOpen(false)} aria-label="Close"><X size={18}/></button></div><div className="acknowledgement-list">{acknowledgements.employees.map(employee=><div key={employee.id}><span className={`status-dot ${employee.acknowledgedAt?"is-complete":""}`}/><div><strong>{employee.name}</strong><small>{employee.acknowledgedAt?`Acknowledged ${new Date(employee.acknowledgedAt).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}`:"Awaiting acknowledgement"}{employee.changeTypes?.length?` · ${employee.changeTypes.map((type)=>type.replaceAll("_"," ").toLowerCase()).join(", ")}`:""}</small></div></div>)}{!acknowledgements.employees.length&&<div className="empty-state"><CheckCheck size={20}/><strong>No assigned employees</strong><span>This publication has no employee acknowledgements to collect.</span></div>}</div><div className="modal-actions"><button type="button" className="secondary" onClick={()=>void loadAcknowledgements()}>Refresh</button><button type="button" className="primary" onClick={()=>setAcknowledgementsOpen(false)}>Done</button></div></section></div>}
   </>
 }
 function ShiftCard({ shift, conflict, onOpen, onDragStart }: { shift: Shift; conflict?: boolean; onOpen: () => void; onDragStart?: (event: React.DragEvent<HTMLButtonElement>) => void }) { const overnight = isOvernight(shift.start, shift.end); return <button type="button" draggable onDragStart={onDragStart} className={`shift-card shift-card-button role-${shift.role.toLowerCase()} ${shift.status === "Draft" ? "is-draft" : ""} ${conflict ? "has-conflict" : ""}`} onClick={onOpen} aria-label={`Open ${shift.isOpen ? "available" : shift.employee} shift ${shift.start} to ${shift.end}${overnight ? " next day" : ""}`}><div className="shift-card-top"><span>{shift.start}–{shift.end}{overnight ? " +1" : ""}</span><ChevronRight size={14} /></div><strong>{shift.isOpen ? "Available shift" : shift.employee}</strong><small>{shift.role}{overnight ? " · Overnight" : ""}{shift.recurrenceLabel ? ` · ${shift.recurrenceLabel}` : ""}</small>{shift.isOpen && <em>Open</em>}{shift.status === "Draft" && <em>Draft</em>}{shift.availabilityConflict && <em className="conflict-badge">{shift.availabilityConflict === "APPROVED_TIME_OFF" ? "Time off" : "Unavailable"}</em>}{conflict && !shift.availabilityConflict && <em className="conflict-badge">Conflict</em>}</button> }
