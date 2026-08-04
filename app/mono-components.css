@@ -864,3 +864,32 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
 @supports (padding:max(0px)){
   .topbar,.employee-header{padding-left:max(var(--workspace-inline,16px),env(safe-area-inset-left));padding-right:max(var(--workspace-inline,16px),env(safe-area-inset-right))}
 }
+
+
+/* v0.18.4.3 — mobile dialog and cross-screen consistency */
+.modal-layer{background:rgba(0,0,0,.46)}
+.modal-scrim{backdrop-filter:none}
+.employee-dialog{display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden;background:#fff4c4;border:2px solid #000;border-radius:2.5rem;box-shadow:none}
+.employee-dialog .modal-head{padding:20px 22px 14px;background:#fff4c4;border-bottom:2px solid #000}
+.employee-dialog .modal-head h2{font-size:clamp(2rem,8vw,3rem);line-height:.95;letter-spacing:-.04em}
+.employee-dialog .modal-head .icon-button{background:transparent;border:0;color:#000}
+.employee-dialog>.form-grid{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:18px 22px 120px;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.employee-dialog .form-grid label{gap:6px;font-size:13px;font-weight:800}
+.employee-dialog .form-grid input,.employee-dialog .form-grid select{min-height:50px;padding:0 16px;border:2px solid #000;border-radius:999px;background:transparent;font-size:16px;font-weight:700}
+.employee-dialog .interaction-actions{position:absolute;left:0;right:0;bottom:0;padding:12px 22px max(12px,env(safe-area-inset-bottom));background:#fff4c4;border-top:2px solid #000}
+.employee-dialog .interaction-actions button{min-height:52px;border-radius:999px}
+.employee-dialog .interaction-actions .secondary{border:2px solid #000;background:transparent;color:#000}
+.employee-dialog .interaction-actions .primary{border:2px solid #000;background:#000;color:#fff4c4}
+.execution-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.execution-metrics .metric-card{min-height:0;padding:18px;border:0;border-radius:28px;box-shadow:none;color:#000}
+.execution-metrics .metric-card:nth-child(1){background:#f47add}.execution-metrics .metric-card:nth-child(2){background:#feb34a}.execution-metrics .metric-card:nth-child(3){background:#4e4ced}.execution-metrics .metric-card:nth-child(4){background:#dfee4b}
+.execution-metrics .metric-card *{color:#000}.execution-metrics .metric-card small{font-size:12px;line-height:1.35}.execution-metrics .metric-trend{margin-top:10px}
+@media(max-width:600px){
+ .employee-dialog{position:fixed;inset:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));width:auto;max-height:none;margin:0;border-radius:2rem}
+ .employee-dialog>.form-grid{grid-template-columns:1fr;padding:14px 18px 116px}
+ .employee-dialog .full-field{grid-column:auto}
+ .employee-dialog .modal-head{padding:18px 18px 12px}
+ .employee-dialog .interaction-actions{padding-inline:18px}
+ .execution-metrics{grid-template-columns:1fr 1fr}
+ .execution-metrics .metric-card{padding:16px;min-height:148px}
+}

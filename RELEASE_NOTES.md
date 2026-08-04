@@ -1,3 +1,18 @@
+# Release Notes — v0.18.4.3
+
+## Mobile Dialog & Cross-Screen Consistency
+
+- Rebuilt the employee editor as a viewport-safe mobile dialog with fixed heading, independently scrolling form content and safe-area-aware sticky actions.
+- Removed the white dialog heading, backdrop blur, shadow treatment and oversized mobile controls.
+- Restored a visible icon inside the mobile Add employee action.
+- Tightened Team card spacing and metadata density.
+- Aligned scheduling with the approved pink shift identity and removed blue, green, grey, white-card and shadow treatments.
+- Compacted schedule period controls and retained touch-safe horizontal scrolling.
+- Converted Shift execution metrics into a compact two-column functional-colour grid.
+- Simplified Operational summary into one black surface with divided metrics rather than rounded cards within a card.
+- Compacted mobile dashboard panel actions and normalized metric-card rhythm.
+- No business logic, permissions, APIs, database schema or workflow behavior changed.
+
 # Release Notes — v0.18.4.2 Visual System Alignment Pass
 
 - Unified the light page, header, safe-area, and overscroll background to approved beige.
