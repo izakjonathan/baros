@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { requestIdFrom } from "@/lib/observability";
+import { releaseHeaders } from "@/lib/release";
 
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
@@ -46,6 +47,7 @@ export function proxy(request: NextRequest) {
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("x-request-id", requestId);
   response.headers.set("cache-control", "no-store");
+  for (const [key, value] of Object.entries(releaseHeaders())) response.headers.set(key, value);
   return response;
 }
 

@@ -1,38 +1,27 @@
-# Bar Ops v0.16.15.1 — Order Route TypeScript Hotfix
+# Bar Ops v0.16.17 — Production Hardening XVII & XVIII
 
-Built from the approved v0.16.15 Production Hardening XV & XVI baseline.
+Built from the approved v0.16.15.1 Order Route TypeScript Hotfix baseline.
 
-- Fixed typed SQL-template parameters in `app/api/orders/route.ts`.
-- Validates order number, status, delivery date, notes and item-array shape before the transaction.
-- Preserves tenant-scope enforcement and atomic audit writes.
-- No migration, permission, API or workflow change.
+## v0.16.16 — Operational Observability
 
----
+- Added centralized application release metadata.
+- Health endpoints now identify the running version, environment and shortened Vercel commit SHA.
+- API responses receive version and commit headers through the shared request boundary.
+- Structured server logs now include service, version, environment and deployment commit context.
+- Readiness checks now report and log their execution duration.
+- No secrets, full deployment URLs or database connection details are exposed.
 
-# Bar Ops v0.16.15 — Production Hardening XV & XVI
+## v0.16.17 — Release & Recovery Guardrails
 
-Built from the approved v0.16.13 Production Hardening XIII & XIV baseline.
-
-## v0.16.14 — Authorization & Tenant Scope Integrity
-
-- Added shared organization-location and organization-entity scope guards.
-- Purchase-order creation now verifies the selected location belongs to the authenticated organization.
-- Purchase-order suppliers and products must belong to the same authenticated organization.
-- Payroll-period creation now verifies its selected location belongs to the authenticated organization.
-- Cross-organization identifiers are rejected before any write occurs.
-- Existing role permissions remain unchanged.
-
-## v0.16.15 — Transaction Integrity
-
-- Purchase-order creation, line-item insertion and its audit record now run in one database transaction.
-- Payroll-period creation/status transitions and their audit records now run in one database transaction.
-- A failed validation or audit write now rolls back the complete affected mutation.
-- Added bounded order-item input validation and a maximum of 250 submitted lines.
-- Replaced direct unbounded JSON parsing in the affected routes with the shared bounded parser.
+- Added `npm run validate:release`.
+- GitHub Quality Checks now execute release validation before the existing gates.
+- Release validation checks package/document version consistency, Node 24 workflows, required service-worker presence and forbidden deployment files.
+- Added focused v0.16.16 and v0.16.17 regression suites.
+- Documented v0.16.15.1 as the approved rollback checkpoint with minimum post-rollback health and authentication checks.
 
 ## Compatibility
 
 - No database migration.
-- No permission or role changes.
-- No new business features.
+- No role or permission changes.
+- No business-feature additions.
 - No route removal or intentional successful-response break.
