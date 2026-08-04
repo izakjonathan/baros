@@ -1,3 +1,3 @@
-# Bar Ops v0.13.3 — Shift Notes
+# Bar Ops v0.14.2
 
-Employees can add structured notes to their assigned shifts. Managers see recent note, incident, equipment and stock entries on Today’s Operations. Notes are tenant-scoped, append-only and linked to the originating shift.
+Reusable opening and closing checklist presets for daily shift execution.

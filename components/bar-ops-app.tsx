@@ -5,7 +5,7 @@ import {
   ArrowRight, Bell, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight,
   CircleDollarSign, ClipboardList, Clock3, Coffee, LayoutDashboard, Menu, Package, Plus,
   Search, Settings, ShoppingCart, Sparkles, Users, X, AlertTriangle, Truck, MoreHorizontal,
-  Copy, Send, Boxes, Wine, UserRoundPlus, Timer, Play, Square, FileCheck2, FileDown, CheckCheck, RotateCcw, Ban, Pencil, ShieldAlert, History, DownloadCloud, LockKeyhole, UnlockKeyhole, Database, KeyRound, MapPin, FileArchive, ShieldCheck, ReceiptText, Trash2, ArrowLeftRight, TrendingUp, NotebookPen, Wrench, Save, Upload, Undo2, CheckCircle2, LogOut
+  Copy, Send, Boxes, Wine, UserRoundPlus, Timer, Play, Square, Activity, FileCheck2, FileDown, CheckCheck, RotateCcw, Ban, Pencil, ShieldAlert, History, DownloadCloud, LockKeyhole, UnlockKeyhole, Database, KeyRound, MapPin, FileArchive, ShieldCheck, ReceiptText, Trash2, ArrowLeftRight, TrendingUp, NotebookPen, Wrench, Save, Upload, Undo2, CheckCircle2, LogOut
 } from "lucide-react";
 import { days, initialProducts, initialShifts, orders, team, type NavKey, type Product, type Shift, type ShiftRole } from "@/lib/data";
 import { DevRoleSwitcher } from "@/components/dev-role-switcher";
@@ -13,6 +13,7 @@ import { RequestsWorkspace } from "@/components/requests-workspace";
 
 const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Today’s operations", icon: LayoutDashboard },
+  { id: "execution", label: "Shift execution", icon: Activity },
   { id: "schedule", label: "Shift plan", icon: CalendarDays },
   { id: "attendance", label: "Time & attendance", icon: Timer },
   { id: "inventory", label: "Inventory", icon: Package },
@@ -168,11 +169,12 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
         <Topbar onMenu={() => setMobileNav(true)} locations={locations} selectedLocationId={selectedLocationId} onLocationChange={setSelectedLocationId} onNavigate={setActive} />
         <div className="page-wrap">
           {active === "dashboard" && <Dashboard shifts={shifts} products={products} employees={employees} timeEntries={timeEntries} tasks={opsTasks} shiftNotes={shiftNotes} devMode={devMode} onNavigate={setActive} />}
+          {active === "execution" && <ShiftExecution shifts={shifts} entries={timeEntries} notes={shiftNotes} onNavigate={setActive} />}
           {active === "schedule" && <Schedule shifts={shifts} setShifts={setShifts} employees={employees} onNewShift={openShiftDialog} onEditShift={setEditingShift} notify={notify} currentWeekOffset={currentWeekOffset} setCurrentWeekOffset={setCurrentWeekOffset} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
           {active === "attendance" && <Attendance employees={employees} shifts={shifts} entries={timeEntries} setEntries={setTimeEntries} notify={notify} onEdit={setEditingTimeEntry} devMode={devMode} persist={persist} />}
           {active === "inventory" && <Inventory products={products} setProducts={setProducts} onNewProduct={() => setDialog("product")} onEditProduct={setEditingProduct} onStockCount={() => setDialog("stockCount")} adjustments={stockAdjustments} setAdjustments={setStockAdjustments} notify={notify} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
           {active === "orders" && <Orders products={products} setProducts={setProducts} onNewOrder={() => setDialog("order")} notify={notify} />}
-          {active === "operations" && <DailyOperations tasks={opsTasks} setTasks={setOpsTasks} logs={logEntries} setLogs={setLogEntries} notify={notify} />}
+          {active === "operations" && <DailyOperations tasks={opsTasks} setTasks={setOpsTasks} logs={logEntries} setLogs={setLogEntries} notify={notify} devMode={devMode} locationId={selectedLocationId} />}
           {active === "team" && (
             <Team
               employees={employees}
@@ -368,6 +370,15 @@ function Dashboard({ shifts, products, employees, timeEntries, tasks, shiftNotes
     return priority[a.tone] - priority[b.tone] || a.shift.start.localeCompare(b.shift.start);
   });
   const attentionTotal = openToday.length + late.length + lowStock.length + pendingRequests + conflicts.size + availabilityConflicts;
+  const completedToday = assignedToday.filter((shift) => { const [eh,em]=shift.end.split(":").map(Number); const [sh,sm]=shift.start.split(":").map(Number); let end=eh*60+em; const start=sh*60+sm; if(end<=start) end+=1440; let current=nowMinutes; if(end>1440&&current<start) current+=1440; return current>end; });
+  const workedMinutesToday = timeEntries.filter((entry) => entry.date === today).reduce((total, entry) => {
+    if (!entry.clockOut) return total;
+    const [ih,im]=entry.clockIn.split(":").map(Number); const [oh,om]=entry.clockOut.split(":").map(Number);
+    let minutes=(oh*60+om)-(ih*60+im); if(minutes<0) minutes+=1440;
+    return total + Math.max(0, minutes-entry.breakMinutes);
+  }, 0);
+  const completedTasks = tasks.filter((task) => task.done).length;
+  const operationalExceptions = late.length + openToday.length + conflicts.size + availabilityConflicts + incompleteTasks.length;
   return <>
     <PageHeader eyebrow={new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})} title="Today’s operations" subtitle={`Live overview for the current location · updated ${lastUpdated.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}`} />
     <section className="metric-grid daily-metrics">
@@ -399,6 +410,14 @@ function Dashboard({ shifts, products, employees, timeEntries, tasks, shiftNotes
         <button className="attention-item" onClick={() => onNavigate("operations")}><span className="attention-icon blue"><CheckCircle2 size={19} /></span><div><strong>{incompleteTasks.length} operations tasks open</strong><small>Opening, closing and maintenance</small></div><ChevronRight size={18} /></button>
       </section>
     </div>
+    <section className="panel operational-summary"><PanelTitle title="Operational summary" subtitle="Current progress and outstanding work for today" />
+      <div className="operational-summary-grid">
+        <div><span>Completed shifts</span><strong>{completedToday.length}</strong><small>{assignedToday.length} assigned today</small></div>
+        <div><span>Worked hours</span><strong>{(workedMinutesToday/60).toFixed(1)}</strong><small>Recorded after breaks</small></div>
+        <div><span>Tasks completed</span><strong>{completedTasks}/{tasks.length}</strong><small>{incompleteTasks.length} still open</small></div>
+        <div><span>Open exceptions</span><strong>{operationalExceptions}</strong><small>Staffing, schedule and operations</small></div>
+      </div>
+    </section>
     {shiftNotes.length>0&&<section className="panel shift-notes-panel"><PanelTitle title="Latest shift notes" subtitle="Incidents, equipment, stock and handover notes from the team" action={<button type="button" className="text-button" onClick={()=>onNavigate("schedule")}>Open schedule <ArrowRight size={15}/></button>}/><div className="shift-notes-list">{shiftNotes.slice(0,6).map(note=><article key={note.id}><span className={`note-category note-${note.category.toLowerCase()}`}>{note.category}</span><div><strong>{note.author} · {note.role}</strong><p>{note.note}</p><small>{new Date(note.createdAt).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</small></div></article>)}</div></section>}
     <section className="panel quick-panel"><PanelTitle title="Quick actions" subtitle="Jump directly into today’s work" /><div className="quick-grid">
       <Quick icon={Plus} label="Create shift" detail="Add or assign today’s coverage" onClick={() => onNavigate("schedule")} />
@@ -408,6 +427,25 @@ function Dashboard({ shifts, products, employees, timeEntries, tasks, shiftNotes
       <Quick icon={Truck} label="Receive delivery" detail="Open purchase orders" onClick={() => onNavigate("orders")} />
       <Quick icon={NotebookPen} label="Daily operations" detail="Complete opening and closing tasks" onClick={() => onNavigate("operations")} />
     </div></section>
+  </>
+}
+
+function ShiftExecution({ shifts, entries, notes, onNavigate }: { shifts: Shift[]; entries: TimeEntry[]; notes: ShiftNote[]; onNavigate: (id: NavKey) => void }) {
+  const today = toIsoDate(new Date());
+  const todayShifts = shifts.filter((shift) => canonicalShiftDate(shift) === today && !shift.isOpen).sort((a,b)=>a.start.localeCompare(b.start));
+  const activeEntries = entries.filter((entry) => entry.date === today && entry.status === "Running");
+  return <>
+    <PageHeader eyebrow="Live operations" title="Shift execution" subtitle="Run the current shift from one operational view" action={<button type="button" className="primary action-button" onClick={()=>onNavigate("attendance")}><Timer size={16}/>Open attendance</button>} />
+    <section className="metric-grid execution-metrics">
+      <Metric icon={Users} label="Assigned today" value={`${todayShifts.length}`} detail="Published employee shifts" trend="Current location" />
+      <Metric icon={Play} label="Clocked in" value={`${activeEntries.length}`} detail={`${activeEntries.filter(entry=>entry.onBreak).length} currently on break`} trend="Live attendance" />
+      <Metric icon={NotebookPen} label="Shift notes" value={`${notes.length}`} detail="Latest operational notes" trend="Handover context" />
+      <Metric icon={AlertTriangle} label="Exceptions" value={`${todayShifts.filter(shift=>shift.availabilityConflict).length}`} detail="Availability conflicts today" trend="Review before service" warning={todayShifts.some(shift=>shift.availabilityConflict)} />
+    </section>
+    <section className="panel execution-board"><PanelTitle title="Current shift board" subtitle="Attendance, breaks and shift context" />
+      <div className="execution-list">{todayShifts.length===0&&<div className="daily-empty">No assigned shifts today.</div>}{todayShifts.map(shift=>{const entry=activeEntries.find(item=>item.employee===shift.employee); const shiftNotes=notes.filter(note=>note.shiftId===shift.id); return <article key={shift.id}><div className="avatar">{shift.initials}</div><div><strong>{shift.employee}</strong><small>{shift.role} · {shift.start}–{shift.end}</small></div><span className={`execution-state ${entry?.onBreak?"break":entry?"live":"expected"}`}>{entry?.onBreak?"On break":entry?"Clocked in":"Expected"}</span><small>{shiftNotes.length} notes</small><button type="button" className="text-button" onClick={()=>onNavigate(entry?"attendance":"schedule")}>{entry?"Manage":"Open shift"}<ArrowRight size={14}/></button></article>})}</div>
+    </section>
+    <div className="dashboard-grid"><section className="panel"><PanelTitle title="Execution actions" subtitle="Existing operational tools"/><div className="quick-grid execution-actions"><Quick icon={Coffee} label="Manage breaks" detail="Start or end an employee break" onClick={()=>onNavigate("attendance")}/><Quick icon={NotebookPen} label="Review notes" detail="See incidents and handover notes" onClick={()=>onNavigate("dashboard")}/><Quick icon={CalendarDays} label="Adjust coverage" detail="Reassign or open a shift" onClick={()=>onNavigate("schedule")}/><Quick icon={CheckCircle2} label="Operations tasks" detail="Opening, closing and maintenance" onClick={()=>onNavigate("operations")}/></div></section></div>
   </>
 }
 
@@ -620,15 +658,19 @@ function Orders({ products, setProducts, onNewOrder, notify }: { products:Produc
   </>
 }
 
-function DailyOperations({tasks,setTasks,logs,setLogs,notify}:{tasks:OpsTask[];setTasks:React.Dispatch<React.SetStateAction<OpsTask[]>>;logs:LogEntry[];setLogs:React.Dispatch<React.SetStateAction<LogEntry[]>>;notify:(s:string)=>void}){
- const [title,setTitle]=useState(""); const [type,setType]=useState<OpsTask["type"]>("Task"); const [logText,setLogText]=useState("");
+function DailyOperations({tasks,setTasks,logs,setLogs,notify,devMode,locationId}:{tasks:OpsTask[];setTasks:React.Dispatch<React.SetStateAction<OpsTask[]>>;logs:LogEntry[];setLogs:React.Dispatch<React.SetStateAction<LogEntry[]>>;notify:(s:string)=>void;devMode:boolean;locationId:string}){
+ const [title,setTitle]=useState(""); const [type,setType]=useState<OpsTask["type"]>("Task"); const [logText,setLogText]=useState(""); const [savingId,setSavingId]=useState<string|null>(null);
  const complete=tasks.filter(t=>t.done).length;
- function addTask(){if(!title.trim())return;setTasks(cur=>[...cur,{id:crypto.randomUUID(),title:title.trim(),type,owner:"Unassigned",due:"Today",done:false}]);setTitle("");notify("Operational task added");}
+ useEffect(()=>{if(devMode||!locationId)return;fetch(`/api/operation-checklists?locationId=${encodeURIComponent(locationId)}`,{cache:"no-store"}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||"Could not load checklist");return d}).then(d=>setTasks((d.items||[]).map((x:any)=>({id:x.id,title:x.title,type:x.task_type,owner:x.owner_label||"Unassigned",due:x.due_label||"Today",done:Boolean(x.completed_at)})))).catch(e=>notify(e.message));},[devMode,locationId]);
+ async function addTask(){if(!title.trim())return; if(devMode){setTasks(cur=>[...cur,{id:crypto.randomUUID(),title:title.trim(),type,owner:"Unassigned",due:"Today",done:false}]);setTitle("");notify("Operational task added");return;} try{const r=await fetch("/api/operation-checklists",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({locationId,title:title.trim(),taskType:type})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Could not add task");setTasks(cur=>[...cur,{id:d.id,title:d.title,type:d.task_type,owner:d.owner_label||"Unassigned",due:d.due_label||"Today",done:false}]);setTitle("");notify("Operational task added");}catch(e){notify(e instanceof Error?e.message:"Could not add task");}}
+ async function addPreset(preset:"Opening"|"Closing"){const titles=preset==="Opening"?["Check tills and floats","Check fridges and ice","Prepare garnishes and bar stations","Confirm toilets and guest areas are ready"]:["Complete final stock check","Clean bar stations and equipment","Lock doors and secure cash","Set alarm and record handover notes"];for(const itemTitle of titles){if(devMode){setTasks(cur=>[...cur,{id:crypto.randomUUID(),title:itemTitle,type:preset,owner:"Shift manager",due:preset==="Opening"?"Before opening":"Before close",done:false}]);continue;}const r=await fetch("/api/operation-checklists",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({locationId,title:itemTitle,taskType:preset})});const d=await r.json();if(!r.ok){notify(d.error||`Could not add ${preset.toLowerCase()} checklist`);return;}setTasks(cur=>[...cur,{id:d.id,title:d.title,type:d.task_type,owner:d.owner_label||"Unassigned",due:d.due_label||"Today",done:false}]);}notify(`${preset} checklist added`);}
+ async function toggleTask(task:OpsTask){if(devMode){setTasks(cur=>cur.map(x=>x.id===task.id?{...x,done:!x.done}:x));return;}setSavingId(task.id);try{const r=await fetch("/api/operation-checklists",{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({id:task.id,done:!task.done})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Could not update task");setTasks(cur=>cur.map(x=>x.id===task.id?{...x,done:Boolean(d.completed_at)}:x));}catch(e){notify(e instanceof Error?e.message:"Could not update task");}finally{setSavingId(null);}}
+ async function removeTask(task:OpsTask){if(devMode){setTasks(cur=>cur.filter(x=>x.id!==task.id));return;}try{const r=await fetch(`/api/operation-checklists?id=${encodeURIComponent(task.id)}`,{method:"DELETE"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Could not remove task");setTasks(cur=>cur.filter(x=>x.id!==task.id));}catch(e){notify(e instanceof Error?e.message:"Could not remove task");}}
  function addLog(){if(!logText.trim())return;setLogs(cur=>[{id:crypto.randomUUID(),title:"Shift handover",body:logText.trim(),author:"Current manager",createdAt:new Date().toLocaleString("en-GB")},...cur]);setLogText("");notify("Handover note saved");}
  return <><PageHeader title="Daily operations" subtitle="Opening, closing, handovers and maintenance in one live manager workspace." action={<span className="connection-pill dev">{complete}/{tasks.length} complete</span>}/>
  <section className="operations-summary"><div><ClipboardList/><span>Opening & closing<strong>{tasks.filter(t=>t.type==="Opening"||t.type==="Closing").length} checks</strong></span></div><div><Wrench/><span>Maintenance<strong>{tasks.filter(t=>t.type==="Maintenance"&&!t.done).length} open</strong></span></div><div><NotebookPen/><span>Logbook<strong>{logs.length} entries</strong></span></div></section>
- <div className="operations-layout"><section className="panel ops-checklist"><PanelTitle title="Today’s checklist" subtitle="Tap a task to mark it complete."/><div className="task-list">{tasks.map(t=><article key={t.id} className={t.done?"task-done":""}><button className="task-check" onClick={()=>setTasks(cur=>cur.map(x=>x.id===t.id?{...x,done:!x.done}:x))}>{t.done?<Check size={16}/>:null}</button><span><b>{t.title}</b><small>{t.type} · {t.owner} · {t.due}</small></span><button className="icon-button" onClick={()=>setTasks(cur=>cur.filter(x=>x.id!==t.id))}><Trash2 size={15}/></button></article>)}</div><div className="inline-create"><input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Add an operational task"/><select value={type} onChange={e=>setType(e.target.value as OpsTask["type"])}><option>Task</option><option>Opening</option><option>Closing</option><option>Maintenance</option></select><button className="primary" onClick={addTask}><Plus size={16}/>Add</button></div></section>
- <section className="panel logbook"><PanelTitle title="Manager logbook" subtitle="Permanent shift handovers and important operational context."/><div className="log-compose"><textarea value={logText} onChange={e=>setLogText(e.target.value)} placeholder="What does the next manager need to know?"/><button className="primary" onClick={addLog}><Send size={16}/>Save handover</button></div><div className="log-list">{logs.map(l=><article key={l.id}><div><b>{l.title}</b><small>{l.author} · {l.createdAt}</small></div><p>{l.body}</p></article>)}</div></section></div></>
+ <div className="operations-layout"><section className="panel ops-checklist"><PanelTitle title="Today’s checklist" subtitle="Completion is shared with every manager at this location."/><div className="checklist-presets"><button type="button" className="secondary" onClick={()=>addPreset("Opening")}><Plus size={15}/>Opening checklist</button><button type="button" className="secondary" onClick={()=>addPreset("Closing")}><Plus size={15}/>Closing checklist</button></div><div className="task-list">{tasks.map(t=><article key={t.id} className={t.done?"task-done":""}><button type="button" className="task-check" disabled={savingId===t.id} onClick={()=>toggleTask(t)}>{t.done?<Check size={16}/>:null}</button><span><b>{t.title}</b><small>{t.type} · {t.owner} · {t.due}</small></span><button type="button" className="icon-button" onClick={()=>removeTask(t)} aria-label={`Remove ${t.title}`}><Trash2 size={15}/></button></article>)}</div><div className="inline-create"><input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Add an operational task"/><select value={type} onChange={e=>setType(e.target.value as OpsTask["type"])}><option>Task</option><option>Opening</option><option>Closing</option><option>Maintenance</option></select><button type="button" className="primary" onClick={addTask}><Plus size={16}/>Add</button></div></section>
+ <section className="panel logbook"><PanelTitle title="Manager logbook" subtitle="Permanent shift handovers and important operational context."/><div className="log-compose"><textarea value={logText} onChange={e=>setLogText(e.target.value)} placeholder="What does the next manager need to know?"/><button type="button" className="primary" onClick={addLog}><Send size={16}/>Save handover</button></div><div className="log-list">{logs.map(l=><article key={l.id}><div><b>{l.title}</b><small>{l.author} · {l.createdAt}</small></div><p>{l.body}</p></article>)}</div></section></div></>
 }
 
 function Team({ employees, shifts, devMode, onAdd, onEdit, onInvite, onRevoke }: { employees: Employee[]; shifts: Shift[]; devMode:boolean; onAdd: () => void; onEdit: (employee: Employee) => void; onInvite:(employee:Employee)=>void; onRevoke:(employee:Employee)=>void }) {

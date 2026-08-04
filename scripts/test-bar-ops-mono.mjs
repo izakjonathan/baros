@@ -3,7 +3,7 @@ const css = fs.readFileSync('app/mono-tokens.css', 'utf8') + fs.readFileSync('ap
 const layout = fs.readFileSync('app/layout.tsx', 'utf8');
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const checks = [
-  ['version', ['0.9.8','0.9.9','0.10.0','0.10.1','0.10.2','0.10.3','0.10.4','0.10.5','0.10.6','0.10.7','0.10.8','0.10.9','0.10.10','0.10.11','0.11.0','0.11.1','0.11.2','0.11.3','0.11.4','0.11.6','0.12.0','0.12.1','0.12.2','0.12.3','0.12.4','0.13.0','0.13.1','0.13.2','0.13.3'].includes(pkg.version)],
+  ['version', ['0.9.8','0.9.9','0.10.0','0.10.1','0.10.2','0.10.3','0.10.4','0.10.5','0.10.6','0.10.7','0.10.8','0.10.9','0.10.10','0.10.11','0.11.0','0.11.1','0.11.2','0.11.3','0.11.4','0.11.6','0.12.0','0.12.1','0.12.2','0.12.3','0.12.4','0.13.0','0.13.1','0.13.2','0.13.3','0.13.4','0.14.0','0.14.1','0.14.2'].includes(pkg.version)],
   ['mono imported', layout.includes('import "./mono-tokens.css"') && layout.includes('import "./mono-components.css"')],
   ['light grey canvas', css.includes('--mono-canvas: #f4f4f2')],
   ['white surface', css.includes('--mono-surface: #ffffff')],

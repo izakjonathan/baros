@@ -1,0 +1,4 @@
+create table if not exists operation_checklist_items (
+ id uuid primary key default gen_random_uuid(), organization_id uuid not null references organizations(id) on delete cascade, location_id uuid not null references locations(id) on delete cascade, service_date date not null, title text not null, task_type text not null check(task_type in ('Opening','Closing','Task','Maintenance')), owner_label text, due_label text, sort_order integer not null default 0, completed_at timestamptz, completed_by uuid references users(id) on delete set null, created_by uuid references users(id) on delete set null, created_at timestamptz not null default now(), updated_at timestamptz not null default now()
+);
+create index if not exists operation_checklist_items_day_idx on operation_checklist_items(organization_id,location_id,service_date);
