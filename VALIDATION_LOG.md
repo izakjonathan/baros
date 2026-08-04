@@ -1,16 +1,13 @@
-# Validation Log — Bar Ops v0.16.15
+# Validation Log — Bar Ops v0.16.15.1
 
 ## Passed
 
-- v0.16.12 Shared Session Issuance
-- v0.16.13 Authentication Endpoint Consistency
-- v0.16.14 Authorization & Tenant Scope Integrity
-- v0.16.15 Transaction Integrity
-- Purchase-order location, supplier and product scope checks present
-- Payroll-period location scope check present
-- Purchase-order audit write is inside its transaction
-- Payroll-period audit write is inside its transaction
-- External post-transaction audit calls removed from affected routes
+- Purchase-order request values are narrowed before SQL interpolation
+- Order status is constrained to the database enum
+- Delivery date, notes and order number are validated
+- Order items use the bounded object-array parser
+- v0.16.14 tenant-scope regression
+- v0.16.15 transaction-integrity regression
 - `public/sw.js` present
 - `public/offline.html` absent
 - `vercel.json` absent
@@ -22,8 +19,6 @@
 - ESLint
 - TypeScript compilation
 - Full Next.js production build
-- Live cross-tenant database test
-- Live transaction rollback test
 - Vercel deployment
 
-These dependency- and infrastructure-based gates must run in GitHub Actions or Vercel.
+The local npm mirror returned 404 for `@types/node@22.10.2`; Vercel must run the complete dependency-based gates.

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
 import { requireOrganizationEntity, requireOrganizationLocation } from "@/lib/auth/scope";
 import { db } from "@/lib/db/client";
-import { ApiError, jsonError, readJsonObject, uuid } from "@/lib/http";
+import { ApiError, enumValue, isoDate, jsonError, objectArray, optionalString, readJsonObject, uuid } from "@/lib/http";
 
 export async function GET() {
   const user = await getSessionUser();
@@ -17,12 +17,20 @@ export async function POST(request: Request) {
     const body = await readJsonObject(request, 32_000);
     const locationId = body.locationId ? uuid(body.locationId, "locationId") : user.locationId;
     const supplierId = uuid(body.supplierId, "supplierId");
-    const items = Array.isArray(body.items) ? body.items.slice(0, 250) : [];
+    const items = objectArray(body.items, "items", 250);
+    const orderNumber = optionalString(body, "orderNumber", 100) ?? `PO-${Date.now()}`;
+    const status = body.status == null || body.status === ""
+      ? "DRAFT"
+      : enumValue(body.status, "status", ["DRAFT", "SUBMITTED", "CONFIRMED", "DELIVERED", "CANCELLED"] as const);
+    const expectedDelivery = body.expectedDelivery == null || body.expectedDelivery === ""
+      ? null
+      : isoDate(body.expectedDelivery, "expectedDelivery");
+    const notes = optionalString(body, "notes", 2_000);
 
     const purchaseOrder = await db().begin(async (tx) => {
       await requireOrganizationLocation(tx as any, user.organizationId, locationId, { lock: true });
       await requireOrganizationEntity(tx as any, "suppliers", user.organizationId, supplierId);
-      const [created] = await tx`insert into purchase_orders(organization_id,location_id,supplier_id,order_number,status,expected_delivery,notes,created_by) values(${user.organizationId},${locationId},${supplierId},${body.orderNumber || `PO-${Date.now()}`},${body.status || "DRAFT"},${body.expectedDelivery || null},${body.notes || null},${user.userId}) returning *`;
+      const [created] = await tx`insert into purchase_orders(organization_id,location_id,supplier_id,order_number,status,expected_delivery,notes,created_by) values(${user.organizationId},${locationId},${supplierId},${orderNumber},${status},${expectedDelivery},${notes},${user.userId}) returning *`;
       for (const item of items) {
         const productId = uuid(item?.productId, "productId");
         await requireOrganizationEntity(tx as any, "products", user.organizationId, productId);

@@ -2,7 +2,7 @@
 
 ## Current release
 
-Bar Ops v0.16.15 — Production Hardening XV & XVI
+Bar Ops v0.16.15.1 — Order Route TypeScript Hotfix
 
 ## Completed in this release
 

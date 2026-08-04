@@ -1,12 +1,12 @@
 # Bar Ops
 
-**Current release: v0.16.15 — Production Hardening XV & XVI**
+**Current release: v0.16.15.1 — Order Route TypeScript Hotfix**
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 
 ## Current release
 
-v0.16.15 combines tenant-scope enforcement with transaction-integrity hardening. User-supplied location, supplier and product identifiers are now verified against the authenticated organization before order or payroll writes, and the corresponding audit records are committed atomically with those mutations.
+v0.16.15.1 preserves the v0.16.14–v0.16.15 hardening work and fixes the Vercel TypeScript failure in purchase-order creation by validating and narrowing request values before passing them to the typed PostgreSQL transaction template.
 
 No database migration, permission change or business-workflow change is required.
 

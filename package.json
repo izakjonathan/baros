@@ -1,6 +1,6 @@
 {
   "name": "bar-ops",
-  "version": "0.16.15",
+  "version": "0.16.15.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -98,7 +98,8 @@
     "test:v01612-session-issuance": "node scripts/test-v01612-shared-session-issuance.mjs",
     "test:v01613-auth-consistency": "node scripts/test-v01613-auth-endpoint-consistency.mjs",
     "test:v01614-tenant-scope": "node scripts/test-v01614-tenant-scope.mjs",
-    "test:v01615-transaction-integrity": "node scripts/test-v01615-transaction-integrity.mjs"
+    "test:v01615-transaction-integrity": "node scripts/test-v01615-transaction-integrity.mjs",
+    "test:v01615-hotfix": "node scripts/test-v016151-order-route-types.mjs"
   },
   "dependencies": {
     "lucide-react": "0.468.0",

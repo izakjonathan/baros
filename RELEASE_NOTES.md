@@ -1,3 +1,14 @@
+# Bar Ops v0.16.15.1 — Order Route TypeScript Hotfix
+
+Built from the approved v0.16.15 Production Hardening XV & XVI baseline.
+
+- Fixed typed SQL-template parameters in `app/api/orders/route.ts`.
+- Validates order number, status, delivery date, notes and item-array shape before the transaction.
+- Preserves tenant-scope enforcement and atomic audit writes.
+- No migration, permission, API or workflow change.
+
+---
+
 # Bar Ops v0.16.15 — Production Hardening XV & XVI
 
 Built from the approved v0.16.13 Production Hardening XIII & XIV baseline.
