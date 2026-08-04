@@ -1,3 +1,13 @@
+# Implementation Status — v0.18.4
+
+**Status:** Phase D Visual Design System Brief and Employees & Team Redesign complete.
+
+- Approved visual source of truth documented.
+- Palette and semantic content-colour tokens centralized.
+- Employee/team workspace redesigned through a feature-owned CSS Module.
+- Existing employee APIs, portal access actions, role permissions and scheduling calculations preserved.
+- No migration required.
+
 # Implementation Status — v0.18.3
 
 **Status:** Scheduling Workspace Redesign complete.

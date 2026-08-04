@@ -13,7 +13,7 @@ const checks=[
  ['publish arbitrary range',ui.includes('weekStart: startIso')&&ui.includes('weekEnd: exclusiveEnd')],
  ['today full header highlight',/\.day-column\.today\s+\.day-header/.test(css)],
  ['attendance workflow removed',!ui.includes('Resolve exceptions, approve accurate time')&&!ui.includes('className="attendance-workflow"')],
- ['team compact identity',ui.includes('team-identity')&&ui.includes('team-status')],
+ ['team compact identity',ui.includes('teamStyles.identity')&&ui.includes('teamStyles.activeStatus')],
  ['employee modal subtitle removed',!ui.includes('Maintain the employee profile used throughout scheduling.')]
 ];
 for(const [name,ok] of checks){if(!ok)throw new Error(`FAIL ${name}`);console.log(`PASS ${name}`)}

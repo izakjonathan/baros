@@ -1,3 +1,21 @@
+# Validation Log — v0.18.4
+
+## Completed
+
+- Complete `npm run test:all`
+- v0.18.4 visual-system and employees/team regression
+- Release preflight and release contract checks
+- Inherited employee access, portal invitation, scheduled-hours and permission regressions
+- v0.18.0–v0.18.3 Phase D regressions
+- ZIP integrity check
+
+## Not completed in this environment
+
+- Dependency-based ESLint
+- TypeScript compilation
+- Next.js production build
+- Browser/device visual verification
+
 # Validation Log — v0.18.3
 
 ## Completed

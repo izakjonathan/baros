@@ -5,7 +5,8 @@ const app = fs.readFileSync("components/bar-ops-app.tsx", "utf8");
 const css = fs.readFileSync("features/scheduling/ScheduleWorkspace.module.css", "utf8");
 
 const errors = [];
-if (pkg.version !== "0.18.3") errors.push(`Expected package version 0.18.3, received ${pkg.version}`);
+const [major, minor, patch] = pkg.version.split(".").map(Number);
+if (major !== 0 || minor < 18 || (minor === 18 && patch < 3)) errors.push(`Expected package version 0.18.3 or newer, received ${pkg.version}`);
 if (!app.includes('ScheduleWorkspace.module.css')) errors.push("Schedule workspace CSS Module is not imported");
 if (!app.includes("scheduleStyles.calendarPanel")) errors.push("Schedule calendar does not use the feature-owned module");
 if (!app.includes('data-role={shift.role}')) errors.push("Shift cards do not expose role styling state");

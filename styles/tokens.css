@@ -1,42 +1,138 @@
 @layer tokens {
 :root {
-  /* Primitive colour palette */
-  --color-neutral-0:#ffffff; --color-neutral-25:#fbfbfa; --color-neutral-50:#f5f5f2; --color-neutral-100:#e9e9e4;
-  --color-neutral-200:#d7d7d0; --color-neutral-500:#77776f; --color-neutral-700:#454540; --color-neutral-900:#171715;
-  --color-brand-400:#c9d89b; --color-brand-500:#9caf63; --color-brand-700:#5d7130;
-  --color-success-500:#397a50; --color-warning-500:#a87312; --color-danger-500:#a33d35; --color-info-500:#466b91;
+  /* Approved Phase D primitive palette */
+  --color-beige:#fff4c4;
+  --color-black:#000000;
+  --color-neon:#dfee4b;
+  --color-pink:#f47add;
+  --color-blue:#4e4ced;
+  --color-orange:#feb34a;
 
-  /* Semantic colours */
-  --surface-page:var(--color-neutral-50); --surface-shell:var(--color-neutral-25); --surface-card:var(--color-neutral-0);
-  --surface-muted:var(--color-neutral-100); --surface-inverse:var(--color-neutral-900); --surface-accent:var(--color-brand-500);
-  --text-primary:var(--color-neutral-900); --text-secondary:var(--color-neutral-500); --text-inverse:var(--color-neutral-0);
-  --border-subtle:color-mix(in srgb,var(--color-neutral-900) 8%,transparent); --border-default:var(--color-neutral-200);
-  --status-success:var(--color-success-500); --status-warning:var(--color-warning-500); --status-danger:var(--color-danger-500); --status-info:var(--color-info-500);
+  /* Semantic surfaces */
+  --surface-page:var(--color-beige);
+  --surface-shell:var(--color-beige);
+  --surface-card:var(--color-beige);
+  --surface-muted:color-mix(in srgb,var(--color-beige) 82%,var(--color-black));
+  --surface-inverse:var(--color-black);
+  --surface-accent:var(--color-neon);
+  --surface-employee:var(--color-neon);
+  --surface-shift:var(--color-pink);
+  --surface-inventory:var(--color-blue);
+  --surface-order:var(--color-orange);
+  --surface-neon:var(--color-neon);
+  --surface-pink:var(--color-pink);
+  --surface-blue:var(--color-blue);
+  --surface-orange:var(--color-orange);
+
+  /* Semantic text and borders */
+  --text-primary:var(--color-black);
+  --text-secondary:color-mix(in srgb,var(--color-black) 72%,transparent);
+  --text-inverse:var(--color-beige);
+  --text-on-color:var(--color-black);
+  --border-subtle:color-mix(in srgb,var(--color-black) 20%,transparent);
+  --border-default:var(--color-black);
+  --border-strong:var(--color-black);
+
+  /* Status colours use small indicators, not full-card fills */
+  --status-success:var(--color-neon);
+  --status-warning:var(--color-orange);
+  --status-danger:var(--color-pink);
+  --status-info:var(--color-blue);
 
   /* Typography */
-  --font-body:var(--font-inter),Arial,sans-serif; --font-display:var(--font-space-grotesk),var(--font-inter),Arial,sans-serif;
-  --font-weight-regular:400; --font-weight-medium:500; --font-weight-semibold:600; --font-weight-bold:700;
-  --text-xs:.75rem; --text-sm:.875rem; --text-md:1rem; --text-lg:1.125rem; --text-xl:1.375rem; --text-2xl:1.75rem; --text-3xl:2.25rem;
-  --leading-tight:1.08; --leading-heading:1.18; --leading-body:1.5; --tracking-tight:-.03em;
+  --font-body:var(--font-inter),Arial,sans-serif;
+  --font-display:var(--font-space-grotesk),var(--font-inter),Arial,sans-serif;
+  --font-weight-regular:400;
+  --font-weight-medium:500;
+  --font-weight-semibold:600;
+  --font-weight-bold:700;
+  --text-xs:.75rem;
+  --text-sm:.875rem;
+  --text-md:1rem;
+  --text-lg:1.125rem;
+  --text-xl:1.375rem;
+  --text-2xl:1.75rem;
+  --text-3xl:2.25rem;
+  --text-4xl:clamp(2.6rem,6vw,4.75rem);
+  --leading-tight:.98;
+  --leading-heading:1.08;
+  --leading-body:1.42;
+  --tracking-tight:-.045em;
 
   /* Spacing */
-  --space-0:0; --space-1:.25rem; --space-2:.5rem; --space-3:.75rem; --space-4:1rem; --space-5:1.25rem; --space-6:1.5rem;
-  --space-8:2rem; --space-10:2.5rem; --space-12:3rem; --space-16:4rem; --space-20:5rem; --space-24:6rem;
+  --space-0:0;
+  --space-1:.25rem;
+  --space-2:.5rem;
+  --space-3:.75rem;
+  --space-4:1rem;
+  --space-5:1.25rem;
+  --space-6:1.5rem;
+  --space-8:2rem;
+  --space-10:2.5rem;
+  --space-12:3rem;
+  --space-16:4rem;
+  --space-20:5rem;
+  --space-24:6rem;
 
-  /* Radius and elevation */
-  --radius-xs:.25rem; --radius-sm:.5rem; --radius-md:.75rem; --radius-lg:1rem; --radius-xl:1.5rem; --radius-full:9999px;
-  --radius-control:var(--radius-sm); --radius-card:var(--radius-lg); --radius-panel:var(--radius-xl);
-  --shadow-sm:0 1px 2px rgb(0 0 0/.05); --shadow-md:0 2px 4px rgb(0 0 0/.04),0 12px 32px rgb(0 0 0/.08);
+  /* Radius: bold, rounded, and consistent */
+  --radius-xs:.35rem;
+  --radius-sm:.75rem;
+  --radius-md:1rem;
+  --radius-lg:1.5rem;
+  --radius-xl:2rem;
+  --radius-2xl:3rem;
+  --radius-full:9999px;
+  --radius-pill:var(--radius-full);
+  --radius-control:var(--radius-full);
+  --radius-card:var(--radius-xl);
+  --radius-panel:var(--radius-2xl);
+
+  /* No shadows, glow, or gradients in the approved visual system */
+  --shadow-sm:none;
+  --shadow-md:none;
 
   /* Layout, motion, layering */
-  --content-width:90rem; --content-width-reading:45rem; --page-gutter:clamp(1rem,3vw,2rem); --header-height:4.25rem; --sidebar-width:17.5rem;
-  --control-height:2.75rem; --duration-fast:140ms; --duration-normal:220ms; --ease-standard:cubic-bezier(.2,0,0,1);
-  --z-header:100; --z-dropdown:200; --z-modal:300; --z-toast:400;
+  --content-width:90rem;
+  --content-width-reading:45rem;
+  --page-gutter:clamp(1rem,3vw,2rem);
+  --header-height:4.25rem;
+  --sidebar-width:17.5rem;
+  --control-height:2.75rem;
+  --duration-fast:140ms;
+  --duration-normal:220ms;
+  --ease-standard:cubic-bezier(.2,0,0,1);
+  --z-header:100;
+  --z-dropdown:200;
+  --z-modal:300;
+  --z-toast:400;
 
   /* Compatibility aliases during phased migration */
-  --mono-canvas:var(--surface-page); --mono-surface:var(--surface-card); --mono-inset:var(--surface-muted); --mono-ink:var(--text-primary);
-  --mono-secondary:var(--text-secondary); --mono-tertiary:color-mix(in srgb,var(--text-secondary) 72%,transparent); --mono-separator:var(--border-subtle);
-  --mono-danger:var(--status-danger); --mono-radius-sm:var(--radius-control); --mono-radius-md:var(--radius-card); --mono-radius-lg:var(--radius-panel);
-  --mono-content:var(--content-width); --mono-control:var(--control-height);
+  --mono-canvas:var(--surface-page);
+  --mono-surface:var(--surface-card);
+  --mono-inset:var(--surface-muted);
+  --mono-ink:var(--text-primary);
+  --mono-secondary:var(--text-secondary);
+  --mono-tertiary:color-mix(in srgb,var(--text-secondary) 72%,transparent);
+  --mono-separator:var(--border-subtle);
+  --mono-danger:var(--status-danger);
+  --mono-radius-sm:var(--radius-control);
+  --mono-radius-md:var(--radius-card);
+  --mono-radius-lg:var(--radius-panel);
+  --mono-content:var(--content-width);
+  --mono-control:var(--control-height);
+}
+
+[data-theme="dark"] {
+  --surface-page:var(--color-black);
+  --surface-shell:var(--color-black);
+  --surface-card:var(--color-black);
+  --surface-muted:color-mix(in srgb,var(--color-black) 82%,var(--color-beige));
+  --surface-inverse:var(--color-beige);
+  --text-primary:var(--color-beige);
+  --text-secondary:color-mix(in srgb,var(--color-beige) 72%,transparent);
+  --text-inverse:var(--color-black);
+  --border-default:var(--color-beige);
+  --border-strong:var(--color-beige);
+  --border-subtle:color-mix(in srgb,var(--color-beige) 28%,transparent);
 }
 }

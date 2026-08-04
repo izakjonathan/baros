@@ -6,10 +6,10 @@ const checks = [
   [data.includes("employeeId?: string"), "Shift type keeps employee UUID"],
   [scheduleMapper.includes("employeeId: record.employee_id || undefined"), "Database shift mapper keeps employee UUID"],
   [app.includes("shifts={shifts}"), "Team receives live shift state"],
-  [app.includes("Scheduled next 4 weeks"), "Team labels scheduled-hours period"],
+  [app.includes("Next 4 weeks"), "Team labels scheduled-hours period"],
   [app.includes("shift.employeeId === person.id"), "Scheduled hours match immutable employee ID"],
   [app.includes('shift.status === "Published"'), "Only published shifts count"],
-  [app.includes("hoursBetween(shift.start, shift.end)"), "Overnight-aware duration helper is used"],
+  [/hoursBetween\(shift\.start,\s*shift\.end\)/.test(app), "Overnight-aware duration helper is used"],
 ];
 let failed = false;
 for (const [ok, label] of checks) { console.log(`${ok ? "✓" : "✗"} ${label}`); if (!ok) failed = true; }

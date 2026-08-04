@@ -1,3 +1,18 @@
+# Release Notes — v0.18.4
+
+## Phase D Visual Design System Brief
+
+- Formalized the approved beige/black, neon, pink, blue and orange visual direction.
+- Defined no-shadow, no-gradient and no-glow rules.
+- Defined semantic content colours, typography, buttons, icons, cards, grids, responsive behavior and accessibility expectations.
+
+## Employees & Team Redesign
+
+- Added a feature-owned Team workspace CSS Module.
+- Applied neon employee/team identity and compact two-column cards.
+- Added concise team summary cards, clear access status, bold hierarchy and rounded outline/filled actions.
+- Preserved employee search, filtering, scheduled-hour calculations, editing, invitation and revocation behavior.
+
 # Release Notes — v0.18.3
 
 ## Scheduling Workspace Redesign

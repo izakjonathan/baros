@@ -4,6 +4,11 @@
 
 The visual redesign uses a layered design-system architecture consisting of primitive tokens, semantic tokens, foundation styles, shared UI primitives and feature-specific product components. Design decisions are globalised through tokens, while component implementation remains locally scoped through CSS Modules. Components control their internal presentation, while parent layouts control external spacing and placement.
 
+
+## Approved visual brief
+
+The detailed visual source of truth is `docs/phase-d-visual-design-system.md`. All Phase D product components must use its semantic palette, typography, surface, card, icon and spacing rules while preserving the stable contracts below.
+
 ## Stable contracts
 
 Phase D preserves APIs, database schemas, permissions, tenant boundaries, authentication, operational terminology, URLs and existing business workflows unless a separate change is explicitly approved.
