@@ -31,4 +31,16 @@
   --sidebar: #16181c;
   --font-display: var(--font-space-grotesk), Inter, system-ui, sans-serif;
   --focus-ring: 0 0 0 3px rgba(17, 17, 17, 0.18);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --workspace-inline: clamp(16px, 2.4vw, 32px);
+  --workspace-block: clamp(20px, 3vw, 36px);
+  --workspace-section-gap: 24px;
+  --workspace-card-padding: 18px;
 }

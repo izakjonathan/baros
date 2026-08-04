@@ -11,7 +11,7 @@ const sw=read('public/sw.js');
 const config=read('next.config.ts');
 
 const checks=[
-  [['0.10.4','0.10.5','0.10.6','0.10.7','0.10.8','0.10.9','0.10.10','0.10.11','0.11.0','0.11.1','0.11.2','0.11.3','0.11.4','0.11.6','0.12.0','0.12.1','0.12.2','0.12.3','0.12.4','0.13.0','0.13.1','0.13.2','0.13.3','0.13.4','0.14.0','0.14.1','0.14.2'].includes(pkg.version),'package version is PWA-compatible'],
+  [(/^0\.(1[0-5])\./.test(pkg.version)),'package version is PWA-compatible'],
   [manifest.includes('display: "standalone"'),'manifest uses standalone display'],
   [manifest.includes('icon-maskable-512.png'),'manifest includes maskable icon'],
   [layout.includes('appleWebApp'),'Apple standalone metadata exists'],
@@ -19,10 +19,10 @@ const checks=[
   [register.includes('navigator.serviceWorker.register("/sw.js"'),'service worker registers at root scope'],
   [sw.includes('url.pathname.startsWith("/api/")'),'API requests are excluded from cache'],
   [sw.includes('request.mode === "navigate"'),'navigation uses network-first fallback'],
-  [sw.includes('/offline.html'),'offline fallback is available'],
+  [sw.includes('const OFFLINE_HTML') && sw.includes('new Response(OFFLINE_HTML'),'inline offline fallback is available'],
   [config.includes("worker-src 'self'"),'CSP permits same-origin service worker'],
   [config.includes('Service-Worker-Allowed'),'service-worker scope header exists'],
-  [['public/icons/icon-192.png','public/icons/icon-512.png','public/icons/icon-maskable-512.png','public/icons/apple-touch-icon.png','public/offline.html'].every(p=>fs.existsSync(path.join(root,p))),'PWA assets exist'],
+  [['public/icons/icon-192.png','public/icons/icon-512.png','public/icons/icon-maskable-512.png','public/icons/apple-touch-icon.png'].every(p=>fs.existsSync(path.join(root,p))),'PWA assets exist'],
 ];
 let failed=0;
 for(const [ok,label] of checks){console.log(`${ok?'✓':'✗'} ${label}`); if(!ok) failed++;}

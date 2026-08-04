@@ -4,7 +4,7 @@ const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.ur
 const route = fs.readFileSync(new URL("../app/api/availability/route.ts", import.meta.url), "utf8");
 
 const checks = [
-  ["release version", ["0.11.6","0.12.0","0.12.1","0.12.2","0.12.3","0.12.4","0.13.0","0.13.1","0.13.2","0.13.3","0.13.4","0.14.0","0.14.1","0.14.2"].includes(pkg.version),"0.12.0","0.12.1"],
+  ["release version", ["0.11.6","0.12.0","0.12.1","0.12.2","0.12.3","0.12.4","0.13.0","0.13.1","0.13.2","0.13.3","0.13.4","0.14.0","0.14.1","0.14.2","0.14.3","0.14.4","0.15.0"].includes(pkg.version),"0.12.0","0.12.1"],
   ["weekday narrowed to number", route.includes('typeof weekday !== "number"')],
   ["weekly rules normalized before transaction", route.includes("const weeklyRules = rules.map")],
   ["optional weekly times use null", route.includes("availableFrom: available ? rule.availableFrom ?? null : null") && route.includes("availableTo: available ? rule.availableTo ?? null : null")],

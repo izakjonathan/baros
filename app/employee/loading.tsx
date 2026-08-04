@@ -1,1 +1,5 @@
-export default function Loading(){return <div className="employee-page employee-skeleton" aria-busy="true" aria-live="polite"><div className="skeleton-line short"/><div className="skeleton-line title"/><div className="skeleton-card"/><div className="skeleton-card"/><div className="skeleton-card"/></div>}
+import { LoadingState, WorkspacePage } from "@/components/ui/workspace-ui";
+
+export default function Loading(){
+  return <WorkspacePage className="employee-page"><LoadingState title="Loading employee workspace" description="Preparing your shifts, requests and hours…"/></WorkspacePage>;
+}

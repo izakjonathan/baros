@@ -1,6 +1,6 @@
 # Bar Ops
 
-**Current release: v0.13.1 — Live Shift Board**
+**Current release: v0.15.3 — Mobile & iPad Polish**
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 
@@ -29,7 +29,7 @@ For this release no new migration is required.
 
 Bar Ops v0.10.4 includes a web app manifest, Apple metadata, app icons and a service worker. In Safari, open the deployed site, choose **Share → Add to Home Screen**, then launch Bar Ops from its icon. If an older shortcut was installed before v0.10.4, delete it and add it again so iOS picks up the new standalone configuration.
 
-The service worker does not cache authenticated API responses or operational pages. When offline, Bar Ops shows a controlled reconnect screen rather than stale schedule, payroll or inventory data.
+The service worker does not cache authenticated API responses or operational pages. When offline, Bar Ops shows a controlled reconnect screen generated directly by the service worker rather than caching stale schedule, payroll or inventory data.
 ## v0.10.5 CSS ownership
 
 The CSS cleanup release removes historical redesign blocks, repeated exact selectors and `!important` declarations while preserving the v0.10.4 project architecture. See `CSS_OWNERSHIP_REPORT_V0105.md`.

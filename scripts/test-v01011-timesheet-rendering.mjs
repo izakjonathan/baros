@@ -4,7 +4,7 @@ const pkg = JSON.parse(read("package.json"));
 const page = read("app/employee/hours/page.tsx");
 const boundary = read("app/employee/hours/error.tsx");
 const checks = [
-  [["0.10.11","0.11.0","0.11.1","0.11.2","0.11.3","0.11.4","0.11.6","0.12.0","0.12.1","0.12.2","0.12.3","0.12.4","0.13.0","0.13.1","0.13.2","0.13.3","0.13.4","0.14.0","0.14.1","0.14.2"].includes(pkg.version), "release version"],
+  [["0.10.11","0.11.0","0.11.1","0.11.2","0.11.3","0.11.4","0.11.6","0.12.0","0.12.1","0.12.2","0.12.3","0.12.4","0.13.0","0.13.1","0.13.2","0.13.3","0.13.4","0.14.0","0.14.1","0.14.2","0.14.3","0.14.4","0.15.0"].includes(pkg.version), "release version"],
   [page.includes('value.match(/^\\d{4}-\\d{2}-\\d{2}/)?.[0]') && page.includes('dateOnly && datePart'), "date-only normalization accepts ISO timestamps"],
   [page.includes('Number.isNaN(parsed.getTime()) ? null : parsed') && page.includes('return "Unknown date"'), "invalid dates cannot crash formatting"],
   [page.includes('Array.isArray(hoursData.timesheets)'), "timesheet payload guarded before rendering"],
