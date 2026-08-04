@@ -1,23 +1,20 @@
-# Bar Ops v0.16.17 — Production Hardening XVII & XVIII
+# Bar Ops v0.16.19 — Production Hardening XIX & XX
 
-Built from the approved v0.16.15.1 Order Route TypeScript Hotfix baseline.
+Built from the approved v0.16.17 Production Hardening XVII & XVIII baseline.
 
-## v0.16.16 — Operational Observability
+## v0.16.18 — API Boundary Completion
 
-- Added centralized application release metadata.
-- Health endpoints now identify the running version, environment and shortened Vercel commit SHA.
-- API responses receive version and commit headers through the shared request boundary.
-- Structured server logs now include service, version, environment and deployment commit context.
-- Readiness checks now report and log their execution duration.
-- No secrets, full deployment URLs or database connection details are exposed.
+- Completed adoption of the shared streamed and bounded JSON parser across the remaining legacy mutation routes.
+- Attendance-alert resolution now validates the alert UUID before executing the organization-scoped update.
+- Schedule-template creation now validates its location against the authenticated organization and bounds template name, description and item count.
+- Security actions now validate action names, GDPR request types, session identifiers and password-reset email length before database access.
+- Authentication and API errors retain request correlation and no-store response behavior.
 
-## v0.16.17 — Release & Recovery Guardrails
+## v0.16.19 — Type-Safety Stabilization
 
-- Added `npm run validate:release`.
-- GitHub Quality Checks now execute release validation before the existing gates.
-- Release validation checks package/document version consistency, Node 24 workflows, required service-worker presence and forbidden deployment files.
-- Added focused v0.16.16 and v0.16.17 regression suites.
-- Documented v0.16.15.1 as the approved rollback checkpoint with minimum post-rollback health and authentication checks.
+- Removed avoidable transaction `any` casts from purchase-order and payroll-period mutations.
+- Replaced untyped payroll result arrays with record-shaped transaction rows.
+- Added focused regression checks preventing the hardened routes from returning to direct `Request.json()` or transaction `any` escapes.
 
 ## Compatibility
 
@@ -25,3 +22,4 @@ Built from the approved v0.16.15.1 Order Route TypeScript Hotfix baseline.
 - No role or permission changes.
 - No business-feature additions.
 - No route removal or intentional successful-response break.
+- `public/sw.js` remains included; `public/offline.html` and `vercel.json` remain absent.

@@ -28,12 +28,12 @@ export async function POST(request: Request) {
     const notes = optionalString(body, "notes", 2_000);
 
     const purchaseOrder = await db().begin(async (tx) => {
-      await requireOrganizationLocation(tx as any, user.organizationId, locationId, { lock: true });
-      await requireOrganizationEntity(tx as any, "suppliers", user.organizationId, supplierId);
+      await requireOrganizationLocation(tx, user.organizationId, locationId, { lock: true });
+      await requireOrganizationEntity(tx, "suppliers", user.organizationId, supplierId);
       const [created] = await tx`insert into purchase_orders(organization_id,location_id,supplier_id,order_number,status,expected_delivery,notes,created_by) values(${user.organizationId},${locationId},${supplierId},${orderNumber},${status},${expectedDelivery},${notes},${user.userId}) returning *`;
       for (const item of items) {
         const productId = uuid(item?.productId, "productId");
-        await requireOrganizationEntity(tx as any, "products", user.organizationId, productId);
+        await requireOrganizationEntity(tx, "products", user.organizationId, productId);
         const quantity = Number(item?.quantity);
         const unitPrice = Number(item?.unitPrice);
         if (!Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(unitPrice) || unitPrice < 0) throw new ApiError(400, "Order item quantity or price is invalid");

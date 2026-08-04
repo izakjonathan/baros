@@ -1,4 +1,10 @@
-# Bar Ops
+# Bar Ops v0.16.19
+
+Current release: **v0.16.19 — Production Hardening XIX & XX**.
+
+This release completes bounded request parsing across the remaining legacy mutation routes and removes avoidable transaction type escapes from the recently hardened order and payroll paths. It introduces no migration or business feature.
+
+Rollback checkpoint: **v0.16.17**.
 
 **Current release: v0.16.17 — Production Hardening XVII & XVIII**
 

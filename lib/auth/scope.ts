@@ -1,6 +1,7 @@
 import { ApiError } from "@/lib/http";
 
-export type SqlExecutor = (strings: TemplateStringsArray, ...values: unknown[]) => Promise<any[]>;
+export type SqlRow = Record<string, unknown>;
+export type SqlExecutor = (strings: TemplateStringsArray, ...values: unknown[]) => Promise<SqlRow[]>;
 
 export async function requireOrganizationLocation(
   sql: SqlExecutor,

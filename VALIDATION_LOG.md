@@ -1,27 +1,25 @@
-# Validation Log — Bar Ops v0.16.17
+# Validation Log — Bar Ops v0.16.19
 
-## Passed
+## Executed
 
-- v0.16.14 tenant-scope regression
-- v0.16.15 transaction-integrity regression
-- v0.16.15.1 order-route typing regression
-- v0.16.16 operational-observability regression
-- v0.16.17 release-and-recovery regression
-- Release contract validation
-- Package and required-document version alignment
-- Node 24 package and workflow alignment
-- `public/sw.js` present
-- `public/offline.html` absent
-- `vercel.json` absent
-- Release ZIP integrity
+- `node scripts/test-v01618-api-boundary-completion.mjs`
+- `node scripts/test-v01619-type-safety-stabilization.mjs`
+- `node scripts/test-v01614-tenant-scope.mjs`
+- `node scripts/test-v01615-transaction-integrity.mjs`
+- `node scripts/test-v01616-observability.mjs`
+- `node scripts/test-v01617-release-recovery.mjs`
+- `node scripts/validate-release.mjs`
+- JavaScript syntax checks for new regression scripts
+- Source checks for `public/sw.js`, `public/offline.html` and `vercel.json`
+- Release ZIP integrity check
 
-## Not run in this environment
+## Not executed here
 
-- Clean dependency installation
+- Clean dependency installation (attempted; internal npm mirror returned 404 for `@types/node@22.10.2`)
 - ESLint
-- TypeScript compilation
-- Full Next.js production build
-- Live Vercel health and log verification
-- Rollback deployment exercise
+- TypeScript compiler
+- Complete Next.js production build
+- Live database workflow testing
+- Vercel deployment
 
-These dependency- and deployment-based checks remain configured for GitHub Actions and Vercel.
+These dependency- and infrastructure-based gates remain configured for GitHub Actions and Vercel.

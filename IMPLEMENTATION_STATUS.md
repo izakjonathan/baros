@@ -2,30 +2,28 @@
 
 ## Current release
 
-Bar Ops v0.16.17 — Production Hardening XVII & XVIII
+Bar Ops v0.16.19 — Production Hardening XIX & XX
 
-## v0.16.16 — Operational Observability
+## v0.16.18 — API Boundary Completion
 
-- Added centralized release metadata derived from the package version and Vercel deployment environment.
-- Added privacy-safe version and shortened commit diagnostics to liveness and readiness responses.
-- Added release-identification headers to API responses.
-- Added structured informational and warning server-log helpers alongside existing error logging.
-- Added readiness duration measurement and structured readiness events.
-- Preserved no-store behavior and request correlation identifiers.
+- Replaced the remaining direct `Request.json()` calls in attendance alerts, schedule templates and security actions with the shared bounded JSON parser.
+- Added explicit request-size, media-type, UTF-8 and JSON-object enforcement to those routes.
+- Added bounded UUID, string, enum and object-array validation before database access.
+- Added organization-location validation to schedule-template creation.
+- Preserved request IDs and no-store error handling through the shared API error response.
 
-## v0.16.17 — Release & Recovery Guardrails
+## v0.16.19 — Type-Safety Stabilization
 
-- Added an executable release-contract validator.
-- Added the release validator to GitHub Quality Checks before regression, lint, typecheck and build gates.
-- Enforced package/document version alignment.
-- Enforced Node 24 workflow alignment.
-- Enforced `public/sw.js` presence and continued absence of `vercel.json` and `public/offline.html`.
-- Documented v0.16.15.1 as the approved rollback checkpoint and the minimum rollback verification steps.
+- Removed transaction `as any` casts from the hardened order and payroll routes.
+- Replaced untyped payroll transaction rows with record-shaped rows.
+- Added a shared SQL row contract for organization-scope guards.
+- Added focused regression gates for remaining unbounded parsers and transaction type escapes.
 
 ## Baseline and compatibility
 
-- Baseline: approved v0.16.15.1
+- Baseline: approved v0.16.17
 - Database migration: none
 - Permissions: unchanged
 - Business workflows: unchanged
 - Service worker: preserved
+- Rollback checkpoint: v0.16.17

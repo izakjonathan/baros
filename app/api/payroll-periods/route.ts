@@ -15,10 +15,10 @@ export async function POST(request: Request) {
     const body = await readJsonObject(request, 8_000);
     const action = String(body.action || "");
     const row = await db().begin(async (tx) => {
-      let rows: any[];
+      let rows: Record<string, unknown>[];
       if (action === "CREATE") {
         const locationId = body.locationId ? uuid(body.locationId, "locationId") : user.locationId;
-        await requireOrganizationLocation(tx as any, user.organizationId, locationId, { lock: true });
+        await requireOrganizationLocation(tx, user.organizationId, locationId, { lock: true });
         const from = isoDate(body.from, "from");
         const to = isoDate(body.to, "to");
         if (to < from) throw new ApiError(400, "Payroll period end must not be before its start");
