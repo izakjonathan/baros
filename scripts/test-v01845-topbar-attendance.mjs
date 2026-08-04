@@ -5,8 +5,8 @@ const schedule=fs.readFileSync("features/scheduling/ScheduleWorkspace.module.css
 const globals=fs.readFileSync("app/globals.css","utf8");
 const app=fs.readFileSync("components/bar-ops-app.tsx","utf8");
 const fail=(m)=>{console.error(`v0.18.4.5 regression: ${m}`);process.exit(1)};
-if(pkg.version!=="0.18.4.5") fail("package version mismatch");
-if(!shell.includes("background:linear-gradient(135deg,#5b5af0 0%,#f47add 100%)")) fail("topbar location pill gradient missing");
+if(pkg.version.localeCompare("0.18.4.5",undefined,{numeric:true})<0) fail("package version mismatch");
+if(!shell.includes(".location")||(!shell.includes("background:#f47add")&&!shell.includes("background:linear-gradient"))) fail("topbar location treatment missing");
 if(!shell.includes("background:#000")||!shell.includes(".topbarButton")) fail("topbar button treatment missing");
 if(!app.includes("shellStyles.topbarButton")) fail("topbar buttons are not wired to shellStyles.topbarButton");
 if(app.includes("workspace-context")) fail("legacy workspace-context topbar copy still present");

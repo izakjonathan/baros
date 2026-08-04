@@ -1,3 +1,18 @@
+# Release Notes — v0.18.4.6
+
+## Mobile Density & Responsive Structure
+
+- Reduced the manager top bar and mobile control dimensions.
+- Changed the location switcher from a gradient to approved solid pink.
+- Shortened supporting copy in Team and Time & Attendance.
+- Restored Team’s neon editorial heading block.
+- Reflowed Time & Attendance actions into one primary row and one secondary row on mobile.
+- Reduced filter and metric-card height.
+- Replaced the mobile timesheet table with stacked responsive cards.
+- Changed Exceptions to a filled pink card rather than a beige outlined exception.
+- Removed remaining low-contrast olive and disabled-state treatments from the refined screens.
+- Preserved all existing workflow, permission, API and data behavior.
+
 # Release Notes — v0.18.4.5
 
 ## Top Bar & Attendance Refinement

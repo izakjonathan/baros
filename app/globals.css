@@ -89,3 +89,64 @@ html,body,.app-frame,.main-shell,.page-wrap{background:#fff4c4}body .page-header
 .page-wrap[data-workspace="attendance"] .table-panel{background:#fff4c4;border:0;border-radius:var(--radius-panel)}
 .page-wrap[data-workspace="attendance"] .attendance-empty{padding:2rem 1.5rem;text-align:center;color:#000;font-weight:700}
 @media(max-width:600px){.page-wrap[data-workspace="attendance"] > .page-header{border-radius:2.25rem;padding:1.35rem}.page-wrap[data-workspace="attendance"] .attendance-filters{padding:1rem;border-radius:2rem}.page-wrap[data-workspace="attendance"] .attendance-filters .result-count{grid-column:1/-1;align-self:start}}
+
+
+/* v0.18.4.6 mobile density + responsive structure */
+.page-wrap[data-workspace="team"] .page-header{padding:clamp(1.15rem,3.5vw,1.8rem);border:0;border-radius:var(--radius-panel);background:#dfee4b;color:#000}
+.page-wrap[data-workspace="team"] .page-header p,
+.page-wrap[data-workspace="team"] .page-header .eyebrow{color:#000}
+.page-wrap[data-workspace="team"] .page-header .page-actions{align-self:center}
+.page-wrap[data-workspace="team"] .team-add-button{background:#000;color:#dfee4b;border:0}
+body .page-wrap[data-workspace="attendance"] > .page-header{padding:clamp(1.15rem,3.5vw,1.8rem)}
+body .page-wrap[data-workspace="attendance"] > .page-header .header-actions{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;width:min(100%,33rem)}
+body .page-wrap[data-workspace="attendance"] > .page-header .header-actions>button:first-child{grid-column:1/-1}
+body .page-wrap[data-workspace="attendance"] > .page-header .header-actions button{width:100%;min-width:0;min-height:2.75rem;padding-inline:.85rem;border-radius:999px;white-space:nowrap}
+body .page-wrap[data-workspace="attendance"] > .page-header .header-actions button:disabled{opacity:.42;background:#000;color:#fff4c4}
+body .page-wrap[data-workspace="attendance"] .attendance-filters{padding:1rem}
+body .page-wrap[data-workspace="attendance"] .attendance-filters input,
+body .page-wrap[data-workspace="attendance"] .attendance-filters select{min-height:2.75rem;padding-inline:.9rem}
+body .page-wrap[data-workspace="attendance"] .attendance-filters .filter-reset{min-height:2.65rem;padding-inline:1rem;border-radius:999px;width:max-content}
+body .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card{min-height:0;padding:1rem}
+body .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card:nth-child(4){background:#f47add;border:0}
+body .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-icon{margin-bottom:.5rem}
+body .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-trend{margin-top:.55rem}
+body .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card small{line-height:1.3}
+.page-wrap[data-workspace="execution"] .execution-board .text-button{color:#000}
+.page-wrap[data-workspace="execution"] .execution-board .execution-list article{padding-block:1rem}
+.page-wrap[data-workspace="execution"] .execution-board .execution-list small{color:#000}
+.page-wrap[data-workspace="execution"] .execution-board .execution-list article>small{font-weight:700}
+@media(max-width:600px){
+  .page-wrap{padding-top:.85rem;gap:1rem}
+  .page-wrap[data-workspace="team"] .page-header,
+  body .page-wrap[data-workspace="attendance"] > .page-header,
+  .page-wrap[data-workspace="execution"] > .page-header{padding:1.15rem;border-radius:2rem}
+  .page-wrap[data-workspace="team"] .page-header{grid-template-columns:minmax(0,1fr) auto}
+  .page-wrap[data-workspace="team"] .page-subtitle,
+  body .page-wrap[data-workspace="attendance"] .page-subtitle,
+  .page-wrap[data-workspace="execution"] .page-subtitle{font-size:.93rem;line-height:1.35}
+  body .page-wrap[data-workspace="attendance"] > .page-header{display:block}
+  body .page-wrap[data-workspace="attendance"] > .page-header .page-actions{margin-top:1rem;width:100%}
+  body .page-wrap[data-workspace="attendance"] > .page-header .header-actions{width:100%}
+  body .page-wrap[data-workspace="attendance"] .attendance-filters{grid-template-columns:1fr 1fr;gap:.75rem;border-radius:2rem}
+  body .page-wrap[data-workspace="attendance"] .attendance-filters label{min-width:0}
+  body .page-wrap[data-workspace="attendance"] .attendance-filters input,
+  body .page-wrap[data-workspace="attendance"] .attendance-filters select{width:100%;min-width:0;font-size:1rem}
+  body .page-wrap[data-workspace="attendance"] .attendance-filters .filter-reset{grid-column:1/-1}
+  body .page-wrap[data-workspace="attendance"] .attendance-metrics{gap:.75rem}
+  body .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card{min-height:10.5rem;padding:.95rem}
+  body .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card>strong{font-size:2rem}
+  body .page-wrap[data-workspace="attendance"] .table-panel{overflow:visible;background:transparent}
+  body .page-wrap[data-workspace="attendance"] .table-panel>.panel-title{padding-inline:.25rem}
+  body .page-wrap[data-workspace="attendance"] .attendance-table{display:grid;gap:.75rem;background:transparent}
+  body .page-wrap[data-workspace="attendance"] .attendance-table .table-head{display:none}
+  body .page-wrap[data-workspace="attendance"] .attendance-table .table-row:not(.table-head){display:grid;grid-template-columns:1fr 1fr;gap:.8rem;background:#4e4ced;color:#000;border:0;border-radius:1.75rem;padding:1rem}
+  body .page-wrap[data-workspace="attendance"] .attendance-table .table-row:not(.table-head)>span{display:grid;gap:.2rem;min-width:0}
+  body .page-wrap[data-workspace="attendance"] .attendance-table .table-row:not(.table-head)>span::before{content:attr(data-label);font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+  body .page-wrap[data-workspace="attendance"] .attendance-table .table-row:not(.table-head)>span:first-child,
+  body .page-wrap[data-workspace="attendance"] .attendance-table .table-row:not(.table-head)>.timesheet-actions{grid-column:1/-1}
+  body .page-wrap[data-workspace="attendance"] .attendance-table .timesheet-actions{display:flex;flex-wrap:wrap;align-items:center;gap:.45rem}
+  body .page-wrap[data-workspace="attendance"] .attendance-table .timesheet-actions button{min-height:2.5rem;border:0;border-radius:999px;background:#000;color:#fff4c4;padding-inline:.85rem}
+  body .page-wrap[data-workspace="attendance"] .attendance-empty{min-height:8rem;display:grid;place-items:center;background:#dfee4b;border-radius:1.75rem;padding:1.25rem}
+  body .page-wrap[data-workspace="attendance"] .hours-by-employee>.panel-title,
+  body .page-wrap[data-workspace="attendance"] .export-history>.panel-title{padding-inline:.25rem}
+}

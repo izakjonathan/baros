@@ -1,5 +1,5 @@
 .sidebar{background:var(--surface-shell);border-inline-end:1px solid var(--border-subtle)}
-.brand{min-height:var(--header-height);padding:var(--space-4) var(--space-5);gap:var(--space-3)}
+.brand{min-height:3.75rem;padding:var(--space-4) var(--space-5);gap:var(--space-3)}
 .brandMark{background:var(--surface-inverse);color:var(--text-inverse);border-radius:var(--radius-md)}
 .navigation{padding:var(--space-3)}
 .navigation button{border-radius:var(--radius-md);transition:background var(--duration-fast) var(--ease-standard),color var(--duration-fast) var(--ease-standard)}
@@ -14,7 +14,7 @@
   display:grid;
   grid-template-columns:auto 1fr auto;
   align-items:center;
-  gap:clamp(.75rem,2vw,1.25rem);
+  gap:clamp(.5rem,1.5vw,.75rem);
   padding-inline:var(--page-gutter);
   background:#fff4c4;
   border:0;
@@ -27,11 +27,11 @@
   gap:var(--space-2);
   min-width:0;
   max-width:min(100%,14rem);
-  min-height:3.25rem;
+  min-height:2.75rem;
   padding-inline:1rem;
   border:0;
   border-radius:999px;
-  background:linear-gradient(135deg,#5b5af0 0%,#f47add 100%);
+  background:#f47add;
   color:#000;
   box-shadow:none;
 }
@@ -54,12 +54,12 @@
 .topbarButton{
   display:inline-grid;
   place-items:center;
-  width:3.25rem;
-  height:3.25rem;
-  min-width:3.25rem;
-  min-height:3.25rem;
+  width:2.75rem;
+  height:2.75rem;
+  min-width:2.75rem;
+  min-height:2.75rem;
   border:0;
-  border-radius:1.35rem;
+  border-radius:1.05rem;
   background:#000;
   color:#fff4c4;
   box-shadow:none;
@@ -74,8 +74,8 @@
   .topbar{padding-inline:max(var(--space-4),env(safe-area-inset-left));padding-right:max(var(--space-4),env(safe-area-inset-right))}
 }
 @media(max-width:640px){
-  .topbar{gap:.75rem;grid-template-columns:auto minmax(0,1fr) auto}
-  .location{min-height:3rem;padding-inline:.9rem;max-width:12.5rem}
+  .topbar{gap:.55rem;grid-template-columns:auto minmax(0,1fr) auto;padding-block:.35rem}
+  .location{min-height:2.65rem;padding-inline:.8rem;max-width:11.5rem}
   .location select{font-size:1rem}
-  .topbarButton{width:3rem;height:3rem;min-width:3rem;min-height:3rem;border-radius:1.2rem}
+  .topbarButton{width:2.65rem;height:2.65rem;min-width:2.65rem;min-height:2.65rem;border-radius:1rem}
 }

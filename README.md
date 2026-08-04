@@ -1,6 +1,14 @@
+# Bar Ops v0.18.4.6 — Mobile Density & Responsive Structure
+
+Current release: **v0.18.4.6**
+
+This release tightens mobile density and converts Time & Attendance from a desktop table squeezed onto mobile into a responsive card-based workflow. It also reduces the persistent top-bar height, replaces the unapproved location gradient with solid pink, restores Team’s editorial title composition, standardizes disabled controls, and removes remaining low-contrast legacy state colors from the refined screens.
+
+Rollback checkpoint: **v0.18.4.5**.
+
 # Bar Ops v0.18.4.5 — Top Bar & Attendance Refinement
 
-Current release: **v0.18.4.5**
+Historic release: **v0.18.4.5**
 
 This release refines the manager top bar and the Time & attendance workspace after the first colour-architecture pass. The persistent top bar now removes the bottom rule, uses the approved rounded black control treatment for menu/search/notification actions, and gives the location switcher a stronger gradient pill treatment based on the supplied references. Time & attendance now receives its own editorial header and functional colour surfaces so it no longer drops back into a flat beige composition.
 
