@@ -83,9 +83,12 @@ export type ScheduleAcknowledgementSummary = {
 };
 
 export type ClockSettings = {
+  allowMobileClock: boolean;
+  allowKioskClock: boolean;
+  allowUnscheduledClock: boolean;
+  requireLocationCheck: boolean;
   earlyClockInMinutes: number;
   lateClockOutMinutes: number;
-  requireClockOutNote: boolean;
-  requireManagerApproval: boolean;
-  kioskPinRequired: boolean;
+  roundingMinutes: number;
+  autoApproveWithinMinutes: number | "";
 };

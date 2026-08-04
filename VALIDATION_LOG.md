@@ -1,4 +1,4 @@
-# Bar Ops Validation Log — v0.17.0
+# Bar Ops Validation Log — v0.17.0.1
 
 ## Baseline
 
@@ -6,12 +6,18 @@ Approved `bar-ops-v0.16.21.3-audit-remediation.zip`.
 
 ## Completed validation
 
+- Corrected the `ClockSettings` TypeScript contract reported by the Vercel build.
+- Verified the contract covers every property read or written by the settings workspace.
+- Ran the complete `npm run test:all` regression chain after the hotfix: passed.
+- Ran `npm run audit:preflight`: passed.
+- Ran `npm run validate:release`: passed.
+
 - Audited repository structure and largest responsibility concentrations.
 - Extracted workspace domain contracts and pure schedule logic.
 - Confirmed extracted schedule utilities contain no `any` usage.
-- Added and ran the v0.17.0 redesign-readiness regression.
+- Added and ran the v0.17.0.1 redesign-readiness regression.
 - Ran the complete regression suite: passed.
-- Updated architecture-coupled regressions to verify the new feature-owned schedule mapper and forward-compatible v0.17.0 version line.
+- Updated architecture-coupled regressions to verify the new feature-owned schedule mapper and forward-compatible v0.17.0.1 version line.
 - Ran JavaScript syntax checks for modified regression scripts: passed.
 - Ran the final stabilization preflight.
 - Ran release-contract validation.

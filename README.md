@@ -1,6 +1,6 @@
-# Bar Ops v0.17.0
+# Bar Ops v0.17.0.1
 
-Current release: **v0.17.0** — Architecture Cleanup & Redesign Readiness.
+Current release: **v0.17.0.1** — Architecture Cleanup & Redesign Readiness.
 
 This release creates a safer foundation for Phase D by extracting shared workspace domain contracts and pure schedule logic from the manager application shell, documenting stable redesign boundaries, and adding a complete cross-workspace redesign inventory.
 

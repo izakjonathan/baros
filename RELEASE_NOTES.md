@@ -1,4 +1,11 @@
-# Release Notes — v0.17.0
+# Release Notes — v0.17.0.1
+
+## TypeScript hotfix
+
+- Corrected the extracted `ClockSettings` contract so it matches the existing time-clock settings UI and API.
+- Restored the fields for mobile, kiosk, unscheduled clocking, location verification, rounding and auto-approval.
+- Removed three stale fields that were never used by the current settings implementation.
+- No runtime behavior or redesign scope changed.
 
 ## Architecture Cleanup & Redesign Readiness
 

@@ -1,8 +1,13 @@
-# Bar Ops Implementation Status — v0.17.0
+# Bar Ops Implementation Status — v0.17.0.1
 
 ## Baseline
 
 Built from the approved v0.16.21.3 Audit Remediation release.
+
+## v0.17.0.1 hotfix
+
+- Aligned the centralized `ClockSettings` domain contract with the current settings workspace and `/api/settings/time-clock` route.
+- Preserved all existing defaults, persistence fields and UI behavior.
 
 ## Architecture cleanup
 
@@ -18,7 +23,7 @@ Built from the approved v0.16.21.3 Audit Remediation release.
 - Added architecture and stability-boundary documentation.
 - Added a complete manager/employee/shared-state redesign inventory.
 - Added testing and development-workflow documentation.
-- Added a v0.17.0 regression gate protecting the extracted domain layer and Phase D boundaries.
+- Added a v0.17.0.1 regression gate protecting the extracted domain layer and Phase D boundaries.
 
 ## Compatibility
 

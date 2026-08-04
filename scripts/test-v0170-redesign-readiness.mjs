@@ -22,6 +22,18 @@ expect(!app.includes("function mapDatabaseShift"), "Database shift mapping must 
 expect(!app.includes("function shiftsOverlap"), "Pure shift conflict logic must not return to the monolithic app component");
 expect(types.includes("export type Employee"), "Employee contract must be exported from the workspace domain layer");
 expect(types.includes("export type ClockSettings"), "Clock settings contract must be exported from the workspace domain layer");
+for (const field of [
+  "allowMobileClock: boolean",
+  "allowKioskClock: boolean",
+  "allowUnscheduledClock: boolean",
+  "requireLocationCheck: boolean",
+  "earlyClockInMinutes: number",
+  "lateClockOutMinutes: number",
+  "roundingMinutes: number",
+  'autoApproveWithinMinutes: number | ""',
+]) {
+  expect(types.includes(field), `ClockSettings must include ${field}`);
+}
 expect(schedule.includes("export function mapDatabaseShift"), "Typed database shift mapping must be present");
 expect(schedule.includes("DatabaseShiftRecord"), "Database shift mapping must use an explicit input contract");
 expect(!schedule.includes("any"), "Pure schedule utilities must not use any");
