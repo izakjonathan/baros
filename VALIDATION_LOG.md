@@ -1,3 +1,19 @@
+# Validation Log — v0.18.3
+
+## Completed
+
+- v0.18.3 scheduling redesign regression
+- Release preflight and release contract checks
+- Existing scheduling behaviors preserved by source regression checks
+- ZIP integrity check
+
+## Not completed in this environment
+
+- Dependency-based ESLint
+- TypeScript compilation
+- Next.js production build
+- Browser/device visual verification
+
 # Bar Ops v0.18.2 — Dashboard & Overview Redesign
 
 Phase D dashboard redesign built from v0.18.2. It introduces a feature-owned dashboard CSS Module, stronger operational hierarchy, responsive KPI layouts, a prominent live shift board, structured attention and timeline panels, an inverse operational summary, and clearer quick actions. Existing calculations, API requests, role access and navigation targets are unchanged. No migration is required.

@@ -1,3 +1,14 @@
+# Release Notes — v0.18.3
+
+## Scheduling Workspace Redesign
+
+- Added a feature-owned scheduling CSS Module.
+- Redesigned period controls, publication status, conflict review and acknowledgement actions.
+- Added sticky day headers, clearer today treatment and role-coded shift cards.
+- Improved draft, conflict and availability-conflict visibility.
+- Added intentional mobile/iPad horizontal scheduling with touch-safe controls.
+- Preserved drag-and-drop, recurring shifts, overnight shifts, copy-week and publishing behavior.
+
 # Bar Ops v0.18.2 — Dashboard & Overview Redesign
 
 Phase D dashboard redesign built from v0.18.2. It introduces a feature-owned dashboard CSS Module, stronger operational hierarchy, responsive KPI layouts, a prominent live shift board, structured attention and timeline panels, an inverse operational summary, and clearer quick actions. Existing calculations, API requests, role access and navigation targets are unchanged. No migration is required.

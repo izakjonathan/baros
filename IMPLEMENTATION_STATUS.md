@@ -1,3 +1,9 @@
+# Implementation Status — v0.18.3
+
+**Status:** Scheduling Workspace Redesign complete.
+
+The manager scheduling workspace is migrated to the Phase D token and CSS Module architecture. Business logic, APIs, role permissions and database behavior are unchanged.
+
 # Bar Ops v0.18.2 — Dashboard & Overview Redesign
 
 Phase D dashboard redesign built from v0.18.2. It introduces a feature-owned dashboard CSS Module, stronger operational hierarchy, responsive KPI layouts, a prominent live shift board, structured attention and timeline panels, an inverse operational summary, and clearer quick actions. Existing calculations, API requests, role access and navigation targets are unchanged. No migration is required.
