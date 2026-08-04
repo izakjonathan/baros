@@ -2,7 +2,7 @@ import fs from 'node:fs';
 const app=fs.readFileSync('components/bar-ops-app.tsx','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const checks=[
-  ['version',['0.13.0','0.13.1'].includes(pkg.version)],
+  ['version',['0.13.0','0.13.1','0.13.2','0.13.3'].includes(pkg.version)],
   ['default navigation label',app.includes('label: "Today’s operations"')],
   ['live dashboard title',app.includes('title="Today’s operations"')],
   ['30 second refresh',app.includes('window.setInterval(refresh, 30000)')],

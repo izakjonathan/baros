@@ -1,6 +1,6 @@
 # Bar Ops
 
-**Current release: v0.13.0 — Schedule Acknowledgement Reminders**
+**Current release: v0.13.1 — Live Shift Board**
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 
