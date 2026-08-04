@@ -6,9 +6,10 @@ import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
 import { jsonError, readJsonObject, requiredString } from "@/lib/http";
 import { sessionCookieName, sessionCookieOptions, sessionExpiry } from "@/lib/auth/session-cookie";
+import { persistSessionRecord } from "@/lib/auth/session-store";
+import { requestIdFrom } from "@/lib/observability";
 
 const tokenHash = (token: string) => createHash("sha256").update(token).digest("hex");
-const sessionTokenHash = (token: string) => createHash("sha256").update(token).digest("hex");
 
 type InvitationRow = {
   id: string;
@@ -21,12 +22,14 @@ type InvitationRow = {
 };
 
 export async function POST(request: Request) {
+  const requestId = requestIdFrom(request);
+  const responseHeaders = { "cache-control": "no-store", "x-request-id": requestId };
   try {
     const body = await readJsonObject(request, 10_000);
     const token = requiredString(body, "token", 200);
     const password = requiredString(body, "password", 256);
     if (password.length < 12) {
-      return NextResponse.json({ error: "Password must be at least 12 characters" }, { status: 400 });
+      return NextResponse.json({ error: "Password must be at least 12 characters", requestId }, { status: 400, headers: responseHeaders });
     }
 
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
@@ -164,22 +167,13 @@ export async function POST(request: Request) {
         )
       `;
 
-      await tx`
-        delete from sessions
-        where user_id = ${userId}
-          and organization_id = ${invitation.organization_id}
-          and expires_at <= now()
-      `;
-      await tx`
-        insert into sessions(user_id, organization_id, location_id, token_hash, expires_at)
-        values(
-          ${userId},
-          ${invitation.organization_id},
-          ${invitation.location_id},
-          ${sessionTokenHash(rawSessionToken)},
-          ${expiresAt}
-        )
-      `;
+      await persistSessionRecord(tx, {
+        userId,
+        organizationId: invitation.organization_id,
+        locationId: invitation.location_id,
+        rawToken: rawSessionToken,
+        expiresAt,
+      });
 
       return { userId, organizationId: invitation.organization_id };
     });
@@ -187,22 +181,22 @@ export async function POST(request: Request) {
     const store = await cookies();
     store.set(sessionCookieName(), rawSessionToken, sessionCookieOptions(expiresAt));
 
-    return NextResponse.json({ ok: true, redirect: "/employee", userId: result.userId });
+    return NextResponse.json({ ok: true, redirect: "/employee", userId: result.userId, requestId }, { headers: responseHeaders });
   } catch (error) {
     if (error instanceof Error && ["INVITATION_INVALID", "INVITATION_ALREADY_USED"].includes(error.message)) {
-      return NextResponse.json({ error: "This invitation is invalid, expired, or already used" }, { status: 410 });
+      return NextResponse.json({ error: "This invitation is invalid, expired, or already used", requestId }, { status: 410, headers: responseHeaders });
     }
     if (error instanceof Error && error.message === "EXISTING_PASSWORD_INVALID") {
       return NextResponse.json(
-        { error: "This email already has a Bar Ops account. Enter its existing password to accept the invitation." },
-        { status: 401 },
+        { error: "This email already has a Bar Ops account. Enter its existing password to accept the invitation.", requestId },
+        { status: 401, headers: responseHeaders },
       );
     }
     if (error instanceof Error && error.message === "ACCOUNT_CONFLICT") {
-      return NextResponse.json({ error: "This email is already used by a management account" }, { status: 409 });
+      return NextResponse.json({ error: "This email is already used by a management account", requestId }, { status: 409, headers: responseHeaders });
     }
     if (error instanceof Error && ["USER_CREATE_FAILED", "EMPLOYEE_LINK_FAILED"].includes(error.message)) {
-      return NextResponse.json({ error: "The employee account could not be linked. Ask a manager to resend the invitation." }, { status: 409 });
+      return NextResponse.json({ error: "The employee account could not be linked. Ask a manager to resend the invitation.", requestId }, { status: 409, headers: responseHeaders });
     }
     return jsonError(error, request);
   }

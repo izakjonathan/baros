@@ -1,53 +1,29 @@
 # Bar Ops
 
-**Current release: v0.16.11
+**Current release: v0.16.13 — Production Hardening XIII & XIV**
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 
-## v0.10.11 employee timesheet rendering
-
-v0.10.11 prevents Clock-page crashes when PostgreSQL date values are returned as full ISO timestamps and keeps geolocation failures inline. See `RELEASE_NOTES_V01011.md`.
-
-## v0.10.10 employee hours and location assignment
-
-v0.10.10 fixes the production employee-hours SQL failure and adds manager-controlled primary location assignment for employees. See `RELEASE_NOTES_V01010.md`.
-
-## v0.10.8 baseline audit
-
-v0.10.8 is an audit-only package based on v0.10.7. It adds a complete SHA-256 manifest, classified repository inventory, functional verification matrix, validation log and prioritized audit report. Application behavior is unchanged. See `AUDIT_REPORT_V0108.md`.
-
-
-## iPad workflow
-Commit the flat ZIP to the private `baros` repository using the Commit app. GitHub Quality Checks installs dependencies, runs tests/type checking/build, and Vercel deploys the commit.
-
-## Database
-Use `DATABASE_URL` for the pooled Neon runtime URL and `DATABASE_DIRECT_URL` for migrations.
-
-For this release no new migration is required.
-
-## Install as an iPhone or iPad app
-
-Bar Ops v0.10.4 includes a web app manifest, Apple metadata, app icons and a service worker. In Safari, open the deployed site, choose **Share → Add to Home Screen**, then launch Bar Ops from its icon. If an older shortcut was installed before v0.10.4, delete it and add it again so iOS picks up the new standalone configuration.
-
-The service worker does not cache authenticated API responses or operational pages. When offline, Bar Ops shows a controlled reconnect screen generated directly by the service worker rather than caching stale schedule, payroll or inventory data.
-## v0.10.5 CSS ownership
-
-The CSS cleanup release removes historical redesign blocks, repeated exact selectors and `!important` declarations while preserving the v0.10.4 project architecture. See `CSS_OWNERSHIP_REPORT_V0105.md`.
-
-
-### v0.10.7 employee workspace integrity
-
-Employee routes derive their employee and location context centrally from the authenticated session. An active session location is preferred; employee accounts use their primary active `employee_locations` assignment when the stored session location is missing or stale. Development employee previews require a seeded, activated employee account and resolve that real database identity instead of using placeholder UUID values.
 ## Current release
 
-**v0.16.9.1 — Session Cookie TypeScript Hotfix** preserves the v0.16.9 production-hardening release and corrects the shared cookie option types for Next.js 16. No database migration or workflow change is required.
+v0.16.13 combines shared session issuance with authentication endpoint consistency. Standard login and employee activation now use the same bounded session-store implementation, and activation/development-login responses carry consistent request tracing and no-store cache protection.
 
-The preceding **v0.16.9 — Production Hardening IX & X** release combines API Payload Integrity and Database Operations Guardrails. API requests now receive consistent request IDs and no-store policy at the network boundary, while cross-site mutation requests and mismatched browser origins are rejected before reaching business routes. Production configuration validation now verifies URL schemes, HTTPS, PostgreSQL connection formats, session TTL bounds and cookie-name safety. No database migration or business-workflow change is required.
+No database migration, permission change or business-workflow change is required.
 
-Operational readiness remains available through the health endpoints below. Production configuration can be checked with `npm run validate:env`.
+## iPad workflow
+
+Commit the flat ZIP to the private `baros` repository using the Commit app. GitHub Quality Checks installs dependencies, runs tests, type checking and the production build, then Vercel deploys the commit.
+
+## Database
+
+Use `DATABASE_URL` for the pooled Neon runtime URL and `DATABASE_DIRECT_URL` for migrations.
 
 ## Production health checks
 
-- `GET /api/health/live` confirms that the application runtime is alive without requiring the database.
-- `GET /api/health/ready` confirms that the database is reachable within the bounded readiness timeout.
-- `GET /api/health` remains an alias for readiness for backwards compatibility.
+- `GET /api/health/live` checks application liveness without requiring the database.
+- `GET /api/health/ready` checks bounded database readiness.
+- `GET /api/health` remains a backwards-compatible readiness alias.
+
+## Installed app
+
+The web app manifest, Apple metadata, icons and `public/sw.js` remain included. The service worker does not cache authenticated API responses or operational pages.

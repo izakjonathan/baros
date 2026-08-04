@@ -1,13 +1,13 @@
-import { createHash, randomBytes } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db/client";
 import { createDevSessionToken, getDevSessionUser, isDevAuthEnabled, verifyDevSessionToken } from "@/lib/auth/dev-auth";
 import { expiredSessionCookieOptions, sessionCookieName, sessionCookieOptions, sessionExpiry } from "@/lib/auth/session-cookie";
+import { hashSessionToken, persistSessionRecord } from "@/lib/auth/session-store";
 
 export type AppRole = "OWNER" | "ADMIN" | "MANAGER" | "SHIFT_MANAGER" | "EMPLOYEE";
 export type SessionUser = { userId: string; email: string; name: string; role: AppRole; organizationId: string; locationId: string | null; employeeId: string | null };
-const tokenHash = (token: string) => createHash("sha256").update(token).digest("hex");
 
 export async function createSession(userId: string, organizationId: string, locationId: string | null, devRole: AppRole = "OWNER") {
   const store = await cookies();
@@ -20,18 +20,13 @@ export async function createSession(userId: string, organizationId: string, loca
 
   const token = randomBytes(32).toString("base64url");
   const sql = db();
-  await sql.begin(async transaction => {
-    await transaction`delete from sessions where expires_at <= now()`;
-    await transaction`insert into sessions (user_id, organization_id, location_id, token_hash, expires_at) values (${userId}, ${organizationId}, ${locationId}, ${tokenHash(token)}, ${expiresAt})`;
-    await transaction`
-      delete from sessions
-      where id in (
-        select id from sessions
-        where user_id = ${userId} and organization_id = ${organizationId}
-        order by expires_at desc, id desc
-        offset 10
-      )`;
-  });
+  await sql.begin(transaction => persistSessionRecord(transaction, {
+    userId,
+    organizationId,
+    locationId,
+    rawToken: token,
+    expiresAt,
+  }));
   store.set(sessionCookieName(), token, sessionCookieOptions(expiresAt));
 }
 
@@ -39,7 +34,7 @@ export async function destroySession() {
   const store = await cookies();
   const token = store.get(sessionCookieName())?.value;
   if (token && !isDevAuthEnabled()) {
-    await db()`delete from sessions where token_hash = ${tokenHash(token)}`;
+    await db()`delete from sessions where token_hash = ${hashSessionToken(token)}`;
   }
   store.set(sessionCookieName(), "", expiredSessionCookieOptions());
 }
@@ -116,7 +111,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
       order by el.primary_location desc,el.location_id
       limit 1
     ) employee_location on true
-    where s.token_hash=${tokenHash(token)} and s.expires_at>now() and u.status='ACTIVE'
+    where s.token_hash=${hashSessionToken(token)} and s.expires_at>now() and u.status='ACTIVE'
     limit 1`;
   return rows[0] || null;
 }
