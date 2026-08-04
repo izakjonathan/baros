@@ -29,6 +29,7 @@ type StockAdjustment = { id: string; productId: string; productName: string; del
 type OpsTask = { id: string; title: string; type: "Opening" | "Closing" | "Task" | "Maintenance"; owner: string; due: string; done: boolean; note?: string };
 type LogEntry = { id: string; title: string; body: string; author: string; createdAt: string };
 type TimeEntry = { id: string; employee: string; date: string; clockIn: string; clockOut?: string; breakMinutes: number; status: "Running" | "Pending" | "Approved" | "Rejected"; scheduledHours: number; note?: string; edited?: boolean; onBreak?: boolean; breakStartedAt?: string | null };
+type ShiftNote = { id:string; shiftId:string; note:string; category:string; createdAt:string; author:string; role:string; startsAt:string };
 type ScheduleAcknowledgementSummary = { publication: { id: string; version: number; publishedAt: string } | null; employees: Array<{ id: string; name: string; acknowledgedAt: string | null; changeTypes?: string[] }> };
 const todayAtNoon = new Date(); todayAtNoon.setHours(12,0,0,0);
 const BASE_MONDAY = new Date(todayAtNoon); BASE_MONDAY.setDate(todayAtNoon.getDate() - ((todayAtNoon.getDay() + 6) % 7));
@@ -97,6 +98,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
     { id: "t3", employee: "Jonas Berg", date: "2026-07-28", clockIn: "16:51", clockOut: "01:14", breakMinutes: 30, status: "Pending", scheduledHours: 8 },
     { id: "t4", employee: "Sofia Lund", date: "2026-07-31", clockIn: "18:58", breakMinutes: 0, status: "Running", scheduledHours: 7 },
   ]);
+  const [shiftNotes, setShiftNotes] = useState<ShiftNote[]>([]);
   const [databaseStatus, setDatabaseStatus] = useState(devMode ? "Development data · saved locally" : "Connecting…");
   useEffect(() => {
     if (!devMode) return;
@@ -135,6 +137,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       setShifts((data.shifts || []).map(mapDatabaseShift));
       setProducts((data.products || []).map((x:any)=>({id:x.id,name:x.name,category:x.category,supplier:x.supplier||"Unassigned",stock:Number(x.quantity||0),par:Number(x.par_level||0),unit:x.unit,price:Number(x.purchase_price||0)})));
       setTimeEntries((data.timesheets || []).map((x:any)=>({id:x.id,employee:x.employee_name,date:String(x.work_date).slice(0,10),clockIn:String(x.clocked_in_at).slice(11,16),clockOut:x.clocked_out_at?String(x.clocked_out_at).slice(11,16):undefined,breakMinutes:x.break_minutes,status:(x.status==="OPEN"?"Running":x.status[0]+x.status.slice(1).toLowerCase()) as TimeEntry["status"],scheduledHours:Number(x.scheduled_minutes||0)/60,note:x.manager_note,onBreak:Boolean(x.on_break),breakStartedAt:x.open_break_started_at?String(x.open_break_started_at):null})));
+      setShiftNotes((data.shiftNotes || []).map((n:any)=>({id:n.id,shiftId:n.shift_id,note:n.note,category:n.category,createdAt:String(n.created_at),author:n.author_name,role:n.role,startsAt:String(n.starts_at)})));
       setDatabaseStatus(resolvedLocationId ? "PostgreSQL connected" : "No active location configured");
       hasBootstrappedRef.current = true;
       setDataReady(true);
@@ -164,7 +167,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       <main className="main-shell">
         <Topbar onMenu={() => setMobileNav(true)} locations={locations} selectedLocationId={selectedLocationId} onLocationChange={setSelectedLocationId} onNavigate={setActive} />
         <div className="page-wrap">
-          {active === "dashboard" && <Dashboard shifts={shifts} products={products} employees={employees} timeEntries={timeEntries} tasks={opsTasks} devMode={devMode} onNavigate={setActive} />}
+          {active === "dashboard" && <Dashboard shifts={shifts} products={products} employees={employees} timeEntries={timeEntries} tasks={opsTasks} shiftNotes={shiftNotes} devMode={devMode} onNavigate={setActive} />}
           {active === "schedule" && <Schedule shifts={shifts} setShifts={setShifts} employees={employees} onNewShift={openShiftDialog} onEditShift={setEditingShift} notify={notify} currentWeekOffset={currentWeekOffset} setCurrentWeekOffset={setCurrentWeekOffset} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
           {active === "attendance" && <Attendance employees={employees} shifts={shifts} entries={timeEntries} setEntries={setTimeEntries} notify={notify} onEdit={setEditingTimeEntry} devMode={devMode} persist={persist} />}
           {active === "inventory" && <Inventory products={products} setProducts={setProducts} onNewProduct={() => setDialog("product")} onEditProduct={setEditingProduct} onStockCount={() => setDialog("stockCount")} adjustments={stockAdjustments} setAdjustments={setStockAdjustments} notify={notify} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
@@ -296,7 +299,7 @@ function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; ti
   return <div className="page-header"><div>{eyebrow && <p className="eyebrow">{eyebrow}</p>}<h1>{title}</h1>{subtitle&&<p>{subtitle}</p>}</div>{action}</div>
 }
 
-function Dashboard({ shifts, products, employees, timeEntries, tasks, devMode, onNavigate }: { shifts: Shift[]; products: Product[]; employees: Employee[]; timeEntries: TimeEntry[]; tasks: OpsTask[]; devMode: boolean; onNavigate: (id: NavKey) => void }) {
+function Dashboard({ shifts, products, employees, timeEntries, tasks, shiftNotes, devMode, onNavigate }: { shifts: Shift[]; products: Product[]; employees: Employee[]; timeEntries: TimeEntry[]; tasks: OpsTask[]; shiftNotes:ShiftNote[]; devMode: boolean; onNavigate: (id: NavKey) => void }) {
   const [pendingRequests, setPendingRequests] = useState(0);
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const today = toIsoDate(new Date());
@@ -396,6 +399,7 @@ function Dashboard({ shifts, products, employees, timeEntries, tasks, devMode, o
         <button className="attention-item" onClick={() => onNavigate("operations")}><span className="attention-icon blue"><CheckCircle2 size={19} /></span><div><strong>{incompleteTasks.length} operations tasks open</strong><small>Opening, closing and maintenance</small></div><ChevronRight size={18} /></button>
       </section>
     </div>
+    {shiftNotes.length>0&&<section className="panel shift-notes-panel"><PanelTitle title="Latest shift notes" subtitle="Incidents, equipment, stock and handover notes from the team" action={<button type="button" className="text-button" onClick={()=>onNavigate("schedule")}>Open schedule <ArrowRight size={15}/></button>}/><div className="shift-notes-list">{shiftNotes.slice(0,6).map(note=><article key={note.id}><span className={`note-category note-${note.category.toLowerCase()}`}>{note.category}</span><div><strong>{note.author} · {note.role}</strong><p>{note.note}</p><small>{new Date(note.createdAt).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</small></div></article>)}</div></section>}
     <section className="panel quick-panel"><PanelTitle title="Quick actions" subtitle="Jump directly into today’s work" /><div className="quick-grid">
       <Quick icon={Plus} label="Create shift" detail="Add or assign today’s coverage" onClick={() => onNavigate("schedule")} />
       <Quick icon={ClipboardList} label="Review requests" detail="Approve employee requests" onClick={() => onNavigate("requests")} />
