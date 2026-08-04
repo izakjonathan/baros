@@ -78,8 +78,13 @@ export async function PUT(req: Request) {
       await db().begin(async tx => {
         await tx`delete from availability_rules where organization_id=${user.organizationId} and employee_id=${user.employeeId} and valid_from between ${first}::date and ${last}::date and valid_until=valid_from`;
         for (const rule of rules) {
-          const weekday = new Date(`${rule.date}T00:00:00Z`).getUTCDay();
-          await tx`insert into availability_rules(organization_id,employee_id,weekday,available_from,available_to,available,valid_from,valid_until,note) values(${user.organizationId},${user.employeeId},${weekday},${rule.availableFrom || null},${rule.availableTo || null},${rule.available !== false},${rule.date}::date,${rule.date}::date,${rule.note || null})`;
+          const date = rule.date as string;
+          const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
+          const available = rule.available !== false;
+          const availableFrom: string | null = available ? rule.availableFrom ?? null : null;
+          const availableTo: string | null = available ? rule.availableTo ?? null : null;
+          const note: string | null = rule.note ?? null;
+          await tx`insert into availability_rules(organization_id,employee_id,weekday,available_from,available_to,available,valid_from,valid_until,note) values(${user.organizationId},${user.employeeId},${weekday},${availableFrom},${availableTo},${available},${date}::date,${date}::date,${note})`;
         }
       });
       await writeAudit({ organizationId: user.organizationId, actorUserId: user.userId, action: "MONTHLY_AVAILABILITY_UPDATED", entityType: "employee", entityId: user.employeeId, after: { month, rules } });
