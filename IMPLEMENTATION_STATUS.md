@@ -1,8 +1,12 @@
-# Implementation Status — v0.18.1
+# Bar Ops v0.18.2 — Dashboard & Overview Redesign
+
+Phase D dashboard redesign built from v0.18.2. It introduces a feature-owned dashboard CSS Module, stronger operational hierarchy, responsive KPI layouts, a prominent live shift board, structured attention and timeline panels, an inverse operational summary, and clearer quick actions. Existing calculations, API requests, role access and navigation targets are unchanged. No migration is required.
+
+# Implementation Status — v0.18.2
 
 ## Status
 
-Phase D has begun with a combined v0.18.0 + v0.18.1 build. The design-system foundation and application shells are implemented. Workspace content redesign remains scheduled for later Phase D releases.
+Phase D has begun with a combined v0.18.0 + v0.18.2 build. The design-system foundation and application shells are implemented. Workspace content redesign remains scheduled for later Phase D releases.
 
 ## Approved baseline
 

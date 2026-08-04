@@ -1,16 +1,20 @@
-# Validation Log — v0.18.1
+# Bar Ops v0.18.2 — Dashboard & Overview Redesign
+
+Phase D dashboard redesign built from v0.18.2. It introduces a feature-owned dashboard CSS Module, stronger operational hierarchy, responsive KPI layouts, a prominent live shift board, structured attention and timeline panels, an inverse operational summary, and clearer quick actions. Existing calculations, API requests, role access and navigation targets are unchanged. No migration is required.
+
+# Validation Log — v0.18.2
 
 ## Baseline
 
 - Approved baseline: v0.17.0.2
-- Combined release: v0.18.0 + v0.18.1
+- Combined release: v0.18.0 + v0.18.2
 
 ## Passed
 
 - `node scripts/test-v0180-design-system.mjs`
 - `node scripts/test-v0181-shell-navigation.mjs`
 - Complete inherited regression chain through v0.15.0
-- Complete v0.15.0–v0.18.1 regression chain
+- Complete v0.15.0–v0.18.2 regression chain
 - `npm run audit:preflight`
 - `npm run validate:release`
 - Release-contract validation

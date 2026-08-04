@@ -1,6 +1,10 @@
-# Bar Ops v0.18.1
+# Bar Ops v0.18.2 — Dashboard & Overview Redesign
 
-Current release: **v0.18.1** — Architecture Cleanup & Redesign Readiness.
+Phase D dashboard redesign built from v0.18.2. It introduces a feature-owned dashboard CSS Module, stronger operational hierarchy, responsive KPI layouts, a prominent live shift board, structured attention and timeline panels, an inverse operational summary, and clearer quick actions. Existing calculations, API requests, role access and navigation targets are unchanged. No migration is required.
+
+# Bar Ops v0.18.2
+
+Current release: **v0.18.2** — Architecture Cleanup & Redesign Readiness.
 
 This release creates a safer foundation for Phase D by extracting shared workspace domain contracts and pure schedule logic from the manager application shell, documenting stable redesign boundaries, and adding a complete cross-workspace redesign inventory.
 
@@ -10,7 +14,7 @@ Rollback checkpoint: **v0.16.21.3**.
 
 Hospitality operations system built with Next.js, TypeScript and PostgreSQL for Vercel and Neon.
 
-## Phase D begins — v0.18.0 + v0.18.1
+## Phase D begins — v0.18.0 + v0.18.2
 
 This combined build establishes the layered design-system foundation and redesigns the manager and employee application shells/navigation. Workspace content remains intentionally unchanged until its planned Phase D release.
 

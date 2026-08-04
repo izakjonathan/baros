@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+const app=fs.readFileSync('components/bar-ops-app.tsx','utf8');
+const css=fs.readFileSync('features/dashboard/Dashboard.module.css','utf8');
+const fail=(m)=>{console.error(`v0.18.2 regression: ${m}`);process.exitCode=1};
+if(pkg.version!=='0.18.2') fail('package version must be 0.18.2');
+if(!app.includes('Dashboard.module.css')) fail('dashboard CSS Module is not imported');
+for(const token of ['dashboardStyles.metrics','dashboardStyles.heroPanel','dashboardStyles.contentGrid','dashboardStyles.summary','dashboardStyles.quickPanel']) if(!app.includes(token)) fail(`missing ${token}`);
+for(const token of ['--surface-card','--radius-panel','--space-6','@media(max-width:640px)']) if(!css.includes(token)) fail(`dashboard module missing ${token}`);
+for(const target of ['onNavigate("attendance")','onNavigate("schedule")','onNavigate("requests")','onNavigate("inventory")','onNavigate("orders")','onNavigate("operations")']) if(!app.includes(target)) fail(`dashboard navigation target missing: ${target}`);
+if(!process.exitCode) console.log('v0.18.2 dashboard redesign regression passed');

@@ -14,6 +14,7 @@ import { BASE_MONDAY, canonicalShiftDate, conflictIds, dateFromSerial, dateFromS
 import { DevRoleSwitcher } from "@/components/dev-role-switcher";
 import { RequestsWorkspace } from "@/components/requests-workspace";
 import shellStyles from "@/components/shell/ManagerShell.module.css";
+import dashboardStyles from "@/features/dashboard/Dashboard.module.css";
 
 const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Today’s operations", icon: LayoutDashboard },
@@ -343,15 +344,15 @@ function Dashboard({ shifts, products, employees, timeEntries, tasks, shiftNotes
   }, 0);
   const completedTasks = tasks.filter((task) => task.done).length;
   const operationalExceptions = late.length + openToday.length + conflicts.size + availabilityConflicts + incompleteTasks.length;
-  return <>
+  return <div className={dashboardStyles.dashboard}>
     <PageHeader eyebrow={new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})} title="Today’s operations" subtitle={`Live overview for the current location · updated ${lastUpdated.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}`} />
-    <section className="metric-grid daily-metrics">
+    <section className={`metric-grid daily-metrics ${dashboardStyles.metrics}`}>
       <Metric icon={Users} label="Clocked in" value={`${runningEntries.length}`} detail={`${assignedToday.length} assigned today`} trend={runningEntries.length ? "Live now" : "No active clocks"} />
       <Metric icon={Clock3} label="Expected next" value={upcoming[0]?.start || "—"} detail={upcoming[0]?.employee || "No more arrivals"} trend={`${upcoming.length} upcoming`} />
       <Metric icon={ClipboardList} label="Pending requests" value={`${pendingRequests}`} detail="Leave, claims and transfers" trend={pendingRequests ? "Review queue" : "All clear"} warning={pendingRequests > 0} />
       <Metric icon={AlertTriangle} label="Needs attention" value={`${attentionTotal}`} detail={`${late.length} late · ${openToday.length} open · ${lowStock.length} low stock`} trend={attentionTotal ? "Review now" : "All clear"} warning={attentionTotal > 0} />
     </section>
-    <section className="panel live-shift-board"><PanelTitle title="Live shift board" subtitle={`${runningEntries.length} clocked in · ${late.length} late · ${upcoming.length} expected`} action={<button type="button" className="text-button" onClick={() => onNavigate("attendance")}>Open attendance <ArrowRight size={15} /></button>} />
+    <section className={`panel live-shift-board ${dashboardStyles.heroPanel}`}><PanelTitle title="Live shift board" subtitle={`${runningEntries.length} clocked in · ${late.length} late · ${upcoming.length} expected`} action={<button type="button" className="text-button" onClick={() => onNavigate("attendance")}>Open attendance <ArrowRight size={15} /></button>} />
       <div className="live-board-list">
         {liveBoard.length === 0 && <div className="daily-empty">No employees are assigned today.</div>}
         {liveBoard.map(({ shift, status, tone, detail }) => <button type="button" className="live-board-row" key={shift.id} onClick={() => onNavigate("attendance")}>
@@ -359,14 +360,14 @@ function Dashboard({ shifts, products, employees, timeEntries, tasks, shiftNotes
         </button>)}
       </div>
     </section>
-    <div className="dashboard-grid daily-dashboard-grid">
-      <section className="panel today-panel"><PanelTitle title="Today’s timeline" subtitle={`${assignedToday.length} assigned · ${openToday.length} open`} action={<button className="text-button" onClick={() => onNavigate("schedule")}>Open shift plan <ArrowRight size={15} /></button>} />
+    <div className={`dashboard-grid daily-dashboard-grid ${dashboardStyles.contentGrid}`}>
+      <section className={`panel today-panel ${dashboardStyles.panel}`}><PanelTitle title="Today’s timeline" subtitle={`${assignedToday.length} assigned · ${openToday.length} open`} action={<button className="text-button" onClick={() => onNavigate("schedule")}>Open shift plan <ArrowRight size={15} /></button>} />
         <div className="timeline">
           {timeline.length === 0 && <div className="daily-empty">No shifts scheduled today.</div>}
           {timeline.map((shift) => <button type="button" className="timeline-row timeline-action" key={shift.id} onClick={() => onNavigate("schedule")}><time>{shift.start}</time><div className={`avatar ${shift.isOpen ? "sand" : ""}`}>{shift.isOpen ? "+" : shift.initials}</div><div className="grow"><strong>{shift.employee}</strong><span>{shift.role}{shift.availabilityConflict ? " · availability conflict" : ""}</span></div><span className="shift-time">{shift.start}–{shift.end}</span><ChevronRight size={18}/></button>)}
         </div>
       </section>
-      <section className="panel attention-panel"><PanelTitle title="Attention needed" subtitle="Prioritised operational actions" />
+      <section className={`panel attention-panel ${dashboardStyles.panel} ${dashboardStyles.attention}`}><PanelTitle title="Attention needed" subtitle="Prioritised operational actions" />
         <button className="attention-item" onClick={() => onNavigate("attendance")}><span className="attention-icon amber"><Timer size={19} /></span><div><strong>{late.length} employees late</strong><small>{runningEntries.length} currently clocked in</small></div><ChevronRight size={18} /></button>
         <button className="attention-item" onClick={() => onNavigate("requests")}><span className="attention-icon violet"><ClipboardList size={19} /></span><div><strong>{pendingRequests} pending requests</strong><small>Leave, open shifts and transfers</small></div><ChevronRight size={18} /></button>
         <button className="attention-item" onClick={() => onNavigate("schedule")}><span className="attention-icon violet"><CalendarDays size={19} /></span><div><strong>{openToday.length + conflicts.size + availabilityConflicts} schedule issues</strong><small>{openToday.length} open shifts · {conflicts.size + availabilityConflicts} conflicts</small></div><ChevronRight size={18} /></button>
@@ -374,7 +375,7 @@ function Dashboard({ shifts, products, employees, timeEntries, tasks, shiftNotes
         <button className="attention-item" onClick={() => onNavigate("operations")}><span className="attention-icon blue"><CheckCircle2 size={19} /></span><div><strong>{incompleteTasks.length} operations tasks open</strong><small>Opening, closing and maintenance</small></div><ChevronRight size={18} /></button>
       </section>
     </div>
-    <section className="panel operational-summary"><PanelTitle title="Operational summary" subtitle="Current progress and outstanding work for today" />
+    <section className={`panel operational-summary ${dashboardStyles.summary}`}><PanelTitle title="Operational summary" subtitle="Current progress and outstanding work for today" />
       <div className="operational-summary-grid">
         <div><span>Completed shifts</span><strong>{completedToday.length}</strong><small>{assignedToday.length} assigned today</small></div>
         <div><span>Worked hours</span><strong>{(workedMinutesToday/60).toFixed(1)}</strong><small>Recorded after breaks</small></div>
@@ -382,8 +383,8 @@ function Dashboard({ shifts, products, employees, timeEntries, tasks, shiftNotes
         <div><span>Open exceptions</span><strong>{operationalExceptions}</strong><small>Staffing, schedule and operations</small></div>
       </div>
     </section>
-    {shiftNotes.length>0&&<section className="panel shift-notes-panel"><PanelTitle title="Latest shift notes" subtitle="Incidents, equipment, stock and handover notes from the team" action={<button type="button" className="text-button" onClick={()=>onNavigate("schedule")}>Open schedule <ArrowRight size={15}/></button>}/><div className="shift-notes-list">{shiftNotes.slice(0,6).map(note=><article key={note.id}><span className={`note-category note-${note.category.toLowerCase()}`}>{note.category}</span><div><strong>{note.author} · {note.role}</strong><p>{note.note}</p><small>{new Date(note.createdAt).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</small></div></article>)}</div></section>}
-    <section className="panel quick-panel"><PanelTitle title="Quick actions" subtitle="Jump directly into today’s work" /><div className="quick-grid">
+    {shiftNotes.length>0&&<section className={`panel shift-notes-panel ${dashboardStyles.panel}`}><PanelTitle title="Latest shift notes" subtitle="Incidents, equipment, stock and handover notes from the team" action={<button type="button" className="text-button" onClick={()=>onNavigate("schedule")}>Open schedule <ArrowRight size={15}/></button>}/><div className="shift-notes-list">{shiftNotes.slice(0,6).map(note=><article key={note.id}><span className={`note-category note-${note.category.toLowerCase()}`}>{note.category}</span><div><strong>{note.author} · {note.role}</strong><p>{note.note}</p><small>{new Date(note.createdAt).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</small></div></article>)}</div></section>}
+    <section className={`panel quick-panel ${dashboardStyles.quickPanel}`}><PanelTitle title="Quick actions" subtitle="Jump directly into today’s work" /><div className="quick-grid">
       <Quick icon={Plus} label="Create shift" detail="Add or assign today’s coverage" onClick={() => onNavigate("schedule")} />
       <Quick icon={ClipboardList} label="Review requests" detail="Approve employee requests" onClick={() => onNavigate("requests")} />
       <Quick icon={Timer} label="Time & attendance" detail="Review clocks and exceptions" onClick={() => onNavigate("attendance")} />
@@ -391,7 +392,7 @@ function Dashboard({ shifts, products, employees, timeEntries, tasks, shiftNotes
       <Quick icon={Truck} label="Receive delivery" detail="Open purchase orders" onClick={() => onNavigate("orders")} />
       <Quick icon={NotebookPen} label="Daily operations" detail="Complete opening and closing tasks" onClick={() => onNavigate("operations")} />
     </div></section>
-  </>
+  </div>
 }
 
 function ShiftExecution({ shifts, entries, notes, onNavigate }: { shifts: Shift[]; entries: TimeEntry[]; notes: ShiftNote[]; onNavigate: (id: NavKey) => void }) {
