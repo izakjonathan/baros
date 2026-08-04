@@ -1,3 +1,4 @@
+import { isVersionAtLeast } from "./version-utils.mjs";
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 
@@ -7,7 +8,7 @@ const transfers=fs.readFileSync('app/api/shift-transfers/route.ts','utf8');
 const workspace=fs.readFileSync('components/requests-workspace.tsx','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 
-assert.ok(['0.11.6','0.12.0','0.12.1','0.12.2','0.12.3','0.12.4','0.13.0','0.13.1','0.13.2','0.13.3','0.13.4','0.14.0','0.14.1','0.14.2','0.14.3','0.14.4','0.15.0'].includes(pkg.version));
+assert.ok(isVersionAtLeast(pkg.version, "0.11.6"));
 assert.match(requests,/r\.status='PENDING'/);
 assert.match(claims,/c\.status='PENDING'/);
 assert.match(claims,/s\.is_open=true and s\.employee_id is null/);

@@ -1,35 +1,29 @@
-# Validation Log — v0.16.21.2
+# Bar Ops Validation Log — v0.16.21.3
 
-## Executed
+## Baseline
 
-- `node scripts/test-v01618-api-boundary-completion.mjs`
-- `node scripts/test-v01619-type-safety-stabilization.mjs`
-- `node scripts/test-v01620-release-metadata.mjs`
-- `node scripts/test-v01621-final-stabilization.mjs`
-- `node scripts/validate-release.mjs`
-- `npm run audit:preflight`
-- JavaScript syntax checks for new scripts
-- Service-worker and forbidden-file checks
-- ZIP integrity check
+GitHub-downloaded `baros-main.zip` at v0.16.21.2, reconciled against the approved v0.16.21.2 release package.
 
-## Dependency limitation
+## Completed validation
 
-A clean lockfile generation/install was attempted with `npm install --package-lock-only --ignore-scripts`, but the available internal npm registry returned 404 for `@types/node@22.10.2`. Therefore ESLint, TypeScript compilation and the complete Next.js production build were not executed locally. GitHub Actions/Vercel must run those dependency-based gates.
+- Removed unintended `vercel.json` repository drift.
+- Confirmed `public/sw.js` is present.
+- Confirmed `public/offline.html` is absent.
+- Updated activation reliability regression for the shared session-store implementation.
+- Added shared semantic-version comparison for historical regression scripts.
+- Updated 25 historical version assertions while preserving their functional checks.
+- Corrected four-part hotfix version handling in the release/recovery regression.
+- Ran all 93 individual focused regression scripts: passed.
+- Ran `npm run test:all`: passed.
+- Ran `npm run audit:preflight`: passed after this validation log was updated.
+- Ran `npm run validate:release`: passed after this validation log was updated.
+- Verified JavaScript syntax for modified regression scripts.
+- Verified ZIP integrity.
 
-## Result
+## Not completed in this environment
 
-Focused source-level and release-contract validation passed. No database migration was introduced.
+A clean dependency installation, ESLint, TypeScript compilation, and complete Next.js production build were not run because the available npm mirror previously returned a 404 for `@types/node@22.10.2`. GitHub Actions and Vercel remain the authoritative dependency-based gates.
 
+## Compatibility
 
-## v0.16.21.2 hotfix validation
-
-- Confirmed `lib/auth/scope.ts` uses the native `postgres` SQL type.
-- Confirmed order and payroll transaction routes contain no `tx as any` casts.
-- Ran focused v0.16.19–v0.16.21 regression scripts.
-- Full dependency-based TypeScript and Next.js build could not be run in this environment because the internal npm mirror does not provide the required packages.
-
-## v0.16.21.2 hotfix validation
-
-- Confirmed payroll transaction queries use `tx<PayrollPeriodRow[]>`.
-- Confirmed audit-log interpolation receives typed string/null values.
-- Confirmed no `any` transaction casts were introduced.
+No database migration, API contract change, permission change, business feature, or workflow change.

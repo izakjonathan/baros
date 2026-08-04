@@ -1,24 +1,17 @@
-# Bar Ops Implementation Status — v0.16.21.2
+# Bar Ops Implementation Status — v0.16.21.3
 
 ## Baseline
 
-Built from approved v0.16.19 — Production Hardening XIX & XX.
+Built from the GitHub-downloaded v0.16.21.2 snapshot and reconciled against the approved v0.16.21.2 release package.
 
-## v0.16.20 — Release Metadata Consolidation
+## Audit remediation
 
-- Removed duplicated and stale current-release text from README.md.
-- Consolidated the rollback checkpoint on v0.16.17.
-- Aligned package and release documentation on v0.16.21.
-- Preserved all operational setup and health-check guidance.
-
-## v0.16.21 — Final Stabilization Gate
-
-- Added `npm run audit:preflight`.
-- Added the preflight to GitHub Actions before the existing quality gates.
-- Checks source packages for generated directories, local environment files and forbidden deployment files.
-- Verifies Node 24 and exact direct dependency versions.
-- Verifies bounded API request parsing and prevents transaction `any` escapes.
-- Runs release-contract and final hardening regressions as one checkpoint.
+- Removed the unintended `vercel.json` repository artifact.
+- Updated activation reliability checks for the shared session-store architecture.
+- Made historical release-version assertions forward-compatible while preserving functional assertions.
+- Corrected hotfix semantic-version handling.
+- Consolidated duplicated release documentation.
+- Preserved the final stabilization preflight and release-contract gates.
 
 ## Compatibility
 
@@ -27,14 +20,4 @@ Built from approved v0.16.19 — Production Hardening XIX & XX.
 - No role or permission change.
 - No business-feature change.
 - `public/sw.js` remains included.
-
-
-## v0.16.21.2 — Payroll Row TypeScript Hotfix
-
-- Replaced the custom SQL template-tag type with the PostgreSQL driver’s native `Sql<{}>` contract.
-- Restored type compatibility for organization-scope guards called with transaction clients.
-- Preserved the v0.16.19 prohibition on transaction `any` casts.
-
-## v0.16.21.2 — Payroll Row TypeScript Hotfix
-
-Typed payroll-period transaction rows so location and entity identifiers are safe SQL parameters in the audit-log insert.
+- `public/offline.html` and `vercel.json` remain absent.

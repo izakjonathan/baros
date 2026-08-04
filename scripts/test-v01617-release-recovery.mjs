@@ -3,7 +3,7 @@ const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
 const quality=fs.readFileSync(".github/workflows/quality.yml","utf8");
 const readme=fs.readFileSync("README.md","utf8");
 const parts=pkg.version.split(".").map(Number);
-if(parts.length!==3 || parts[0]!==0 || parts[1]!==16 || parts[2]<17) throw new Error("package version predates v0.16.17");
+if(parts.length<3 || parts[0]!==0 || parts[1]!==16 || parts[2]<17) throw new Error("package version predates v0.16.17");
 if(!pkg.scripts["validate:release"]) throw new Error("release validation script missing");
 if(!quality.includes("npm run validate:release")) throw new Error("CI release gate missing");
 if(!readme.includes("Rollback checkpoint")||!readme.includes("v0.16.17")) throw new Error("approved rollback checkpoint is not documented");

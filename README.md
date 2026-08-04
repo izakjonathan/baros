@@ -1,10 +1,10 @@
-# Bar Ops v0.16.21.2
+# Bar Ops v0.16.21.3
 
-Current release: **v0.16.21.2**.
+Current release: **v0.16.21.3** — Audit Remediation.
 
-This release combines **v0.16.20 — Release Metadata Consolidation** and **v0.16.21 — Final Stabilization Gate**. It removes stale release information from the operational documentation and adds one consolidated source-package preflight before the existing CI quality gates.
+This release removes repository drift discovered in the GitHub source audit, repairs regression tests that were coupled to historical version strings or pre-refactor implementation locations, and consolidates release documentation for the redesign baseline.
 
-No database migration, permission change, business feature, or workflow change is introduced.
+No database migration, permission change, business feature, API contract change, or workflow change is introduced.
 
 Rollback checkpoint: **v0.16.17**.
 

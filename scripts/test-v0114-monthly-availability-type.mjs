@@ -1,9 +1,10 @@
+import { isVersionAtLeast } from "./version-utils.mjs";
 import fs from "node:fs";
 
 const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
 const route = fs.readFileSync("app/api/availability/route.ts", "utf8");
 const checks = [
-  ["release version", ["0.11.4", "0.11.6","0.12.0","0.12.1","0.12.2","0.12.3","0.12.4","0.13.0","0.13.1","0.13.2","0.13.3","0.13.4","0.14.0","0.14.1","0.14.2","0.14.3","0.14.4","0.15.0"].includes(pkg.version)],
+  ["release version", isVersionAtLeast(pkg.version, "0.11.4")],
   ["monthly date is narrowed", route.includes("const date = rule.date as string")],
   ["availability is normalized", route.includes("const available = rule.available !== false")],
   ["optional start is null-safe", route.includes("const availableFrom: string | null = available ? rule.availableFrom ?? null : null")],

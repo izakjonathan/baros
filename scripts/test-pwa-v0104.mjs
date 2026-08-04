@@ -1,3 +1,4 @@
+import { isVersionAtLeast } from "./version-utils.mjs";
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -11,7 +12,7 @@ const sw=read('public/sw.js');
 const config=read('next.config.ts');
 
 const checks=[
-  [(/^0\.(1[0-5])\./.test(pkg.version)),'package version is PWA-compatible'],
+  [isVersionAtLeast(pkg.version, "0.10.4"),'package version is PWA-compatible'],
   [manifest.includes('display: "standalone"'),'manifest uses standalone display'],
   [manifest.includes('icon-maskable-512.png'),'manifest includes maskable icon'],
   [layout.includes('appleWebApp'),'Apple standalone metadata exists'],
