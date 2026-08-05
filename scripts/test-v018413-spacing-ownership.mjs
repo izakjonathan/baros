@@ -7,7 +7,7 @@ const legacy = fs.readFileSync("app/mono-components.css", "utf8");
 const shell = fs.readFileSync("components/shell/ManagerShell.module.css", "utf8");
 const fail = (message) => { console.error(`v0.18.4.13 spacing ownership regression: ${message}`); process.exit(1); };
 
-if (pkg.version !== "0.18.4.13") fail("package version mismatch");
+if (pkg.version.localeCompare("0.18.4.13", undefined, { numeric: true }) < 0) fail("package version mismatch");
 if (layout.indexOf('import "./spacing-system.css"') < layout.indexOf('import "./mono-components.css"')) fail("spacing owner must load after legacy component CSS");
 for (const token of [
   "--layout-gap: 8px",

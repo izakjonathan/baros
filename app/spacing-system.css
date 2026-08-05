@@ -20,7 +20,31 @@
 
 .main-shell > .page-wrap {
   padding-block-start: var(--layout-gap);
+  gap: 0;
+}
+
+/* v0.18.4.14 — single-owner page flow
+   Every workspace has one vertical-flow owner. Direct children never add
+   external margins; only the parent gap creates space between sections. */
+.workspace-flow,
+.page-flow {
+  display: grid;
   gap: var(--layout-gap);
+  min-width: 0;
+}
+
+.workspace-flow > *,
+.page-flow > * {
+  margin-block: 0 !important;
+  min-width: 0;
+}
+
+/* A feature-owned nested grid may control its own columns, but it must use the
+   same gap and may not add extra outer spacing. */
+.workspace-flow :where(.metric-grid,.dashboard-grid,.card-grid,.attendance-metrics,.execution-metrics),
+.page-flow :where(.metric-grid,.dashboard-grid,.card-grid,.attendance-metrics,.execution-metrics) {
+  gap: var(--layout-gap);
+  margin-block: 0 !important;
 }
 
 .employee-page,
@@ -85,4 +109,12 @@
   .calendar-panel-full-bleed {
     margin-inline: calc(var(--layout-gap) * -1);
   }
+}
+
+
+/* Top-level section aliases retained by legacy components must not stack with
+   the parent page-flow gap. */
+.workspace-flow > :where(.live-shift-board,.operational-summary,.execution-board,.team-toolbar,.metric-grid,.dashboard-grid,.panel,.page-header,.workspace-header),
+.page-flow > :where(.live-shift-board,.operational-summary,.execution-board,.team-toolbar,.metric-grid,.dashboard-grid,.panel,.page-header,.workspace-header) {
+  margin: 0 !important;
 }

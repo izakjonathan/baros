@@ -147,6 +147,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       <main className="main-shell">
         <Topbar active={active} onMenu={() => setMobileNav(true)} locations={locations} selectedLocationId={selectedLocationId} onLocationChange={setSelectedLocationId} onNavigate={setActive} theme={theme} onToggleTheme={toggleTheme} />
         <div className="page-wrap" data-workspace={active}>
+          <div className="workspace-flow">
           {active === "dashboard" && <Dashboard shifts={shifts} products={products} employees={employees} timeEntries={timeEntries} tasks={opsTasks} shiftNotes={shiftNotes} devMode={devMode} onNavigate={setActive} />}
           {active === "execution" && <ShiftExecution shifts={shifts} entries={timeEntries} notes={shiftNotes} onNavigate={setActive} />}
           {active === "schedule" && <Schedule shifts={shifts} setShifts={setShifts} employees={employees} onNewShift={openShiftDialog} onEditShift={setEditingShift} notify={notify} currentWeekOffset={currentWeekOffset} setCurrentWeekOffset={setCurrentWeekOffset} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
@@ -194,6 +195,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
           {active === "requests" && <RequestsWorkspace devMode={devMode} notify={notify} />}
           {active === "control" && <ControlCenter devMode={devMode} databaseStatus={databaseStatus} notify={notify} />}
           {active === "settings" && <SettingsWorkspace locations={locations} selectedLocationId={selectedLocationId} userRole={userRole} devMode={devMode} notify={notify} />}
+          </div>
         </div>
       </main>
       {editingShift && <EditShiftDialog shift={editingShift} employees={employees} onClose={() => setEditingShift(null)} onSave={async (updated, scope) => {
@@ -360,7 +362,7 @@ function Dashboard({ shifts, products, employees, timeEntries, tasks, shiftNotes
   }, 0);
   const completedTasks = tasks.filter((task) => task.done).length;
   const operationalExceptions = late.length + openToday.length + conflicts.size + availabilityConflicts + incompleteTasks.length;
-  return <div className={dashboardStyles.dashboard}>
+  return <div className={`${dashboardStyles.dashboard} page-flow`}>
     <PageHeader eyebrow={new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})} title="Today’s operations" subtitle={`Live overview for the current location · updated ${lastUpdated.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}`} />
     <section className={`metric-grid daily-metrics ${dashboardStyles.metrics}`}>
       <Metric icon={Users} label="Clocked in" value={`${runningEntries.length}`} detail={`${assignedToday.length} assigned today`} trend={runningEntries.length ? "Live now" : "No active clocks"} />
@@ -532,7 +534,7 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
       notify(`${copies.length} shifts copied as drafts`);
     } catch (error) { notify(error instanceof Error ? error.message : "Could not copy previous week"); }
   }
-  return <div className={scheduleStyles.workspace}>
+  return <div className={`${scheduleStyles.workspace} page-flow`}>
     <div className={`schedule-head ${scheduleStyles.header}`}>
       <div className={scheduleStyles.headerCopy}><p className="eyebrow">{rangeLabel}</p><h1>Shift plan</h1></div>
       <div className={`schedule-head-actions ${scheduleStyles.headerActions}`}><label className="schedule-view-select"><span className="sr-only">Schedule view</span><select value={viewMode} onChange={(event) => setViewMode(event.target.value as "week" | "month" | "custom")}><option value="week">Week</option><option value="month">Month</option><option value="custom">Period</option></select><ChevronDown size={15} aria-hidden="true" /></label><button className="secondary compact-action" onClick={copyPreviousWeek} disabled={viewMode !== "week"}><Copy size={15} /><span>Copy previous week</span></button><button className="primary compact-action" onClick={() => onNewShift(displayDays[0]?.iso)}><Plus size={16} /><span>Add shift</span></button></div>
@@ -670,7 +672,7 @@ function Team({ employees, shifts, devMode, onAdd, onEdit, onInvite, onRevoke }:
   }).reduce((total,shift)=>total+hoursBetween(shift.start,shift.end),0);
   const activeCount=employees.filter(person=>person.active).length;
   const portalCount=employees.filter(person=>person.portalStatus==="ACTIVE").length;
-  return <div className={teamStyles.workspace}>
+  return <div className={`${teamStyles.workspace} page-flow`}>
     <PageHeader eyebrow="People operations" title="Team" subtitle="People, access and upcoming hours." action={<button className={`team-add-button ${teamStyles.addButton}`} onClick={onAdd}><UserRoundPlus size={17}/>Add employee</button>}/>
     <section className={teamStyles.summary} aria-label="Team summary">
       <article><span>Total team</span><strong>{employees.length}</strong></article>

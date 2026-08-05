@@ -1,3 +1,14 @@
+# Implementation Status — v0.18.4.14
+
+**Status:** Single-owner page-flow spacing correction complete.
+
+- One workspace-flow wrapper owns top-level vertical spacing.
+- Dashboard, Team and Shift Plan roots explicitly participate as page-flow containers.
+- Direct children contribute no external margins.
+- Nested card grids retain the same row and column gap.
+- Internal component padding is unchanged.
+- No migration or behavior change.
+
 # Implementation Status — v0.18.4.13
 
 **Status:** Spacing Ownership Cleanup complete.

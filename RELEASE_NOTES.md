@@ -1,3 +1,13 @@
+# Release Notes — v0.18.4.14
+
+## Single-Owner Page Flow
+
+- Added a canonical workspace flow wrapper.
+- Removed compounded spacing caused by parent gaps plus section margins.
+- Normalized top-level Dashboard, Team, Shift Plan and fragment-based workspaces.
+- Ensured nested grids use the same row and column gap without outer margins.
+- Preserved internal card padding and all application behavior.
+
 # Release Notes — v0.18.4.13
 
 ## Spacing Ownership Cleanup

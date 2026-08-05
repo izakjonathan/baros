@@ -1,6 +1,14 @@
+# Bar Ops v0.18.4.14 — Single-Owner Page Flow
+
+Current release: **v0.18.4.14**
+
+This release removes stacked external spacing by introducing one canonical workspace flow owner. Each top-level workspace section now contributes zero external margin; the parent flow gap is the only source of vertical spacing. Nested card grids use the same gap for rows and columns. Internal component padding remains unchanged.
+
+Rollback checkpoint: **v0.18.4.13**.
+
 # Bar Ops v0.18.4.13 — Spacing Ownership Cleanup
 
-Current release: **v0.18.4.13**
+Historic release: **v0.18.4.13**
 
 This release makes the existing 8px external grid authoritative across the full CSS cascade. Canonical page gutters, section gaps, card-grid gaps, top-bar alignment and background-title rhythm are now owned by a final-loaded stylesheet. Internal component padding remains independent.
 
