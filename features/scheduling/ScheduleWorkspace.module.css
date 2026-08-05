@@ -1540,3 +1540,164 @@
     border-radius:.52rem !important;
   }
 }
+
+/* v0.18.4.24 compact Shift Plan header stack */
+.workspace{
+  gap:.38rem;
+}
+.header{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto !important;
+  align-items:end !important;
+  gap:.45rem !important;
+  padding:.72rem .78rem !important;
+  border-radius:.95rem !important;
+}
+.headerCopy{
+  min-width:0;
+}
+.headerCopy :global(.eyebrow){
+  margin:0 0 .08rem !important;
+  font-size:.62rem !important;
+  line-height:1 !important;
+}
+.headerCopy h1{
+  margin:0 !important;
+  font-size:clamp(1.85rem,5vw,2.25rem) !important;
+  line-height:.9 !important;
+}
+.headerActions{
+  display:grid !important;
+  grid-template-columns:minmax(5.6rem,1fr) 2rem 2rem !important;
+  align-items:center !important;
+  gap:.3rem !important;
+  width:auto !important;
+  min-width:0 !important;
+}
+.headerActions :global(.schedule-view-select),
+.headerActions :global(button),
+.headerActions :global(.compact-action){
+  min-height:2rem !important;
+  height:2rem !important;
+  border-radius:.55rem !important;
+}
+.headerActions :global(.schedule-view-select){
+  min-width:5.6rem !important;
+  width:auto !important;
+}
+.headerActions :global(.schedule-view-select select){
+  padding-inline:.6rem 1.45rem !important;
+  font-size:.72rem !important;
+}
+.headerActions :global(.compact-action){
+  width:2rem !important;
+  min-width:2rem !important;
+  padding:0 !important;
+}
+.toolbar{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto !important;
+  align-items:center !important;
+  gap:.3rem !important;
+  min-height:0 !important;
+  padding:.32rem .4rem !important;
+  border-radius:.75rem !important;
+}
+.periodControls{
+  display:grid !important;
+  grid-template-columns:1.9rem minmax(0,1fr) 1.9rem !important;
+  align-items:center !important;
+  gap:.25rem !important;
+  min-width:0 !important;
+}
+.periodControls button{
+  width:1.9rem !important;
+  min-width:1.9rem !important;
+  height:1.9rem !important;
+  min-height:1.9rem !important;
+  padding:0 !important;
+  border-radius:.5rem !important;
+}
+.periodControls strong{
+  font-size:.78rem !important;
+  line-height:1 !important;
+}
+.summary{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  flex-wrap:nowrap !important;
+  gap:.25rem !important;
+  min-width:0 !important;
+}
+.summaryText{
+  display:none !important;
+}
+.summary :global(.compact-action),
+.summary :global(.compact-publish),
+.summary :global(.badge){
+  width:1.9rem !important;
+  min-width:1.9rem !important;
+  height:1.9rem !important;
+  min-height:1.9rem !important;
+  padding:0 !important;
+  border-radius:.5rem !important;
+}
+.calendarPanel{
+  margin-top:0 !important;
+}
+@media(max-width:48rem){
+  .workspace{
+    gap:.34rem;
+  }
+  .header{
+    grid-template-columns:minmax(0,1fr) auto !important;
+    padding:.62rem .68rem !important;
+    gap:.38rem !important;
+    border-radius:.85rem !important;
+  }
+  .headerCopy :global(.eyebrow){
+    font-size:.58rem !important;
+  }
+  .headerCopy h1{
+    font-size:1.72rem !important;
+  }
+  .headerActions{
+    grid-template-columns:minmax(5rem,1fr) 1.85rem 1.85rem !important;
+    gap:.24rem !important;
+  }
+  .headerActions :global(.schedule-view-select),
+  .headerActions :global(button),
+  .headerActions :global(.compact-action){
+    min-height:1.85rem !important;
+    height:1.85rem !important;
+    border-radius:.48rem !important;
+  }
+  .headerActions :global(.schedule-view-select){
+    min-width:5rem !important;
+  }
+  .headerActions :global(.compact-action){
+    width:1.85rem !important;
+    min-width:1.85rem !important;
+  }
+  .toolbar{
+    padding:.28rem .34rem !important;
+    border-radius:.68rem !important;
+  }
+  .periodControls{
+    grid-template-columns:1.75rem minmax(0,1fr) 1.75rem !important;
+  }
+  .periodControls button,
+  .summary :global(.compact-action),
+  .summary :global(.compact-publish),
+  .summary :global(.badge){
+    width:1.75rem !important;
+    min-width:1.75rem !important;
+    height:1.75rem !important;
+    min-height:1.75rem !important;
+    border-radius:.45rem !important;
+  }
+  .periodControls strong{
+    font-size:.74rem !important;
+  }
+}

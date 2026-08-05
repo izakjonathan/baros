@@ -1,3 +1,13 @@
+# v0.18.4.24 — Compact Shift Plan Header Stack
+
+- Reduced mobile top-bar height and control sizing.
+- Reduced the pink Shift Plan card padding, title size and action-control height.
+- Reduced the beige week-navigation card height and button sizing.
+- Reduced vertical gaps before the day-header row so the schedule begins higher on mobile.
+- Preserved independent day columns, neon day headers, role-colored shifts and scheduling behavior.
+
+---
+
 # v0.18.4.23 — Independent Day Column Repair
 
 - Rebuilt the weekly schedule row as independent fixed-width day columns.

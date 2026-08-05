@@ -1,3 +1,9 @@
+# Validation Log — v0.18.4.24
+
+Validated the compact Shift Plan header regression, release artifact rules and stabilization preflight for this focused visual release.
+
+---
+
 # v0.18.4.23 validation
 
 - Dedicated independent-day-column regression

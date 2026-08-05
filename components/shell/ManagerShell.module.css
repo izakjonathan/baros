@@ -107,3 +107,28 @@
 
 /* v0.18.4.10 stable iOS top-bar placement */
 @media(max-width:960px){.topbar{left:0;top:env(safe-area-inset-top,0px);height:3.35rem;padding-top:0;padding-bottom:0}}
+
+/* v0.18.4.24 compact mobile top bar */
+@media(max-width:640px){
+  .topbar{
+    height:2.9rem;
+    min-height:2.9rem;
+    gap:.42rem;
+  }
+  .location{
+    min-height:2.15rem;
+    height:2.15rem;
+    padding-inline:.65rem;
+  }
+  .location>span:last-child,
+  .location select{
+    font-size:.86rem;
+  }
+  .topbarButton{
+    width:2.15rem;
+    height:2.15rem;
+    min-width:2.15rem;
+    min-height:2.15rem;
+    border-radius:.72rem;
+  }
+}

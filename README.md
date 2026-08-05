@@ -1,6 +1,16 @@
+# Bar Ops v0.18.4.24 — Compact Shift Plan Header Stack
+
+Current release: **v0.18.4.24**
+
+This release reduces the vertical footprint above the weekly schedule. The mobile top bar, pink Shift Plan heading card, view/actions row, beige week navigation card, and gaps between them are all compacted while preserving the independent day-column repair from v0.18.4.23.
+
+Rollback checkpoint: **v0.18.4.23**.
+
+---
+
 # Bar Ops v0.18.4.23 — Independent Day Column Repair
 
-Current release: **v0.18.4.23**
+Historic release: **v0.18.4.23**
 
 This release structurally isolates every schedule day into its own fixed-width column so neon headers, role-colored shifts, and Add shift actions can no longer merge across neighboring days. Horizontal touch scrolling remains available without a visible scrollbar.
 

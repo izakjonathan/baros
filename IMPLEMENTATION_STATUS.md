@@ -1,3 +1,9 @@
+# Implementation Status — v0.18.4.24
+
+The Shift Plan header stack has been compacted for mobile while preserving the independent day-column schedule structure from v0.18.4.23.
+
+---
+
 # v0.18.4.23 status
 
 Independent day-column containment implemented for the Shift Plan. Each day now owns its header, shifts, and Add shift control.
