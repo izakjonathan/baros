@@ -1,10 +1,10 @@
-# Bar Ops v0.18.4.28 — iPhone-First Shift Plan
+# Bar Ops v0.18.4.29 — Shift Plan Chrome Reduction
 
-Current release: **v0.18.4.28**
+Current release: **v0.18.4.29**
 
-This release rebuilds the mobile weekly rota around a predictable three-day iPhone viewport. Calendar columns, shift cards and Add shift actions now share one mobile width; text remains readable without desktop-style truncation; controls retain 44px-class touch targets while remaining secondary to the rota.
+This release applies the first precise iPhone-specific Shift Plan redesign. Day headers are reduced to a single compact line, decorative dividers and the role legend are removed, the view selector moves into the beige period controls, acknowledgement controls are removed from this screen, employee names are smaller, day-column spacing is tighter, and per-day Add shift actions are reduced to icon-only controls.
 
-Rollback checkpoint: **v0.18.4.27**.
+Rollback checkpoint: **v0.18.4.28**.
 
 ---
 

@@ -1,3 +1,18 @@
+# v0.18.4.29 — Shift Plan Chrome Reduction
+
+- Shortened day headers to one line with regular day names and bold dates.
+- Removed decorative schedule dividers and the bottom role-status legend.
+- Abbreviated month names in the period control.
+- Moved the Week/Month/Period selector into the beige period-control pill.
+- Removed schedule acknowledgement controls from the Shift Plan screen.
+- Changed the global Add shift icon to black.
+- Reduced employee-name sizing on mobile shift cards.
+- Tightened horizontal spacing between day columns.
+- Replaced per-day Add shift labels with icon-only controls and accessible labels.
+- Preserved scheduling behavior, publishing, conflicts, drag-and-drop, APIs and persistence.
+
+---
+
 # v0.18.4.28 — iPhone-first Shift Plan
 
 - Reworked the weekly rota around an exact three-day iPhone viewport.

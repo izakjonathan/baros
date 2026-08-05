@@ -1,3 +1,9 @@
+# v0.18.4.29 implementation status
+
+Implemented the agreed 10-point iPhone Shift Plan refinement on top of v0.18.4.28. The calendar remains the primary surface while secondary controls use less space.
+
+---
+
 # v0.18.4.28 status
 
 Implemented an iPhone-first three-day weekly rota on top of v0.18.4.27.

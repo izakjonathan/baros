@@ -2544,3 +2544,221 @@
     font-size:.61rem !important;
   }
 }
+
+/* v0.18.4.29 precise iPhone shift-plan redesign */
+.topAddShift svg{
+  color:#000 !important;
+  stroke:#000 !important;
+}
+.viewSelect{
+  position:relative;
+  display:flex;
+  align-items:center;
+  min-width:0;
+  background:#9561e6;
+  border:0;
+  border-radius:.72rem;
+  overflow:hidden;
+}
+.viewSelect select{
+  width:100%;
+  min-width:0;
+  appearance:none;
+  border:0;
+  background:transparent;
+  color:#000;
+  font:inherit;
+  font-weight:800;
+  text-align:center;
+  cursor:pointer;
+}
+.calendarPanel,
+.calendarScroll,
+.calendarGrid{
+  border-block:0 !important;
+  box-shadow:none !important;
+}
+.calendarPanel::before,
+.calendarPanel::after,
+.calendarScroll::before,
+.calendarScroll::after,
+.calendarGrid::before,
+.calendarGrid::after{
+  display:none !important;
+  content:none !important;
+}
+
+@media(max-width:48rem){
+  .workspace{
+    gap:.52rem !important;
+  }
+
+  .header,
+  :global(.schedule-head).header{
+    grid-template-columns:minmax(0,1fr) auto !important;
+    gap:.55rem !important;
+  }
+  .headerActions{
+    grid-template-columns:2.65rem 2.65rem !important;
+    gap:.38rem !important;
+  }
+  .headerActions :global(.compact-action){
+    width:2.65rem !important;
+    min-width:2.65rem !important;
+    height:2.65rem !important;
+    min-height:2.65rem !important;
+  }
+
+  .toolbar,
+  :global(.schedule-toolbar).toolbar{
+    grid-template-columns:minmax(0,1fr) 4rem auto !important;
+    min-height:2.95rem !important;
+    gap:.35rem !important;
+    padding:.28rem .34rem !important;
+    border:0 !important;
+    box-shadow:none !important;
+  }
+  .periodControls{
+    grid-template-columns:2.35rem minmax(0,1fr) 2.35rem !important;
+    gap:.2rem !important;
+    min-width:0 !important;
+  }
+  .periodControls button,
+  .summary :global(.compact-action),
+  .summary :global(.compact-publish),
+  .summary :global(.badge){
+    width:2.35rem !important;
+    min-width:2.35rem !important;
+    height:2.35rem !important;
+    min-height:2.35rem !important;
+    border-radius:.66rem !important;
+  }
+  .periodControls strong{
+    min-width:0 !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    font-size:.73rem !important;
+    white-space:nowrap !important;
+  }
+  .viewSelect{
+    width:4rem !important;
+    height:2.35rem !important;
+    min-height:2.35rem !important;
+    border-radius:.66rem !important;
+  }
+  .viewSelect select{
+    height:100% !important;
+    padding:0 .35rem !important;
+    font-size:.67rem !important;
+    text-align:center !important;
+  }
+  .summary{
+    gap:.22rem !important;
+  }
+  .summaryText{
+    display:none !important;
+  }
+
+  .calendarPanel,
+  :global(.schedule-calendar).calendarPanel{
+    border:0 !important;
+    box-shadow:none !important;
+    padding:0 !important;
+  }
+  .calendarScroll{
+    border:0 !important;
+    padding:0 !important;
+  }
+  .calendarGrid,
+  .calendarPanel :global(.calendar-grid){
+    --iphone-day-gap:.28rem;
+    grid-auto-columns:calc((100vw - 2.55rem) / 3) !important;
+    gap:var(--iphone-day-gap) !important;
+    border:0 !important;
+  }
+  .dayColumn,
+  .calendarPanel :global(.day-column){
+    gap:.36rem !important;
+  }
+  .dayHeader{
+    min-height:2.1rem !important;
+    display:flex !important;
+    flex-direction:row !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:.32rem !important;
+    padding:.28rem .4rem !important;
+    border-radius:.68rem !important;
+    white-space:nowrap !important;
+  }
+  .dayHeader span{
+    font-size:.53rem !important;
+    line-height:1 !important;
+    letter-spacing:.08em !important;
+    font-weight:400 !important;
+  }
+  .dayHeader strong{
+    margin:0 !important;
+    font-size:.78rem !important;
+    line-height:1 !important;
+    font-weight:800 !important;
+  }
+  .today .dayHeader{
+    box-shadow:inset 0 0 0 1.5px #000 !important;
+  }
+  .today .dayHeader strong{
+    display:inline !important;
+    inline-size:auto !important;
+    block-size:auto !important;
+    padding:.14rem .28rem !important;
+    font-size:.78rem !important;
+    line-height:1 !important;
+  }
+  .dayBody,
+  .calendarPanel :global(.day-body){
+    gap:.36rem !important;
+  }
+  .shiftCard,
+  .shiftCard:global(.shift-card){
+    min-height:4.5rem !important;
+    padding:.48rem .52rem !important;
+  }
+  .shiftCard strong{
+    font-size:.82rem !important;
+    line-height:1 !important;
+  }
+  .shiftCard small{
+    font-size:.61rem !important;
+  }
+  .addShift{
+    width:2.15rem !important;
+    min-width:2.15rem !important;
+    height:2.15rem !important;
+    min-height:2.15rem !important;
+    justify-self:center !important;
+    display:grid !important;
+    place-items:center !important;
+    padding:0 !important;
+    border:1.5px dashed rgba(255,244,196,.72) !important;
+    border-radius:999px !important;
+  }
+  .addShift svg{
+    width:1rem !important;
+    height:1rem !important;
+  }
+}
+
+@media(max-width:23.5rem){
+  .toolbar,
+  :global(.schedule-toolbar).toolbar{
+    grid-template-columns:minmax(0,1fr) 3.7rem auto !important;
+  }
+  .viewSelect{
+    width:3.7rem !important;
+  }
+  .calendarGrid,
+  .calendarPanel :global(.calendar-grid){
+    grid-auto-columns:calc((100vw - 2.35rem) / 3) !important;
+    gap:.24rem !important;
+  }
+}

@@ -1,3 +1,12 @@
+# v0.18.4.29 validation
+
+- Focused v0.18.4.29 regression test added.
+- Release metadata updated.
+- Stabilization preflight and release validation passed before packaging.
+- Dependency installation and the production build could not run because the internal registry did not provide `@types/node@22.10.2`.
+
+---
+
 # v0.18.4.28 validation
 
 - Focused CSS/JSX regression added.
