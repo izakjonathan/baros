@@ -1,3 +1,13 @@
+# v0.18.4.25 — Shift Plan Vertical Compression
+
+- Reduced the pink Shift Plan header height and moved its content into a compact centered row.
+- Reduced the beige week-navigation card height and control sizing.
+- Forced the schedule grid to size to its actual content rather than viewport height.
+- Removed duplicated legend divider behavior and moved the legend directly below the schedule.
+- Preserved independent day columns, role colors, interactions, and scheduling logic.
+
+---
+
 # v0.18.4.24 — Compact Shift Plan Header Stack
 
 - Reduced mobile top-bar height and control sizing.

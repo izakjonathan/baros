@@ -1,3 +1,10 @@
+# v0.18.4.25 validation
+
+- Dedicated regression added.
+- Release preflight and artifact checks executed before packaging.
+
+---
+
 # Validation Log — v0.18.4.24
 
 Validated the compact Shift Plan header regression, release artifact rules and stabilization preflight for this focused visual release.

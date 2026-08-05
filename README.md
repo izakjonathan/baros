@@ -1,10 +1,10 @@
-# Bar Ops v0.18.4.24 — Compact Shift Plan Header Stack
+# Bar Ops v0.18.4.25 — Shift Plan Vertical Compression
 
-Current release: **v0.18.4.24**
+Current release: **v0.18.4.25**
 
-This release reduces the vertical footprint above the weekly schedule. The mobile top bar, pink Shift Plan heading card, view/actions row, beige week navigation card, and gaps between them are all compacted while preserving the independent day-column repair from v0.18.4.23.
+This release further compresses the Shift Plan header stack and removes the remaining content-height inflation beneath the schedule. The pink title card and beige week controls are smaller, the weekly calendar follows its actual content height, and the legend sits directly below the Add shift row.
 
-Rollback checkpoint: **v0.18.4.23**.
+Rollback checkpoint: **v0.18.4.24**.
 
 ---
 

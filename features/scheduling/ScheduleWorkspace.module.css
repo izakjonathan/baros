@@ -1701,3 +1701,169 @@
     font-size:.74rem !important;
   }
 }
+
+/* v0.18.4.25 Shift Plan vertical compression */
+.workspace{
+  gap:.28rem !important;
+  align-content:start !important;
+}
+.header,
+:global(.schedule-head).header{
+  min-height:0 !important;
+  height:auto !important;
+  padding:.48rem .58rem !important;
+  align-items:center !important;
+  align-content:center !important;
+  grid-template-columns:minmax(0,1fr) auto !important;
+  border-radius:.78rem !important;
+}
+.headerCopy{
+  align-self:center !important;
+}
+.headerCopy :global(.eyebrow){
+  margin:0 0 .06rem !important;
+  font-size:.54rem !important;
+}
+.headerCopy h1{
+  font-size:1.5rem !important;
+  line-height:.92 !important;
+}
+.headerActions{
+  align-self:center !important;
+  grid-template-columns:minmax(4.5rem,1fr) 1.7rem 1.7rem !important;
+  gap:.2rem !important;
+}
+.headerActions :global(.schedule-view-select),
+.headerActions :global(button),
+.headerActions :global(.compact-action){
+  min-height:1.7rem !important;
+  height:1.7rem !important;
+  border-radius:.42rem !important;
+}
+.headerActions :global(.schedule-view-select){
+  min-width:4.5rem !important;
+}
+.headerActions :global(.schedule-view-select select){
+  font-size:.64rem !important;
+  padding-inline:.48rem 1.2rem !important;
+}
+.headerActions :global(.compact-action){
+  width:1.7rem !important;
+  min-width:1.7rem !important;
+}
+.toolbar,
+:global(.schedule-toolbar).toolbar{
+  min-height:0 !important;
+  height:auto !important;
+  padding:.24rem .3rem !important;
+  border-radius:.58rem !important;
+  align-content:center !important;
+}
+.periodControls{
+  grid-template-columns:1.55rem minmax(0,1fr) 1.55rem !important;
+  gap:.18rem !important;
+}
+.periodControls button,
+.summary :global(.compact-action),
+.summary :global(.compact-publish),
+.summary :global(.badge){
+  width:1.55rem !important;
+  min-width:1.55rem !important;
+  height:1.55rem !important;
+  min-height:1.55rem !important;
+  border-radius:.38rem !important;
+}
+.periodControls strong{
+  font-size:.68rem !important;
+}
+.calendarPanel,
+.calendarScroll,
+.calendarGrid,
+.calendarPanel :global(.calendar-grid){
+  min-height:0 !important;
+  height:max-content !important;
+  block-size:max-content !important;
+  align-self:start !important;
+  align-content:start !important;
+}
+.calendarPanel{
+  overflow:visible !important;
+  padding:0 !important;
+}
+.calendarScroll{
+  overflow-x:auto !important;
+  overflow-y:hidden !important;
+  padding:0 !important;
+}
+.calendarGrid,
+.calendarPanel :global(.calendar-grid){
+  padding:0 !important;
+  margin:0 !important;
+}
+.dayColumn,
+.calendarPanel :global(.day-column){
+  min-height:0 !important;
+  height:max-content !important;
+  align-self:flex-start !important;
+}
+.dayBody,
+.calendarPanel :global(.day-body){
+  min-height:0 !important;
+  height:max-content !important;
+  padding-bottom:0 !important;
+}
+.legend{
+  margin:.18rem 0 0 !important;
+  padding:.28rem 0 0 !important;
+  border-top:1px solid #fff4c4 !important;
+  gap:.55rem !important;
+  font-size:.64rem !important;
+}
+.legend::before,
+.legend::after{
+  content:none !important;
+  display:none !important;
+}
+@media(max-width:48rem){
+  .workspace{gap:.24rem !important}
+  .header,
+  :global(.schedule-head).header{
+    padding:.42rem .5rem !important;
+    border-radius:.7rem !important;
+  }
+  .headerCopy h1{font-size:1.42rem !important}
+  .headerActions{
+    grid-template-columns:minmax(4.25rem,1fr) 1.6rem 1.6rem !important;
+  }
+  .headerActions :global(.schedule-view-select),
+  .headerActions :global(button),
+  .headerActions :global(.compact-action){
+    min-height:1.6rem !important;
+    height:1.6rem !important;
+  }
+  .headerActions :global(.compact-action){
+    width:1.6rem !important;
+    min-width:1.6rem !important;
+  }
+  .toolbar,
+  :global(.schedule-toolbar).toolbar{
+    padding:.2rem .26rem !important;
+    border-radius:.52rem !important;
+  }
+  .periodControls{
+    grid-template-columns:1.45rem minmax(0,1fr) 1.45rem !important;
+  }
+  .periodControls button,
+  .summary :global(.compact-action),
+  .summary :global(.compact-publish),
+  .summary :global(.badge){
+    width:1.45rem !important;
+    min-width:1.45rem !important;
+    height:1.45rem !important;
+    min-height:1.45rem !important;
+  }
+  .legend{
+    margin-top:.14rem !important;
+    padding-top:.22rem !important;
+  }
+}

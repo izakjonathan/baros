@@ -1,3 +1,9 @@
+# v0.18.4.25 status
+
+Shift Plan vertical compression implemented from v0.18.4.24.
+
+---
+
 # Implementation Status — v0.18.4.24
 
 The Shift Plan header stack has been compacted for mobile while preserving the independent day-column schedule structure from v0.18.4.23.
