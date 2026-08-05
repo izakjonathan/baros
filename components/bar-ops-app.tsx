@@ -572,7 +572,7 @@ function ShiftCard({ shift, conflict, onOpen, onDragStart }: { shift: Shift; con
   return <button type="button" draggable onDragStart={onDragStart} className={`shift-card shift-card-button ${scheduleStyles.shiftCard} role-${shift.role.toLowerCase()} ${shift.status === "Draft" ? "is-draft" : ""} ${conflict ? "has-conflict" : ""}`} data-role={shift.role} data-draft={shift.status === "Draft"} data-conflict={Boolean(conflict)} onClick={onOpen} aria-label={`Open ${shift.isOpen ? "available" : shift.employee} shift ${shift.start} to ${shift.end}${overnight ? " next day" : ""}`}>
     <div className="shift-card-top"><span>{shift.start}–{shift.end}{overnight ? " +1" : ""}</span><ChevronRight size={14} /></div>
     <strong>{displayName}</strong>
-    <small>{shift.role}{overnight ? " · Overnight" : ""}</small>
+    <small><span>{shift.role}</span>{overnight ? <span className="shift-overnight-label"> · Overnight</span> : null}</small>
     {shift.isOpen && <em>Open</em>}{shift.status === "Draft" && <em>Draft</em>}{shift.availabilityConflict && <em className="conflict-badge">{shift.availabilityConflict === "APPROVED_TIME_OFF" ? "Time off" : "Unavailable"}</em>}{conflict && !shift.availabilityConflict && <em className="conflict-badge">Conflict</em>}
   </button>;
 }

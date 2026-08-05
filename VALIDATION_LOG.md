@@ -1,3 +1,10 @@
+# v0.18.4.28 validation
+
+- Focused CSS/JSX regression added.
+- Release preflight and ZIP integrity completed.
+
+---
+
 # Validation Log — v0.18.4.27
 
 Completed the focused v0.18.4.27 regression, stabilization preflight, forbidden-artifact audit and ZIP integrity validation. Browser/device visual verification remains required after deployment.

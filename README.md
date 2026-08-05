@@ -1,10 +1,10 @@
-# Bar Ops v0.18.4.27 — Calendar-First Shift Plan
+# Bar Ops v0.18.4.28 — iPhone-First Shift Plan
 
-Current release: **v0.18.4.27**
+Current release: **v0.18.4.28**
 
-This release changes the Shift Plan hierarchy rather than continuing to tune the same stacked-card composition. The weekly calendar is now the primary visual and interaction surface. The page title sits directly on the black background, date navigation and publishing tools form a compact secondary toolbar, and each day column keeps its own header, shifts and Add shift action.
+This release rebuilds the mobile weekly rota around a predictable three-day iPhone viewport. Calendar columns, shift cards and Add shift actions now share one mobile width; text remains readable without desktop-style truncation; controls retain 44px-class touch targets while remaining secondary to the rota.
 
-Rollback checkpoint: **v0.18.4.26**.
+Rollback checkpoint: **v0.18.4.27**.
 
 ---
 

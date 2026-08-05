@@ -2299,3 +2299,248 @@
     font-size:.6rem !important;
   }
 }
+
+
+/* v0.18.4.28 iPhone-first weekly rota */
+@media(max-width:48rem){
+  .workspace{
+    gap:.6rem !important;
+    width:100% !important;
+    min-width:0 !important;
+  }
+
+  .header,
+  :global(.schedule-head).header{
+    grid-template-columns:minmax(0,1fr) auto !important;
+    align-items:center !important;
+    gap:.65rem !important;
+    padding:.15rem 0 .05rem !important;
+  }
+  .headerCopy h1{
+    font-size:1.72rem !important;
+    line-height:.96 !important;
+  }
+  .headerCopy :global(.eyebrow){
+    margin-top:.16rem !important;
+    font-size:.62rem !important;
+    letter-spacing:.085em !important;
+  }
+  .headerActions{
+    grid-template-columns:5.25rem 2.75rem 2.75rem !important;
+    gap:.42rem !important;
+  }
+  .headerActions :global(.schedule-view-select),
+  .headerActions :global(button),
+  .headerActions :global(.compact-action){
+    min-height:2.75rem !important;
+    height:2.75rem !important;
+    border-radius:.85rem !important;
+  }
+  .headerActions :global(.schedule-view-select){
+    width:5.25rem !important;
+  }
+  .headerActions :global(.schedule-view-select select){
+    padding-inline:.75rem 1.65rem !important;
+    font-size:.78rem !important;
+  }
+  .headerActions :global(.compact-action){
+    width:2.75rem !important;
+    min-width:2.75rem !important;
+  }
+
+  .toolbar,
+  :global(.schedule-toolbar).toolbar{
+    min-height:3.35rem !important;
+    grid-template-columns:minmax(0,1fr) auto !important;
+    gap:.45rem !important;
+    padding:.34rem .42rem !important;
+    border-radius:.9rem !important;
+  }
+  .periodControls{
+    grid-template-columns:2.75rem minmax(0,1fr) 2.75rem !important;
+    gap:.32rem !important;
+  }
+  .periodControls button,
+  .summary :global(.compact-action),
+  .summary :global(.compact-publish),
+  .summary :global(.badge){
+    width:2.75rem !important;
+    min-width:2.75rem !important;
+    height:2.75rem !important;
+    min-height:2.75rem !important;
+    border-radius:.78rem !important;
+  }
+  .periodControls strong{
+    font-size:.86rem !important;
+    white-space:nowrap !important;
+  }
+  .summary{
+    gap:.28rem !important;
+  }
+
+  .calendarPanel{
+    width:100% !important;
+    overflow:hidden !important;
+  }
+  .calendarScroll{
+    width:100% !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    padding:0 !important;
+    scroll-snap-type:x mandatory !important;
+    scroll-padding-inline:0 !important;
+    -webkit-overflow-scrolling:touch !important;
+    scrollbar-width:none !important;
+  }
+  .calendarScroll::-webkit-scrollbar{
+    display:none !important;
+  }
+  .calendarGrid,
+  .calendarPanel :global(.calendar-grid){
+    --iphone-day-gap:.5rem;
+    display:grid !important;
+    grid-auto-flow:column !important;
+    grid-auto-columns:calc((100vw - 3rem) / 3) !important;
+    grid-template-columns:none !important;
+    gap:var(--iphone-day-gap) !important;
+    min-width:max-content !important;
+    padding:0 !important;
+  }
+  .dayColumn,
+  .calendarPanel :global(.day-column){
+    display:grid !important;
+    grid-template-rows:auto auto !important;
+    align-content:start !important;
+    gap:.48rem !important;
+    min-width:0 !important;
+    width:auto !important;
+    scroll-snap-align:start !important;
+    scroll-snap-stop:always !important;
+  }
+  .dayHeader{
+    min-height:3.55rem !important;
+    padding:.42rem .3rem !important;
+    border-radius:.82rem !important;
+  }
+  .dayHeader span{
+    font-size:.67rem !important;
+  }
+  .dayHeader strong{
+    font-size:1.36rem !important;
+  }
+  .today .dayHeader{
+    box-shadow:inset 0 0 0 2px #000 !important;
+  }
+  .today .dayHeader strong{
+    inline-size:1.85rem !important;
+    block-size:1.85rem !important;
+    font-size:1.2rem !important;
+  }
+  .dayBody,
+  .calendarPanel :global(.day-body){
+    display:grid !important;
+    align-content:start !important;
+    gap:.5rem !important;
+    min-height:0 !important;
+    height:auto !important;
+    padding:0 !important;
+  }
+  .shiftCard,
+  .shiftCard:global(.shift-card){
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    min-height:5.05rem !important;
+    padding:.55rem .58rem !important;
+    border-radius:.72rem !important;
+    overflow:hidden !important;
+  }
+  .shiftCard :global(.shift-card-top){
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    gap:.25rem !important;
+    min-width:0 !important;
+    margin-bottom:.32rem !important;
+  }
+  .shiftCard :global(.shift-card-top) span{
+    min-width:0 !important;
+    overflow:visible !important;
+    text-overflow:clip !important;
+    white-space:nowrap !important;
+    font-size:.61rem !important;
+    letter-spacing:-.01em !important;
+  }
+  .shiftCard :global(.shift-card-top) svg{
+    display:none !important;
+  }
+  .shiftCard strong{
+    display:block !important;
+    margin:0 0 .2rem !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    font-size:1rem !important;
+    line-height:1 !important;
+  }
+  .shiftCard small{
+    display:block !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    font-size:.66rem !important;
+    line-height:1.1 !important;
+  }
+  .shiftCard :global(.shift-overnight-label){
+    display:none !important;
+  }
+  .shiftCard em{
+    margin-top:.3rem !important;
+    font-size:.55rem !important;
+  }
+  .addShift{
+    width:100% !important;
+    min-height:2.6rem !important;
+    justify-content:center !important;
+    gap:.3rem !important;
+    padding:.35rem .4rem !important;
+    border:1.5px dashed rgba(255,244,196,.72) !important;
+    border-radius:.7rem !important;
+    font-size:.68rem !important;
+    white-space:nowrap !important;
+  }
+  .addShift svg{
+    width:.85rem !important;
+    height:.85rem !important;
+  }
+  .legend{
+    margin-top:.15rem !important;
+    padding-top:.45rem !important;
+    gap:.65rem !important;
+    font-size:.6rem !important;
+  }
+}
+
+@media(max-width:23.5rem){
+  .headerActions{
+    grid-template-columns:4.75rem 2.6rem 2.6rem !important;
+    gap:.3rem !important;
+  }
+  .headerActions :global(.schedule-view-select){
+    width:4.75rem !important;
+  }
+  .calendarGrid,
+  .calendarPanel :global(.calendar-grid){
+    grid-auto-columns:calc((100vw - 2.65rem) / 3) !important;
+    gap:.42rem !important;
+  }
+  .shiftCard :global(.shift-card-top) span{
+    font-size:.56rem !important;
+  }
+  .shiftCard strong{
+    font-size:.92rem !important;
+  }
+  .shiftCard small{
+    font-size:.61rem !important;
+  }
+}

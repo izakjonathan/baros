@@ -1,3 +1,9 @@
+# v0.18.4.28 status
+
+Implemented an iPhone-first three-day weekly rota on top of v0.18.4.27.
+
+---
+
 # Implementation Status — v0.18.4.27
 
 Calendar-first Shift Plan hierarchy implemented. Calendar content is now primary; title and operational controls are secondary. No business logic or data behavior changed.

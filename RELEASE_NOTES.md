@@ -1,3 +1,13 @@
+# v0.18.4.28 — iPhone-first Shift Plan
+
+- Reworked the weekly rota around an exact three-day iPhone viewport.
+- Increased touch targets while keeping controls visually secondary.
+- Removed shift-card truncation by simplifying mobile card details and hiding redundant overnight copy when +1 is already shown.
+- Made each day header, shift stack and Add shift action align to the same mobile column width.
+- Preserved horizontal snap scrolling, role colors, drag-and-drop and scheduling behavior.
+
+---
+
 # v0.18.4.27 — Calendar-First Shift Plan
 
 - Replaced the large pink title card with a lightweight title treatment on the black page background.
