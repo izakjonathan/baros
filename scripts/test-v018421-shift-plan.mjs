@@ -3,7 +3,7 @@ const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
 const app=fs.readFileSync("components/bar-ops-app.tsx","utf8");
 const css=fs.readFileSync("features/scheduling/ScheduleWorkspace.module.css","utf8");
 const fail=(m)=>{console.error(`v0.18.4.21 regression: ${m}`);process.exit(1)};
-if(pkg.version!=="0.18.4.21") fail("package version mismatch");
+if(!["0.18.4.21","0.18.4.22"].includes(pkg.version)) fail("package version mismatch");
 if(!app.includes("calendarScrollRef")) fail("calendar scroll ref missing");
 if(!app.includes('scroller.scrollTo({ left: 0, behavior: "instant" })')) fail("week-change scroll reset missing");
 if(!css.includes("v0.18.4.21 canonical schedule grid ownership")) fail("canonical grid block missing");

@@ -1,3 +1,14 @@
+# v0.18.4.22 — Schedule Column & Shift Modal Polish
+
+- Separated neon day headers with a visible black gap between every schedule column.
+- Constrained shift cards and add-shift controls to their own day columns to eliminate overlap and clipping.
+- Removed residual fixed schedule height and moved the legend directly beneath the content-driven grid.
+- Tightened the week toolbar and normalized legend colours with role treatments.
+- Reworked add/edit shift dialogs around internal scrolling, contained field widths and smaller balanced actions.
+- Preserved scheduling logic, recurrence, permissions, APIs and persistence.
+
+---
+
 # v0.18.4.21 — Schedule Grid Alignment Repair
 
 - Added one canonical schedule column-width token for headers and day bodies.

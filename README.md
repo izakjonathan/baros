@@ -1,10 +1,10 @@
-# Bar Ops v0.18.4.21 — Schedule Grid Alignment Repair
+# Bar Ops v0.18.4.22 — Schedule Column & Shift Modal Polish
 
-Current release: **v0.18.4.21**
+Current release: **v0.18.4.22**
 
 This release repairs the Shift Plan calendar structure so headers, shift cards and Add shift controls share one canonical column grid. Horizontal position resets when changing periods, all neon day headers return to view, and the schedule body height follows actual content.
 
-Rollback checkpoint: **v0.18.4.20**.
+Rollback checkpoint: **v0.18.4.21**.
 
 ---
 

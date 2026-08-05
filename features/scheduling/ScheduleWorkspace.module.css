@@ -1180,3 +1180,165 @@
     max-width:80%;
   }
 }
+
+/* v0.18.4.22 schedule column and modal-adjacent grid polish */
+.toolbar{
+  padding:.38rem .52rem;
+  min-height:0;
+}
+.calendarPanel,
+.calendarScroll,
+.calendarGrid,
+.calendarPanel :global(.calendar-grid){
+  background:#000 !important;
+  min-height:0 !important;
+  height:auto !important;
+  max-height:none !important;
+}
+.calendarPanel{
+  overflow:visible;
+}
+.calendarScroll{
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:0;
+}
+.calendarGrid,
+.calendarPanel :global(.calendar-grid){
+  --schedule-column-width:6.65rem;
+  --schedule-column-gap:.52rem;
+  grid-template-columns:repeat(7,var(--schedule-column-width));
+  gap:var(--schedule-column-gap);
+  align-items:start;
+  padding:0;
+}
+.dayColumn,
+.calendarPanel :global(.day-column){
+  width:var(--schedule-column-width);
+  min-width:var(--schedule-column-width);
+  max-width:var(--schedule-column-width);
+  min-height:0 !important;
+  grid-template-rows:auto auto;
+  gap:.34rem;
+  background:#000 !important;
+  overflow:visible;
+}
+.dayHeader,
+.calendarPanel :global(.day-header){
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  margin:0;
+  padding:.42rem .3rem;
+  border:0 !important;
+  border-radius:.78rem;
+  background:#dfee4b !important;
+  box-shadow:none !important;
+}
+.today .dayHeader,
+.calendarPanel :global(.today) :global(.day-header){
+  background:#dfee4b !important;
+  box-shadow:inset 0 0 0 1.5px #000 !important;
+}
+.dayBody,
+.calendarPanel :global(.day-body){
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  min-height:0 !important;
+  height:auto !important;
+  max-height:none !important;
+  gap:.3rem;
+  padding:0;
+  overflow:visible;
+  background:#000 !important;
+}
+.shiftCard,
+.shiftCard:global(.shift-card),
+.calendarPanel :global(.shift-card){
+  box-sizing:border-box;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  margin:0;
+  padding:.34rem .4rem;
+  overflow:hidden;
+  border-radius:.58rem;
+}
+.shiftCard :global(.shift-card-top),
+.shiftCard :global(.shift-card-top) span,
+.shiftCard strong,
+.shiftCard small{
+  min-width:0;
+  max-width:100%;
+}
+.shiftCard :global(.shift-card-top) span,
+.shiftCard strong,
+.shiftCard small{
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.shiftCard :global(.shift-card-top) span{
+  white-space:nowrap;
+}
+.shiftCard strong,
+.shiftCard small{
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.addShift,
+.calendarPanel :global(.add-slot){
+  box-sizing:border-box;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  margin:0;
+  padding:.08rem .08rem 0;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.legend{
+  margin:.42rem 0 0;
+  padding:.42rem 0 0;
+  border-top:1px solid #fff4c4;
+  gap:.7rem;
+  font-size:.72rem;
+}
+.legend :global(.manager){background:#f47add}
+.legend :global(.bartender){background:#9561e6}
+.legend :global(.floor){background:#c47a00}
+.legend :global(.kitchen){background:#eb6746}
+@media(max-width:48rem){
+  .toolbar{
+    padding:.32rem .44rem;
+  }
+  .calendarGrid,
+  .calendarPanel :global(.calendar-grid){
+    --schedule-column-width:6.35rem;
+    --schedule-column-gap:.46rem;
+  }
+  .dayHeader,
+  .calendarPanel :global(.day-header){
+    min-height:2.8rem;
+    padding:.34rem .26rem;
+    border-radius:.7rem;
+  }
+  .dayBody,
+  .calendarPanel :global(.day-body){
+    gap:.26rem;
+  }
+  .shiftCard,
+  .shiftCard:global(.shift-card),
+  .calendarPanel :global(.shift-card){
+    width:100% !important;
+    max-width:100% !important;
+    padding:.3rem .34rem;
+    border-radius:.52rem;
+  }
+  .legend{
+    margin-top:.34rem;
+    padding-top:.34rem;
+    font-size:.68rem;
+  }
+}

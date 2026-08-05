@@ -1,3 +1,24 @@
+# Validation Log — v0.18.4.22
+
+## Completed
+
+- v0.18.4.22 schedule/modal regression
+- v0.18.4.21 inherited grid regression
+- release contract validation
+- stabilization preflight
+- forbidden-artifact audit
+- ZIP integrity
+
+## Not completed in this environment
+
+- Clean dependency installation
+- ESLint
+- TypeScript compilation
+- Next.js production build
+- Browser/device verification
+
+---
+
 # v0.18.4.21 validation
 
 - Dedicated schedule-grid regression added.

@@ -1,3 +1,15 @@
+# Implementation Status — v0.18.4.22
+
+**Status:** Schedule column and shift modal polish complete.
+
+- Independent neon day-header tiles with black gaps
+- Column-contained shift cards and add-shift controls
+- Content-driven schedule height and closer legend placement
+- Internally scrolling add/edit shift dialogs with balanced actions
+- No scheduling logic, API, permission, persistence, or database changes
+
+---
+
 # v0.18.4.21 status
 
 Schedule grid ownership is now centralized. Header and body columns share one width, period changes reset the horizontal viewport, and the calendar height follows its content instead of filling most of the screen.

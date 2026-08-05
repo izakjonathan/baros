@@ -1136,3 +1136,131 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
     padding-inline:18px;
   }
 }
+
+/* v0.18.4.22 compact internally scrolling shift editor */
+.shift-editor-dialog{
+  width:min(92vw,46rem);
+  max-width:46rem;
+  max-height:calc(100dvh - max(24px,env(safe-area-inset-top)) - max(24px,env(safe-area-inset-bottom)));
+  grid-template-rows:auto minmax(0,1fr) auto;
+  overflow:hidden;
+  border-radius:1.8rem;
+}
+.shift-editor-dialog .modal-head{
+  padding:16px 18px 12px;
+  border-bottom:1.5px solid #000;
+}
+.shift-editor-dialog .modal-head h2{
+  font-size:clamp(1.8rem,6vw,2.7rem);
+}
+.shift-editor-dialog .modal-head p{
+  margin-top:.32rem;
+  font-size:.9rem;
+  line-height:1.28;
+}
+.shift-editor-body{
+  min-width:0;
+  padding:14px 18px 16px;
+  gap:12px;
+  overflow-x:hidden;
+  overflow-y:auto;
+  scrollbar-gutter:stable;
+}
+.shift-editor-dialog .shift-editor-body .form-grid,
+.shift-editor-dialog .shift-editor-body .form-grid label,
+.shift-editor-dialog .location-field,
+.shift-editor-dialog .repeat-count{
+  min-width:0;
+  max-width:100%;
+}
+.shift-editor-dialog .location-field select,
+.shift-editor-dialog .shift-editor-body .form-grid input,
+.shift-editor-dialog .shift-editor-body .form-grid select,
+.shift-editor-dialog .repeat-count input,
+.shift-editor-dialog .series-edit-note select{
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+  width:100%;
+  min-height:46px;
+  padding-inline:14px;
+  font-size:15px;
+}
+.shift-editor-dialog .assignment-toggle{
+  min-width:0;
+  padding:5px;
+  gap:5px;
+}
+.shift-editor-dialog .assignment-toggle button{
+  min-width:0;
+  min-height:42px;
+  padding-inline:10px;
+  font-size:13px;
+  white-space:normal;
+}
+.shift-editor-dialog .interaction-actions,
+.shift-editor-dialog .edit-shift-actions{
+  position:static;
+  padding:10px 18px max(10px,env(safe-area-inset-bottom));
+  border-top:1.5px solid #000;
+  background:#fff4c4;
+}
+.shift-editor-dialog .interaction-actions button,
+.shift-editor-dialog .edit-shift-actions button{
+  min-height:46px;
+}
+.shift-editor-dialog .edit-shift-actions{
+  grid-template-columns:minmax(0,.72fr) minmax(0,1.45fr);
+  align-items:center;
+  gap:10px;
+}
+.shift-editor-dialog .edit-shift-actions>div{
+  grid-column:2;
+  grid-row:1;
+  grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);
+  gap:8px;
+}
+.shift-editor-dialog .edit-shift-actions .danger-button{
+  grid-column:1;
+  grid-row:1;
+  width:100%;
+  min-height:42px;
+  padding-inline:12px;
+  font-size:13px;
+}
+@media(max-width:600px){
+  .shift-editor-dialog{
+    inset:max(12px,env(safe-area-inset-top)) 10px max(12px,env(safe-area-inset-bottom));
+    width:auto;
+    max-width:none;
+    max-height:none;
+    border-radius:1.5rem;
+  }
+  .shift-editor-dialog .modal-head{
+    padding:14px 16px 10px;
+  }
+  .shift-editor-body{
+    padding:12px 16px 14px;
+    gap:10px;
+  }
+  .shift-editor-dialog .interaction-actions,
+  .shift-editor-dialog .edit-shift-actions{
+    padding-inline:16px;
+  }
+  .shift-editor-dialog .edit-shift-actions{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+  .shift-editor-dialog .edit-shift-actions>div{
+    grid-column:1;
+    grid-row:1;
+  }
+  .shift-editor-dialog .edit-shift-actions .danger-button{
+    grid-column:1;
+    grid-row:2;
+    width:auto;
+    justify-self:start;
+    min-height:38px;
+    padding-inline:18px;
+  }
+}
