@@ -1,3 +1,19 @@
+# v0.18.4.19 status
+
+Implemented a focused scheduling polish pass on top of v0.18.4.18.
+
+## Included
+- Neon-filled rounded day header cells
+- Black schedule body under headers
+- Smaller, denser shift cards
+- Slightly tighter schedule-column rhythm
+
+## Not changed
+- Data model and scheduling logic
+- Other workspace layouts
+
+---
+
 # Implementation Status — v0.18.4.18
 
 **Status:** Shift Plan density and header refinement complete.

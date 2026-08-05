@@ -1,3 +1,12 @@
+# v0.18.4.19 — Shift-plan neon header fill polish
+
+- Updated week/day header cells to use the neon fill color consistently.
+- Kept the schedule body on the black site background while preserving separated rounded header cards.
+- Reduced shift-card size and text density further for a lighter weekly overview.
+- Preserved role-based shift colors and add-shift indicators.
+
+---
+
 # Release Notes — v0.18.4.18
 
 ## Shift Plan Density & Header Refinement

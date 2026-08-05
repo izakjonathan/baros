@@ -1,10 +1,10 @@
-# Bar Ops v0.18.4.18 — Shift Plan Density & Header Refinement
+# Bar Ops v0.18.4.19 — Shift Plan Neon Header Fill Polish
 
-Current release: **v0.18.4.18**
+Current release: **v0.18.4.19**
 
-This release tightens the Shift Plan visual baseline without changing scheduling behaviour. The pink title area and week controls are smaller, the week toolbar is simpler, day headers are more compact, and shift cards use a substantially smaller footprint and typography. The black schedule canvas and repaired add/edit shift dialog from v0.18.4.17 are preserved.
+This release focuses the next Shift Plan visual pass on the weekly schedule grid. Day header cells now use the neon fill consistently, remain visually separate as rounded cards, and sit above a black schedule body. Shift cards are reduced further in size and typography so the weekly overview feels lighter and more deliberate while preserving role-based color coding.
 
-Rollback checkpoint: **v0.18.4.17**.
+Rollback checkpoint: **v0.18.4.18**.
 
 # Bar Ops v0.18.4.14.1 — Quality Check Ordering Hotfix
 

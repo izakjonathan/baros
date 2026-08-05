@@ -910,3 +910,145 @@
     font-size:.55rem;
   }
 }
+
+
+/* v0.18.4.19 neon header fill polish */
+.calendarGrid{
+  min-width:38.6rem;
+  grid-template-columns:repeat(7,minmax(6.85rem,1fr));
+  gap:.42rem;
+}
+.dayColumn{
+  grid-template-rows:auto minmax(10rem,1fr);
+  gap:.36rem;
+}
+.dayHeader{
+  display:grid;
+  justify-items:center;
+  align-content:center;
+  min-height:3.1rem;
+  padding:.44rem .36rem;
+  background:var(--color-neon);
+  border-radius:.82rem;
+  border:0;
+  box-shadow:none;
+}
+.dayHeader span{
+  font-size:.6rem;
+  letter-spacing:.12em;
+  color:rgba(0,0,0,.7);
+}
+.dayHeader strong{
+  font-size:1.12rem;
+  line-height:1;
+  color:#000;
+}
+.today .dayHeader{
+  background:var(--color-neon) !important;
+  box-shadow:inset 0 0 0 2px #000;
+}
+.today .dayHeader strong{
+  inline-size:1.6rem;
+  block-size:1.6rem;
+  font-size:1rem;
+  background:#f47add;
+  border-radius:999px;
+}
+.dayBody{
+  min-height:14rem;
+  padding:0;
+  gap:.3rem;
+  background:transparent;
+}
+.shiftCard,
+.shiftCard:global(.shift-card){
+  width:80%;
+  max-width:80%;
+  padding:.34rem .4rem;
+  border-radius:.56rem;
+}
+.shiftCard :global(.shift-card-top){
+  margin-bottom:.14rem;
+  gap:.14rem;
+}
+.shiftCard :global(.shift-card-top) span,
+.shiftCard :global(.shift-time){
+  font-size:.56rem;
+  line-height:1;
+}
+.shiftCard :global(.shift-card-top) svg{
+  width:.58rem;
+  height:.58rem;
+}
+.shiftCard strong{
+  margin:0 0 .05rem;
+  font-size:.68rem;
+  line-height:1.02;
+}
+.shiftCard small{
+  font-size:.53rem;
+  line-height:1.1;
+}
+.shiftCard :global(.conflict-badge),
+.shiftCard em{
+  margin-top:.14rem;
+  font-size:.48rem;
+}
+.addShift{
+  gap:.16rem;
+  padding-top:.08rem;
+  font-size:.56rem;
+  line-height:1;
+  color:#fff4c4;
+}
+.addShift:hover{
+  color:#f47add;
+}
+@media(max-width:48rem){
+  .calendarGrid{
+    min-width:36.8rem;
+    grid-template-columns:repeat(7,minmax(6.45rem,1fr));
+    gap:.36rem;
+  }
+  .dayColumn{
+    gap:.3rem;
+  }
+  .dayHeader{
+    min-height:2.95rem;
+    padding:.38rem .3rem;
+    border-radius:.75rem;
+  }
+  .dayHeader span{
+    font-size:.56rem;
+  }
+  .dayHeader strong{
+    font-size:1.04rem;
+  }
+  .today .dayHeader strong{
+    inline-size:1.48rem;
+    block-size:1.48rem;
+    font-size:.94rem;
+  }
+  .dayBody{
+    min-height:12.5rem;
+    gap:.26rem;
+  }
+  .shiftCard,
+  .shiftCard:global(.shift-card){
+    width:78%;
+    max-width:78%;
+    padding:.3rem .36rem;
+    border-radius:.52rem;
+  }
+  .shiftCard strong{
+    font-size:.64rem;
+  }
+  .shiftCard :global(.shift-card-top) span,
+  .shiftCard :global(.shift-time),
+  .shiftCard small{
+    font-size:.5rem;
+  }
+  .addShift{
+    font-size:.53rem;
+  }
+}
