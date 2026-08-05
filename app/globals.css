@@ -33,7 +33,7 @@ html,body,.app-frame,.main-shell,.page-wrap{background:#fff4c4}body .page-header
   border-radius:var(--radius-panel);
   color:#000;
 }
-.page-wrap[data-workspace="dashboard"] > .page-header{background:#fd2200}
+.page-wrap[data-workspace="dashboard"] > .page-header{background:#eb6746}
 .page-wrap[data-workspace="team"] > .page-header{background:#dfee4b}
 .page-wrap[data-workspace="execution"] > .page-header{background:#f47add}
 .page-wrap[data-workspace="dashboard"] > .page-header p,
@@ -72,7 +72,7 @@ html,body,.app-frame,.main-shell,.page-wrap{background:#fff4c4}body .page-header
 .page-wrap[data-workspace="attendance"] > .page-header .page-actions{align-self:center}
 .page-wrap[data-workspace="attendance"] > .page-header .page-actions .secondary{background:#000;color:#fff4c4;border:0}
 .page-wrap[data-workspace="attendance"] > .page-header .page-actions .primary{background:#9561e6;color:#fff4c4;border:0}
-.page-wrap[data-workspace="attendance"] .attendance-filters{background:#fd2200;border:0;border-radius:var(--radius-panel);padding:var(--space-4);gap:var(--space-3)}
+.page-wrap[data-workspace="attendance"] .attendance-filters{background:#eb6746;border:0;border-radius:var(--radius-panel);padding:var(--space-4);gap:var(--space-3)}
 .page-wrap[data-workspace="attendance"] .attendance-filters label{display:grid;gap:6px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#000}
 .page-wrap[data-workspace="attendance"] .attendance-filters input,
 .page-wrap[data-workspace="attendance"] .attendance-filters select{background:#fff4c4;border:0;border-radius:999px;box-shadow:none;color:#000;font-weight:700}
@@ -82,7 +82,7 @@ html,body,.app-frame,.main-shell,.page-wrap{background:#fff4c4}body .page-header
 .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card{border:0;border-radius:var(--radius-card);color:#000;box-shadow:none}
 .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card:nth-child(1){background:#dfee4b}
 .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card:nth-child(2){background:#9561e6}
-.page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card:nth-child(3){background:#fd2200}
+.page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card:nth-child(3){background:#eb6746}
 .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card:nth-child(4){background:#fff4c4;border:2px solid #000}
 .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card *,
 .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-trend{color:#000}

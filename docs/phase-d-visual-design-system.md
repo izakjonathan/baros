@@ -30,7 +30,7 @@ Bar Ops should feel graphic, bold, direct and operational rather than neutral or
 | Neon | `#DFEE4B` | Employees and team content |
 | Pink | `#F47ADD` | Shifts and scheduling content |
 | Blue | `#9561E6` | Inventory and stock content |
-| Orange | `#FD2200` | Orders and purchasing content |
+| Orange | `#EB6746` | Orders and purchasing content |
 
 Colours are semantic. One content family keeps the same identity throughout the application. Mixed-colour dashboards are allowed when each colour continues to represent its established content family.
 

@@ -7,6 +7,6 @@ const fail=(m)=>{console.error(`v0.18.2 regression: ${m}`);process.exitCode=1};
 if(!isVersionAtLeast(pkg.version,'0.18.2')) fail('package version must be 0.18.2 or newer');
 if(!app.includes('Dashboard.module.css')) fail('dashboard CSS Module is not imported');
 for(const token of ['dashboardStyles.metrics','dashboardStyles.heroPanel','dashboardStyles.contentGrid','dashboardStyles.summary','dashboardStyles.quickPanel']) if(!app.includes(token)) fail(`missing ${token}`);
-for(const token of ['--radius-panel','--space-5','#f47add','#fd2200','#9561e6','@media(max-width:640px)']) if(!css.includes(token)) fail(`dashboard module missing ${token}`);
+for(const token of ['--radius-panel','--space-5','#f47add','#eb6746','#9561e6','@media(max-width:640px)']) if(!css.includes(token)) fail(`dashboard module missing ${token}`);
 for(const target of ['onNavigate("attendance")','onNavigate("schedule")','onNavigate("requests")','onNavigate("inventory")','onNavigate("orders")','onNavigate("operations")']) if(!app.includes(target)) fail(`dashboard navigation target missing: ${target}`);
 if(!process.exitCode) console.log('v0.18.2 dashboard redesign regression passed');

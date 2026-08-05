@@ -1,8 +1,17 @@
+# Implementation Status — v0.18.4.10
+
+**Status:** Reference red and top-bar placement correction complete.
+
+- Approved red-orange token is now `#EB6746`.
+- Manager top bar safe-area ownership is centralized and stable.
+- Main shell offset matches the top bar from initial render.
+- No migration or behavioral change.
+
 # Implementation Status — v0.18.4.9
 
 **Status:** Palette & Spacing Alignment complete.
 
-- Orange is now `#FD2200` throughout the project.
+- Orange is now `#EB6746` throughout the project.
 - Blue is now `#9561E6` throughout the project.
 - The manager top bar is sticky and its controls use neon, purple, red-orange, pink and beige deliberately.
 - Shared mobile gutters, card gaps and section gaps are reduced and aligned.

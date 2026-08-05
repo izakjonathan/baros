@@ -1,3 +1,20 @@
+# Validation Log — v0.18.4.10
+
+## Completed
+
+- `npm run test:all`
+- `npm run audit:preflight`
+- `node scripts/test-v018410-palette-topbar.mjs`
+- `npm run validate:release`
+- ZIP integrity check
+
+## Pending dependency-backed verification
+
+- ESLint
+- TypeScript compilation
+- Next.js production build
+- Live iOS Safari visual verification
+
 # Validation Log — v0.18.4.9
 
 ## Completed

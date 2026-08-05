@@ -16,8 +16,11 @@
   align-items:center;
   gap:clamp(.4rem,1vw,.6rem);
   padding-inline:var(--page-gutter);
-  position:sticky;
-  top:0;
+  padding-block:0;
+  position:fixed;
+  top:env(safe-area-inset-top, 0px);
+  left:246px;
+  right:0;
   z-index:var(--z-header);
   background:#fff4c4;
   border:0;
@@ -78,7 +81,7 @@
   .topbar{padding-inline:max(var(--space-4),env(safe-area-inset-left));padding-right:max(var(--space-4),env(safe-area-inset-right))}
 }
 @media(max-width:640px){
-  .topbar{gap:.4rem;grid-template-columns:auto minmax(0,1fr) auto;padding-block:.15rem}
+  .topbar{gap:.4rem;grid-template-columns:auto minmax(0,1fr) auto;padding-block:0}
   .location{min-height:2.5rem;padding-inline:.75rem;max-width:10.5rem}
   .location select{font-size:1rem}
   .topbarButton{width:2.5rem;height:2.5rem;min-width:2.5rem;min-height:2.5rem;border-radius:.9rem}
@@ -93,11 +96,14 @@
 /* v0.18.4.9 fixed multi-colour top bar */
 .menuButton{background:#dfee4b;color:#000}
 .actions>button:nth-of-type(1){background:#9561e6;color:#000}
-.actions>button:nth-of-type(2){background:#fd2200;color:#000}
+.actions>button:nth-of-type(2){background:#eb6746;color:#000}
 .actions>button:nth-of-type(3){background:#fff4c4;color:#000}
 .notification i{background:#f47add;border-color:#000}
 [data-theme="dark"] .menuButton{background:#dfee4b;color:#000}
 [data-theme="dark"] .actions>button:nth-of-type(1){background:#9561e6;color:#000}
-[data-theme="dark"] .actions>button:nth-of-type(2){background:#fd2200;color:#000}
+[data-theme="dark"] .actions>button:nth-of-type(2){background:#eb6746;color:#000}
 [data-theme="dark"] .actions>button:nth-of-type(3){background:#fff4c4;color:#000}
 @media(max-width:640px){.topbar{padding-inline:max(.75rem,env(safe-area-inset-left));padding-right:max(.75rem,env(safe-area-inset-right));gap:.3rem}}
+
+/* v0.18.4.10 stable iOS top-bar placement */
+@media(max-width:960px){.topbar{left:0;top:env(safe-area-inset-top,0px);height:3.35rem;padding-top:0;padding-bottom:0}}

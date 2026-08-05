@@ -272,7 +272,7 @@ button:disabled,
 /* A real fixed shell: the page scrolls beneath one persistent header. */
 .topbar {
   position: fixed;
-  top: 0;
+  top: env(safe-area-inset-top, 0px);
   left: 246px;
   right: 0;
   width: auto;
@@ -282,10 +282,10 @@ button:disabled,
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: env(safe-area-inset-top, 0px) 34px 0;
+  padding: 0 34px;
 }
 .main-shell {
-  padding-top: var(--app-header-height);
+  padding-top: calc(var(--app-header-height) + env(safe-area-inset-top, 0px));
 }
 .page-wrap {
   scroll-margin-top: calc(var(--app-header-height) + 12px);
@@ -763,9 +763,8 @@ button:disabled,
   html, body { min-height: 100%; background: var(--mono-canvas, #f4f4f2); }
   body { overscroll-behavior-y: none; }
   .app-frame, .employee-app { min-height: 100dvh; }
-  .topbar, .employee-header {
-    padding-top: env(safe-area-inset-top, 0px);
-  }
+  .topbar { top: env(safe-area-inset-top, 0px); padding-top: 0; }
+  .employee-header { padding-top: env(safe-area-inset-top, 0px); }
   .page-wrap {
     padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
   }
@@ -882,7 +881,7 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
 .employee-dialog .interaction-actions .primary{border:2px solid #000;background:#000;color:#fff4c4}
 .execution-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .execution-metrics .metric-card{min-height:0;padding:18px;border:0;border-radius:28px;box-shadow:none;color:#000}
-.execution-metrics .metric-card:nth-child(1){background:#f47add}.execution-metrics .metric-card:nth-child(2){background:#fd2200}.execution-metrics .metric-card:nth-child(3){background:#9561e6}.execution-metrics .metric-card:nth-child(4){background:#dfee4b}
+.execution-metrics .metric-card:nth-child(1){background:#f47add}.execution-metrics .metric-card:nth-child(2){background:#eb6746}.execution-metrics .metric-card:nth-child(3){background:#9561e6}.execution-metrics .metric-card:nth-child(4){background:#dfee4b}
 .execution-metrics .metric-card *{color:#000}.execution-metrics .metric-card small{font-size:12px;line-height:1.35}.execution-metrics .metric-trend{margin-top:10px}
 @media(max-width:600px){
  .employee-dialog{position:fixed;inset:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));width:auto;max-height:none;margin:0;border-radius:2rem}

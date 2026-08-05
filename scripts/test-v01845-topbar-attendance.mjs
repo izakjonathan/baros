@@ -11,6 +11,6 @@ if(!shell.includes("background:#000")||!shell.includes(".topbarButton")) fail("t
 if(!app.includes("shellStyles.topbarButton")) fail("topbar buttons are not wired to shellStyles.topbarButton");
 if(app.includes("workspace-context")) fail("legacy workspace-context topbar copy still present");
 if(!globals.includes('data-workspace="attendance"')) fail("attendance workspace styling missing");
-for (const token of ["background:#f47add","background:#fd2200","background:#9561e6"]) if(!globals.includes(token)) fail(`attendance colour token ${token} missing`);
+for (const token of ["background:#f47add","background:#eb6746","background:#9561e6"]) if(!globals.includes(token)) fail(`attendance colour token ${token} missing`);
 if(!schedule.includes("v0.18.4.5 top chrome refinement")) fail("schedule top chrome refinement missing");
 console.log("v0.18.4.5 topbar and attendance regression passed");

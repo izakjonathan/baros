@@ -1,6 +1,14 @@
+# Bar Ops v0.18.4.10 — Reference Red & Stable Top Bar
+
+Current release: **v0.18.4.10**
+
+This focused visual hotfix changes the red-orange design token to the sampled reference color `#EB6746` and gives the manager top bar one stable safe-area owner. The top bar now sits below the iOS status area from first paint, while the page shell reserves the same combined height, preventing the initial oversized gap and upward jump when Safari begins scrolling.
+
+Rollback checkpoint: **v0.18.4.9**.
+
 # Bar Ops v0.18.4.9 — Palette & Spacing Alignment
 
-Current release: **v0.18.4.9**
+Historic release: **v0.18.4.9**
 
 This release updates the approved functional palette, fixes the manager top bar in place, distributes colour across its controls, and tightens the shared page gutters and section spacing visible in the mobile screenshots.
 

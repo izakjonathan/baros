@@ -1,8 +1,16 @@
+# Release Notes — v0.18.4.10
+
+- Changed the red-orange palette value everywhere from `#FD2200` to the sampled reference color `#EB6746`.
+- Removed top safe-area padding from inside the fixed manager top bar.
+- Positioned the top bar below `safe-area-inset-top` and moved the same inset into shell content offset.
+- Prevented the top control row from shifting upward after scrolling begins in iOS Safari.
+- No workflow, permission, API, database or business-logic changes.
+
 # Release Notes — v0.18.4.9
 
 ## Palette & Spacing Alignment
 
-- Replaced orange with `#FD2200`.
+- Replaced orange with `#EB6746`.
 - Replaced blue with `#9561E6`.
 - Fixed the top bar in place using sticky positioning.
 - Added purposeful colour variation to top-bar controls.
