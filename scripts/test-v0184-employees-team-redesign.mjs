@@ -9,7 +9,7 @@ const app=read("components/bar-ops-app.tsx");
 const brief=read("docs/phase-d-visual-design-system.md");
 
 if (!pkg.version.startsWith("0.18.4")) failures.push("package version must identify v0.18.4");
-for (const value of ["#fff4c4","#000000","#dfee4b","#f47add","#4e4ced","#feb34a"]) {
+for (const value of ["#fff4c4","#000000","#dfee4b","#f47add","#9561e6","#fd2200"]) {
   if (!tokens.includes(value)) failures.push(`approved palette value missing: ${value}`);
 }
 for (const token of ["--surface-employee","--surface-shift","--surface-inventory","--surface-order","--shadow-sm:none","--shadow-md:none"]) {

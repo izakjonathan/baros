@@ -10,7 +10,7 @@ const fail=(m)=>{console.error(`v0.18.4.2 ERROR: ${m}`);process.exit(1)};
 const [major,minor,patch,hotfix=0]=pkg.version.split('.').map(Number);
 if(major!==0||minor<18||(minor===18&&patch<4)||(minor===18&&patch===4&&hotfix<2))fail('package version must be 0.18.4.2 or newer');
 if(!team.includes('background:#dfee4b')||!team.includes('@media(max-width:600px)'))fail('Team alignment missing');
-if(!dash.includes('background:#f47add')||!dash.includes('background:#feb34a')||!dash.includes('background:#4e4ced'))fail('Dashboard content colors missing');
+if(!dash.includes('background:#f47add')||!dash.includes('background:#fd2200')||!dash.includes('background:#9561e6'))fail('Dashboard content colors missing');
 if(!(layout.includes('themeColor: "#fff4c4"')||layout.includes('prefers-color-scheme: light'))||!manifest.includes('background_color: "#fff4c4"'))fail('safe-area colors missing');
 if(!(globals.includes('html,body,.app-frame,.main-shell,.page-wrap{background:#fff4c4}')||globals.includes('background:var(--surface-page)')))fail('page background alignment missing');
 console.log('v0.18.4.2 visual alignment checks passed.');

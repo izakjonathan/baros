@@ -1,0 +1,15 @@
+import fs from "node:fs";
+const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
+const tokens=fs.readFileSync("styles/tokens.css","utf8");
+const shell=fs.readFileSync("components/shell/ManagerShell.module.css","utf8");
+const globals=fs.readFileSync("app/globals.css","utf8");
+const files=[tokens,shell,globals,fs.readFileSync("features/dashboard/Dashboard.module.css","utf8"),fs.readFileSync("features/employees/TeamWorkspace.module.css","utf8"),fs.readFileSync("features/scheduling/ScheduleWorkspace.module.css","utf8")];
+const fail=(m)=>{console.error(`v0.18.4.9 regression: ${m}`);process.exit(1)};
+if(pkg.version!=="0.18.4.9") fail("version mismatch");
+if(!tokens.includes("--color-orange:#fd2200")||!tokens.includes("--color-blue:#9561e6")) fail("new palette tokens missing");
+if(files.some(x=>x.toLowerCase().includes("#feb34a")||x.toLowerCase().includes("#4e4ced"))) fail("legacy palette remains in core styles");
+if(!shell.includes("position:sticky")||!shell.includes("top:0")) fail("topbar is not fixed in place");
+for(const color of ["#dfee4b","#9561e6","#fd2200","#f47add"]) if(!shell.includes(color)) fail(`topbar missing ${color}`);
+if(!tokens.includes("--page-gutter:clamp(.75rem,2vw,1.25rem)")) fail("page gutter not tightened");
+if(!globals.includes("row-gap:.875rem")) fail("section spacing override missing");
+console.log("v0.18.4.9 palette and spacing checks passed");

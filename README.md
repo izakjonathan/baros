@@ -1,6 +1,14 @@
+# Bar Ops v0.18.4.9 — Palette & Spacing Alignment
+
+Current release: **v0.18.4.9**
+
+This release updates the approved functional palette, fixes the manager top bar in place, distributes colour across its controls, and tightens the shared page gutters and section spacing visible in the mobile screenshots.
+
+Rollback checkpoint: **v0.18.4.8**.
+
 # Bar Ops v0.18.4.8 — Mobile Layout Repair
 
-Current release: **v0.18.4.8**
+Historic release: **v0.18.4.8**
 
 This focused repair release rebuilds the mobile structure of Time & Attendance and contains the Shift Plan controls outside the horizontally scrolling calendar. Attendance filters, empty states, result cards and payroll previews now stay within the viewport in both light and dark modes. Shift Plan navigation, acknowledgement, conflict and publication controls are contained without changing the calendar's intentional horizontal scrolling.
 

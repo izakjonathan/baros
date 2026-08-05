@@ -16,6 +16,9 @@
   align-items:center;
   gap:clamp(.4rem,1vw,.6rem);
   padding-inline:var(--page-gutter);
+  position:sticky;
+  top:0;
+  z-index:var(--z-header);
   background:#fff4c4;
   border:0;
 }
@@ -86,3 +89,15 @@
 [data-theme="dark"] .topbarButton{background:#fff4c4;color:#000}
 [data-theme="dark"] .location{background:#f47add;color:#000}
 @media(max-width:430px){.location{max-width:9rem}.actions{gap:.25rem}.topbarButton{width:2.3rem;height:2.3rem;min-width:2.3rem;min-height:2.3rem}.location>span:last-child,.location select{font-size:.9rem}}
+
+/* v0.18.4.9 fixed multi-colour top bar */
+.menuButton{background:#dfee4b;color:#000}
+.actions>button:nth-of-type(1){background:#9561e6;color:#000}
+.actions>button:nth-of-type(2){background:#fd2200;color:#000}
+.actions>button:nth-of-type(3){background:#fff4c4;color:#000}
+.notification i{background:#f47add;border-color:#000}
+[data-theme="dark"] .menuButton{background:#dfee4b;color:#000}
+[data-theme="dark"] .actions>button:nth-of-type(1){background:#9561e6;color:#000}
+[data-theme="dark"] .actions>button:nth-of-type(2){background:#fd2200;color:#000}
+[data-theme="dark"] .actions>button:nth-of-type(3){background:#fff4c4;color:#000}
+@media(max-width:640px){.topbar{padding-inline:max(.75rem,env(safe-area-inset-left));padding-right:max(.75rem,env(safe-area-inset-right));gap:.3rem}}

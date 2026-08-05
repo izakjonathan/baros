@@ -5,8 +5,8 @@
   --color-black:#000000;
   --color-neon:#dfee4b;
   --color-pink:#f47add;
-  --color-blue:#4e4ced;
-  --color-orange:#feb34a;
+  --color-blue:#9561e6;
+  --color-orange:#fd2200;
 
   /* Semantic surfaces */
   --surface-page:var(--color-beige);
@@ -94,7 +94,7 @@
   /* Layout, motion, layering */
   --content-width:90rem;
   --content-width-reading:45rem;
-  --page-gutter:clamp(1rem,3vw,2rem);
+  --page-gutter:clamp(.75rem,2vw,1.25rem);
   --header-height:3.5rem;
   --sidebar-width:17.5rem;
   --control-height:2.75rem;

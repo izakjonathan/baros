@@ -33,7 +33,7 @@ html,body,.app-frame,.main-shell,.page-wrap{background:#fff4c4}body .page-header
   border-radius:var(--radius-panel);
   color:#000;
 }
-.page-wrap[data-workspace="dashboard"] > .page-header{background:#feb34a}
+.page-wrap[data-workspace="dashboard"] > .page-header{background:#fd2200}
 .page-wrap[data-workspace="team"] > .page-header{background:#dfee4b}
 .page-wrap[data-workspace="execution"] > .page-header{background:#f47add}
 .page-wrap[data-workspace="dashboard"] > .page-header p,
@@ -52,7 +52,7 @@ html,body,.app-frame,.main-shell,.page-wrap{background:#fff4c4}body .page-header
 
 /* v0.18.4.4 shift execution composition */
 .page-wrap[data-workspace="execution"] .execution-metrics{margin:0}
-.page-wrap[data-workspace="execution"] .execution-board{background:#4e4ced;border:0;border-radius:var(--radius-panel);overflow:hidden;color:#000}
+.page-wrap[data-workspace="execution"] .execution-board{background:#9561e6;border:0;border-radius:var(--radius-panel);overflow:hidden;color:#000}
 .page-wrap[data-workspace="execution"] .execution-board .panel-title,
 .page-wrap[data-workspace="execution"] .execution-board .execution-list{color:#000}
 .page-wrap[data-workspace="execution"] .execution-list article{border-top:2px solid #000}
@@ -71,8 +71,8 @@ html,body,.app-frame,.main-shell,.page-wrap{background:#fff4c4}body .page-header
 .page-wrap[data-workspace="attendance"] > .page-header .eyebrow{color:#000}
 .page-wrap[data-workspace="attendance"] > .page-header .page-actions{align-self:center}
 .page-wrap[data-workspace="attendance"] > .page-header .page-actions .secondary{background:#000;color:#fff4c4;border:0}
-.page-wrap[data-workspace="attendance"] > .page-header .page-actions .primary{background:#4e4ced;color:#fff4c4;border:0}
-.page-wrap[data-workspace="attendance"] .attendance-filters{background:#feb34a;border:0;border-radius:var(--radius-panel);padding:var(--space-4);gap:var(--space-3)}
+.page-wrap[data-workspace="attendance"] > .page-header .page-actions .primary{background:#9561e6;color:#fff4c4;border:0}
+.page-wrap[data-workspace="attendance"] .attendance-filters{background:#fd2200;border:0;border-radius:var(--radius-panel);padding:var(--space-4);gap:var(--space-3)}
 .page-wrap[data-workspace="attendance"] .attendance-filters label{display:grid;gap:6px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#000}
 .page-wrap[data-workspace="attendance"] .attendance-filters input,
 .page-wrap[data-workspace="attendance"] .attendance-filters select{background:#fff4c4;border:0;border-radius:999px;box-shadow:none;color:#000;font-weight:700}
@@ -81,8 +81,8 @@ html,body,.app-frame,.main-shell,.page-wrap{background:#fff4c4}body .page-header
 .page-wrap[data-workspace="attendance"] .attendance-metrics{margin:0}
 .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card{border:0;border-radius:var(--radius-card);color:#000;box-shadow:none}
 .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card:nth-child(1){background:#dfee4b}
-.page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card:nth-child(2){background:#4e4ced}
-.page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card:nth-child(3){background:#feb34a}
+.page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card:nth-child(2){background:#9561e6}
+.page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card:nth-child(3){background:#fd2200}
 .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card:nth-child(4){background:#fff4c4;border:2px solid #000}
 .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card *,
 .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-trend{color:#000}
@@ -139,7 +139,7 @@ body .page-wrap[data-workspace="attendance"] .attendance-metrics .metric-card sm
   body .page-wrap[data-workspace="attendance"] .table-panel>.panel-title{padding-inline:.25rem}
   body .page-wrap[data-workspace="attendance"] .attendance-table{display:grid;gap:.75rem;background:transparent}
   body .page-wrap[data-workspace="attendance"] .attendance-table .table-head{display:none}
-  body .page-wrap[data-workspace="attendance"] .attendance-table .table-row:not(.table-head){display:grid;grid-template-columns:1fr 1fr;gap:.8rem;background:#4e4ced;color:#000;border:0;border-radius:1.75rem;padding:1rem}
+  body .page-wrap[data-workspace="attendance"] .attendance-table .table-row:not(.table-head){display:grid;grid-template-columns:1fr 1fr;gap:.8rem;background:#9561e6;color:#000;border:0;border-radius:1.75rem;padding:1rem}
   body .page-wrap[data-workspace="attendance"] .attendance-table .table-row:not(.table-head)>span{display:grid;gap:.2rem;min-width:0}
   body .page-wrap[data-workspace="attendance"] .attendance-table .table-row:not(.table-head)>span::before{content:attr(data-label);font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
   body .page-wrap[data-workspace="attendance"] .attendance-table .table-row:not(.table-head)>span:first-child,
@@ -185,7 +185,7 @@ body:has(.app-frame){color:var(--text-primary)}.app-frame .page-wrap{row-gap:1re
 .page-wrap[data-workspace="attendance"] .payroll-preview-card p{margin:.25rem 0 0;color:#51483e;font-size:.9rem}
 .page-wrap[data-workspace="attendance"] .payroll-preview-card .hours-compare{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
 .page-wrap[data-workspace="attendance"] .payroll-preview-card .hours-compare span{display:grid;gap:.35rem;min-width:0;padding:.9rem;background:#dfee4b;border-radius:.8rem;color:#000;font-size:.85rem}
-.page-wrap[data-workspace="attendance"] .payroll-preview-card .hours-compare span:nth-child(2){background:#4e4ced}
+.page-wrap[data-workspace="attendance"] .payroll-preview-card .hours-compare span:nth-child(2){background:#9561e6}
 .page-wrap[data-workspace="attendance"] .payroll-preview-card .hours-compare b{font-size:1.45rem;line-height:1}
 .page-wrap[data-workspace="attendance"] .payroll-preview-card .export-count{font-size:.85rem;color:#000}
 [data-theme="dark"] .page-wrap[data-workspace="attendance"] .attendance-results,
@@ -215,4 +215,15 @@ body:has(.app-frame){color:var(--text-primary)}.app-frame .page-wrap{row-gap:1re
   .page-wrap[data-workspace="attendance"] .payroll-preview-card{padding:1rem;border-radius:1rem}
   .page-wrap[data-workspace="attendance"] .payroll-preview-card .hours-compare{gap:.6rem}
   .page-wrap[data-workspace="attendance"] .payroll-preview-card .hours-compare span{padding:.75rem;border-radius:.75rem}
+}
+
+
+/* v0.18.4.9 palette and spacing alignment */
+.app-frame .main-shell>.page-wrap{padding-inline:var(--page-gutter);row-gap:.875rem}
+.app-frame .page-wrap,.app-frame .dashboard,.app-frame .workspace{gap:.875rem}
+.app-frame .metric-grid,.app-frame .dashboard-grid{gap:.75rem;margin-bottom:.875rem}
+@media(max-width:640px){
+  .app-frame .main-shell>.page-wrap{padding-inline:max(.75rem,env(safe-area-inset-left));padding-right:max(.75rem,env(safe-area-inset-right));padding-top:.75rem}
+  .app-frame .page-wrap,.app-frame .dashboard,.app-frame .workspace{gap:.75rem}
+  .app-frame .metric-grid{gap:.65rem}
 }

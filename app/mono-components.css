@@ -838,14 +838,14 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
   .icon-button,.menu-button,.sidebar-close{min-width:44px}
 }
 @media (min-width:768px) and (max-width:1180px){
-  .main-shell>.page-wrap{padding-inline:max(22px,env(safe-area-inset-left));padding-right:max(22px,env(safe-area-inset-right))}
+  .main-shell>.page-wrap{padding-inline:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}
   .metric-grid,.inventory-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .dashboard-grid{grid-template-columns:minmax(0,1.35fr) minmax(280px,.85fr)}
   .page-actions,.workspace-actions{max-width:52%}
   .modal,.interaction-dialog{max-height:min(86dvh,760px)}
 }
 @media (max-width:760px){
-  .main-shell>.page-wrap,.employee-page,.workspace-page{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+  .main-shell>.page-wrap,.employee-page,.workspace-page{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
   .page-actions,.workspace-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
   .page-actions>*:only-child,.workspace-actions>*:only-child{grid-column:1/-1}
   .page-actions button,.workspace-actions button{width:100%}
@@ -882,7 +882,7 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
 .employee-dialog .interaction-actions .primary{border:2px solid #000;background:#000;color:#fff4c4}
 .execution-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .execution-metrics .metric-card{min-height:0;padding:18px;border:0;border-radius:28px;box-shadow:none;color:#000}
-.execution-metrics .metric-card:nth-child(1){background:#f47add}.execution-metrics .metric-card:nth-child(2){background:#feb34a}.execution-metrics .metric-card:nth-child(3){background:#4e4ced}.execution-metrics .metric-card:nth-child(4){background:#dfee4b}
+.execution-metrics .metric-card:nth-child(1){background:#f47add}.execution-metrics .metric-card:nth-child(2){background:#fd2200}.execution-metrics .metric-card:nth-child(3){background:#9561e6}.execution-metrics .metric-card:nth-child(4){background:#dfee4b}
 .execution-metrics .metric-card *{color:#000}.execution-metrics .metric-card small{font-size:12px;line-height:1.35}.execution-metrics .metric-trend{margin-top:10px}
 @media(max-width:600px){
  .employee-dialog{position:fixed;inset:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));width:auto;max-height:none;margin:0;border-radius:2rem}

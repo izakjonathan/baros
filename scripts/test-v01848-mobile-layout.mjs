@@ -4,7 +4,7 @@ const app=fs.readFileSync("components/bar-ops-app.tsx","utf8");
 const css=fs.readFileSync("app/globals.css","utf8");
 const schedule=fs.readFileSync("features/scheduling/ScheduleWorkspace.module.css","utf8");
 const fail=(message)=>{console.error(`v0.18.4.8 regression: ${message}`);process.exit(1)};
-if(pkg.version!=="0.18.4.8") fail("package version mismatch");
+if(pkg.version.localeCompare("0.18.4.8",undefined,{numeric:true})<0) fail("package version mismatch");
 if(!app.includes("attendance-results")) fail("attendance results container missing");
 if(!app.includes("payroll-preview-card")) fail("compact payroll preview card missing");
 if(!app.includes("No timesheets found")) fail("responsive empty state copy missing");

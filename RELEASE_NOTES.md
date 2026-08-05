@@ -1,3 +1,14 @@
+# Release Notes — v0.18.4.9
+
+## Palette & Spacing Alignment
+
+- Replaced orange with `#FD2200`.
+- Replaced blue with `#9561E6`.
+- Fixed the top bar in place using sticky positioning.
+- Added purposeful colour variation to top-bar controls.
+- Reduced and aligned page gutters, section gaps and card gaps.
+- Preserved light/dark mode and all existing workflows.
+
 # Release Notes — v0.18.4.8
 
 ## Mobile Layout Repair

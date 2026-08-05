@@ -1,3 +1,17 @@
+# Validation Log — v0.18.4.9
+
+## Completed
+
+- `npm run test:all`
+- `npm run audit:preflight`
+- `npm run validate:release`
+- v0.18.4.9 palette and spacing regression
+- ZIP integrity
+
+## Environment limitations
+
+- Browser/device visual verification remains external.
+
 # Validation Log — v0.18.4.8
 
 ## Completed
