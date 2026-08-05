@@ -1,0 +1,88 @@
+/* v0.18.4.13 — canonical external spacing ownership
+   This file is intentionally imported after legacy component CSS.
+   It owns page edges, section gaps, card-grid gaps and background-title rhythm.
+   Component interior padding remains feature-owned. */
+
+:root {
+  --layout-gap: 8px;
+  --page-gutter: var(--layout-gap);
+  --workspace-inline: var(--layout-gap);
+  --workspace-block: var(--layout-gap);
+  --workspace-section-gap: var(--layout-gap);
+}
+
+.main-shell > .page-wrap,
+.employee-page,
+.workspace-page {
+  padding-inline-start: max(var(--layout-gap), env(safe-area-inset-left));
+  padding-inline-end: max(var(--layout-gap), env(safe-area-inset-right));
+}
+
+.main-shell > .page-wrap {
+  padding-block-start: var(--layout-gap);
+  gap: var(--layout-gap);
+}
+
+.employee-page,
+.workspace-page,
+.dashboard,
+.workspace,
+.ds-stack,
+.ds-grid,
+.ds-cluster {
+  gap: var(--layout-gap);
+}
+
+.page-header,
+.workspace-header,
+.employee-page-title {
+  gap: var(--layout-gap);
+  margin-block-end: var(--layout-gap);
+}
+
+.page-header h1,
+.workspace-header h1,
+.employee-page h1 {
+  margin-block: 0;
+}
+
+.employee-page > .employee-lead,
+.team-toolbar,
+.live-shift-board,
+.operational-summary,
+.execution-board {
+  margin-block-end: var(--layout-gap);
+}
+
+.employee-page section + h2 {
+  margin-block-start: var(--layout-gap);
+}
+
+.metric-grid,
+.attendance-metrics,
+.execution-metrics,
+.dashboard-grid,
+.card-grid,
+.inventory-stats,
+.page-actions,
+.workspace-actions,
+.header-actions,
+.schedule-head-actions,
+.team-actions {
+  gap: var(--layout-gap);
+}
+
+.topbar,
+.employee-header {
+  padding-inline-start: max(var(--layout-gap), env(safe-area-inset-left));
+  padding-inline-end: max(var(--layout-gap), env(safe-area-inset-right));
+}
+
+/* Approved exception: the mobile schedule calendar intentionally bleeds to the
+   viewport edge because it is a horizontally scrollable data surface. The
+   schedule header and toolbar remain aligned to the canonical page grid. */
+@media (max-width: 48rem) {
+  .calendar-panel-full-bleed {
+    margin-inline: calc(var(--layout-gap) * -1);
+  }
+}

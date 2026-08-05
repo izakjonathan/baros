@@ -78,7 +78,7 @@
 
 @media(max-width:960px){
   .sidebar{box-shadow:var(--shadow-md)}
-  .topbar{padding-inline:max(var(--space-4),env(safe-area-inset-left));padding-right:max(var(--space-4),env(safe-area-inset-right))}
+  .topbar{padding-inline:max(var(--layout-gap),env(safe-area-inset-left));padding-right:max(var(--layout-gap),env(safe-area-inset-right))}
 }
 @media(max-width:640px){
   .topbar{gap:var(--layout-gap);grid-template-columns:auto minmax(0,1fr) auto;padding-block:0}
@@ -103,7 +103,7 @@
 [data-theme="dark"] .actions>button:nth-of-type(1){background:#9561e6;color:#000}
 [data-theme="dark"] .actions>button:nth-of-type(2){background:#eb6746;color:#000}
 [data-theme="dark"] .actions>button:nth-of-type(3){background:#fff4c4;color:#000}
-@media(max-width:640px){.topbar{padding-inline:max(.75rem,env(safe-area-inset-left));padding-right:max(.75rem,env(safe-area-inset-right));gap:var(--layout-gap)}}
+@media(max-width:640px){.topbar{padding-inline:max(var(--layout-gap),env(safe-area-inset-left));padding-right:max(var(--layout-gap),env(safe-area-inset-right));gap:var(--layout-gap)}}
 
 /* v0.18.4.10 stable iOS top-bar placement */
 @media(max-width:960px){.topbar{left:0;top:env(safe-area-inset-top,0px);height:3.35rem;padding-top:0;padding-bottom:0}}

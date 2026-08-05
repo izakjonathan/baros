@@ -1,3 +1,14 @@
+# Implementation Status — v0.18.4.13
+
+**Status:** Spacing Ownership Cleanup complete.
+
+- Added a final-loaded canonical spacing stylesheet.
+- Replaced legacy 12px, 14px, 18px, 20px, 22px, 24px and 28px external spacing rules in the affected shared selectors.
+- Aligned manager top-bar and page-content gutters.
+- Preserved component interior padding.
+- Documented the mobile schedule full-bleed exception.
+- No business logic, API, permission, database or workflow changes.
+
 # Implementation Status — v0.18.4.12
 
 **Status:** Compact External Grid complete.

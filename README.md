@@ -1,6 +1,14 @@
+# Bar Ops v0.18.4.13 — Spacing Ownership Cleanup
+
+Current release: **v0.18.4.13**
+
+This release makes the existing 8px external grid authoritative across the full CSS cascade. Canonical page gutters, section gaps, card-grid gaps, top-bar alignment and background-title rhythm are now owned by a final-loaded stylesheet. Internal component padding remains independent.
+
+Rollback checkpoint: **v0.18.4.12**.
+
 # Bar Ops v0.18.4.12 — Compact External Grid
 
-Current release: **v0.18.4.12**
+Historic release: **v0.18.4.12**
 
 This focused Phase D refinement reduces the unified external layout grid from 16px to 8px. Page gutters, section separation, card-grid gaps and spacing around titles sitting on the page background now use the smaller value consistently. Internal card padding is deliberately unchanged.
 

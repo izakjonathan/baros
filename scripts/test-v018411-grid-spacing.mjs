@@ -7,7 +7,7 @@ const dashboard=fs.readFileSync("features/dashboard/Dashboard.module.css","utf8"
 const team=fs.readFileSync("features/employees/TeamWorkspace.module.css","utf8");
 const schedule=fs.readFileSync("features/scheduling/ScheduleWorkspace.module.css","utf8");
 const fail=(m)=>{console.error(`v0.18.4.12 regression: ${m}`);process.exit(1)};
-if(pkg.version!=="0.18.4.12") fail("package version mismatch");
+if(pkg.version.localeCompare("0.18.4.12",undefined,{numeric:true})<0) fail("package version is older than v0.18.4.12");
 if(!tokens.includes("--layout-gap:.5rem")||!tokens.includes("--page-gutter:var(--layout-gap)")) fail("primary grid token missing");
 if(!mono.includes("--workspace-inline: var(--layout-gap)")||!mono.includes("--workspace-section-gap: var(--layout-gap)")) fail("legacy spacing aliases not centralized");
 if(!globals.includes("v0.18.4.12 compact external grid spacing")) fail("global spacing ownership layer missing");

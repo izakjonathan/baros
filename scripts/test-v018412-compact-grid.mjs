@@ -4,7 +4,7 @@ const tokens=fs.readFileSync("styles/tokens.css","utf8");
 const mono=fs.readFileSync("app/mono-tokens.css","utf8");
 const globals=fs.readFileSync("app/globals.css","utf8");
 const fail=(message)=>{console.error(`v0.18.4.12 regression: ${message}`);process.exit(1)};
-if(pkg.version!=="0.18.4.12") fail("package version mismatch");
+if(pkg.version.localeCompare("0.18.4.12",undefined,{numeric:true})<0) fail("package version is older than v0.18.4.12");
 if(!tokens.includes("--layout-gap:.5rem")) fail("8px external grid token missing");
 if(!tokens.includes("--page-gutter:var(--layout-gap)")) fail("page gutter is not linked to external grid");
 if(!mono.includes("--layout-gap: 8px")) fail("legacy layout gap is not 8px");

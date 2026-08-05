@@ -1,3 +1,16 @@
+# Release Notes — v0.18.4.13
+
+## Spacing Ownership Cleanup
+
+- Made the 8px external grid authoritative after all legacy CSS.
+- Unified mobile, tablet and desktop page gutters.
+- Unified spacing around page-level titles and descriptions.
+- Unified manager and employee workspace section spacing.
+- Unified dashboard, attendance and execution metric-grid gaps.
+- Aligned top-bar controls with page content.
+- Removed obsolete hard-coded external spacing from key legacy selectors.
+- Preserved internal component padding and the intentional mobile schedule full-bleed data surface.
+
 # Release Notes — v0.18.4.12
 
 ## Compact External Grid
