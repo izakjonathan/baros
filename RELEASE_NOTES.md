@@ -1,3 +1,14 @@
+# v0.18.4.23 — Independent Day Column Repair
+
+- Rebuilt the weekly schedule row as independent fixed-width day columns.
+- Kept each neon header, shift stack, and Add shift action inside its own contained column.
+- Prevented shift cards and actions from merging or clipping into neighboring days.
+- Hid the intrusive horizontal scrollbar while preserving touch scrolling.
+- Normalized role-card colors and moved the legend closer to schedule content.
+- Preserved scheduling logic, drag-and-drop, recurrence, permissions, APIs, and persistence.
+
+---
+
 # v0.18.4.22 — Schedule Column & Shift Modal Polish
 
 - Separated neon day headers with a visible black gap between every schedule column.

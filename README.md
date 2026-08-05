@@ -1,10 +1,10 @@
-# Bar Ops v0.18.4.22 — Schedule Column & Shift Modal Polish
+# Bar Ops v0.18.4.23 — Independent Day Column Repair
 
-Current release: **v0.18.4.22**
+Current release: **v0.18.4.23**
 
-This release repairs the Shift Plan calendar structure so headers, shift cards and Add shift controls share one canonical column grid. Horizontal position resets when changing periods, all neon day headers return to view, and the schedule body height follows actual content.
+This release structurally isolates every schedule day into its own fixed-width column so neon headers, role-colored shifts, and Add shift actions can no longer merge across neighboring days. Horizontal touch scrolling remains available without a visible scrollbar.
 
-Rollback checkpoint: **v0.18.4.21**.
+Rollback checkpoint: **v0.18.4.22**.
 
 ---
 

@@ -1,3 +1,11 @@
+# v0.18.4.23 validation
+
+- Dedicated independent-day-column regression
+- Release contract and preflight checks
+- ZIP integrity check
+
+---
+
 # Validation Log — v0.18.4.22
 
 ## Completed

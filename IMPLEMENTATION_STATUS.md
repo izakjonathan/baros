@@ -1,3 +1,9 @@
+# v0.18.4.23 status
+
+Independent day-column containment implemented for the Shift Plan. Each day now owns its header, shifts, and Add shift control.
+
+---
+
 # Implementation Status — v0.18.4.22
 
 **Status:** Schedule column and shift modal polish complete.
