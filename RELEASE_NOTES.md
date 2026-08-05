@@ -1,3 +1,12 @@
+# Release Notes — v0.18.4.7
+
+- Added persistent light/dark mode and a top-bar theme switch.
+- Added black page/shell backgrounds with beige neutral content in dark mode.
+- Reduced top-bar height, card radius and visual softness.
+- Removed leading metric-card icons and increased card-title size.
+- Refined Time & Attendance responsive actions, filters, metrics and cards.
+- Refined Shift Plan controls, publication state, day surfaces and shift cards.
+
 # Release Notes — v0.18.4.6
 
 ## Mobile Density & Responsive Structure

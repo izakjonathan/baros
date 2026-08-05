@@ -6,7 +6,7 @@ import {
   ArrowRight, Bell, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight,
   CircleDollarSign, ClipboardList, Clock3, Coffee, LayoutDashboard, Menu, Package, Plus,
   Search, Settings, ShoppingCart, Sparkles, Users, X, AlertTriangle, Truck, MoreHorizontal,
-  Copy, Send, Boxes, Wine, UserRoundPlus, Timer, Play, Square, Activity, FileCheck2, FileDown, CheckCheck, RotateCcw, Ban, Pencil, ShieldAlert, History, DownloadCloud, LockKeyhole, UnlockKeyhole, Database, KeyRound, MapPin, FileArchive, ShieldCheck, ReceiptText, Trash2, ArrowLeftRight, TrendingUp, NotebookPen, Wrench, Save, Upload, Undo2, CheckCircle2, LogOut
+  Copy, Send, Boxes, Wine, UserRoundPlus, Timer, Play, Square, Activity, FileCheck2, FileDown, CheckCheck, RotateCcw, Ban, Pencil, ShieldAlert, History, DownloadCloud, LockKeyhole, UnlockKeyhole, Database, KeyRound, MapPin, FileArchive, ShieldCheck, ReceiptText, Trash2, ArrowLeftRight, TrendingUp, NotebookPen, Wrench, Save, Upload, Undo2, CheckCircle2, LogOut, Moon, Sun
 } from "lucide-react";
 import { days, initialProducts, initialShifts, orders, team, type NavKey, type Product, type Shift, type ShiftRole } from "@/lib/data";
 import type { ClockSettings, Employee, Location, LogEntry, OpsTask, ScheduleAcknowledgementSummary, ShiftNote, StockAdjustment, TimeEntry } from "@/features/workspace/types";
@@ -37,6 +37,20 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
   const [locations, setLocations] = useState<Location[]>(devMode ? [{ id: "dev-temple", name: "Temple Bar" }] : []);
   const [selectedLocationId, setSelectedLocationId] = useState<string>(devMode ? "dev-temple" : "");
   const [mobileNav, setMobileNav] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  useEffect(() => {
+    const saved = window.localStorage.getItem("bar-ops-theme");
+    const next = saved === "dark" || saved === "light" ? saved : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    setTheme(next);
+    document.documentElement.dataset.theme = next;
+  }, []);
+  function toggleTheme() {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    document.documentElement.dataset.theme = next;
+    window.localStorage.setItem("bar-ops-theme", next);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next === "dark" ? "#000000" : "#fff4c4");
+  }
   const [shifts, setShifts] = useState(initialShifts);
   const [products, setProducts] = useState(initialProducts);
   const [employees, setEmployees] = useState<Employee[]>(team.map((person) => ({ ...person, active: true })));
@@ -131,7 +145,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
     <div className="app-frame">
       <Sidebar active={active} onChange={(value) => { setActive(value); setMobileNav(false); }} open={mobileNav} onClose={() => setMobileNav(false)} userName={userName} userRole={userRole} devMode={devMode} />
       <main className="main-shell">
-        <Topbar active={active} onMenu={() => setMobileNav(true)} locations={locations} selectedLocationId={selectedLocationId} onLocationChange={setSelectedLocationId} onNavigate={setActive} />
+        <Topbar active={active} onMenu={() => setMobileNav(true)} locations={locations} selectedLocationId={selectedLocationId} onLocationChange={setSelectedLocationId} onNavigate={setActive} theme={theme} onToggleTheme={toggleTheme} />
         <div className="page-wrap" data-workspace={active}>
           {active === "dashboard" && <Dashboard shifts={shifts} products={products} employees={employees} timeEntries={timeEntries} tasks={opsTasks} shiftNotes={shiftNotes} devMode={devMode} onNavigate={setActive} />}
           {active === "execution" && <ShiftExecution shifts={shifts} entries={timeEntries} notes={shiftNotes} onNavigate={setActive} />}
@@ -222,6 +236,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
   );
 }
 
+
 function Sidebar({ active, onChange, open, onClose, userName, userRole, devMode }: { active: NavKey; onChange: (id: NavKey) => void; open: boolean; onClose: () => void; userName: string; userRole: string; devMode: boolean }) {
   return <>
     {open && <button className="scrim" aria-label="Close navigation" onClick={onClose} />}
@@ -243,7 +258,7 @@ function Sidebar({ active, onChange, open, onClose, userName, userRole, devMode 
   </>
 }
 
-function Topbar({ active, onMenu, locations, selectedLocationId, onLocationChange, onNavigate }: { active: NavKey; onMenu: () => void; locations: Location[]; selectedLocationId: string; onLocationChange: (id: string) => void; onNavigate: (id: NavKey) => void }) {
+function Topbar({ active, onMenu, locations, selectedLocationId, onLocationChange, onNavigate, theme, onToggleTheme }: { active: NavKey; onMenu: () => void; locations: Location[]; selectedLocationId: string; onLocationChange: (id: string) => void; onNavigate: (id: NavKey) => void; theme: "light" | "dark"; onToggleTheme: () => void }) {
   const selected = locations.find(location => location.id === selectedLocationId);
   const [searchOpen,setSearchOpen]=useState(false);
   const [notificationsOpen,setNotificationsOpen]=useState(false);
@@ -255,6 +270,7 @@ function Topbar({ active, onMenu, locations, selectedLocationId, onLocationChang
     <label className={`location-switch ${shellStyles.location}`} aria-label="Current location"><span className="status-dot" />{locations.length > 1 ? <><select value={selectedLocationId} onChange={event => onLocationChange(event.target.value)}>{locations.map(location => <option key={location.id} value={location.id}>{location.name}</option>)}</select><ChevronDown size={15} /></> : <span>{selected?.name || "No active location"}</span>}</label>
     <div className={`top-actions ${shellStyles.actions}`}>
       <button className={`icon-button ${shellStyles.topbarButton}`} onClick={()=>{setSearchOpen(v=>!v);setNotificationsOpen(false)}} aria-label="Search workspace"><Search size={19} /></button>
+      <button className={`icon-button ${shellStyles.topbarButton} ${shellStyles.themeButton}`} onClick={onToggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} aria-pressed={theme === "dark"}>{theme === "dark" ? <Sun size={18}/> : <Moon size={18}/>}</button>
       <button className={`icon-button notification ${shellStyles.topbarButton}`} onClick={()=>{setNotificationsOpen(v=>!v);setSearchOpen(false)}} aria-label="Open notifications"><Bell size={19} /><i /></button>
       {searchOpen&&<div className="top-popover search-popover"><label><Search size={16}/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search workspace"/></label><div>{matches.map(item=><button key={item.id} onClick={()=>go(item.id)}><item.icon size={17}/><span>{item.label}</span><ArrowRight size={14}/></button>)}</div></div>}
       {notificationsOpen&&<div className="top-popover notifications-popover"><strong>Notifications</strong><button onClick={()=>go("schedule")}><CalendarDays size={17}/><span><b>Draft schedule</b><small>Review and publish upcoming shifts</small></span></button><button onClick={()=>go("attendance")}><Clock3 size={17}/><span><b>Timesheet review</b><small>Open time and attendance</small></span></button><button onClick={()=>go("requests")}><ClipboardList size={17}/><span><b>Employee requests</b><small>Review leave, open shifts and shift changes</small></span></button><button onClick={()=>go("inventory")}><Package size={17}/><span><b>Stock attention</b><small>Review products below par</small></span></button></div>}
@@ -415,7 +431,7 @@ function ShiftExecution({ shifts, entries, notes, onNavigate }: { shifts: Shift[
 }
 
 function Metric({ icon: Icon, label, value, detail, trend, warning }: { icon: typeof Users; label: string; value: string; detail: string; trend: string; warning?: boolean }) {
-  return <div className="metric-card"><div className={`metric-icon ${warning ? "warning" : ""}`}><Icon size={20} /></div><span className="metric-label">{label}</span><strong>{value}</strong><small>{detail}</small><div className={`metric-trend ${warning ? "warn" : ""}`}>{warning ? <AlertTriangle size={13} /> : <span aria-hidden="true" className="metric-status-dot" />}{trend}</div></div>
+  return <div className="metric-card"><span className="metric-label">{label}</span><strong>{value}</strong><small>{detail}</small><div className={`metric-trend ${warning ? "warn" : ""}`}>{warning ? <AlertTriangle size={13} /> : <span aria-hidden="true" className="metric-status-dot" />}{trend}</div></div>
 }
 function PanelTitle({ title, subtitle, action }: { title: string; subtitle: string; action?: React.ReactNode }) { return <div className="panel-title"><div><h2>{title}</h2>{subtitle&&<p>{subtitle}</p>}</div>{action}</div> }
 function Quick({ icon: Icon, label, detail, onClick }: { icon: typeof CalendarDays; label: string; detail: string; onClick: () => void }) { return <button className="quick-action" onClick={onClick}><span><Icon size={19} /></span><div><strong>{label}</strong><small>{detail}</small></div><ArrowRight size={17} /></button> }

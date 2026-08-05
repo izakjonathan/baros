@@ -1,6 +1,14 @@
+# Bar Ops v0.18.4.7 — Dark Mode & Structural Card Refinement
+
+Current release: **v0.18.4.7**
+
+This focused Phase D release adds a persistent light/dark theme switch and corrects the visible structural problems in the latest mobile screenshots. Dark mode uses a black application canvas with beige neutral content surfaces while preserving the approved functional colors. Card geometry is firmer, leading metric icons are removed, titles are larger, and Time & Attendance plus Shift Plan receive the deepest refinement.
+
+Rollback checkpoint: **v0.18.4.6**.
+
 # Bar Ops v0.18.4.6 — Mobile Density & Responsive Structure
 
-Current release: **v0.18.4.6**
+Historic release: **v0.18.4.6**
 
 This release tightens mobile density and converts Time & Attendance from a desktop table squeezed onto mobile into a responsive card-based workflow. It also reduces the persistent top-bar height, replaces the unapproved location gradient with solid pink, restores Team’s editorial title composition, standardizes disabled controls, and removes remaining low-contrast legacy state colors from the refined screens.
 

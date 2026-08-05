@@ -7,7 +7,7 @@
 
 /* v0.18.4.5 top chrome refinement */
 .headerActions{gap:var(--space-2)}
-.headerActions :global(.schedule-view-select){background:linear-gradient(135deg,#5b5af0 0%,#f47add 100%);border:0;border-radius:999px;box-shadow:none}
+.headerActions :global(.schedule-view-select){background:#4e4ced;border:0;border-radius:999px;box-shadow:none}
 .headerActions :global(.schedule-view-select select){color:#000;font-family:var(--font-display);font-weight:800;padding-left:1rem;padding-right:2rem}
 .headerActions :global(.schedule-view-select svg){color:#000}
 .headerActions :global(button){min-height:3.25rem;border:0;border-radius:999px;padding-inline:1rem;background:#000;color:#fff4c4;box-shadow:none}
@@ -15,3 +15,34 @@
 .headerActions :global(button:last-child){background:#f47add;color:#000}
 .headerActions :global(button:last-child svg){color:#000}
 @media(max-width:48rem){.headerActions{width:100%;justify-content:flex-start}.headerActions :global(.compact-action){width:3.25rem;padding:0;border-radius:1.35rem}.headerActions :global(.schedule-view-select){min-width:8rem}}
+
+/* v0.18.4.7 structural refinement */
+.workspace{gap:1rem}.header{padding:1.4rem;border-radius:1.75rem}.headerCopy h1{font-size:clamp(2.4rem,8vw,4rem)}
+.headerActions :global(.schedule-view-select){background:#4e4ced;border-radius:1rem}.headerActions :global(button){min-height:2.75rem;border-radius:1rem}.headerActions :global(button:last-child){background:#000;color:#fff4c4}
+.toolbar{padding:1.15rem;border-radius:1.25rem;gap:1rem}.periodControls button{width:2.75rem;height:2.75rem;border-radius:.85rem}
+.summary :global(.compact-publish){width:auto;min-width:7rem;border-radius:1rem;padding-inline:1rem}.summary :global(.compact-publish span),.summary :global(.compact-action span){display:inline}
+.calendarPanel{border-radius:1.25rem}.calendarPanel .dayColumn{background:#dfee4b}.calendarPanel .dayColumn:nth-child(even){background:#fff4c4}.calendarPanel .today{background:#feb34a}.calendarPanel .dayHeader{background:inherit}
+.calendarPanel .shiftCard{background:#f47add;border-radius:1rem;padding:1rem}.calendarPanel .shiftCard :global(.shift-card-top){color:#000}.calendarPanel .shiftCard strong{font-size:1.05rem}.calendarPanel .addShift{border-radius:.85rem}
+[data-theme="dark"] .header,[data-theme="dark"] .toolbar,[data-theme="dark"] .calendarPanel{color:#000}
+@media(max-width:48rem){.header{border-radius:1.5rem;padding:1.25rem}.headerActions{display:grid;grid-template-columns:minmax(0,1fr) auto auto}.headerActions :global(.schedule-view-select){min-width:0;width:100%}.headerActions :global(.compact-action){width:2.75rem;height:2.75rem;border-radius:.85rem}.toolbar{border-radius:1.25rem}.calendarPanel{border-radius:0}.periodControls{grid-template-columns:2.75rem 1fr 2.75rem}}
+
+
+/* v0.18.4.7 structural schedule baseline */
+.header{padding:1.35rem 1.5rem;border-radius:1.75rem;align-items:center}
+.headerCopy h1{font-size:clamp(2.15rem,6vw,3.4rem)}
+.headerActions :global(.schedule-view-select){background:#4e4ced;border-radius:1rem}
+.headerActions :global(button){min-height:2.75rem;border-radius:1rem}
+.headerActions :global(button:last-child){background:#000;color:#fff4c4}
+.toolbar{padding:1rem 1.25rem;border-radius:1.5rem;gap:1rem}
+.periodControls{grid-template-columns:2.5rem minmax(8rem,1fr) 2.5rem}
+.periodControls button{width:2.5rem;height:2.5rem;border-radius:.85rem}
+.summary :global(.badge),.summary :global(button){border-radius:.9rem}
+.calendarPanel{border-radius:1.5rem}
+.shiftCard:global(.shift-card),.shiftCard:global(.shift-card.role-bartender),.shiftCard:global(.shift-card.role-floor){background:#f47add;color:#000;border:0;border-radius:1rem;padding:1rem}
+.shiftCard :global(.shift-card-top),.shiftCard :global(.shift-time){color:#000}
+.shiftCard strong{font-size:1.12rem;line-height:1.1}.shiftCard small{font-size:.82rem}
+.addShift{border-radius:.85rem;padding:.85rem}
+[data-theme="dark"] .workspace{color:#fff4c4}
+[data-theme="dark"] .calendarPanel{outline:1px solid #fff4c4}
+[data-theme="dark"] .dayColumn:nth-child(even){background:#fff4c4;color:#000}
+@media(max-width:48rem){.header{padding:1.15rem 1.25rem;border-radius:1.5rem;gap:1rem}.headerActions{display:grid;grid-template-columns:minmax(0,1fr) 2.75rem 2.75rem}.headerActions :global(.schedule-view-select){min-width:0;width:100%}.headerActions :global(.compact-action){width:2.75rem;height:2.75rem;min-height:2.75rem;border-radius:.9rem}.toolbar{padding:.85rem 1rem;border-radius:1.25rem}.calendarPanel{border-radius:0}.dayBody{padding:1rem}.shiftCard:global(.shift-card){padding:1rem}}

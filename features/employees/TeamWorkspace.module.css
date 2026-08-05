@@ -25,3 +25,12 @@
 
 /* v0.18.4.6 density */
 @media(max-width:40rem){.workspace{gap:1rem}.summary{gap:.75rem}.summary article{min-height:8.25rem;padding:1rem}.toolbar{padding:1rem;border-radius:2rem}.card{padding:1rem}.details{gap:.75rem;padding-block:.85rem}.actions{gap:.5rem}.note{margin-top:.5rem}}
+
+/* v0.18.4.7 structural refinement */
+.summary article,.toolbar,.card{border-radius:1.25rem}.summary article,.toolbar,.card{padding:1.25rem}.identity h2{font-size:clamp(1.65rem,3vw,2.15rem)}@media(max-width:600px){.card,.toolbar{border-radius:1.25rem;padding:1.25rem}.summary article{min-height:7rem}}
+
+
+/* v0.18.4.7 structural cards */
+.summary article,.toolbar,.card{border-radius:1.5rem}
+.summary article{padding:1.25rem}.summary span{font-size:1rem}.toolbar{padding:1.25rem}.card{padding:1.35rem}.identity h2{font-size:clamp(1.65rem,3vw,2.15rem)}
+@media(max-width:600px){.card,.toolbar{border-radius:1.4rem}.summary article{min-height:7rem;padding:1.15rem}.card{padding:1.25rem}}

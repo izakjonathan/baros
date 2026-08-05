@@ -1,0 +1,18 @@
+import fs from "node:fs";
+const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
+const app=fs.readFileSync("components/bar-ops-app.tsx","utf8");
+const layout=fs.readFileSync("app/layout.tsx","utf8");
+const tokens=fs.readFileSync("styles/tokens.css","utf8");
+const shell=fs.readFileSync("components/shell/ManagerShell.module.css","utf8");
+const schedule=fs.readFileSync("features/scheduling/ScheduleWorkspace.module.css","utf8");
+const globals=fs.readFileSync("app/globals.css","utf8");
+const fail=m=>{console.error(`v0.18.4.7 regression: ${m}`);process.exit(1)};
+if(pkg.version!=="0.18.4.7") fail("package version mismatch");
+if(!app.includes("bar-ops-theme")||!app.includes("onToggleTheme")) fail("persistent theme switch missing");
+if(!layout.includes("suppressHydrationWarning")||!layout.includes("prefers-color-scheme")) fail("first paint theme restoration missing");
+if(!tokens.includes('[data-theme="dark"]')) fail("dark token scope missing");
+if(!shell.includes("themeButton")) fail("theme control styling missing");
+if(!globals.includes("v0.18.4.7 dark mode and structural card baseline")) fail("structural baseline missing");
+if(!globals.includes(".metric-card .metric-icon{display:none}")) fail("metric icons are not removed from presentation");
+if(!schedule.includes("v0.18.4.7 structural schedule baseline")) fail("schedule refinement missing");
+console.log("v0.18.4.7 dark mode and structural card regression passed");

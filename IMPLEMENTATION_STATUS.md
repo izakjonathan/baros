@@ -1,3 +1,14 @@
+# Implementation Status — v0.18.4.7
+
+**Status:** Dark Mode & Structural Card Refinement complete.
+
+- Persistent theme switching added.
+- Black-canvas dark mode with beige neutral content surfaces added.
+- Card radii reduced and metric titles enlarged.
+- Leading metric icons removed.
+- Time & Attendance and Shift Plan structurally refined.
+- No business-logic, API, permission or migration change.
+
 # Implementation Status — v0.18.4.6
 
 **Status:** Mobile Density & Responsive Structure complete.
