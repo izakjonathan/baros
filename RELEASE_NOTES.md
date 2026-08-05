@@ -1,3 +1,12 @@
+# v0.18.4.20 — Day-header fill fix
+
+- Fixed the Shift Plan day/date headers so every header cell uses the neon fill color.
+- Removed the broken undefined CSS variable that left non-current day headers transparent.
+- Preserved separate rounded header tiles, black schedule body background, compact shift cards and role-based colors.
+- No workflow, data, API or permissions behavior changed.
+
+---
+
 # v0.18.4.19 — Shift-plan neon header fill polish
 
 - Updated week/day header cells to use the neon fill color consistently.

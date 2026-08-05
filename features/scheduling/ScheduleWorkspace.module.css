@@ -928,7 +928,7 @@
   align-content:center;
   min-height:3.1rem;
   padding:.44rem .36rem;
-  background:var(--color-neon);
+  background:#dfee4b;
   border-radius:.82rem;
   border:0;
   box-shadow:none;
@@ -944,7 +944,7 @@
   color:#000;
 }
 .today .dayHeader{
-  background:var(--color-neon) !important;
+  background:#dfee4b !important;
   box-shadow:inset 0 0 0 2px #000;
 }
 .today .dayHeader strong{
