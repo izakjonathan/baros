@@ -1,3 +1,9 @@
+# Implementation Status — v0.18.4.27
+
+Calendar-first Shift Plan hierarchy implemented. Calendar content is now primary; title and operational controls are secondary. No business logic or data behavior changed.
+
+---
+
 # Implementation Status — v0.18.4.26
 
 **Status:** Balanced Shift Plan spacing pass complete.

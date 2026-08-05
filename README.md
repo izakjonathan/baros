@@ -1,10 +1,10 @@
-# Bar Ops v0.18.4.26 — Balanced Shift Plan Rhythm
+# Bar Ops v0.18.4.27 — Calendar-First Shift Plan
 
-Current release: **v0.18.4.26**
+Current release: **v0.18.4.27**
 
-This release restores a deliberate middle-ground spacing rhythm after v0.18.4.25 became too compressed. The compact top bar and independent schedule columns remain, while moderate spacing is restored between the pink title card, beige week controls, neon day headers, shift cards, Add shift actions and legend.
+This release changes the Shift Plan hierarchy rather than continuing to tune the same stacked-card composition. The weekly calendar is now the primary visual and interaction surface. The page title sits directly on the black background, date navigation and publishing tools form a compact secondary toolbar, and each day column keeps its own header, shifts and Add shift action.
 
-Rollback checkpoint: **v0.18.4.25**.
+Rollback checkpoint: **v0.18.4.26**.
 
 ---
 

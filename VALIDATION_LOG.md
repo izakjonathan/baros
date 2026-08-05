@@ -1,3 +1,9 @@
+# Validation Log — v0.18.4.27
+
+Completed the focused v0.18.4.27 regression, stabilization preflight, forbidden-artifact audit and ZIP integrity validation. Browser/device visual verification remains required after deployment.
+
+---
+
 # Validation Log — v0.18.4.26
 
 ## Completed

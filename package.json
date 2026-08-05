@@ -1,6 +1,6 @@
 {
   "name": "bar-ops",
-  "version": "0.18.4.26",
+  "version": "0.18.4.27",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -136,7 +136,8 @@
     "test:v018423-shift-plan": "node scripts/test-v018423-shift-plan.mjs",
     "test:v018424-shift-plan": "node scripts/test-v018424-shift-plan.mjs",
     "test:v018425-shift-plan": "node scripts/test-v018425-shift-plan.mjs",
-    "test:v018426-shift-plan": "node scripts/test-v018426-shift-plan.mjs"
+    "test:v018426-shift-plan": "node scripts/test-v018426-shift-plan.mjs",
+    "test:v018427-shift-plan": "node scripts/test-v018427-shift-plan.mjs"
   },
   "dependencies": {
     "lucide-react": "0.468.0",

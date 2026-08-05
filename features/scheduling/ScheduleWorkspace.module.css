@@ -1993,3 +1993,309 @@
     margin-top:1rem !important;
   }
 }
+
+/* v0.18.4.27 calendar-first hierarchy */
+.workspace{
+  gap:.7rem !important;
+}
+.header,
+:global(.schedule-head).header{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto !important;
+  align-items:end !important;
+  gap:.75rem !important;
+  padding:.25rem 0 .15rem !important;
+  background:transparent !important;
+  border-radius:0 !important;
+  color:#fff4c4 !important;
+}
+.headerCopy{
+  display:flex !important;
+  flex-direction:column !important;
+  min-width:0 !important;
+}
+.headerCopy :global(.eyebrow){
+  order:2 !important;
+  margin:.18rem 0 0 !important;
+  color:#fff4c4 !important;
+  opacity:.72 !important;
+  font-size:.67rem !important;
+  letter-spacing:.1em !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+.headerCopy h1{
+  order:1 !important;
+  margin:0 !important;
+  color:#fff4c4 !important;
+  font-size:1.9rem !important;
+  line-height:.94 !important;
+  letter-spacing:-.045em !important;
+}
+.headerActions{
+  display:grid !important;
+  grid-template-columns:4.25rem 2.35rem 2.35rem !important;
+  align-items:center !important;
+  gap:.42rem !important;
+}
+.headerActions :global(.schedule-view-select),
+.headerActions :global(button),
+.headerActions :global(.compact-action){
+  min-height:2.35rem !important;
+  height:2.35rem !important;
+  border-radius:.75rem !important;
+}
+.headerActions :global(.schedule-view-select){
+  min-width:0 !important;
+  width:4.25rem !important;
+  background:#9561e6 !important;
+}
+.headerActions :global(.schedule-view-select select){
+  padding-inline:.62rem 1.4rem !important;
+  font-size:.72rem !important;
+}
+.headerActions :global(.compact-action){
+  width:2.35rem !important;
+  min-width:2.35rem !important;
+  padding:0 !important;
+  background:#fff4c4 !important;
+  color:#000 !important;
+}
+.headerActions :global(.compact-action:last-child){
+  background:#dfee4b !important;
+  color:#000 !important;
+}
+.toolbar,
+:global(.schedule-toolbar).toolbar{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto !important;
+  align-items:center !important;
+  gap:.5rem !important;
+  padding:.38rem .45rem !important;
+  background:#fff4c4 !important;
+  border-radius:.85rem !important;
+  color:#000 !important;
+}
+.periodControls{
+  grid-template-columns:2rem minmax(0,1fr) 2rem !important;
+  gap:.35rem !important;
+}
+.periodControls button{
+  width:2rem !important;
+  min-width:2rem !important;
+  height:2rem !important;
+  min-height:2rem !important;
+  border-radius:.62rem !important;
+  background:#000 !important;
+  color:#fff4c4 !important;
+}
+.periodControls strong{
+  font-size:.82rem !important;
+  font-weight:850 !important;
+}
+.summary{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  flex-wrap:nowrap !important;
+  gap:.32rem !important;
+}
+.summaryText{
+  display:none !important;
+}
+.summary :global(.compact-action),
+.summary :global(.compact-publish),
+.summary :global(.badge){
+  width:2rem !important;
+  min-width:2rem !important;
+  height:2rem !important;
+  min-height:2rem !important;
+  padding:0 !important;
+  border-radius:.62rem !important;
+  background:#000 !important;
+  color:#fff4c4 !important;
+}
+.summary :global(.compact-action span),
+.summary :global(.compact-publish span){
+  display:none !important;
+}
+.calendarPanel{
+  margin:0 !important;
+  width:100% !important;
+  overflow:hidden !important;
+  border-radius:0 !important;
+  background:transparent !important;
+}
+.calendarScroll{
+  padding:0 0 .15rem !important;
+  scroll-snap-type:x proximity !important;
+}
+.calendarGrid,
+.calendarPanel :global(.calendar-grid){
+  display:grid !important;
+  grid-auto-flow:column !important;
+  grid-auto-columns:clamp(6.8rem,28vw,8.5rem) !important;
+  grid-template-columns:none !important;
+  min-width:max-content !important;
+  gap:.55rem !important;
+  padding:0 .05rem !important;
+}
+.dayColumn,
+.calendarPanel :global(.day-column){
+  display:grid !important;
+  grid-template-rows:auto auto !important;
+  gap:.42rem !important;
+  width:auto !important;
+  min-width:0 !important;
+  scroll-snap-align:start !important;
+}
+.dayHeader{
+  min-height:3.15rem !important;
+  padding:.45rem .35rem !important;
+  border-radius:.82rem !important;
+  background:#dfee4b !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+.today .dayHeader{
+  background:#dfee4b !important;
+  box-shadow:inset 0 0 0 2px #000 !important;
+}
+.dayBody,
+.calendarPanel :global(.day-body){
+  display:grid !important;
+  grid-template-rows:auto auto !important;
+  align-content:start !important;
+  gap:.42rem !important;
+  min-height:0 !important;
+  height:auto !important;
+  padding:0 !important;
+}
+.shiftCard,
+.shiftCard:global(.shift-card){
+  width:100% !important;
+  max-width:none !important;
+  min-width:0 !important;
+  padding:.5rem .55rem !important;
+  border-radius:.72rem !important;
+}
+.shiftCard strong{
+  font-size:.9rem !important;
+  line-height:1.02 !important;
+}
+.shiftCard :global(.shift-card-top) span{
+  font-size:.63rem !important;
+}
+.shiftCard small{
+  font-size:.61rem !important;
+}
+.addShift{
+  width:100% !important;
+  min-height:2rem !important;
+  justify-content:flex-start !important;
+  padding:.25rem .28rem !important;
+  border:1px dashed rgba(255,244,196,.6) !important;
+  border-radius:.55rem !important;
+  color:#fff4c4 !important;
+  font-size:.63rem !important;
+}
+.addShift:hover{
+  background:#fff4c4 !important;
+  color:#000 !important;
+}
+.legend{
+  margin:.15rem 0 0 !important;
+  padding:.35rem 0 0 !important;
+  border-top:1px solid rgba(255,244,196,.45) !important;
+  gap:.65rem !important;
+  color:#fff4c4 !important;
+  font-size:.63rem !important;
+  white-space:nowrap !important;
+  overflow-x:auto !important;
+  scrollbar-width:none !important;
+}
+.legend::-webkit-scrollbar{
+  display:none !important;
+}
+
+@media(max-width:48rem){
+  .workspace{
+    gap:.65rem !important;
+  }
+  .header,
+  :global(.schedule-head).header{
+    grid-template-columns:minmax(0,1fr) auto !important;
+    align-items:end !important;
+    padding:.15rem 0 .1rem !important;
+  }
+  .headerCopy h1{
+    font-size:1.78rem !important;
+  }
+  .headerCopy :global(.eyebrow){
+    font-size:.61rem !important;
+  }
+  .headerActions{
+    grid-template-columns:3.85rem 2.2rem 2.2rem !important;
+    gap:.34rem !important;
+  }
+  .headerActions :global(.schedule-view-select),
+  .headerActions :global(button),
+  .headerActions :global(.compact-action){
+    min-height:2.2rem !important;
+    height:2.2rem !important;
+  }
+  .headerActions :global(.schedule-view-select){
+    width:3.85rem !important;
+  }
+  .headerActions :global(.compact-action){
+    width:2.2rem !important;
+    min-width:2.2rem !important;
+  }
+  .toolbar,
+  :global(.schedule-toolbar).toolbar{
+    grid-template-columns:minmax(0,1fr) auto !important;
+    padding:.34rem .38rem !important;
+  }
+  .periodControls{
+    grid-template-columns:1.9rem minmax(0,1fr) 1.9rem !important;
+  }
+  .periodControls button,
+  .summary :global(.compact-action),
+  .summary :global(.compact-publish),
+  .summary :global(.badge){
+    width:1.9rem !important;
+    min-width:1.9rem !important;
+    height:1.9rem !important;
+    min-height:1.9rem !important;
+  }
+  .periodControls strong{
+    font-size:.76rem !important;
+  }
+  .calendarGrid,
+  .calendarPanel :global(.calendar-grid){
+    grid-auto-columns:minmax(6.75rem,29vw) !important;
+    gap:.48rem !important;
+  }
+  .dayHeader{
+    min-height:3rem !important;
+    border-radius:.76rem !important;
+  }
+  .shiftCard,
+  .shiftCard:global(.shift-card){
+    padding:.46rem .5rem !important;
+    border-radius:.66rem !important;
+  }
+  .shiftCard strong{
+    font-size:.86rem !important;
+  }
+  .addShift{
+    min-height:1.9rem !important;
+    font-size:.6rem !important;
+  }
+  .legend{
+    display:flex !important;
+    margin-top:.1rem !important;
+    font-size:.6rem !important;
+  }
+}

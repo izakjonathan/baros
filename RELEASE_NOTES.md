@@ -1,3 +1,16 @@
+# v0.18.4.27 — Calendar-First Shift Plan
+
+- Replaced the large pink title card with a lightweight title treatment on the black page background.
+- Compressed view, copy and Add shift controls into a small secondary action group.
+- Reduced the week navigation and publishing controls to a single compact toolbar.
+- Made the weekly calendar the first dominant colored region on the screen.
+- Standardized independently scrolling day columns with snap alignment.
+- Preserved neon day headers, role-colored shift cards and per-day Add shift actions.
+- Kept the legend compact and secondary below the calendar.
+- Preserved scheduling workflows, drag-and-drop, recurrence, permissions, APIs and persistence.
+
+---
+
 # v0.18.4.26 — Balanced Shift Plan Rhythm
 
 - Restored moderate spacing between major Shift Plan sections after the previous over-compression.
