@@ -439,6 +439,7 @@ function PanelTitle({ title, subtitle, action }: { title: string; subtitle: stri
 function Quick({ icon: Icon, label, detail, onClick }: { icon: typeof CalendarDays; label: string; detail: string; onClick: () => void }) { return <button className="quick-action" onClick={onClick}><span><Icon size={19} /></span><div><strong>{label}</strong><small>{detail}</small></div><ArrowRight size={17} /></button> }
 
 function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notify, currentWeekOffset, setCurrentWeekOffset, devMode, selectedLocationId, persist }: { shifts: Shift[]; setShifts: React.Dispatch<React.SetStateAction<Shift[]>>; employees: Employee[]; onNewShift: (date?: string) => void; onEditShift: (shift: Shift) => void; notify: (s: string) => void; currentWeekOffset: number; setCurrentWeekOffset: React.Dispatch<React.SetStateAction<number>>; devMode: boolean; selectedLocationId: string; persist: (path:string, options:RequestInit) => Promise<any> }) {
+  const calendarScrollRef = useRef<HTMLDivElement>(null);
   const [publishing, setPublishing] = useState(false);
   const [viewMode, setViewMode] = useState<"week" | "month" | "custom">("week");
   const [customFrom,setCustomFrom]=useState(toIsoDate(BASE_MONDAY));
@@ -481,6 +482,11 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
     } catch { setAcknowledgements({ publication: null, employees: [] }); }
   }
   useEffect(() => { void loadAcknowledgements(); }, [viewMode, selectedLocationId, startIso, devMode]);
+  useEffect(() => {
+    const scroller = calendarScrollRef.current;
+    if (!scroller) return;
+    scroller.scrollTo({ left: 0, behavior: "instant" });
+  }, [viewMode, startIso]);
   async function remindOutstandingAcknowledgements() {
     if (remindingAcknowledgements || !acknowledgements.publication) return;
     setRemindingAcknowledgements(true);
@@ -544,7 +550,7 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
       {viewMode==="custom"&&<div className="custom-range"><label><span>From</span><input type="date" value={customFrom} onChange={e=>setCustomFrom(e.target.value)}/></label><label><span>To</span><input type="date" value={customTo} min={customFrom} onChange={e=>setCustomTo(e.target.value)}/></label></div>}
       <div className={`schedule-toolbar-right ${scheduleStyles.summary}`}><span className={`schedule-counts ${scheduleStyles.summaryText}`}><b>{visibleShifts.length}</b> shifts · <b>{drafts}</b> drafts{conflicts.size ? <> · <b className="conflict-count">{conflicts.size}</b> overlaps</> : null}{availabilityConflicts.size ? <> · <b className="conflict-count">{availabilityConflicts.size}</b> availability</> : null}</span>{acknowledgements.publication ? <button type="button" className="secondary compact-action" onClick={() => setAcknowledgementsOpen(true)}><CheckCheck size={15}/><span>Acknowledged {acknowledgedCount}/{acknowledgements.employees.length}</span></button> : null}{conflictShiftIds.size ? <button type="button" className="secondary compact-action" aria-pressed={showConflictsOnly} onClick={() => setShowConflictsOnly((value) => !value)}><AlertTriangle size={15}/><span>{showConflictsOnly ? "Show all" : `Review conflicts (${conflictShiftIds.size})`}</span></button> : null}<button type="button" className="publish-button compact-publish" onClick={publish} disabled={!drafts || publishing}><Send size={15}/><span>{publishing ? "Publishing…" : drafts ? `Publish (${drafts})` : "Published"}</span></button></div>
     </section>
-    <section className={`calendar-panel schedule-calendar ${scheduleStyles.calendarPanel} ${viewMode === "month" ? "month-view" : "week-view"}`}><div className={scheduleStyles.calendarScroll}><div className={`calendar-grid ${scheduleStyles.calendarGrid}`}>
+    <section className={`calendar-panel schedule-calendar ${scheduleStyles.calendarPanel} ${viewMode === "month" ? "month-view" : "week-view"}`}><div ref={calendarScrollRef} className={scheduleStyles.calendarScroll}><div className={`calendar-grid ${scheduleStyles.calendarGrid}`}>
       {displayDays.map((day) => {
         const isToday = day.iso === toIsoDate(new Date());
         const dayShifts = displayedShifts.filter((shift) => canonicalShiftDate(shift) === day.iso);

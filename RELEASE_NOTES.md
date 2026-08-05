@@ -1,3 +1,13 @@
+# v0.18.4.21 — Schedule Grid Alignment Repair
+
+- Added one canonical schedule column-width token for headers and day bodies.
+- Reset horizontal scroll to the first day whenever the displayed period changes.
+- Overrode legacy fixed-width and viewport-height schedule rules that caused clipped headers and excessive empty space.
+- Kept every day/date header neon, separate and rounded.
+- Aligned shift cards and Add shift controls within their day columns.
+
+---
+
 # v0.18.4.20 — Day-header fill fix
 
 - Fixed the Shift Plan day/date headers so every header cell uses the neon fill color.

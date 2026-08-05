@@ -1,3 +1,9 @@
+# v0.18.4.21 status
+
+Schedule grid ownership is now centralized. Header and body columns share one width, period changes reset the horizontal viewport, and the calendar height follows its content instead of filling most of the screen.
+
+---
+
 # v0.18.4.19 status
 
 Implemented a focused scheduling polish pass on top of v0.18.4.18.

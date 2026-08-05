@@ -1,0 +1,15 @@
+import fs from "node:fs";
+const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
+const app=fs.readFileSync("components/bar-ops-app.tsx","utf8");
+const css=fs.readFileSync("features/scheduling/ScheduleWorkspace.module.css","utf8");
+const fail=(m)=>{console.error(`v0.18.4.21 regression: ${m}`);process.exit(1)};
+if(pkg.version!=="0.18.4.21") fail("package version mismatch");
+if(!app.includes("calendarScrollRef")) fail("calendar scroll ref missing");
+if(!app.includes('scroller.scrollTo({ left: 0, behavior: "instant" })')) fail("week-change scroll reset missing");
+if(!css.includes("v0.18.4.21 canonical schedule grid ownership")) fail("canonical grid block missing");
+if(!css.includes("--schedule-column-width:6.9rem")) fail("desktop column token missing");
+if(!css.includes("--schedule-column-width:6.55rem")) fail("mobile column token missing");
+if(!css.includes("grid-template-columns:repeat(7,var(--schedule-column-width))")) fail("canonical columns missing");
+if(!css.includes("background:#dfee4b !important")) fail("neon header fill missing");
+if(!css.includes("min-height:0 !important")) fail("content-driven body height missing");
+console.log("v0.18.4.21 schedule grid alignment regression passed");

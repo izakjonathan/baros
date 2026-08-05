@@ -1,3 +1,11 @@
+# v0.18.4.21 validation
+
+- Dedicated schedule-grid regression added.
+- Release preflight and package validation executed.
+- Production build attempted in the packaging environment.
+
+---
+
 # v0.18.4.19 validation
 
 Planned / performed for this packaging pass:

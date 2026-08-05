@@ -1,6 +1,16 @@
+# Bar Ops v0.18.4.21 — Schedule Grid Alignment Repair
+
+Current release: **v0.18.4.21**
+
+This release repairs the Shift Plan calendar structure so headers, shift cards and Add shift controls share one canonical column grid. Horizontal position resets when changing periods, all neon day headers return to view, and the schedule body height follows actual content.
+
+Rollback checkpoint: **v0.18.4.20**.
+
+---
+
 # Bar Ops v0.18.4.19 — Shift Plan Neon Header Fill Polish
 
-Current release: **v0.18.4.19**
+Historic release: **v0.18.4.19**
 
 This release focuses the next Shift Plan visual pass on the weekly schedule grid. Day header cells now use the neon fill consistently, remain visually separate as rounded cards, and sit above a black schedule body. Shift cards are reduced further in size and typography so the weekly overview feels lighter and more deliberate while preserving role-based color coding.
 
