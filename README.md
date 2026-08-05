@@ -1,6 +1,14 @@
+# Bar Ops v0.18.4.8 — Mobile Layout Repair
+
+Current release: **v0.18.4.8**
+
+This focused repair release rebuilds the mobile structure of Time & Attendance and contains the Shift Plan controls outside the horizontally scrolling calendar. Attendance filters, empty states, result cards and payroll previews now stay within the viewport in both light and dark modes. Shift Plan navigation, acknowledgement, conflict and publication controls are contained without changing the calendar's intentional horizontal scrolling.
+
+Rollback checkpoint: **v0.18.4.7**.
+
 # Bar Ops v0.18.4.7 — Dark Mode & Structural Card Refinement
 
-Current release: **v0.18.4.7**
+Historic release: **v0.18.4.7**
 
 This focused Phase D release adds a persistent light/dark theme switch and corrects the visible structural problems in the latest mobile screenshots. Dark mode uses a black application canvas with beige neutral content surfaces while preserving the approved functional colors. Card geometry is firmer, leading metric icons are removed, titles are larger, and Time & Attendance plus Shift Plan receive the deepest refinement.
 

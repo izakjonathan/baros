@@ -1,3 +1,23 @@
+# Validation Log — v0.18.4.8
+
+## Completed
+
+- Complete `npm run test:all`
+- `npm run audit:preflight`
+- `npm run validate:release`
+- CSS ownership regression
+- v0.18.4.7 dark-mode regression
+- v0.18.4.8 mobile-layout regression
+- ZIP integrity check
+
+## Not completed in this environment
+
+- Clean dependency installation
+- ESLint
+- TypeScript compilation
+- Next.js production build
+- Browser/device visual verification
+
 # Validation Log — v0.18.4.7
 
 ## Completed

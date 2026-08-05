@@ -1,3 +1,14 @@
+# Implementation Status — v0.18.4.8
+
+**Status:** Mobile Layout Repair complete.
+
+- Time & Attendance filters, empty states and result content are width-safe.
+- Payroll preview cards use a compact content-driven structure.
+- Shift Plan controls remain inside the viewport while the calendar alone scrolls horizontally.
+- Period arrows and publication controls remain visibly identifiable on mobile.
+- Light and dark neutral surfaces remain within the approved palette.
+- No migration, permission, API, workflow or business-logic change.
+
 # Implementation Status — v0.18.4.7
 
 **Status:** Dark Mode & Structural Card Refinement complete.

@@ -1,3 +1,16 @@
+# Release Notes — v0.18.4.8
+
+## Mobile Layout Repair
+
+- Rebuilt the mobile Time & Attendance layout around contained single-column filters.
+- Replaced clipped empty output with a centered, descriptive empty state.
+- Compacted payroll preview cards and removed oversized empty areas.
+- Preserved responsive timesheet cards for actual records.
+- Contained Shift Plan view, copy, add, acknowledgement, conflict and publication controls.
+- Protected visible previous/next arrows and prevented non-calendar horizontal overflow.
+- Preserved intentional horizontal scrolling inside the calendar only.
+- No business behavior, API, permission or database change.
+
 # Release Notes — v0.18.4.7
 
 - Added persistent light/dark mode and a top-bar theme switch.

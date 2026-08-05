@@ -1,0 +1,18 @@
+import fs from "node:fs";
+const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
+const app=fs.readFileSync("components/bar-ops-app.tsx","utf8");
+const css=fs.readFileSync("app/globals.css","utf8");
+const schedule=fs.readFileSync("features/scheduling/ScheduleWorkspace.module.css","utf8");
+const fail=(message)=>{console.error(`v0.18.4.8 regression: ${message}`);process.exit(1)};
+if(pkg.version!=="0.18.4.8") fail("package version mismatch");
+if(!app.includes("attendance-results")) fail("attendance results container missing");
+if(!app.includes("payroll-preview-card")) fail("compact payroll preview card missing");
+if(!app.includes("No timesheets found")) fail("responsive empty state copy missing");
+if(!css.includes("v0.18.4.8 mobile layout repair")) fail("attendance layout repair styles missing");
+if(!css.includes("grid-template-columns:minmax(0,1fr)")) fail("single-column mobile filters missing");
+if(!css.includes(".payroll-preview-card>header")) fail("compact payroll card header missing");
+if(!schedule.includes("v0.18.4.8 mobile layout repair")) fail("schedule layout repair styles missing");
+if(!schedule.includes(".headerActions :global(.compact-action span){display:none}")) fail("mobile schedule action containment missing");
+if(!schedule.includes(".periodControls button svg{display:block")) fail("visible period arrows not protected");
+if(css.includes("!important")||schedule.includes("!important")) fail("important declarations are not allowed");
+console.log("v0.18.4.8 mobile layout regression passed");
