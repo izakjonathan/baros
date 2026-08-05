@@ -1,3 +1,13 @@
+# v0.18.4.30 — Shift Plan Divider & Density Cleanup
+
+- Removed the remaining beige and grey divider rules around the schedule overview.
+- Reduced spacing between adjacent mobile day columns.
+- Reduced vertical spacing between shift cards and the icon-only add control.
+- Shortened day/date headers and reduced their mobile typography.
+- Preserved the calendar-first hierarchy and existing scheduling behaviour.
+
+---
+
 # v0.18.4.29 — Shift Plan Chrome Reduction
 
 - Shortened day headers to one line with regular day names and bold dates.

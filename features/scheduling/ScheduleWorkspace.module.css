@@ -2762,3 +2762,86 @@
     gap:.24rem !important;
   }
 }
+
+/* v0.18.4.30 divider and day-column density cleanup */
+.calendarPanel,
+.calendarScroll,
+.calendarGrid,
+.calendarPanel :global(.calendar-grid),
+.dayColumn,
+.calendarPanel :global(.day-column),
+.dayBody,
+.calendarPanel :global(.day-body){
+  border:0 !important;
+  border-block:0 !important;
+  border-top:0 !important;
+  border-bottom:0 !important;
+  outline:0 !important;
+  box-shadow:none !important;
+}
+.calendarPanel::before,
+.calendarPanel::after,
+.calendarScroll::before,
+.calendarScroll::after,
+.calendarGrid::before,
+.calendarGrid::after,
+.dayColumn::before,
+.dayColumn::after,
+.dayBody::before,
+.dayBody::after{
+  display:none !important;
+  content:none !important;
+}
+.legend{
+  display:none !important;
+  border:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+
+@media(max-width:48rem){
+  .calendarGrid,
+  .calendarPanel :global(.calendar-grid){
+    --iphone-day-gap:.2rem !important;
+    gap:var(--iphone-day-gap) !important;
+  }
+  .dayColumn,
+  .calendarPanel :global(.day-column){
+    gap:.22rem !important;
+  }
+  .dayHeader,
+  .calendarPanel :global(.day-header){
+    min-height:1.72rem !important;
+    height:1.72rem !important;
+    gap:.22rem !important;
+    padding:.1rem .24rem !important;
+    border-radius:.56rem !important;
+  }
+  .dayHeader span,
+  .calendarPanel :global(.day-header) span{
+    font-size:.46rem !important;
+    line-height:1 !important;
+    letter-spacing:.065em !important;
+  }
+  .dayHeader strong,
+  .calendarPanel :global(.day-header) strong{
+    font-size:.68rem !important;
+    line-height:1 !important;
+  }
+  .today .dayHeader strong,
+  .calendarPanel :global(.today) :global(.day-header) strong{
+    padding:.08rem .18rem !important;
+    font-size:.68rem !important;
+  }
+  .dayBody,
+  .calendarPanel :global(.day-body){
+    gap:.22rem !important;
+  }
+  .shiftCard,
+  .shiftCard:global(.shift-card){
+    margin:0 !important;
+  }
+  .addShift{
+    margin:0 !important;
+  }
+}

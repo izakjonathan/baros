@@ -1,3 +1,12 @@
+# v0.18.4.30 validation
+
+- Focused Shift Plan regression script
+- Stabilization preflight
+- Release validation
+- ZIP integrity
+
+---
+
 # v0.18.4.29 validation
 
 - Focused v0.18.4.29 regression test added.

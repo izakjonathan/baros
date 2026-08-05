@@ -1,3 +1,9 @@
+# v0.18.4.30 status
+
+Focused iPhone Shift Plan cleanup complete: remaining overview dividers removed, day headers shortened, and day-column spacing tightened. No scheduling logic, APIs, permissions, recurrence, drag-and-drop, or persistence behaviour changed.
+
+---
+
 # v0.18.4.29 implementation status
 
 Implemented the agreed 10-point iPhone Shift Plan refinement on top of v0.18.4.28. The calendar remains the primary surface while secondary controls use less space.

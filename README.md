@@ -1,6 +1,6 @@
-# Bar Ops v0.18.4.29 — Shift Plan Chrome Reduction
+# Bar Ops v0.18.4.30 — Shift Plan Divider & Density Cleanup
 
-Current release: **v0.18.4.29**
+Current release: **v0.18.4.30**
 
 This release applies the first precise iPhone-specific Shift Plan redesign. Day headers are reduced to a single compact line, decorative dividers and the role legend are removed, the view selector moves into the beige period controls, acknowledgement controls are removed from this screen, employee names are smaller, day-column spacing is tighter, and per-day Add shift actions are reduced to icon-only controls.
 
