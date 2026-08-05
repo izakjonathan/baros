@@ -1,10 +1,10 @@
-# Bar Ops v0.18.4.16 — Shift Plan Simplification
+# Bar Ops v0.18.4.18 — Shift Plan Density & Header Refinement
 
-Current release: **v0.18.4.16**
+Current release: **v0.18.4.18**
 
-This release simplifies the Shift Plan layout. The week overview is calmer and smaller, day columns no longer use full-height background fills, role-based shift colors are clearer, the add-shift indicator is reduced to a small inline control under the final shift, and shift cards use smaller text with first names only.
+This release tightens the Shift Plan visual baseline without changing scheduling behaviour. The pink title area and week controls are smaller, the week toolbar is simpler, day headers are more compact, and shift cards use a substantially smaller footprint and typography. The black schedule canvas and repaired add/edit shift dialog from v0.18.4.17 are preserved.
 
-Rollback checkpoint: **v0.18.4.14.1**.
+Rollback checkpoint: **v0.18.4.17**.
 
 # Bar Ops v0.18.4.14.1 — Quality Check Ordering Hotfix
 

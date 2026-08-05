@@ -1,15 +1,15 @@
-# Release Notes — v0.18.4.16
+# Release Notes — v0.18.4.18
 
-## Shift Plan Simplification
+## Shift Plan Density & Header Refinement
 
-- Simplified the week overview and reduced its visual bulk.
-- Removed the full-height color fill from the day body so the grid reads more cleanly.
-- Kept the day header cell filled while making the shift area quieter.
-- Reduced shift-card size and typography for a denser weekly schedule.
-- Kept employee names to first name only on shift cards.
-- Added clearer role-based shift colors for Bartender, Floor and Kitchen.
-- Reduced the add-shift control to a small inline indicator below the last shift in each day.
-- Preserved the existing scheduling workflows and horizontal mobile week scroll.
+- Reduced the Shift Plan title block and control heights.
+- Simplified the week toolbar into a slimmer beige control row.
+- Reduced day-header padding, typography and corner radius.
+- Reduced the mobile calendar minimum width and inter-column gaps.
+- Reduced shift-card width, padding, typography, icon size and radius.
+- Reduced the inline Add Shift indicator without removing its accessible button behaviour.
+- Preserved role colours, first-name display, black schedule canvas and repaired shift dialogs.
+- Preserved scheduling logic, recurrence, permissions, persistence and horizontal week scrolling.
 
 # Release Notes — v0.18.4.14.1
 

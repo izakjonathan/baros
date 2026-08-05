@@ -1,12 +1,10 @@
-# Validation Log — v0.18.4.16
+# Validation Log — v0.18.4.18
 
 ## Completed
 
 - `node scripts/test-v018415-shift-plan.mjs`
-- `npm run test:all`
-- `npm run audit:artifacts`
-- `npm run audit:preflight`
-- `npm run validate:release`
+- `node scripts/validate-release.mjs`
+- `node scripts/preflight-stabilization.mjs`
 - ZIP integrity check
 
 ## Not completed in this environment
@@ -15,7 +13,8 @@
 - ESLint
 - TypeScript compilation
 - Next.js production build
-- Browser/device visual verification
+- Full browser/device visual verification
+- Full regression suite
 
 # Validation Log — v0.18.4.14.1
 

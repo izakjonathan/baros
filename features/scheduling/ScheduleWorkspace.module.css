@@ -503,3 +503,410 @@
     padding-top:.05rem;
   }
 }
+
+/* v0.18.4.17 header-only schedule columns */
+.calendarPanel{
+  background:transparent;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  overflow:visible;
+}
+.calendarScroll{
+  background:transparent;
+  padding-block-end:.2rem;
+}
+.calendarGrid{
+  min-width:43.5rem;
+  display:grid;
+  grid-template-columns:repeat(7,minmax(8.2rem,1fr));
+  gap:.65rem;
+  align-items:start;
+}
+.dayColumn{
+  display:grid;
+  grid-template-rows:auto minmax(12rem,1fr);
+  gap:.5rem;
+  min-width:0;
+  background:transparent !important;
+  border-inline-end:0 !important;
+}
+.dayColumn:nth-child(even){background:transparent !important}
+.today{background:transparent !important}
+.dayHeader{
+  position:static;
+  z-index:auto;
+  min-height:0;
+  display:grid;
+  justify-items:center;
+  align-content:center;
+  gap:.18rem;
+  padding:.72rem .5rem;
+  background:#fff4c4;
+  border:0 !important;
+  border-radius:1rem;
+  color:#000;
+}
+.dayHeader span{
+  font-size:.72rem;
+  letter-spacing:.12em;
+  color:#5e564d;
+}
+.dayHeader strong{
+  margin:0;
+  font-size:1.65rem;
+  line-height:1;
+  color:#000;
+}
+.today .dayHeader{
+  background:#d8d8de !important;
+}
+.today .dayHeader strong{
+  display:grid;
+  place-items:center;
+  inline-size:2rem;
+  block-size:2rem;
+  border-radius:999px;
+  background:#f47add;
+  color:#000;
+}
+.dayBody{
+  display:grid;
+  align-content:start;
+  gap:.42rem;
+  min-height:25rem;
+  padding:0;
+  background:transparent;
+}
+.shiftCard,
+.shiftCard:global(.shift-card),
+.shiftCard:global(.shift-card.role-bartender),
+.shiftCard:global(.shift-card.role-floor){
+  width:92%;
+  max-width:92%;
+  justify-self:start;
+  padding:.52rem .62rem;
+  border-radius:.82rem;
+  border:0;
+  box-shadow:none;
+}
+.shiftCard:global(.shift-card.role-manager),
+.shiftCard[data-role="Manager"]{background:#dfee4b;color:#000}
+.shiftCard:global(.shift-card.role-bartender),
+.shiftCard[data-role="Bartender"]{background:#f47add;color:#000}
+.shiftCard:global(.shift-card.role-floor),
+.shiftCard[data-role="Floor"]{background:#9561e6;color:#000}
+.shiftCard:global(.shift-card.role-kitchen),
+.shiftCard[data-role="Kitchen"]{background:#eb6746;color:#000}
+.shiftCard :global(.shift-card-top){
+  gap:.25rem;
+}
+.shiftCard :global(.shift-card-top) span,
+.shiftCard :global(.shift-time){
+  font-size:.72rem;
+  line-height:1.1;
+}
+.shiftCard :global(.shift-card-top) svg{
+  width:.75rem;
+  height:.75rem;
+}
+.shiftCard strong{
+  font-size:.94rem;
+  line-height:1.05;
+}
+.shiftCard small{
+  font-size:.7rem;
+  line-height:1.2;
+}
+.shiftCard :global(.conflict-badge),
+.shiftCard em{
+  font-size:.62rem;
+}
+.addShift{
+  min-height:0;
+  width:auto;
+  justify-self:start;
+  display:inline-flex;
+  align-items:center;
+  gap:.28rem;
+  padding:.08rem 0 0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:#fff4c4;
+  font-size:.76rem;
+  font-weight:800;
+}
+.addShift:hover{
+  background:transparent;
+  color:#f47add;
+}
+.addShift svg{
+  width:.8rem;
+  height:.8rem;
+  color:currentColor;
+  stroke:currentColor;
+}
+.legend{
+  color:#fff4c4;
+}
+@media(max-width:48rem){
+  .calendarPanel{
+    margin-inline:0;
+    width:100%;
+  }
+  .calendarGrid{
+    min-width:43.5rem;
+    gap:.5rem;
+  }
+  .dayHeader{
+    padding:.58rem .4rem;
+    border-radius:.9rem;
+  }
+  .dayHeader span{
+    font-size:.66rem;
+  }
+  .dayHeader strong{
+    font-size:1.35rem;
+  }
+  .today .dayHeader strong{
+    inline-size:1.82rem;
+    block-size:1.82rem;
+  }
+  .dayBody{
+    min-height:18rem;
+    gap:.36rem;
+  }
+  .shiftCard,
+  .shiftCard:global(.shift-card){
+    width:91%;
+    max-width:91%;
+    padding:.48rem .55rem;
+    border-radius:.75rem;
+  }
+  .shiftCard :global(.shift-card-top) span,
+  .shiftCard :global(.shift-time),
+  .shiftCard small{
+    font-size:.67rem;
+  }
+  .shiftCard strong{
+    font-size:.87rem;
+  }
+  .addShift{
+    font-size:.72rem;
+  }
+  .legend{
+    display:flex;
+    gap:.65rem;
+    font-size:.72rem;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+}
+
+/* v0.18.4.18 shift-plan density and header refinement */
+.header{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:end;
+  padding:.7rem .8rem;
+  border-radius:.85rem;
+  gap:.55rem;
+}
+.headerCopy :global(.eyebrow){
+  margin:0 0 .12rem;
+  font-size:.67rem;
+  letter-spacing:.1em;
+}
+.headerCopy h1{
+  font-size:clamp(1.8rem,5vw,2.35rem);
+  line-height:.92;
+}
+.headerActions{
+  display:grid;
+  grid-template-columns:minmax(6.5rem,1fr) 2.25rem 2.25rem;
+  align-items:center;
+  gap:.38rem;
+}
+.headerActions :global(.schedule-view-select),
+.headerActions :global(button){
+  min-height:2.25rem;
+  height:2.25rem;
+  border-radius:.62rem;
+}
+.headerActions :global(.schedule-view-select select){
+  font-size:.78rem;
+  padding-inline:.7rem 1.7rem;
+}
+.headerActions :global(.compact-action){
+  width:2.25rem;
+  min-width:2.25rem;
+  padding:0;
+}
+.toolbar{
+  grid-template-columns:minmax(0,1fr) auto;
+  padding:.38rem .45rem;
+  border-radius:.72rem;
+  gap:.38rem;
+  background:#fff4c4;
+}
+.periodControls{
+  grid-template-columns:2rem minmax(0,1fr) 2rem;
+  gap:.3rem;
+}
+.periodControls button{
+  width:2rem;
+  min-width:2rem;
+  height:2rem;
+  min-height:2rem;
+  border-radius:.52rem;
+}
+.periodControls strong{
+  font-size:.83rem;
+  letter-spacing:-.01em;
+}
+.summary{
+  gap:.3rem;
+}
+.summary :global(.compact-action),
+.summary :global(.compact-publish){
+  width:2rem;
+  min-width:2rem;
+  height:2rem;
+  min-height:2rem;
+  padding:0;
+  border-radius:.52rem;
+}
+.summary :global(.compact-publish span){
+  display:none;
+}
+.calendarGrid{
+  min-width:39.5rem;
+  grid-template-columns:repeat(7,minmax(7.15rem,1fr));
+  gap:.38rem;
+}
+.dayColumn{
+  grid-template-rows:auto minmax(10rem,1fr);
+  gap:.32rem;
+}
+.dayHeader{
+  padding:.42rem .35rem;
+  border-radius:.68rem;
+  gap:.08rem;
+}
+.dayHeader span{
+  font-size:.58rem;
+  letter-spacing:.1em;
+}
+.dayHeader strong{
+  font-size:1.16rem;
+}
+.today .dayHeader strong{
+  inline-size:1.55rem;
+  block-size:1.55rem;
+  font-size:1.05rem;
+}
+.dayBody{
+  min-height:15rem;
+  gap:.26rem;
+}
+.shiftCard,
+.shiftCard:global(.shift-card){
+  width:84%;
+  max-width:84%;
+  padding:.36rem .42rem;
+  border-radius:.58rem;
+}
+.shiftCard :global(.shift-card-top){
+  margin-bottom:.18rem;
+  gap:.16rem;
+}
+.shiftCard :global(.shift-card-top) span,
+.shiftCard :global(.shift-time){
+  font-size:.59rem;
+  line-height:1;
+}
+.shiftCard :global(.shift-card-top) svg{
+  width:.62rem;
+  height:.62rem;
+}
+.shiftCard strong{
+  margin:0 0 .08rem;
+  font-size:.72rem;
+  line-height:1;
+}
+.shiftCard small{
+  font-size:.56rem;
+  line-height:1.08;
+}
+.shiftCard :global(.conflict-badge),
+.shiftCard em{
+  margin-top:.18rem;
+  font-size:.5rem;
+}
+.addShift{
+  gap:.18rem;
+  font-size:.58rem;
+  line-height:1;
+}
+.addShift svg{
+  width:.66rem;
+  height:.66rem;
+}
+@media(max-width:48rem){
+  .header{
+    grid-template-columns:minmax(0,1fr);
+    padding:.62rem .7rem;
+    gap:.45rem;
+  }
+  .headerCopy h1{
+    font-size:1.9rem;
+  }
+  .headerActions{
+    grid-template-columns:minmax(0,1fr) 2.15rem 2.15rem;
+  }
+  .headerActions :global(.schedule-view-select),
+  .headerActions :global(button),
+  .headerActions :global(.compact-action){
+    height:2.15rem;
+    min-height:2.15rem;
+  }
+  .headerActions :global(.compact-action){
+    width:2.15rem;
+    min-width:2.15rem;
+  }
+  .toolbar{
+    padding:.34rem .4rem;
+  }
+  .calendarGrid{
+    min-width:37rem;
+    grid-template-columns:repeat(7,minmax(6.7rem,1fr));
+    gap:.32rem;
+  }
+  .dayHeader{
+    padding:.36rem .28rem;
+    border-radius:.62rem;
+  }
+  .dayBody{
+    min-height:13rem;
+    gap:.22rem;
+  }
+  .shiftCard,
+  .shiftCard:global(.shift-card){
+    width:82%;
+    max-width:82%;
+    padding:.32rem .38rem;
+    border-radius:.52rem;
+  }
+  .shiftCard strong{
+    font-size:.68rem;
+  }
+  .shiftCard :global(.shift-card-top) span,
+  .shiftCard :global(.shift-time),
+  .shiftCard small{
+    font-size:.53rem;
+  }
+  .addShift{
+    font-size:.55rem;
+  }
+}

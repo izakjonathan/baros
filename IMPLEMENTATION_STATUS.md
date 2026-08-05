@@ -1,11 +1,12 @@
-# Implementation Status — v0.18.4.16
+# Implementation Status — v0.18.4.18
 
-**Status:** Shift Plan visual repair complete.
+**Status:** Shift Plan density and header refinement complete.
 
-- Shift cards display first names while preserving full names for accessible labels and underlying data.
-- Week navigation and publication controls are compacted.
-- Missing header and toolbar icons are explicitly restored.
-- Calendar width, day height, shift-card padding and text wrapping are reduced for mobile.
+- Reduced the Shift Plan editorial header and action controls.
+- Simplified and compacted the week-navigation toolbar.
+- Reduced day-header size and spacing while preserving separate rounded cells.
+- Reduced shift-card width, padding, radius and typography on mobile and desktop.
+- Preserved the black schedule canvas and v0.18.4.17 shift-dialog repair.
 - No scheduling rules, persistence, permissions or APIs changed.
 
 # Implementation Status — v0.18.4.14.1

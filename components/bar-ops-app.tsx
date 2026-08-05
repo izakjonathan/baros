@@ -821,21 +821,23 @@ function ShiftDialog({ onClose, onSave, currentWeekOffset, initialDate, employee
     const initials = assignment === "open" ? "+" : employee.split(" ").map((word) => word[0]).join("");
     onSave(uniqueOccurrences.map((occurrence, index) => ({ id: crypto.randomUUID(), date: dateFromShift(occurrence.weekOffset, occurrence.day), day: occurrence.day, weekOffset: occurrence.weekOffset, employee: name, initials, start, end, role, status: "Draft", isOpen: assignment === "open", recurrenceLabel: label, recurrenceGroupId, locationId })));
   }
-  return <Modal title="Add shift" subtitle="Create one shift or a repeating series." onClose={onClose}>
-    {locations.length > 1 && <label className="location-field">Location<select value={locationId} onChange={event=>setLocationId(event.target.value)}>{locations.map(location=><option key={location.id} value={location.id}>{location.name}</option>)}</select></label>}
-    <div className="assignment-toggle"><button className={assignment === "employee" ? "selected" : ""} onClick={() => setAssignment("employee")}>Assign employee</button><button className={assignment === "open" ? "selected" : ""} onClick={() => setAssignment("open")}>Available shift</button></div>
-    <div className="form-grid shift-dialog-fields">
-      {assignment === "employee" && <label className="full-field">Employee<select value={employee} onChange={(e) => setEmployee(e.target.value)}>{activeEmployees.map((p) => <option key={p.name}>{p.name}</option>)}</select></label>}
-      {assignment === "open" && <div className="open-shift-note full-field"><Users size={18}/><div><strong>Employees can request this shift</strong><span>A manager approves the employee who receives it.</span></div></div>}
-      <label className="full-field shift-date-field">Shift date<input type="date" value={shiftDate} onChange={(e) => { setShiftDate(e.target.value); setWeekdays([shiftPositionFromDate(e.target.value).day]); }} /></label>
-      <label>Role<select value={role} onChange={(e) => setRole(e.target.value as ShiftRole)}><option>Manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label>
-      <label className="shift-time-field">Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} /></label><label className="shift-time-field">Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /><small className="field-help">{isOvernight(start, end) ? "Ends the following day" : "Ends the same day"}</small></label>
+  return <Modal title="Add shift" subtitle="Create one shift or a repeating series." className="shift-editor-dialog" onClose={onClose}>
+    <div className="shift-editor-body">
+      {locations.length > 1 && <label className="location-field">Location<select value={locationId} onChange={event=>setLocationId(event.target.value)}>{locations.map(location=><option key={location.id} value={location.id}>{location.name}</option>)}</select></label>}
+      <div className="assignment-toggle"><button type="button" aria-pressed={assignment === "employee"} className={assignment === "employee" ? "selected" : ""} onClick={() => setAssignment("employee")}>Assign employee</button><button type="button" aria-pressed={assignment === "open"} className={assignment === "open" ? "selected" : ""} onClick={() => setAssignment("open")}>Available shift</button></div>
+      <div className="form-grid shift-dialog-fields">
+        {assignment === "employee" && <label className="full-field">Employee<select value={employee} onChange={(e) => setEmployee(e.target.value)}>{activeEmployees.map((p) => <option key={p.name}>{p.name}</option>)}</select></label>}
+        {assignment === "open" && <div className="open-shift-note full-field"><Users size={18}/><div><strong>Employees can request this shift</strong><span>A manager approves the employee who receives it.</span></div></div>}
+        <label className="full-field shift-date-field">Shift date<input type="date" value={shiftDate} onChange={(e) => { setShiftDate(e.target.value); setWeekdays([shiftPositionFromDate(e.target.value).day]); }} /></label>
+        <label>Role<select value={role} onChange={(e) => setRole(e.target.value as ShiftRole)}><option>Manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label>
+        <label className="shift-time-field">Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} /></label><label className="shift-time-field">Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /><small className="field-help">{isOvernight(start, end) ? "Ends the following day" : "Ends the same day"}</small></label>
+      </div>
+      <label className="repeat-switch"><input type="checkbox" checked={repeat} onChange={(e) => setRepeat(e.target.checked)}/><span><strong>Repeat shift</strong><small>Create a daily or weekly series</small></span></label>
+      {repeat && <div className="repeat-panel"><div className="frequency-toggle"><button type="button" aria-pressed={frequency === "daily"} className={frequency === "daily" ? "selected" : ""} onClick={() => setFrequency("daily")}>Daily</button><button type="button" aria-pressed={frequency === "weekly"} className={frequency === "weekly" ? "selected" : ""} onClick={() => setFrequency("weekly")}>Weekly</button></div>
+        {frequency === "weekly" && <div className="weekday-picker">{weekdayNames.map((name, index) => <button type="button" key={name} aria-pressed={weekdays.includes(index)} className={weekdays.includes(index) ? "selected" : ""} onClick={() => setWeekdays((current) => current.includes(index) ? current.filter((d) => d !== index) : [...current, index].sort())}>{name}</button>)}</div>}
+        <label className="repeat-count">Repeat for <input type="number" min="1" max={frequency === "daily" ? 31 : 52} value={count} onChange={(e) => setCount(Number(e.target.value))}/><span>{frequency === "daily" ? "days" : "weeks"}</span></label>
+      </div>}
     </div>
-    <label className="repeat-switch"><input type="checkbox" checked={repeat} onChange={(e) => setRepeat(e.target.checked)}/><span><strong>Repeat shift</strong><small>Create a daily or weekly series</small></span></label>
-    {repeat && <div className="repeat-panel"><div className="frequency-toggle"><button className={frequency === "daily" ? "selected" : ""} onClick={() => setFrequency("daily")}>Daily</button><button className={frequency === "weekly" ? "selected" : ""} onClick={() => setFrequency("weekly")}>Weekly</button></div>
-      {frequency === "weekly" && <div className="weekday-picker">{weekdayNames.map((name, index) => <button key={name} className={weekdays.includes(index) ? "selected" : ""} onClick={() => setWeekdays((current) => current.includes(index) ? current.filter((d) => d !== index) : [...current, index].sort())}>{name}</button>)}</div>}
-      <label className="repeat-count">Repeat for <input type="number" min="1" max={frequency === "daily" ? 31 : 52} value={count} onChange={(e) => setCount(Number(e.target.value))}/><span>{frequency === "daily" ? "days" : "weeks"}</span></label>
-    </div>}
     <ModalActions onClose={onClose} onSave={save} label={repeat ? "Add repeating shifts" : "Add shift"} />
   </Modal>
 }
@@ -855,18 +857,20 @@ function EditShiftDialog({ shift, employees, onClose, onSave, onDelete }: { shif
     onSave({ ...shift, date: shiftDate, day: position.day, weekOffset: position.weekOffset, employee: selectedEmployee, initials: assignment === "open" ? "+" : employee.split(" ").map((word) => word[0]).join(""), role, start, end, status, isOpen: assignment === "open" }, scope);
   }
   const conflictLabel = shift.availabilityConflict === "APPROVED_TIME_OFF" ? "This employee has approved time off during the shift." : shift.availabilityConflict === "OUTSIDE_AVAILABILITY" ? "This shift is outside the employee’s saved availability." : null;
-  return <Modal title="Edit shift" subtitle="Update this shift occurrence, its assignment or availability." onClose={onClose}>
-    {conflictLabel ? <div className="open-shift-note full-field"><AlertTriangle size={18}/><div><strong>Availability conflict</strong><span>{conflictLabel} Reassign the shift, adjust the time, or make it available.</span></div></div> : null}
-    <div className="assignment-toggle"><button type="button" className={assignment === "employee" ? "selected" : ""} onClick={() => setAssignment("employee")}>Assign employee</button><button type="button" className={assignment === "open" ? "selected" : ""} onClick={() => setAssignment("open")}>{shift.availabilityConflict ? "Make available" : "Available shift"}</button></div>
-    <div className="form-grid shift-dialog-fields">
-      {assignment === "employee" && <label className="full-field">Employee<select value={employee} onChange={(e) => setEmployee(e.target.value)}>{activeEmployees.map((person) => <option key={person.name}>{person.name}</option>)}</select></label>}
-      {assignment === "open" && <div className="open-shift-note full-field"><Users size={18}/><div><strong>Employees can request this shift</strong><span>The current employee is removed. A manager approves the employee who receives it.</span></div></div>}
-      <label className="full-field shift-date-field">Shift date<input type="date" value={shiftDate} onChange={(e) => setShiftDate(e.target.value)} /></label>
-      <label>Role<select value={role} onChange={(e) => setRole(e.target.value as ShiftRole)}><option>Manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label>
-      <label className="shift-time-field">Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} /></label><label className="shift-time-field">Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /><small className="field-help">{isOvernight(start, end) ? "Ends the following day" : "Ends the same day"}</small></label>
-      <label className="full-field">Schedule status<select value={status} onChange={(e) => setStatus(e.target.value as "Draft" | "Published")}><option>Draft</option><option>Published</option></select></label>
+  return <Modal title="Edit shift" subtitle="Update this shift occurrence, its assignment or availability." className="shift-editor-dialog" onClose={onClose}>
+    <div className="shift-editor-body">
+      {conflictLabel ? <div className="open-shift-note full-field"><AlertTriangle size={18}/><div><strong>Availability conflict</strong><span>{conflictLabel} Reassign the shift, adjust the time, or make it available.</span></div></div> : null}
+      <div className="assignment-toggle"><button type="button" aria-pressed={assignment === "employee"} className={assignment === "employee" ? "selected" : ""} onClick={() => setAssignment("employee")}>Assign employee</button><button type="button" aria-pressed={assignment === "open"} className={assignment === "open" ? "selected" : ""} onClick={() => setAssignment("open")}>{shift.availabilityConflict ? "Make available" : "Available shift"}</button></div>
+      <div className="form-grid shift-dialog-fields">
+        {assignment === "employee" && <label className="full-field">Employee<select value={employee} onChange={(e) => setEmployee(e.target.value)}>{activeEmployees.map((person) => <option key={person.name}>{person.name}</option>)}</select></label>}
+        {assignment === "open" && <div className="open-shift-note full-field"><Users size={18}/><div><strong>Employees can request this shift</strong><span>The current employee is removed. A manager approves the employee who receives it.</span></div></div>}
+        <label className="full-field shift-date-field">Shift date<input type="date" value={shiftDate} onChange={(e) => setShiftDate(e.target.value)} /></label>
+        <label>Role<select value={role} onChange={(e) => setRole(e.target.value as ShiftRole)}><option>Manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label>
+        <label className="shift-time-field">Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} /></label><label className="shift-time-field">Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /><small className="field-help">{isOvernight(start, end) ? "Ends the following day" : "Ends the same day"}</small></label>
+        <label className="full-field">Schedule status<select value={status} onChange={(e) => setStatus(e.target.value as "Draft" | "Published")}><option>Draft</option><option>Published</option></select></label>
+      </div>
+      {shift.recurrenceGroupId && <div className="series-edit-note"><CalendarDays size={17}/><div><strong>Apply changes to</strong><span>Choose whether this edit affects one occurrence or the wider repeating series.</span><select value={scope} onChange={(e)=>setScope(e.target.value as "occurrence"|"future"|"series")}><option value="occurrence">This shift only</option><option value="future">This and future shifts</option><option value="series">Entire series</option></select></div></div>}
     </div>
-    {shift.recurrenceGroupId && <div className="series-edit-note"><CalendarDays size={17}/><div><strong>Apply changes to</strong><span>Choose whether this edit affects one occurrence or the wider repeating series.</span><select value={scope} onChange={(e)=>setScope(e.target.value as "occurrence"|"future"|"series")}><option value="occurrence">This shift only</option><option value="future">This and future shifts</option><option value="series">Entire series</option></select></div></div>}
     <div className="edit-shift-actions"><button type="button" className="danger-button" onClick={onDelete}>Delete shift</button><div><button type="button" className="secondary" onClick={onClose}>Cancel</button><button type="button" className="primary" onClick={save}>Save changes</button></div></div>
   </Modal>
 }
