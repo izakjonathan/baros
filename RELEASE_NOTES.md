@@ -1,3 +1,14 @@
+# v0.18.4.26 — Balanced Shift Plan Rhythm
+
+- Restored moderate spacing between major Shift Plan sections after the previous over-compression.
+- Increased pink title-card padding and control breathing room without returning to the oversized layout.
+- Slightly increased the beige week-toolbar height and control sizing.
+- Added consistent spacing between day headers, shifts, Add shift actions and the legend.
+- Removed the legend divider while preserving the content-driven schedule height.
+- Preserved independent day columns, role colors, interactions and scheduling logic.
+
+---
+
 # v0.18.4.25 — Shift Plan Vertical Compression
 
 - Reduced the pink Shift Plan header height and moved its content into a compact centered row.

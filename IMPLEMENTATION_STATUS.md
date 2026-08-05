@@ -1,3 +1,13 @@
+# Implementation Status — v0.18.4.26
+
+**Status:** Balanced Shift Plan spacing pass complete.
+
+- Compact shell preserved.
+- Moderate section rhythm restored.
+- Independent day columns and schedule behavior unchanged.
+
+---
+
 # v0.18.4.25 status
 
 Shift Plan vertical compression implemented from v0.18.4.24.

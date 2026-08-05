@@ -1,3 +1,18 @@
+# Validation Log — v0.18.4.26
+
+## Completed
+
+- v0.18.4.26 focused regression
+- stabilization preflight
+- release-artifact audit
+- ZIP integrity
+
+## Not completed in this environment
+
+- Live browser/device verification
+
+---
+
 # v0.18.4.25 validation
 
 - Dedicated regression added.

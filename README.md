@@ -1,10 +1,10 @@
-# Bar Ops v0.18.4.25 — Shift Plan Vertical Compression
+# Bar Ops v0.18.4.26 — Balanced Shift Plan Rhythm
 
-Current release: **v0.18.4.25**
+Current release: **v0.18.4.26**
 
-This release further compresses the Shift Plan header stack and removes the remaining content-height inflation beneath the schedule. The pink title card and beige week controls are smaller, the weekly calendar follows its actual content height, and the legend sits directly below the Add shift row.
+This release restores a deliberate middle-ground spacing rhythm after v0.18.4.25 became too compressed. The compact top bar and independent schedule columns remain, while moderate spacing is restored between the pink title card, beige week controls, neon day headers, shift cards, Add shift actions and legend.
 
-Rollback checkpoint: **v0.18.4.24**.
+Rollback checkpoint: **v0.18.4.25**.
 
 ---
 
