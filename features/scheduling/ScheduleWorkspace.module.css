@@ -295,3 +295,211 @@
     padding:.5rem;
   }
 }
+
+
+/* v0.18.4.16 shift-plan simplification */
+.toolbar{
+  background:var(--surface-card);
+  color:#000;
+  border:0;
+  padding:.55rem .75rem;
+}
+.periodControls button{
+  background:#000;
+  color:var(--schedule-foundation-surface);
+}
+.periodControls button svg{
+  color:currentColor;
+  stroke:currentColor;
+}
+.summary :global(.compact-action),
+.summary :global(.compact-publish),
+.summary :global(.badge){
+  background:#000;
+  color:var(--surface-card);
+}
+.calendarPanel{
+  background:var(--surface-card);
+  outline:none;
+}
+.calendarGrid{
+  min-width:44rem;
+}
+.dayColumn{
+  background:transparent !important;
+  border-inline-end:2px solid #000;
+}
+.dayColumn:last-child{
+  border-inline-end:0;
+}
+.dayHeader{
+  position:relative;
+  min-height:4rem;
+  padding:.7rem .6rem;
+  justify-content:center;
+  flex-direction:column;
+  gap:.15rem;
+  background:var(--surface-card);
+  border-block-end:2px solid #000;
+}
+.dayHeader span{
+  font-size:.72rem;
+  letter-spacing:.08em;
+  color:#555;
+}
+.dayHeader strong{
+  font-size:1.9rem;
+  line-height:1;
+}
+.today .dayHeader{
+  background:#e8e9ec;
+}
+.today .dayHeader strong{
+  display:inline-grid;
+  place-items:center;
+  inline-size:2rem;
+  block-size:2rem;
+  background:#f47add;
+  border-radius:999px;
+}
+.dayBody{
+  min-height:18rem;
+  padding:.5rem;
+  gap:.45rem;
+  background:transparent;
+}
+.shiftCard:global(.shift-card){
+  --shift-bg:#f47add;
+  width:100%;
+  padding:.55rem .6rem;
+  border-radius:.65rem;
+  background:var(--shift-bg);
+  color:#000;
+  min-height:0;
+}
+.shiftCard:global(.shift-card)[data-role="Manager"]{
+  --shift-bg:#f47add;
+}
+.shiftCard:global(.shift-card)[data-role="Bartender"]{
+  --shift-bg:#f47add;
+}
+.shiftCard:global(.shift-card)[data-role="Floor"]{
+  --shift-bg:#9561e6;
+}
+.shiftCard:global(.shift-card)[data-role="Kitchen"]{
+  --shift-bg:#fd6a4a;
+}
+.shiftCard :global(.shift-card-top){
+  margin-bottom:.3rem;
+}
+.shiftCard :global(.shift-card-top) span{
+  font-size:.7rem;
+}
+.shiftCard strong{
+  font-size:.8rem;
+  line-height:1.05;
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  margin:0 0 .15rem;
+}
+.shiftCard small{
+  font-size:.68rem;
+  line-height:1.15;
+}
+.shiftCard em{
+  position:static;
+  display:inline-block;
+  margin-top:.3rem;
+  font-size:.58rem;
+}
+.addShift{
+  justify-content:flex-start;
+  min-height:auto;
+  height:auto;
+  border:0;
+  background:transparent;
+  color:#000;
+  padding:.15rem 0 0;
+  border-radius:0;
+  font-size:.68rem;
+  font-weight:700;
+}
+.addShift:hover{
+  background:transparent;
+  color:#000;
+  text-decoration:underline;
+}
+.addShift svg{
+  width:.8rem;
+  height:.8rem;
+}
+.legend{
+  color:var(--surface-card);
+}
+.legend :global(.manager){background:#f47add}
+.legend :global(.bartender){background:#f47add}
+.legend :global(.floor){background:#9561e6}
+.legend :global(.kitchen){background:#fd6a4a}
+
+@media(max-width:48rem){
+  .toolbar{
+    padding:.45rem .55rem;
+    border-radius:.8rem;
+  }
+  .periodControls{
+    grid-template-columns:2rem minmax(0,1fr) 2rem;
+  }
+  .periodControls button,
+  .summary :global(.compact-action),
+  .summary :global(.compact-publish){
+    width:2rem;
+    min-width:2rem;
+    height:2rem;
+    min-height:2rem;
+    border-radius:.55rem;
+  }
+  .summary :global(.compact-publish){
+    width:auto;
+    min-width:2rem;
+    padding-inline:.55rem;
+  }
+  .periodControls strong{
+    font-size:.9rem;
+  }
+  .calendarGrid{
+    min-width:38.5rem;
+  }
+  .dayHeader{
+    min-height:3.45rem;
+    padding:.45rem .35rem;
+  }
+  .dayHeader span{
+    font-size:.64rem;
+  }
+  .dayHeader strong{
+    font-size:1.6rem;
+  }
+  .dayBody{
+    min-height:15rem;
+    padding:.38rem;
+    gap:.38rem;
+  }
+  .shiftCard:global(.shift-card){
+    padding:.5rem .5rem;
+    border-radius:.58rem;
+  }
+  .shiftCard :global(.shift-card-top) span{
+    font-size:.66rem;
+  }
+  .shiftCard strong{
+    font-size:.74rem;
+  }
+  .shiftCard small{
+    font-size:.62rem;
+  }
+  .addShift{
+    font-size:.62rem;
+    padding-top:.05rem;
+  }
+}

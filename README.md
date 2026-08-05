@@ -1,8 +1,8 @@
-# Bar Ops v0.18.4.15 — Shift Plan Visual Repair
+# Bar Ops v0.18.4.16 — Shift Plan Simplification
 
-Current release: **v0.18.4.15**
+Current release: **v0.18.4.16**
 
-Focused visual correction of the mobile Shift Plan based on the supplied screenshot. Shift cards now show employee first names, the week overview is materially smaller, schedule action icons are visible, and the toolbar/calendar density is improved without changing scheduling behavior.
+This release simplifies the Shift Plan layout. The week overview is calmer and smaller, day columns no longer use full-height background fills, role-based shift colors are clearer, the add-shift indicator is reduced to a small inline control under the final shift, and shift cards use smaller text with first names only.
 
 Rollback checkpoint: **v0.18.4.14.1**.
 
