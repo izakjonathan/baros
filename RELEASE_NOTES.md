@@ -1,3 +1,13 @@
+# Release Notes — v0.18.4.12
+
+## Compact External Grid
+
+- Reduced the site-wide external layout gap from 16px to 8px.
+- Reduced visible black/background channels between content.
+- Kept page edges, section gaps and card-grid gaps exactly aligned.
+- Preserved card interior padding and component density.
+- No functional behavior changed.
+
 # Release Notes — v0.18.4.11
 
 ## Unified Grid Spacing System

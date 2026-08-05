@@ -94,7 +94,7 @@
   /* Layout, motion, layering */
   --content-width:90rem;
   --content-width-reading:45rem;
-  --layout-gap:1rem;
+  --layout-gap:.5rem;
   --page-gutter:var(--layout-gap);
   --header-height:3.5rem;
   --sidebar-width:17.5rem;

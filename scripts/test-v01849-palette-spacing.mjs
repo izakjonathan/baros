@@ -10,6 +10,6 @@ if(!tokens.includes("--color-orange:#eb6746")||!tokens.includes("--color-blue:#9
 if(files.some(x=>x.toLowerCase().includes("#feb34a")||x.toLowerCase().includes("#4e4ced"))) fail("legacy palette remains in core styles");
 if(!shell.includes("position:fixed")||!shell.includes("safe-area-inset-top")) fail("topbar is not fixed in place");
 for(const color of ["#dfee4b","#9561e6","#eb6746","#f47add"]) if(!shell.includes(color)) fail(`topbar missing ${color}`);
-if(!tokens.includes("--layout-gap:1rem")||!tokens.includes("--page-gutter:var(--layout-gap)")) fail("page gutter not centralized");
+if(!tokens.includes("--layout-gap:.5rem")||!tokens.includes("--page-gutter:var(--layout-gap)")) fail("page gutter not centralized");
 if(!globals.includes("row-gap:var(--layout-gap)")) fail("unified section spacing override missing");
 console.log("v0.18.4.9 palette and spacing checks passed");

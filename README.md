@@ -1,6 +1,14 @@
+# Bar Ops v0.18.4.12 — Compact External Grid
+
+Current release: **v0.18.4.12**
+
+This focused Phase D refinement reduces the unified external layout grid from 16px to 8px. Page gutters, section separation, card-grid gaps and spacing around titles sitting on the page background now use the smaller value consistently. Internal card padding is deliberately unchanged.
+
+Rollback checkpoint: **v0.18.4.11**.
+
 # Bar Ops v0.18.4.11 — Unified Grid Spacing System
 
-Current release: **v0.18.4.11**
+Historic release: **v0.18.4.11**
 
 Built from the approved v0.18.4.10 baseline. This release introduces one site-wide external layout token for page gutters, section spacing, card-grid gaps and background-level title rhythm. Internal card padding remains independently controlled.
 

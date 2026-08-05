@@ -229,7 +229,7 @@ body:has(.app-frame){color:var(--text-primary)}.app-frame .page-wrap{row-gap:1re
 }
 
 
-/* v0.18.4.11 unified external grid spacing */
+/* v0.18.4.12 compact external grid spacing */
 .app-frame .main-shell > .page-wrap,
 .employee-page,
 .workspace-page{padding-inline:var(--layout-gap)}

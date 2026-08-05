@@ -39,7 +39,7 @@
   --space-6: 24px;
   --space-8: 32px;
   --space-12: 48px;
-  --layout-gap: 16px;
+  --layout-gap: 8px;
   --workspace-inline: var(--layout-gap);
   --workspace-block: var(--layout-gap);
   --workspace-section-gap: var(--layout-gap);

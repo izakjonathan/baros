@@ -1,3 +1,15 @@
+# Implementation Status — v0.18.4.12
+
+**Status:** Compact External Grid complete.
+
+- Unified external grid reduced from 16px to 8px.
+- Left/right page gutters use the same 8px value.
+- Vertical section gaps use the same 8px value.
+- Horizontal and vertical card-grid gaps use the same 8px value.
+- Background-level title spacing uses the same external grid.
+- Internal card padding remains separate and unchanged.
+- No business logic, permission, API, database or workflow changes.
+
 # Implementation Status — v0.18.4.11
 
 **Status:** Unified Grid Spacing System complete.
