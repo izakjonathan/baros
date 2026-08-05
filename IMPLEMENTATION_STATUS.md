@@ -1,3 +1,13 @@
+# Implementation Status — v0.18.4.11
+
+**Status:** Unified Grid Spacing System complete.
+
+- Added one `--layout-gap` token for external layout rhythm.
+- Unified page gutters, vertical section gaps, horizontal card gaps and background-title spacing.
+- Updated manager and employee workspace aliases.
+- Preserved separate internal component/card padding.
+- No migration, permission, API, workflow or business-logic change.
+
 # Implementation Status — v0.18.4.10
 
 **Status:** Reference red and top-bar placement correction complete.

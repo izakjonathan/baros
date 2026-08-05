@@ -227,3 +227,45 @@ body:has(.app-frame){color:var(--text-primary)}.app-frame .page-wrap{row-gap:1re
   .app-frame .page-wrap,.app-frame .dashboard,.app-frame .workspace{gap:.75rem}
   .app-frame .metric-grid{gap:.65rem}
 }
+
+
+/* v0.18.4.11 unified external grid spacing */
+.app-frame .main-shell > .page-wrap,
+.employee-page,
+.workspace-page{padding-inline:var(--layout-gap)}
+.app-frame .main-shell > .page-wrap{padding-top:var(--layout-gap);row-gap:var(--layout-gap)}
+.app-frame .page-wrap,
+.app-frame .dashboard,
+.app-frame .workspace,
+.employee-page{gap:var(--layout-gap)}
+.app-frame .metric-grid,
+.app-frame .dashboard-grid,
+.app-frame .team-grid,
+.app-frame .quick-grid,
+.app-frame .attendance-metrics,
+.app-frame .hours-by-employee .team-grid{gap:var(--layout-gap);margin-block-end:var(--layout-gap)}
+.app-frame .page-wrap>.page-header,
+.app-frame .page-wrap>.workspace-header,
+.app-frame .page-wrap>.panel-title,
+.employee-page>h2,
+.employee-page>.history-title{margin-block:0}
+.app-frame .page-wrap>.page-header+*,
+.app-frame .page-wrap>.workspace-header+*,
+.employee-page>h1+*,
+.employee-page>.employee-lead+*{margin-block-start:0}
+.app-frame .dashboard>section+section,
+.app-frame .workspace>section+section,
+.employee-page>section+section{margin-block-start:0}
+@media(max-width:640px){
+  .app-frame .main-shell > .page-wrap,
+  .employee-page,
+  .workspace-page{padding-left:max(var(--layout-gap),env(safe-area-inset-left));padding-right:max(var(--layout-gap),env(safe-area-inset-right))}
+  .app-frame .main-shell > .page-wrap{padding-top:var(--layout-gap);row-gap:var(--layout-gap)}
+  .app-frame .page-wrap,
+  .app-frame .dashboard,
+  .app-frame .workspace,
+  .app-frame .metric-grid,
+  .app-frame .dashboard-grid,
+  .app-frame .team-grid,
+  .app-frame .attendance-metrics{gap:var(--layout-gap)}
+}

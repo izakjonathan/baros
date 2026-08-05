@@ -5,7 +5,7 @@ const mono=fs.readFileSync("app/mono-components.css","utf8");
 const shell=fs.readFileSync("components/shell/ManagerShell.module.css","utf8");
 const all=[tokens,mono,shell,fs.readFileSync("features/scheduling/ScheduleWorkspace.module.css","utf8"),fs.readFileSync("features/dashboard/Dashboard.module.css","utf8")].join("\n");
 const fail=m=>{console.error(`v0.18.4.10 regression: ${m}`);process.exit(1)};
-if(pkg.version!=="0.18.4.10") fail("package version mismatch");
+if(pkg.version.localeCompare("0.18.4.10",undefined,{numeric:true})<0) fail("package version mismatch");
 if(!tokens.includes("--color-orange:#eb6746")) fail("reference red token missing");
 if(/#fd2200/i.test(all)) fail("old red token remains in active styles");
 if(!mono.includes("top: env(safe-area-inset-top, 0px)")) fail("fixed topbar does not own safe-area offset");

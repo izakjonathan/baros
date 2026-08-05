@@ -39,8 +39,9 @@
   --space-6: 24px;
   --space-8: 32px;
   --space-12: 48px;
-  --workspace-inline: clamp(16px, 2.4vw, 32px);
-  --workspace-block: clamp(20px, 3vw, 36px);
-  --workspace-section-gap: 14px;
+  --layout-gap: 16px;
+  --workspace-inline: var(--layout-gap);
+  --workspace-block: var(--layout-gap);
+  --workspace-section-gap: var(--layout-gap);
   --workspace-card-padding: 18px;
 }

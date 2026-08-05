@@ -1,0 +1,16 @@
+import fs from "node:fs";
+const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
+const tokens=fs.readFileSync("styles/tokens.css","utf8");
+const mono=fs.readFileSync("app/mono-tokens.css","utf8");
+const globals=fs.readFileSync("app/globals.css","utf8");
+const dashboard=fs.readFileSync("features/dashboard/Dashboard.module.css","utf8");
+const team=fs.readFileSync("features/employees/TeamWorkspace.module.css","utf8");
+const schedule=fs.readFileSync("features/scheduling/ScheduleWorkspace.module.css","utf8");
+const fail=(m)=>{console.error(`v0.18.4.11 regression: ${m}`);process.exit(1)};
+if(pkg.version!=="0.18.4.11") fail("package version mismatch");
+if(!tokens.includes("--layout-gap:1rem")||!tokens.includes("--page-gutter:var(--layout-gap)")) fail("primary grid token missing");
+if(!mono.includes("--workspace-inline: var(--layout-gap)")||!mono.includes("--workspace-section-gap: var(--layout-gap)")) fail("legacy spacing aliases not centralized");
+if(!globals.includes("v0.18.4.11 unified external grid spacing")) fail("global spacing ownership layer missing");
+for(const [name,css] of [["dashboard",dashboard],["team",team],["schedule",schedule]]) if(!css.includes("var(--layout-gap)")) fail(`${name} does not consume the grid token`);
+if(!globals.includes("padding-inline:var(--layout-gap)")||!globals.includes("gap:var(--layout-gap)")) fail("page gutter or grid gap not unified");
+console.log("v0.18.4.11 unified grid spacing regression passed");

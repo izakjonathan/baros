@@ -1,3 +1,13 @@
+# Release Notes — v0.18.4.11
+
+## Unified Grid Spacing System
+
+- Added a single 16px external grid spacing token.
+- Applied it to page edges, section separation, card grids and title rhythm.
+- Aligned Dashboard, Team, Shift Plan, Time & Attendance and employee pages to the same grid.
+- Removed mobile-specific external gap drift while preserving safe-area insets.
+- Kept internal card padding separate from layout spacing.
+
 # Release Notes — v0.18.4.10
 
 - Changed the red-orange palette value everywhere from `#FD2200` to the sampled reference color `#EB6746`.

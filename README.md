@@ -1,6 +1,14 @@
+# Bar Ops v0.18.4.11 — Unified Grid Spacing System
+
+Current release: **v0.18.4.11**
+
+Built from the approved v0.18.4.10 baseline. This release introduces one site-wide external layout token for page gutters, section spacing, card-grid gaps and background-level title rhythm. Internal card padding remains independently controlled.
+
+Rollback checkpoint: **v0.18.4.10**.
+
 # Bar Ops v0.18.4.10 — Reference Red & Stable Top Bar
 
-Current release: **v0.18.4.10**
+Historic release: **v0.18.4.10**
 
 This focused visual hotfix changes the red-orange design token to the sampled reference color `#EB6746` and gives the manager top bar one stable safe-area owner. The top bar now sits below the iOS status area from first paint, while the page shell reserves the same combined height, preventing the initial oversized gap and upward jump when Safari begins scrolling.
 
