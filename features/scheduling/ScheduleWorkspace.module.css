@@ -86,3 +86,212 @@
   .addShift{min-height:2.75rem;padding:.65rem;border-radius:.75rem}
   .legend{display:none}
 }
+
+/* v0.18.4.15 shift-plan visual repair */
+.header{
+  padding:.85rem 1rem;
+  border-radius:1rem;
+  gap:.75rem;
+}
+.headerCopy h1{
+  font-size:clamp(2rem,5vw,2.8rem);
+}
+.headerActions{
+  gap:.5rem;
+}
+.headerActions :global(.schedule-view-select),
+.headerActions :global(button){
+  min-height:2.5rem;
+  height:2.5rem;
+  border-radius:.75rem;
+}
+.headerActions :global(button svg){
+  display:block;
+  color:currentColor;
+  stroke:currentColor;
+}
+.headerActions :global(button:last-child){
+  background:#000;
+  color:#fff4c4;
+}
+.headerActions :global(button:last-child svg){
+  color:#fff4c4;
+  stroke:#fff4c4;
+}
+.toolbar{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:.5rem;
+  padding:.65rem .75rem;
+  border-radius:1rem;
+}
+.periodControls{
+  grid-template-columns:2.35rem minmax(0,1fr) 2.35rem;
+  gap:.5rem;
+}
+.periodControls button{
+  width:2.35rem;
+  height:2.35rem;
+  min-width:2.35rem;
+  border-radius:.7rem;
+}
+.periodControls strong{
+  font-size:1rem;
+}
+.summary{
+  display:flex;
+  justify-content:flex-end;
+  gap:.45rem;
+}
+.summaryText{
+  display:none;
+}
+.summary :global(.compact-action),
+.summary :global(.compact-publish){
+  display:grid;
+  place-items:center;
+  min-height:2.35rem;
+  height:2.35rem;
+  border-radius:.7rem;
+  color:#fff4c4;
+}
+.summary :global(.compact-action){
+  width:2.35rem;
+  min-width:2.35rem;
+  padding:0;
+}
+.summary :global(.compact-action span){
+  display:none;
+}
+.summary :global(.compact-action svg),
+.summary :global(.compact-publish svg){
+  display:block;
+  color:currentColor;
+  stroke:currentColor;
+}
+.summary :global(.compact-publish){
+  min-width:5.75rem;
+  padding-inline:.75rem;
+}
+.calendarGrid{
+  min-width:46rem;
+}
+.dayHeader{
+  min-height:3rem;
+  padding:.65rem .75rem;
+}
+.dayBody{
+  min-height:22rem;
+  padding:.65rem;
+  gap:.65rem;
+}
+.shiftCard:global(.shift-card){
+  padding:.75rem;
+  border-radius:.75rem;
+}
+.shiftCard :global(.shift-card-top){
+  gap:.25rem;
+}
+.shiftCard :global(.shift-card-top) span{
+  font-size:.8rem;
+  white-space:nowrap;
+}
+.shiftCard strong{
+  font-size:1.2rem;
+  line-height:1;
+  overflow-wrap:normal;
+  word-break:normal;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.shiftCard small{
+  font-size:.78rem;
+  line-height:1.2;
+}
+.addShift{
+  min-height:2.45rem;
+  padding:.55rem;
+  border-radius:.65rem;
+}
+
+@media(max-width:48rem){
+  .header{
+    padding:.8rem;
+    border-radius:.9rem;
+    gap:.65rem;
+  }
+  .headerCopy h1{
+    font-size:2rem;
+  }
+  .headerActions{
+    grid-template-columns:minmax(0,1fr) 2.4rem 2.4rem;
+    gap:.45rem;
+  }
+  .headerActions :global(.schedule-view-select),
+  .headerActions :global(.compact-action){
+    height:2.4rem;
+    min-height:2.4rem;
+    border-radius:.7rem;
+  }
+  .headerActions :global(.compact-action){
+    width:2.4rem;
+  }
+  .toolbar{
+    grid-template-columns:minmax(0,1fr) auto;
+    padding:.6rem;
+    gap:.45rem;
+    border-radius:.9rem;
+  }
+  .periodControls{
+    grid-template-columns:2.3rem minmax(0,1fr) 2.3rem;
+    gap:.4rem;
+  }
+  .periodControls button{
+    width:2.3rem;
+    height:2.3rem;
+    min-width:2.3rem;
+  }
+  .periodControls strong{
+    font-size:.95rem;
+  }
+  .summary{
+    display:flex;
+    width:auto;
+    overflow:visible;
+  }
+  .summary :global(.compact-action),
+  .summary :global(.compact-publish){
+    width:2.3rem;
+    min-width:2.3rem;
+    height:2.3rem;
+    min-height:2.3rem;
+    padding:0;
+  }
+  .summary :global(.compact-publish span){
+    display:none;
+  }
+  .calendarGrid{
+    min-width:43.5rem;
+  }
+  .dayBody{
+    min-height:21rem;
+    padding:.6rem;
+    gap:.6rem;
+  }
+  .shiftCard:global(.shift-card){
+    padding:.7rem;
+    border-radius:.7rem;
+  }
+  .shiftCard strong{
+    font-size:1.15rem;
+  }
+  .shiftCard small{
+    font-size:.76rem;
+  }
+  .addShift{
+    min-height:2.4rem;
+    padding:.5rem;
+  }
+}

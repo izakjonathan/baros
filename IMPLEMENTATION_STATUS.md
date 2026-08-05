@@ -1,3 +1,19 @@
+# Implementation Status — v0.18.4.15
+
+**Status:** Shift Plan visual repair complete.
+
+- Shift cards display first names while preserving full names for accessible labels and underlying data.
+- Week navigation and publication controls are compacted.
+- Missing header and toolbar icons are explicitly restored.
+- Calendar width, day height, shift-card padding and text wrapping are reduced for mobile.
+- No scheduling rules, persistence, permissions or APIs changed.
+
+# Implementation Status — v0.18.4.14.1
+
+**Status:** Quality-check ordering hotfix complete.
+
+The GitHub quality workflow now validates the clean checkout before installing dependencies, and then runs dependency-based gates. A one-time manual deletion of the existing tracked root `vercel.json` is still required because archive-based commits do not necessarily delete files omitted from later ZIPs.
+
 # Implementation Status — v0.18.4.14
 
 **Status:** Single-owner page-flow spacing correction complete.

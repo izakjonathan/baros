@@ -1,0 +1,14 @@
+import fs from "node:fs";
+const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
+const app=fs.readFileSync("components/bar-ops-app.tsx","utf8");
+const css=fs.readFileSync("features/scheduling/ScheduleWorkspace.module.css","utf8");
+const fail=(message)=>{console.error(`v0.18.4.15 regression: ${message}`);process.exit(1)};
+if(pkg.version!=="0.18.4.15") fail("package version mismatch");
+if(!app.includes("function firstName(name: string)")) fail("first-name helper missing");
+if(!app.includes('const displayName = shift.isOpen ? "Available shift" : firstName(shift.employee)')) fail("shift cards do not use first names");
+if(!css.includes("v0.18.4.15 shift-plan visual repair")) fail("shift-plan repair CSS missing");
+if(!css.includes("min-width:43.5rem")) fail("compact mobile calendar width missing");
+if(!css.includes("grid-template-columns:minmax(0,1fr) auto")) fail("compact week toolbar structure missing");
+if(!css.includes(".summaryText{\n  display:none")) fail("non-essential mobile summary copy is not removed");
+if(!css.includes("stroke:#fff4c4")) fail("visible add-shift icon treatment missing");
+console.log("v0.18.4.15 shift-plan visual repair regression passed");

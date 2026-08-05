@@ -1,3 +1,25 @@
+# Release Notes — v0.18.4.15
+
+## Shift Plan Visual Repair
+
+- Use employee first names on schedule cards.
+- Reduce the height and visual bulk of the week overview.
+- Restore visible Add Shift, Copy, acknowledgement and publication icons.
+- Reduce mobile calendar width and day-column height.
+- Tighten shift-card padding and prevent awkward name wrapping.
+- Keep the horizontally scrollable calendar and all existing scheduling workflows.
+
+# Release Notes — v0.18.4.14.1
+
+## Quality Check Ordering Hotfix
+
+- Added a dependency-free `audit:artifacts` gate.
+- Moved forbidden-artifact validation before `npm install` in GitHub Actions.
+- Prevented the stabilization preflight from treating install-created `node_modules` as a packaged release artifact.
+- Continued to reject repository-level `vercel.json`, `.vercel`, and `public/offline.html`.
+- Documented the required one-time deletion of the existing tracked `vercel.json`.
+- No application behavior, permissions, APIs, database schema, or UI was changed.
+
 # Release Notes — v0.18.4.14
 
 ## Single-Owner Page Flow

@@ -1,3 +1,36 @@
+# Validation Log — v0.18.4.15
+
+## Completed
+
+- `node scripts/test-v018415-shift-plan.mjs`
+- `npm run test:all`
+- `npm run audit:artifacts`
+- `npm run audit:preflight`
+- `npm run validate:release`
+- ZIP integrity check
+
+## Not completed in this environment
+
+- Clean dependency installation
+- ESLint
+- TypeScript compilation
+- Next.js production build
+- Browser/device visual verification
+
+# Validation Log — v0.18.4.14.1
+
+## Completed
+
+- `npm run audit:artifacts`
+- `node scripts/test-v0184141-quality-check-order.mjs`
+- `npm run audit:preflight`
+- `npm run validate:release`
+- ZIP integrity check
+
+## Repository action still required
+
+- Delete the tracked root `vercel.json` once from GitHub after committing this release.
+
 # Validation Log — v0.18.4.14
 
 ## Completed

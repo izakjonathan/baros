@@ -1,6 +1,24 @@
+# Bar Ops v0.18.4.15 — Shift Plan Visual Repair
+
+Current release: **v0.18.4.15**
+
+Focused visual correction of the mobile Shift Plan based on the supplied screenshot. Shift cards now show employee first names, the week overview is materially smaller, schedule action icons are visible, and the toolbar/calendar density is improved without changing scheduling behavior.
+
+Rollback checkpoint: **v0.18.4.14.1**.
+
+# Bar Ops v0.18.4.14.1 — Quality Check Ordering Hotfix
+
+Historic release: **v0.18.4.14.1**
+
+This hotfix separates release-package artifact validation from dependency-based quality checks. GitHub Actions now checks for forbidden packaged artifacts before `npm install` creates `node_modules`, then installs dependencies and runs the existing stabilization, regression, lint, type-check, environment and production-build gates.
+
+**Required one-time repository cleanup:** delete the existing root `vercel.json` from the GitHub repository. It is not present in this release ZIP, but ZIP-based commit tools may preserve files that are absent from an uploaded archive. Until the tracked file is deleted, both the artifact audit and Vercel repository state remain incorrect.
+
+Rollback checkpoint: **v0.18.4.14**.
+
 # Bar Ops v0.18.4.14 — Single-Owner Page Flow
 
-Current release: **v0.18.4.14**
+Historic release: **v0.18.4.14**
 
 This release removes stacked external spacing by introducing one canonical workspace flow owner. Each top-level workspace section now contributes zero external margin; the parent flow gap is the only source of vertical spacing. Nested card grids use the same gap for rows and columns. Internal component padding remains unchanged.
 

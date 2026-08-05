@@ -8,8 +8,8 @@ const exists = (file) => fs.existsSync(path.join(root, file));
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const pkg = JSON.parse(read("package.json"));
 
-for (const forbidden of ["node_modules", ".next", ".vercel", "vercel.json", "public/offline.html"]) {
-  if (exists(forbidden)) failures.push(`Forbidden release artifact present: ${forbidden}`);
+for (const forbidden of [".vercel", "vercel.json", "public/offline.html"]) {
+  if (exists(forbidden)) failures.push(`Forbidden repository artifact present: ${forbidden}`);
 }
 for (const secret of [".env", ".env.local", ".env.production", ".env.development.local"]) {
   if (exists(secret)) failures.push(`Environment secret file must not be packaged: ${secret}`);
