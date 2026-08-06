@@ -1,3 +1,13 @@
+# v0.19.0-rc.4 — Employee Workspace Redesign
+
+- redesigned all current employee portal pages and mobile navigation;
+- established one route-scoped employee CSS owner;
+- removed the superseded employee presentation block from the global completion stylesheet;
+- preserved linked-manager employee access and all self-service behavior;
+- added focused source-level regression coverage.
+
+No manager workspace, API, permission, persistence or database schema was changed.
+
 # v0.19.0-rc.3 — Authorization & Data-Integrity Verification
 
 - Replaced remaining hard-coded manager role arrays in critical APIs with centralized named capabilities.

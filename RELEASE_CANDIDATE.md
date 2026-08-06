@@ -1,3 +1,17 @@
+# Bar Ops v0.19.0-rc.4 — release candidate contract
+
+## Scope
+
+This candidate is limited to the dedicated employee workspace redesign. It introduces no API, authorization, database schema or manager-workspace change.
+
+## Rollback checkpoint
+
+Application rollback checkpoint: **v0.19.0-rc.3**.
+
+## External acceptance
+
+The employee portal requires real-account, iPhone Safari, native-control, keyboard and VoiceOver verification before final promotion.
+
 # Bar Ops v0.19.0-rc.3 — release candidate contract
 
 ## Scope

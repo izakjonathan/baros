@@ -1,3 +1,7 @@
+# Validation log — v0.19.0-rc.4
+
+Source-level employee workspace redesign and packaging checks are recorded for this candidate. Dependency-backed lint, TypeScript, build, staging and physical-device acceptance remain external gates.
+
 # Bar Ops v0.19.0-rc.3 — Validation Log
 
 ## Source checks passed

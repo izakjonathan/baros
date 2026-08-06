@@ -1,3 +1,7 @@
+# Current implementation status — v0.19.0-rc.4
+
+The dedicated employee workspace redesign is complete at source level. Runtime, Safari, VoiceOver, staging and dependency-backed production gates remain pending.
+
 # Bar Ops v0.19.0-rc.3 — Implementation Status
 
 Phase B source-level authorization alignment is complete. Live authenticated role testing, multi-tenant negative testing, concurrency testing, database verification, and staging acceptance remain pending.

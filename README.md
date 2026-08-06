@@ -1,6 +1,14 @@
+# Bar Ops v0.19.0-rc.4 — Employee Workspace Redesign
+
+Current release: **v0.19.0-rc.4**
+
+This release completes the dedicated visual redesign of the employee portal while preserving employee self-service logic, linked-manager access, APIs, permissions and persistence. Employee presentation is now owned by one route-scoped stylesheet rather than the historical global completion layer.
+
+Rollback checkpoint: **v0.19.0-rc.3**.
+
 # Bar Ops v0.19.0-rc.3 — Authorization & Data-Integrity Verification
 
-Current release: **v0.19.0-rc.3**
+Historic release: **v0.19.0-rc.3**
 
 This release completes the source-level Phase B authorization alignment by replacing remaining hard-coded management role arrays with named capabilities and adding a live database integrity verifier. It does not redesign the employee workspace, which remains explicitly pending.
 

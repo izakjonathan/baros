@@ -1,6 +1,6 @@
 {
   "name": "bar-ops",
-  "version": "0.19.0-rc.3",
+  "version": "0.19.0-rc.4",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -163,13 +163,14 @@
     "test:v01814-accessibility": "node scripts/test-v01814-accessibility-interaction.mjs",
     "test:v01815-production": "node scripts/test-v01815-production-readiness.mjs",
     "audit:production": "node scripts/audit-production-readiness.mjs",
-    "quality:release": "npm run audit:artifacts && npm run audit:preflight && npm run validate:release && npm run test:v0190rc3 && npm run test:all && npm run lint && npm run typecheck && npm run validate:env && npm run build",
+    "quality:release": "npm run audit:artifacts && npm run audit:preflight && npm run validate:release && npm run test:v0190rc4 && npm run test:all && npm run lint && npm run typecheck && npm run validate:env && npm run build",
     "test:v01816-acceptance": "node scripts/test-v01816-production-acceptance.mjs",
-    "acceptance:source": "npm run audit:artifacts && npm run audit:preflight && npm run validate:release && npm run test:v0190rc3",
+    "acceptance:source": "npm run audit:artifacts && npm run audit:preflight && npm run validate:release && npm run test:v0190rc4",
     "test:v0190rc1": "node scripts/test-v0190rc1-release-candidate.mjs",
     "test:v0190rc2": "node scripts/test-v0190rc2-capabilities.mjs",
     "test:v0190rc3": "node scripts/test-v0190rc3-authorization-integrity.mjs",
-    "verify:authorization-integrity": "node scripts/verify-authorization-integrity.mjs"
+    "verify:authorization-integrity": "node scripts/verify-authorization-integrity.mjs",
+    "test:v0190rc4": "node scripts/test-v0190rc4-employee-workspace.mjs"
   },
   "dependencies": {
     "lucide-react": "0.468.0",
