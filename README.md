@@ -1,10 +1,10 @@
-# Bar Ops v0.18.7 — Dashboard & Shift Execution Consistency Pass
+# Bar Ops v0.18.8 — Inventory & Orders Redesign
 
-Current release: **v0.18.7**
+Current release: **v0.18.8**
 
-This release aligns Today’s Operations and Shift Execution with the accepted iPhone-first Shift Plan, Time & Attendance and Team baseline. It reduces oversized surfaces, restores consistent two-column operational metrics, gives Shift Execution a dedicated local CSS owner, and reorganizes live boards and action lists without changing operational behavior.
+This release rebuilds Inventory and Purchase Orders as iPhone-first operational workspaces. Stock controls, low-stock filtering, product details, replenishment suggestions, deliveries and order statuses are presented as compact feature-owned cards rather than desktop tables. Existing stock calculations, supplier data, adjustments, receiving behavior, permissions, APIs and persistence remain unchanged.
 
-Rollback checkpoint: **v0.18.6**.
+Rollback checkpoint: **v0.18.7**.
 
 # Bar Ops v0.18.6 — Team Redesign
 

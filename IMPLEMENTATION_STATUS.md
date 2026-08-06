@@ -1,3 +1,11 @@
+# Implementation Status — v0.18.8
+
+**Status:** Inventory and Purchase Orders redesign complete.
+
+- Inventory and Orders now use locally scoped feature modules.
+- Mobile views use contained one-column operational cards.
+- Existing product, stock, supplier and order behavior is unchanged.
+
 # Implementation Status — v0.18.7
 
 **Status:** Dashboard and Shift Execution consistency pass complete.

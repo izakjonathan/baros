@@ -1,3 +1,13 @@
+# Release Notes — v0.18.8
+
+## Inventory & Orders Redesign
+
+- Added feature-owned CSS Modules for Inventory and Purchase Orders.
+- Replaced mobile desktop-table presentations with compact product and order cards.
+- Prioritized stock levels, par levels, replenishment, delivery and receiving actions.
+- Added concise iPhone-first summaries, filters and empty states.
+- Preserved inventory calculations, adjustments, receiving behavior, permissions, APIs and persistence.
+
 # v0.18.7 — Dashboard & Shift Execution Consistency Pass
 
 - Tightened Today’s Operations typography, metrics, live-board rows, summaries and quick actions for iPhone.
