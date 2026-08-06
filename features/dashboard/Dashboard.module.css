@@ -64,3 +64,11 @@
   .quickPanel :global(.quick-action){min-height:4.25rem;padding:.75rem .9rem}
   .quickPanel :global(.quick-action>span){inline-size:2.5rem;block-size:2.5rem}
 }
+
+/* v0.18.13.2 — empty timeline/board states belong to their coloured parent panel. */
+.heroPanel :global(.daily-empty),
+.panel :global(.daily-empty){
+  background:transparent;
+  border-radius:0;
+  color:#000;
+}

@@ -1,3 +1,7 @@
+# v0.18.13.2 implementation status
+
+Complete: physical-device component corrections for nested fills, attendance filters and Team search.
+
 # v0.18.13.1 implementation status
 
 Status: **Implemented and packaged**

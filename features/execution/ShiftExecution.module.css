@@ -43,3 +43,10 @@
   .actionsPanel :global(.quick-grid){grid-template-columns:1fr}
   .actionsPanel :global(.quick-action){min-height:4rem}
 }
+
+/* v0.18.13.2 — the empty shift board is not a second beige card. */
+.board :global(.daily-empty){
+  background:transparent;
+  border-radius:0;
+  color:#000;
+}

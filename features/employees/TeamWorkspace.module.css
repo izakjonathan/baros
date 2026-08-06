@@ -334,3 +334,42 @@
   .details{grid-template-columns:1fr}
   .actions,.actions:has(>:nth-child(3)){grid-template-columns:1fr}
 }
+
+/* v0.18.13.2 — one component-owned mobile search/filter pattern. */
+.search{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:.65rem;
+  inline-size:100%;
+  max-inline-size:none;
+  min-block-size:2.75rem;
+  padding:0 .9rem;
+  overflow:hidden;
+  background:#fff4c4;
+  border:0;
+  border-radius:999px;
+}
+.search input{
+  inline-size:100%;
+  min-inline-size:0;
+  padding:0;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:#000;
+}
+.toolbar select{
+  inline-size:100%;
+  min-block-size:2.75rem;
+  background:#fff4c4;
+  border:0;
+  border-radius:999px;
+}
+@media(max-width:600px){
+  .toolbar{grid-template-columns:minmax(0,1fr) auto;align-items:center}
+  .search{grid-column:1/-1}
+  .toolbar select{grid-column:1/-1}
+  .clearButton{grid-column:1;justify-self:start}
+  .resultCount{grid-column:1/-1}
+}

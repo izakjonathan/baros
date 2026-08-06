@@ -1,3 +1,10 @@
+# v0.18.13.2 validation
+
+- Focused visual-correction regression: pending execution
+- Release validation: pending execution
+- Stabilization preflight: pending execution
+- Forbidden-artifact audit: pending execution
+
 # v0.18.13.1 validation
 
 - Focused physical-device regression: passed

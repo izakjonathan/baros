@@ -29,3 +29,19 @@
   .create button{grid-column:1/-1;width:100%}
   .presets{grid-template-columns:1fr 1fr}
 }
+
+/* v0.18.13.2 — remove nested beige panels from the manager logbook. */
+.compose textarea{
+  background:transparent;
+  color:#000;
+  border:2px solid #000;
+  border-radius:1rem;
+  padding:.85rem 1rem;
+}
+.compose textarea::placeholder{color:rgba(0,0,0,.58)}
+.logEntry{
+  background:transparent;
+  border-top:2px solid #000;
+  border-radius:0;
+  padding:.85rem 0 0;
+}

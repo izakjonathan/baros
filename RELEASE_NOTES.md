@@ -1,3 +1,12 @@
+# Bar Ops v0.18.13.2 — Physical Device Component Corrections
+
+- Removed beige nested fills from Manager Logbook composition and saved handover entries.
+- Removed beige nested empty cards from Today’s Timeline, Live/Current Shift Boards.
+- Corrected Time & Attendance filter labels and native date controls without clipping the parent or labels.
+- Rebuilt Team search and status controls as one feature-owned mobile pattern.
+- Added focused regression coverage.
+- Preserved all business logic, APIs, permissions and persistence.
+
 # Bar Ops v0.18.13.1 — Physical Device Visual Corrections
 
 - Changed the mobile manager top bar from a fixed overlay to a sticky in-flow header so scrolled workspace content is not hidden behind it.
