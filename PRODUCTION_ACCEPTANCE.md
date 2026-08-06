@@ -1,4 +1,4 @@
-# Bar Ops production acceptance — v0.18.16
+# Bar Ops production acceptance — v0.19.0-rc.2
 
 This release turns the production-readiness contract into an auditable acceptance and sign-off workflow.
 

@@ -1,16 +1,14 @@
 import { createHash, randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth/session";
+import { requireCapability } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { jsonError, readJsonObject, requiredString, uuid } from "@/lib/http";
 
 const tokenHash = (token: string) => createHash("sha256").update(token).digest("hex");
-const managerRoles = ["OWNER", "ADMIN", "MANAGER"] as const;
-
 
 export async function GET() {
   try {
-    const user = await requireUser([...managerRoles]);
+    const user = await requireCapability("accounts.invite");
     await db()`update employee_invitations set status='EXPIRED',updated_at=now() where organization_id=${user.organizationId} and status='PENDING' and expires_at<=now()`;
     const rows = await db()`select e.id employee_id, case when e.user_id is not null then 'ACTIVE' when i.status='PENDING' and i.expires_at>now() then 'INVITED' when i.status='EXPIRED' then 'EXPIRED' else 'NONE' end portal_status, i.expires_at from employees e left join lateral (select status,expires_at from employee_invitations x where x.employee_id=e.id order by x.created_at desc limit 1) i on true where e.organization_id=${user.organizationId}`;
     return NextResponse.json(rows);
@@ -19,7 +17,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const user = await requireUser([...managerRoles]);
+    const user = await requireCapability("accounts.invite");
     const body = await readJsonObject(request, 8_000);
     const employeeId = uuid(body.employeeId, "employeeId");
     const action = requiredString(body, "action", 20).toLowerCase();

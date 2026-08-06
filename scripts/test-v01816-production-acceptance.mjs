@@ -10,7 +10,7 @@ const requiredFiles = [
   "V01814_DEVICE_ACCEPTANCE.md",
 ];
 
-if (pkg.version !== "0.18.16") failures.push("package version is not v0.18.16");
+if (!["0.18.16", "0.19.0-rc.1"].includes(pkg.version)) failures.push("package version does not inherit the v0.18.16 acceptance contract");
 for (const name of ["acceptance:source", "test:v01816-acceptance", "quality:release"]) {
   if (!pkg.scripts?.[name]) failures.push(`missing script: ${name}`);
 }
@@ -18,9 +18,9 @@ for (const file of requiredFiles) {
   if (!fs.existsSync(file)) failures.push(`missing acceptance artifact: ${file}`);
 }
 const readme = fs.readFileSync("README.md", "utf8");
-if (!readme.includes("Current release: **v0.18.16**")) failures.push("README current release is not v0.18.16");
+if (!readme.includes(`Current release: **v${pkg.version}**`)) failures.push("README current release does not match package version");
 const notes = fs.readFileSync("RELEASE_NOTES.md", "utf8");
-if (!notes.includes("v0.18.16")) failures.push("release notes do not identify v0.18.16");
+if (!notes.includes("v0.18.16") && !notes.includes("v0.19.0-rc.1")) failures.push("release notes do not identify the production acceptance lineage");
 const signoff = fs.readFileSync("DEPLOYMENT_SIGNOFF.md", "utf8");
 if (!signoff.includes("pending external staging acceptance")) failures.push("sign-off must remain explicitly pending");
 if (!signoff.includes("Promote the exact tested deployment")) failures.push("sign-off lacks exact-deployment promotion rule");

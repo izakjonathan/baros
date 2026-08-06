@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth/session";
+import { requireCapability } from "@/lib/auth/session";
 import { requireOrganizationLocation } from "@/lib/auth/scope";
 import { db } from "@/lib/db/client";
 import { ApiError, isoDate, jsonError, readJsonObject, uuid } from "@/lib/http";
@@ -15,13 +15,13 @@ type PayrollPeriodRow = {
 };
 
 export async function GET() {
-  const user = await requireUser(["OWNER", "ADMIN", "MANAGER", "SHIFT_MANAGER"]);
+  const user = await requireCapability("payroll.read");
   return NextResponse.json(await db()`select p.*,coalesce((select count(*) from payroll_exports x where x.payroll_period_id=p.id),0)::int export_count from payroll_periods p where p.organization_id=${user.organizationId} order by starts_on desc`);
 }
 
 export async function POST(request: Request) {
   try {
-    const user = await requireUser(["OWNER", "ADMIN", "MANAGER"]);
+    const user = await requireCapability("payroll.manage");
     const body = await readJsonObject(request, 8_000);
     const action = String(body.action || "");
     const row = await db().begin(async (tx) => {

@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth/session";
+import { requireCapability } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, jsonError, readJsonObject, uuid } from "@/lib/http";
 
-const managerRoles = ["OWNER", "ADMIN", "MANAGER"] as const;
-
 export async function GET(request: Request) {
   try {
-    const user = await requireUser([...managerRoles]);
+    const user = await requireCapability("settings.read");
     const locationId = uuid(new URL(request.url).searchParams.get("locationId"), "locationId");
     const [location] = await db()`select id from locations where id=${locationId} and organization_id=${user.organizationId} and active=true`;
     if (!location) throw new ApiError(404, "Location not found");
@@ -36,7 +34,7 @@ export async function GET(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const user = await requireUser([...managerRoles]);
+    const user = await requireCapability("settings.manage");
     const body = await readJsonObject(request);
     const locationId = uuid(body.locationId, "locationId");
     const [location] = await db()`select id from locations where id=${locationId} and organization_id=${user.organizationId} and active=true`;

@@ -1,10 +1,18 @@
-# Bar Ops v0.18.16 — Production Acceptance & Deployment Sign-off
+# Bar Ops v0.19.0-rc.2 — Permission Capability Alignment
 
-Current release: **v0.18.16**
+Current release: **v0.19.0-rc.2**
 
-This release adds an auditable staging acceptance matrix, exact-deployment promotion rules, explicit sign-off evidence, critical rollback triggers, and source-level regression coverage. Production approval remains pending until dependency-backed gates, staging workflows, database verification, and physical-device checks are completed externally.
+This release implements the first Phase B remediation slice: a centralized capability model, Shift Manager operational-lead boundaries, linked-manager employee portal policy, and UI/server permission parity for the highest-risk management actions. Production approval remains pending.
 
-Rollback checkpoint: **v0.18.14**.
+Rollback checkpoint: **v0.19.0-rc.1**.
+
+# Bar Ops v0.19.0-rc.1 — Production Release Candidate
+
+Historic release: **v0.19.0-rc.1**
+
+This is the first frozen production release candidate. It adds an exact-source promotion contract, severity-based defect log, release-candidate CI gate, and auditable staging sign-off. Production approval remains pending until dependency-backed gates, staging workflows, database verification, and physical-device checks are completed externally.
+
+Rollback checkpoint: **v0.18.16**.
 
 # Bar Ops v0.18.13.6 — Shift Plan Column Track Fix
 

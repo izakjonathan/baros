@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth/session";
+import { requireCapability } from "@/lib/auth/session";
 import { requireOrganizationLocation } from "@/lib/auth/scope";
 import { db } from "@/lib/db/client";
 import { ApiError, jsonError, objectArray, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
 
 export async function GET() {
-  const user = await requireUser(["OWNER", "ADMIN", "MANAGER", "SHIFT_MANAGER"]);
+  const user = await requireCapability("schedule.read");
   return NextResponse.json(await db()`select * from schedule_templates where organization_id=${user.organizationId} and (${user.locationId}::uuid is null or location_id=${user.locationId}) and active order by name`);
 }
 
 export async function POST(request: Request) {
   try {
-    const user = await requireUser(["OWNER", "ADMIN", "MANAGER"]);
+    const user = await requireCapability("schedule.templates.manage");
     const body = await readJsonObject(request, 24_000);
     const locationId = body.locationId ? uuid(body.locationId, "locationId") : user.locationId;
     await requireOrganizationLocation(db(), user.organizationId, locationId);

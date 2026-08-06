@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
+import { hasCapability } from "@/lib/auth/capabilities";
 import { db } from "@/lib/db/client";
 import { writeAudit } from "@/lib/services/audit";
 import { hashKioskPin } from "@/lib/security/kiosk-pin";
 import { ApiError, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
 
-const allowed = ["OWNER", "ADMIN", "MANAGER"];
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const numberValue = (value: unknown, key: string, min = 0, max = 1_000_000) => {
   if (value == null || value === "") return null;
@@ -22,14 +22,14 @@ const emailValue = (value: unknown) => {
 
 export async function GET() {
   const user = await getSessionUser();
-  if (!user || user.role === "EMPLOYEE") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!user || !hasCapability(user.role, "team.read")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   return NextResponse.json(await db()`select e.*,coalesce(json_agg(json_build_object('id',l.id,'name',l.name)) filter(where l.id is not null),'[]') locations from employees e left join employee_locations el on el.employee_id=e.id left join locations l on l.id=el.location_id where e.organization_id=${user.organizationId} group by e.id order by e.first_name,e.last_name`);
 }
 
 export async function POST(request: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || !allowed.includes(user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!user || !hasCapability(user.role, "team.manage")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const body = await readJsonObject(request, 20_000);
     const suppliedName = optionalString(body, "name", 160);
     const nameParts = String(suppliedName || "").trim().split(/\s+/).filter(Boolean);
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || !allowed.includes(user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!user || !hasCapability(user.role, "team.manage")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const body = await readJsonObject(request, 20_000);
     const id = uuid(body.id, "id");
     const result = await db().begin(async (tx) => {

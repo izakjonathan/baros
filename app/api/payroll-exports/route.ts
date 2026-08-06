@@ -1,12 +1,12 @@
 import { createHash } from "node:crypto";
-import { requireUser } from "@/lib/auth/session";
+import { requireCapability } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { jsonError, readJsonObject, uuid } from "@/lib/http";
 const csv=(v:unknown)=>/[",\n]/.test(String(v??''))?`"${String(v??'').replaceAll('"','""')}"`:String(v??'');
-export async function GET(){const u=await requireUser(["OWNER","ADMIN","MANAGER","SHIFT_MANAGER"]);return Response.json(await db()`select x.*,p.starts_on,p.ends_on from payroll_exports x join payroll_periods p on p.id=x.payroll_period_id where x.organization_id=${u.organizationId} order by x.created_at desc`)}
+export async function GET(){const u=await requireCapability("payroll.read");return Response.json(await db()`select x.*,p.starts_on,p.ends_on from payroll_exports x join payroll_periods p on p.id=x.payroll_period_id where x.organization_id=${u.organizationId} order by x.created_at desc`)}
 export async function POST(req:Request){
  try{
-  const u=await requireUser(["OWNER","ADMIN","MANAGER"]);const b=await readJsonObject(req);const periodId=uuid(b.periodId,'periodId');
+  const u=await requireCapability("payroll.export");const b=await readJsonObject(req);const periodId=uuid(b.periodId,'periodId');
   const result=await db().begin(async sql=>{
    const [period]=await sql`select * from payroll_periods where id=${periodId} and organization_id=${u.organizationId} and status='LOCKED' for update`;
    if(!period) return null;

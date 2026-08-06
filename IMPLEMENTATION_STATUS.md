@@ -1,4 +1,8 @@
-# Current release: v0.18.16
+# Bar Ops v0.19.0-rc.2 — Implementation Status
+
+Phase B1 capability alignment is implemented. Production acceptance remains pending.
+
+# Current release: v0.19.0-rc.1
 
 Production acceptance tooling and documentation are complete at source level. Production sign-off is explicitly pending external dependency installation, lint, type-check, production build, staging deployment, database verification, critical workflow testing and physical-device acceptance.
 

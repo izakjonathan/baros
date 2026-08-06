@@ -23,21 +23,29 @@ import inventoryStyles from "@/features/inventory/InventoryWorkspace.module.css"
 import orderStyles from "@/features/orders/OrdersWorkspace.module.css";
 import operationsStyles from "@/features/operations/DailyOperations.module.css";
 import settingsStyles from "@/features/settings/SettingsWorkspace.module.css";
+import { hasCapability, type Capability } from "@/lib/auth/capabilities";
+import type { AppRole } from "@/lib/auth/session";
 
-const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = [
-  { id: "dashboard", label: "Today’s operations", icon: LayoutDashboard },
-  { id: "execution", label: "Shift execution", icon: Activity },
-  { id: "schedule", label: "Shift plan", icon: CalendarDays },
-  { id: "attendance", label: "Time & attendance", icon: Timer },
-  { id: "inventory", label: "Inventory", icon: Package },
-  { id: "orders", label: "Orders", icon: ShoppingCart },
-  { id: "operations", label: "Daily operations", icon: NotebookPen },
-  { id: "team", label: "Team", icon: Users },
-  { id: "requests", label: "Requests", icon: ClipboardList },
-  { id: "control", label: "Control centre", icon: Settings },
+type ManagerNavItem = { id: NavKey; label: string; icon: typeof LayoutDashboard; capability: Capability };
+
+const navItems: ManagerNavItem[] = [
+  { id: "dashboard", label: "Today’s operations", icon: LayoutDashboard, capability: "operations.read" },
+  { id: "execution", label: "Shift execution", icon: Activity, capability: "operations.manage" },
+  { id: "schedule", label: "Shift plan", icon: CalendarDays, capability: "schedule.read" },
+  { id: "attendance", label: "Time & attendance", icon: Timer, capability: "attendance.read" },
+  { id: "inventory", label: "Inventory", icon: Package, capability: "inventory.read" },
+  { id: "orders", label: "Orders", icon: ShoppingCart, capability: "orders.manage" },
+  { id: "operations", label: "Daily operations", icon: NotebookPen, capability: "operations.manage" },
+  { id: "team", label: "Team", icon: Users, capability: "team.read" },
+  { id: "requests", label: "Requests", icon: ClipboardList, capability: "requests.review" },
+  { id: "control", label: "Control centre", icon: Settings, capability: "control.read" },
 ];
 
-export function BarOpsApp({ userName, userRole, devMode }: { userName: string; userRole: string; devMode: boolean }) {
+export function BarOpsApp({ userName, userRole, devMode }: { userName: string; userRole: AppRole; devMode: boolean }) {
+  const availableNavItems = navItems.filter((item) => hasCapability(userRole, item.capability));
+  const canManageTeam = hasCapability(userRole, "team.manage");
+  const canManagePayroll = hasCapability(userRole, "payroll.manage");
+  const canExportPayroll = hasCapability(userRole, "payroll.export");
   const [active, setActive] = useState<NavKey>("dashboard");
   useEffect(() => { if (new URLSearchParams(window.location.search).get("workspace") === "requests") setActive("requests"); }, []);
   const [locations, setLocations] = useState<Location[]>(devMode ? [{ id: "dev-temple", name: "Temple Bar" }] : []);
@@ -150,15 +158,15 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
   return (
     <div className="app-frame">
       <a className="skip-link" href="#main-content">Skip to main content</a>
-      <Sidebar active={active} onChange={(value) => { setActive(value); setMobileNav(false); }} open={mobileNav} onClose={() => setMobileNav(false)} userName={userName} userRole={userRole} devMode={devMode} />
+      <Sidebar items={availableNavItems} active={active} onChange={(value) => { setActive(value); setMobileNav(false); }} open={mobileNav} onClose={() => setMobileNav(false)} userName={userName} userRole={userRole} devMode={devMode} />
       <main id="main-content" className="main-shell" tabIndex={-1}>
-        <Topbar active={active} onMenu={() => setMobileNav(true)} locations={locations} selectedLocationId={selectedLocationId} onLocationChange={setSelectedLocationId} onNavigate={setActive} theme={theme} onToggleTheme={toggleTheme} />
+        <Topbar items={availableNavItems} active={active} onMenu={() => setMobileNav(true)} locations={locations} selectedLocationId={selectedLocationId} onLocationChange={setSelectedLocationId} onNavigate={setActive} theme={theme} onToggleTheme={toggleTheme} />
         <div className="page-wrap" data-workspace={active}>
           <div className="workspace-flow">
           {active === "dashboard" && <Dashboard shifts={shifts} products={products} employees={employees} timeEntries={timeEntries} tasks={opsTasks} shiftNotes={shiftNotes} devMode={devMode} onNavigate={setActive} />}
           {active === "execution" && <ShiftExecution shifts={shifts} entries={timeEntries} notes={shiftNotes} onNavigate={setActive} />}
           {active === "schedule" && <Schedule shifts={shifts} setShifts={setShifts} employees={employees} onNewShift={openShiftDialog} onEditShift={setEditingShift} notify={notify} currentWeekOffset={currentWeekOffset} setCurrentWeekOffset={setCurrentWeekOffset} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
-          {active === "attendance" && <Attendance employees={employees} shifts={shifts} entries={timeEntries} setEntries={setTimeEntries} notify={notify} onEdit={setEditingTimeEntry} devMode={devMode} persist={persist} />}
+          {active === "attendance" && <Attendance employees={employees} shifts={shifts} entries={timeEntries} setEntries={setTimeEntries} notify={notify} onEdit={setEditingTimeEntry} devMode={devMode} persist={persist} canManagePayroll={canManagePayroll} canExportPayroll={canExportPayroll} />}
           {active === "inventory" && <Inventory products={products} setProducts={setProducts} onNewProduct={() => setDialog("product")} onEditProduct={setEditingProduct} onStockCount={() => setDialog("stockCount")} adjustments={stockAdjustments} setAdjustments={setStockAdjustments} notify={notify} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
           {active === "orders" && <Orders products={products} setProducts={setProducts} onNewOrder={() => setDialog("order")} notify={notify} />}
           {active === "operations" && <DailyOperations tasks={opsTasks} setTasks={setOpsTasks} logs={logEntries} setLogs={setLogEntries} notify={notify} devMode={devMode} locationId={selectedLocationId} />}
@@ -167,6 +175,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
               employees={employees}
               shifts={shifts}
               devMode={devMode}
+              canManage={canManageTeam}
               onAdd={() => setDialog("employee")}
               onEdit={setEditingEmployee}
               onInvite={async (employee) => {
@@ -234,8 +243,8 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
         } catch (error) { notify(error instanceof Error ? error.message : "Could not add shift"); }
       }} />}
       {editingTimeEntry && <TimesheetDialog entry={editingTimeEntry} onClose={() => setEditingTimeEntry(null)} onSave={async (updated) => { try { if (!devMode) await persist("/api/timesheets", { method:"PATCH", body:JSON.stringify({ id:updated.id, status:"PENDING", clockIn:updated.clockIn, clockOut:updated.clockOut || null, breakMinutes:updated.breakMinutes, managerNote:updated.note }) }); setTimeEntries((current) => current.map((item) => item.id === updated.id ? updated : item)); setEditingTimeEntry(null); notify("Timesheet corrected and returned to pending review"); } catch(error) { notify(error instanceof Error ? error.message : "Could not correct timesheet"); } }} />}
-      {editingEmployee && <EmployeeDialog employee={editingEmployee} locations={locations} onClose={() => setEditingEmployee(null)} onSave={async (updated) => { try { const saved=await persist("/api/employees",{method:"PATCH",body:JSON.stringify({...updated,id:editingEmployee.id})}); setEmployees((current) => current.map((item) => item.id === editingEmployee.id ? {...updated,...saved,id:editingEmployee.id} : item)); setEditingEmployee(null); notify("Employee updated"); } catch(error) { notify(error instanceof Error?error.message:"Could not update employee"); } }} />}
-      {dialog === "employee" && <EmployeeDialog locations={locations} defaultLocationId={selectedLocationId} onClose={() => setDialog(null)} onSave={async (employee) => { try { const saved=await persist("/api/employees",{method:"POST",body:JSON.stringify({...employee,locationId:employee.locationId||selectedLocationId})}); setEmployees((current) => [...current, {...employee,id:saved?.id,portalStatus:"NONE"}]); setDialog(null); notify(devMode?"Employee added":"Employee added — you can now invite them to the portal"); } catch(e) { notify(e instanceof Error?e.message:"Could not add employee"); } }} />}
+      {canManageTeam && editingEmployee && <EmployeeDialog employee={editingEmployee} locations={locations} onClose={() => setEditingEmployee(null)} onSave={async (updated) => { try { const saved=await persist("/api/employees",{method:"PATCH",body:JSON.stringify({...updated,id:editingEmployee.id})}); setEmployees((current) => current.map((item) => item.id === editingEmployee.id ? {...updated,...saved,id:editingEmployee.id} : item)); setEditingEmployee(null); notify("Employee updated"); } catch(error) { notify(error instanceof Error?error.message:"Could not update employee"); } }} />}
+      {canManageTeam && dialog === "employee" && <EmployeeDialog locations={locations} defaultLocationId={selectedLocationId} onClose={() => setDialog(null)} onSave={async (employee) => { try { const saved=await persist("/api/employees",{method:"POST",body:JSON.stringify({...employee,locationId:employee.locationId||selectedLocationId})}); setEmployees((current) => [...current, {...employee,id:saved?.id,portalStatus:"NONE"}]); setDialog(null); notify(devMode?"Employee added":"Employee added — you can now invite them to the portal"); } catch(e) { notify(e instanceof Error?e.message:"Could not add employee"); } }} />}
       {dialog === "product" && <ProductDialog onClose={() => setDialog(null)} onSave={async (product) => { try { const saved=await persist("/api/products",{method:"POST",body:JSON.stringify({...product,locationId:selectedLocationId})}); setProducts((current) => [...current, {...product,...saved}]); setDialog(null); notify("Product added to inventory"); } catch(error) { notify(error instanceof Error?error.message:"Could not add product"); } }} />}
       {editingProduct && <ProductDialog product={editingProduct} onClose={() => setEditingProduct(null)} onSave={async (product) => { try { const saved=await persist("/api/products",{method:"PATCH",body:JSON.stringify({...product,locationId:selectedLocationId})}); setProducts(current => current.map(p => p.id === product.id ? {...product,...saved} : p)); setEditingProduct(null); notify("Product updated"); } catch(error) { notify(error instanceof Error?error.message:"Could not update product"); } }} />}
       {dialog === "stockCount" && <StockCountDialog products={products} onClose={() => setDialog(null)} onSave={async (counts) => { try { if (!devMode) { for (const product of products) if (counts[product.id] !== undefined && counts[product.id] !== product.stock) await persist("/api/products", { method:"PATCH", body:JSON.stringify({...product, stock:counts[product.id], locationId:selectedLocationId}) }); } setProducts(current => current.map(p => ({...p,stock:counts[p.id] ?? p.stock}))); setDialog(null); notify("Stock count approved and inventory updated"); } catch(error) { notify(error instanceof Error ? error.message : "Could not save stock count"); } }} />}
@@ -246,17 +255,17 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
 }
 
 
-function Sidebar({ active, onChange, open, onClose, userName, userRole, devMode }: { active: NavKey; onChange: (id: NavKey) => void; open: boolean; onClose: () => void; userName: string; userRole: string; devMode: boolean }) {
+function Sidebar({ items, active, onChange, open, onClose, userName, userRole, devMode }: { items: ManagerNavItem[]; active: NavKey; onChange: (id: NavKey) => void; open: boolean; onClose: () => void; userName: string; userRole: AppRole; devMode: boolean }) {
   return <>
     {open && <button className="scrim" aria-label="Close navigation" onClick={onClose} />}
     <aside className={`sidebar ${shellStyles.sidebar} ${open ? "sidebar-open" : ""}`}>
       <div className={`brand ${shellStyles.brand}`}><div className={`brand-mark ${shellStyles.brandMark}`}><Wine size={22} /></div><div><strong>Bar Ops</strong><span>Temple Bar</span></div><button type="button" className="sidebar-close" onClick={onClose} aria-label="Close navigation"><X size={20} /></button></div>
       <nav className={`side-nav ${shellStyles.navigation}`}>
         <p>Workspace</p>
-        {navItems.map((item) => <button type="button" key={item.id} className={active === item.id ? "active" : ""} aria-current={active === item.id ? "page" : undefined} onClick={() => onChange(item.id)}><item.icon size={19} /><span>{item.label}</span>{item.id === "inventory" && <em>5</em>}</button>)}
+        {items.map((item) => <button type="button" key={item.id} className={active === item.id ? "active" : ""} aria-current={active === item.id ? "page" : undefined} onClick={() => onChange(item.id)}><item.icon size={19} /><span>{item.label}</span>{item.id === "inventory" && <em>5</em>}</button>)}
       </nav>
       <div className={`side-bottom ${shellStyles.bottom}`}>
-        <button type="button" className={active === "settings" ? "active" : ""} aria-current={active === "settings" ? "page" : undefined} onClick={() => onChange("settings")}><Settings size={19} /><span>Settings</span></button>
+        {hasCapability(userRole, "settings.read") && <button type="button" className={active === "settings" ? "active" : ""} aria-current={active === "settings" ? "page" : undefined} onClick={() => onChange("settings")}><Settings size={19} /><span>Settings</span></button>}
         <button type="button" onClick={async () => {
           await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
           window.location.assign("/login");
@@ -267,12 +276,12 @@ function Sidebar({ active, onChange, open, onClose, userName, userRole, devMode 
   </>
 }
 
-function Topbar({ active, onMenu, locations, selectedLocationId, onLocationChange, onNavigate, theme, onToggleTheme }: { active: NavKey; onMenu: () => void; locations: Location[]; selectedLocationId: string; onLocationChange: (id: string) => void; onNavigate: (id: NavKey) => void; theme: "light" | "dark"; onToggleTheme: () => void }) {
+function Topbar({ items, active, onMenu, locations, selectedLocationId, onLocationChange, onNavigate, theme, onToggleTheme }: { items: ManagerNavItem[]; active: NavKey; onMenu: () => void; locations: Location[]; selectedLocationId: string; onLocationChange: (id: string) => void; onNavigate: (id: NavKey) => void; theme: "light" | "dark"; onToggleTheme: () => void }) {
   const selected = locations.find(location => location.id === selectedLocationId);
   const [searchOpen,setSearchOpen]=useState(false);
   const [notificationsOpen,setNotificationsOpen]=useState(false);
   const [query,setQuery]=useState("");
-  const matches=navItems.filter(item=>item.label.toLowerCase().includes(query.toLowerCase()));
+  const matches=items.filter(item=>item.label.toLowerCase().includes(query.toLowerCase()));
   const go=(id:NavKey)=>{onNavigate(id);setSearchOpen(false);setQuery("");};
   return <header className={`topbar ${shellStyles.topbar}`}>
     <button className={`menu-button ${shellStyles.topbarButton} ${shellStyles.menuButton}`} onClick={onMenu} aria-label="Open navigation"><Menu size={21} /></button>
@@ -593,7 +602,7 @@ function formatAttendanceDate(value: string) {
   return new Date(year, month - 1, day).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function Attendance({ employees, shifts, entries, setEntries, notify, onEdit, devMode, persist }: { employees: Employee[]; shifts: Shift[]; entries: TimeEntry[]; setEntries: React.Dispatch<React.SetStateAction<TimeEntry[]>>; notify:(s:string)=>void; onEdit:(entry:TimeEntry)=>void; devMode:boolean; persist:(path:string,options:RequestInit)=>Promise<any> }) {
+function Attendance({ employees, shifts, entries, setEntries, notify, onEdit, devMode, persist, canManagePayroll, canExportPayroll }: { employees: Employee[]; shifts: Shift[]; entries: TimeEntry[]; setEntries: React.Dispatch<React.SetStateAction<TimeEntry[]>>; notify:(s:string)=>void; onEdit:(entry:TimeEntry)=>void; devMode:boolean; persist:(path:string,options:RequestInit)=>Promise<any>; canManagePayroll:boolean; canExportPayroll:boolean }) {
   const [fromDate, setFromDate] = useState("2026-07-27");
   const [toDate, setToDate] = useState("2026-08-02");
   const [employeeFilter,setEmployeeFilter]=useState("All employees");
@@ -637,9 +646,9 @@ function Attendance({ employees, shifts, entries, setEntries, notify, onEdit, de
     <header className={attendanceStyles.hero}>
       <div><p>Payroll review</p><h1>Time & attendance</h1><span>Review hours and prepare payroll.</span></div>
       <div className={attendanceStyles.actions}>
-        <button className={periodLocked ? attendanceStyles.locked : attendanceStyles.outline} onClick={()=>{setPeriodLocked(v=>!v);notify(periodLocked?"Payroll period unlocked":"Payroll period locked for export")}}>{periodLocked?<><LockKeyhole size={17}/>Locked</>:<><UnlockKeyhole size={17}/>Lock period</>}</button>
+        {canManagePayroll && <button className={periodLocked ? attendanceStyles.locked : attendanceStyles.outline} onClick={()=>{setPeriodLocked(v=>!v);notify(periodLocked?"Payroll period unlocked":"Payroll period locked for export")}}>{periodLocked?<><LockKeyhole size={17}/>Locked</>:<><UnlockKeyhole size={17}/>Lock period</>}</button>}
         <button className={attendanceStyles.approveAll} onClick={approveAllVisible} disabled={periodLocked||!visible.some(e=>e.status==="Pending")}><CheckCheck size={17}/>Approve visible</button>
-        <button className={attendanceStyles.export} onClick={exportApproved} disabled={!approved.length||!periodLocked}><FileDown size={17}/>Export</button>
+        {canExportPayroll && <button className={attendanceStyles.export} onClick={exportApproved} disabled={!approved.length||!periodLocked}><FileDown size={17}/>Export</button>}
       </div>
     </header>
 
@@ -729,7 +738,7 @@ function DailyOperations({tasks,setTasks,logs,setLogs,notify,devMode,locationId}
  <section className={`panel ${operationsStyles.panel} ${operationsStyles.logbook}`}><PanelTitle title="Manager logbook" subtitle="Permanent shift handovers and important operational context."/><div className={operationsStyles.compose}><textarea value={logText} onChange={e=>setLogText(e.target.value)} placeholder="What does the next manager need to know?"/><button type="button" className="primary" onClick={addLog}><Send size={16}/>Save handover</button></div><div className={operationsStyles.logList}>{logs.map(l=><article className={operationsStyles.logEntry} key={l.id}><div><b>{l.title}</b><small>{l.author} · {l.createdAt}</small></div><p>{l.body}</p></article>)}</div></section></div></div>
 }
 
-function Team({ employees, shifts, devMode, onAdd, onEdit, onInvite, onRevoke }: { employees: Employee[]; shifts: Shift[]; devMode:boolean; onAdd: () => void; onEdit: (employee: Employee) => void; onInvite:(employee:Employee)=>void; onRevoke:(employee:Employee)=>void }) {
+function Team({ employees, shifts, devMode, canManage, onAdd, onEdit, onInvite, onRevoke }: { employees: Employee[]; shifts: Shift[]; devMode:boolean; canManage:boolean; onAdd: () => void; onEdit: (employee: Employee) => void; onInvite:(employee:Employee)=>void; onRevoke:(employee:Employee)=>void }) {
   const [query,setQuery]=useState("");
   const [status,setStatus]=useState<"ALL"|"ACTIVE"|"INACTIVE">("ALL");
   const normalizedQuery=query.trim().toLowerCase();
@@ -746,7 +755,7 @@ function Team({ employees, shifts, devMode, onAdd, onEdit, onInvite, onRevoke }:
   const activeCount=employees.filter(person=>person.active).length;
   const portalCount=employees.filter(person=>person.portalStatus==="ACTIVE").length;
   return <div className={`${teamStyles.workspace} page-flow`}>
-    <PageHeader eyebrow="People operations" title="Team" subtitle="People, access and upcoming hours." action={<button className={`team-add-button ${teamStyles.addButton}`} onClick={onAdd}><UserRoundPlus size={17}/>Add employee</button>}/>
+    <PageHeader eyebrow="People operations" title="Team" subtitle="People, access and upcoming hours." action={canManage ? <button className={`team-add-button ${teamStyles.addButton}`} onClick={onAdd}><UserRoundPlus size={17}/>Add employee</button> : <span className="connection-pill">Read only</span>}/>
     <section className={teamStyles.summary} aria-label="Team summary">
       <article><span>Total team</span><strong>{employees.length}</strong></article>
       <article><span>Active</span><strong>{activeCount}</strong></article>
@@ -775,11 +784,11 @@ function Team({ employees, shifts, devMode, onAdd, onEdit, onInvite, onRevoke }:
             <div><span>Contact</span><strong>{person.email||person.status}</strong></div>
           </div>
           <div className={teamStyles.portalRow}><span className={teamStyles.indicator} data-state={person.portalStatus}/><span>{portalLabel}</span></div>
-          <footer className={teamStyles.actions}>
+          {canManage && <footer className={teamStyles.actions}>
             <button className={teamStyles.outlineButton} onClick={() => onEdit(person)}>Edit</button>
             <button className={teamStyles.filledButton} disabled={devMode||!person.email||person.portalStatus==="ACTIVE"} onClick={()=>onInvite(person)}>{person.portalStatus==="INVITED"?"Resend":"Invite"}</button>
             {person.portalStatus==="INVITED"&&<button className={teamStyles.outlineButton} disabled={devMode} onClick={()=>onRevoke(person)}>Revoke</button>}
-          </footer>
+          </footer>}
           {devMode&&<small className={teamStyles.note}>Connect PostgreSQL to create real employee logins.</small>}
         </article>
       })}

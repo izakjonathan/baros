@@ -1,4 +1,4 @@
-# Bar Ops v0.18.16 — deployment sign-off
+# Bar Ops v0.19.0-rc.2 — deployment sign-off
 
 ## Release status
 
@@ -8,8 +8,8 @@ The source package contains the acceptance contract and automated source checks.
 
 ## Promotion decision
 
-- Release candidate: `v0.18.16`
-- Application rollback checkpoint: `v0.18.14`
+- Release candidate: `v0.19.0-rc.2`
+- Application rollback checkpoint: `v0.18.16`
 - Schema change in this release: none
 - Production approver: ____________________
 - Staging deployment URL: ____________________

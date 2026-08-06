@@ -1,3 +1,18 @@
+# v0.19.0-rc.2 — Permission Capability Alignment
+
+Centralizes role capabilities and aligns manager navigation, Team actions, payroll controls, employee invitations, schedule templates, and time-clock settings with the approved role model. No visual redesign or database migration is included.
+
+# Bar Ops v0.19.0-rc.1 — Production Release Candidate
+
+- Froze the accepted v0.18 feature and interface scope for production acceptance.
+- Added an exact-source release-candidate contract and severity-based defect log.
+- Added focused rc.1 regression coverage and CI enforcement.
+- Updated production acceptance and deployment sign-off records to identify the exact rc.1 candidate.
+- Attempted clean dependency resolution; the configured npm proxy still returns 404 for scoped type packages, so dependency-based gates remain pending.
+- No business logic, API contract, permission, persistence or database schema changes.
+
+Rollback checkpoint: **v0.18.16**.
+
 # Bar Ops v0.18.16 — Production Acceptance & Deployment Sign-off
 
 - Added a staging acceptance matrix for manager, employee, database, browser, device and accessibility workflows.

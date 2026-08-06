@@ -39,6 +39,10 @@ jobs:
       - name: Validate release contract
         run: npm run validate:release
 
+      - name: Validate release-candidate contract
+        run: npm run test:v0190rc2
+      - run: npm run test:v0190rc2
+
       - name: Validate production acceptance contract
         run: npm run test:v01816-acceptance
 

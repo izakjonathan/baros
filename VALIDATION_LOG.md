@@ -1,3 +1,7 @@
+# Bar Ops v0.19.0-rc.2 — Validation Log
+
+Source-level capability checks are included. Dependency-backed lint, full type-check, build, live database, staging, and device verification remain external gates.
+
 # v0.18.16 validation log
 
 - Source acceptance regression: passed.
@@ -712,3 +716,41 @@ Not run locally:
 - Release artifact audit: passed
 - Dependency-based lint, type-check and production build: not available unless dependencies are installed
 
+
+## v0.19.0-rc.1 — Production Release Candidate
+
+- Release-candidate contract and defect log added.
+- Exact-source promotion rule recorded.
+- CI and source acceptance updated to validate rc.1.
+- Clean install attempted against the configured npm proxy; `@types/node@22.10.2` returned 404.
+- Dependency-based lint, complete type-check, production build, staging, database and physical-device gates remain pending.
+
+### Local execution evidence
+
+- `npm run acceptance:source`: passed.
+- `npm run test:layout-v094`: passed after updating its obsolete source assertion to the current accessible component-owned schedule selector.
+- `npm run test:all`: progressed through the v0.10.0 suite and stopped at the historical v0.10.1 `order empty state` source assertion. This is recorded as an unresolved regression-suite maintenance blocker; the full suite is not claimed as passed.
+- Clean dependency resolution: failed because the configured npm proxy returned 404 for `@types/node@22.10.2`.
+- ESLint, complete TypeScript validation and Next.js production build: not run because dependencies could not be installed.
+- Local source checks ran under the available Node v22 runtime; mandatory RC build verification remains Node 24.
+
+## v0.19.0-rc.2 Phase B1 evidence
+
+Passed:
+
+- release artifact audit;
+- stabilization preflight;
+- release contract validation;
+- focused capability and permission-parity regression.
+
+Attempted but blocked:
+
+- full TypeScript validation: project dependency type packages are unavailable in the extracted source environment.
+
+Not performed:
+
+- live PostgreSQL authorization tests;
+- concurrent mutation tests;
+- Vercel staging;
+- multi-role browser acceptance;
+- physical-device verification.

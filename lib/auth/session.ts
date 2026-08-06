@@ -5,6 +5,7 @@ import { db } from "@/lib/db/client";
 import { createDevSessionToken, getDevSessionUser, isDevAuthEnabled, verifyDevSessionToken } from "@/lib/auth/dev-auth";
 import { expiredSessionCookieOptions, sessionCookieName, sessionCookieOptions, sessionExpiry } from "@/lib/auth/session-cookie";
 import { hashSessionToken, persistSessionRecord } from "@/lib/auth/session-store";
+import { rolesWithCapability, type Capability } from "@/lib/auth/capabilities";
 
 export type AppRole = "OWNER" | "ADMIN" | "MANAGER" | "SHIFT_MANAGER" | "EMPLOYEE";
 export type SessionUser = { userId: string; email: string; name: string; role: AppRole; organizationId: string; locationId: string | null; employeeId: string | null };
@@ -116,9 +117,13 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   return rows[0] || null;
 }
 
-export async function requireUser(roles?: AppRole[]) {
+export async function requireUser(roles?: readonly AppRole[]) {
   const user = await getSessionUser();
   if (!user) redirect("/login");
   if (roles && !roles.includes(user.role)) redirect("/employee");
   return user;
+}
+
+export async function requireCapability(capability: Capability) {
+  return requireUser(rolesWithCapability(capability));
 }
