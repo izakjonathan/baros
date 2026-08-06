@@ -1,0 +1,15 @@
+/* v0.18.13.3 — shared button-content alignment contract.
+   Buttons own their internal centering; feature layouts still own external size and placement. */
+button,
+[role="button"]{
+  text-align:center;
+}
+button:not(.side-nav button):not(.attention-item):not(.quick-action):not(.top-popover button),
+[role="button"]{
+  align-items:center;
+  justify-content:center;
+}
+button > svg,
+[role="button"] > svg{
+  flex:0 0 auto;
+}

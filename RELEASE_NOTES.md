@@ -1,4 +1,4 @@
-# Bar Ops v0.18.13.2 — Physical Device Component Corrections
+# Bar Ops v0.18.13.3 — Physical Device Component Corrections
 
 - Removed beige nested fills from Manager Logbook composition and saved handover entries.
 - Removed beige nested empty cards from Today’s Timeline, Live/Current Shift Boards.
@@ -485,3 +485,11 @@ Phase D dashboard redesign built from v0.18.2. It introduces a feature-owned das
 - Preserved role permissions, navigation destinations and workspace content.
 
 No database migration or business-feature change is included.
+
+## v0.18.13.3 — Site-wide Button Alignment & Shift Plan Density Fix
+- Centers button labels and icon/label groups through one shared internal-alignment contract.
+- Corrects Inventory Stock count, Add product, and Below par controls.
+- Corrects Purchase Order New order and Receive order controls.
+- Centers native iPhone payroll date values while preserving containment.
+- Reduces Shift Plan inter-column spacing and prevents Week/Month/Period selector clipping.
+- Removes the Manager Logbook divider beneath Save handover.

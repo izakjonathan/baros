@@ -239,3 +239,23 @@
   .periodFields input[type="date"],
   .filters select{min-block-size:2.65rem;height:2.65rem;border-radius:.78rem}
 }
+
+/* v0.18.13.3 — center native date text without weakening iPhone containment. */
+.periodFields input[type="date"]{
+  padding-inline:.5rem;
+  text-align:center;
+  line-height:1;
+}
+.periodFields input[type="date"]::-webkit-date-and-time-value{
+  inline-size:100%;
+  min-inline-size:0;
+  padding:0;
+  text-align:center;
+}
+.periodFields input[type="date"]::-webkit-datetime-edit{
+  display:block;
+  inline-size:100%;
+  min-inline-size:0;
+  padding:0;
+  text-align:center;
+}

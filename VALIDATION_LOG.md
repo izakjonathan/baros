@@ -1,4 +1,4 @@
-# v0.18.13.2 validation
+# v0.18.13.3 validation
 
 - Focused visual-correction regression: pending execution
 - Release validation: pending execution

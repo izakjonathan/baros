@@ -2845,3 +2845,39 @@
     margin:0 !important;
   }
 }
+
+/* v0.18.13.3 — physical-device schedule density and selector containment. */
+.viewSelect,
+.viewSelect select,
+.headerActions :global(.schedule-view-select),
+.headerActions :global(.schedule-view-select select){
+  min-inline-size:0 !important;
+  max-inline-size:100% !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  text-align:center;
+  text-align-last:center;
+}
+@media(max-width:48rem){
+  .calendarGrid,
+  .calendarPanel :global(.calendar-grid){
+    --iphone-day-gap:.08rem !important;
+    gap:var(--iphone-day-gap) !important;
+    grid-auto-columns:calc((100vw - 2.1rem) / 3) !important;
+  }
+  .dayColumn,
+  .calendarPanel :global(.day-column){
+    gap:.14rem !important;
+  }
+  .viewSelect,
+  .headerActions :global(.schedule-view-select){
+    width:4.65rem !important;
+    min-width:4.65rem !important;
+  }
+  .viewSelect select,
+  .headerActions :global(.schedule-view-select select){
+    padding-inline:.45rem 1.35rem !important;
+    font-size:.68rem !important;
+  }
+}

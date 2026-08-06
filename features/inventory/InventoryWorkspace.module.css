@@ -42,3 +42,16 @@
   .productCard header{align-items:center}
   .stockRow{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr) minmax(0,.9fr)}
 }
+
+/* v0.18.13.3 — authoritative mobile button alignment. */
+.headerActions button,
+.lowFilter,
+.clear{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.42rem;
+  text-align:center;
+  line-height:1;
+}
+.headerActions :global(.primary) svg{color:#000;stroke:#000}

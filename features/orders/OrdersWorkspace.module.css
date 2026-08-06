@@ -28,3 +28,16 @@
   box-shadow:none!important;
   color:#000;
 }
+
+/* v0.18.13.3 — order actions center icon and label as one unit. */
+.addButton,
+.receiveButton,
+.suggestion button,
+.delivery button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.42rem;
+  text-align:center;
+  line-height:1;
+}

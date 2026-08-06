@@ -45,3 +45,10 @@
   border-radius:0;
   padding:.85rem 0 0;
 }
+
+/* v0.18.13.3 — saved handovers are separated by spacing, not a divider. */
+.logEntry{
+  border-top:0;
+  padding-top:.35rem;
+}
+.logList{gap:.85rem}
