@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { Check, RefreshCw, X } from "lucide-react";
+import { CalendarClock, Check, CheckCircle2, RefreshCw, Shuffle, Umbrella, X } from "lucide-react";
+import styles from "@/features/requests/RequestsWorkspace.module.css";
 
 type QueueItem={id:string;kind:"REQUEST"|"CLAIM"|"TRANSFER";title:string;subtitle:string;status:string;createdAt:string};
 
@@ -55,7 +56,31 @@ export function RequestsWorkspace({devMode,notify}:{devMode:boolean;notify:(mess
     }catch(e){notify(e instanceof Error?e.message:'Could not review request')}
     finally{setBusy(null)}
   }
-  return <section><div className="page-header"><div><p className="eyebrow">Employee self-service</p><h1>Requests</h1><p>Review time off, open shifts and employee-approved shift changes.</p></div><button className="secondary" type="button" onClick={()=>void load()}><RefreshCw size={16}/>Refresh</button></div><div className="panel request-queue"><div className="panel-title"><div><h2>Review queue</h2><p>{items.length} awaiting a decision</p></div></div>{loading?<div className="queue-empty">Loading requests…</div>:items.length?items.map(item=><article key={`${item.kind}-${item.id}`}><div><span className="queue-kind">{item.kind}</span><strong>{item.title}</strong><p>{item.subtitle}</p><small>{item.status.replaceAll('_',' ')}</small></div><div className="queue-actions"><button className="secondary" type="button" disabled={busy===item.id} onClick={()=>void review(item,'REJECTED')}><X size={15}/>Reject</button><button className="primary" type="button" disabled={busy===item.id} onClick={()=>void review(item,'APPROVED')}><Check size={15}/>Approve</button></div></article>):<div className="queue-empty">No employee requests awaiting review.</div>}</div></section>
+  const requestCount=items.filter(item=>item.kind==="REQUEST").length;
+  const claimCount=items.filter(item=>item.kind==="CLAIM").length;
+  const transferCount=items.filter(item=>item.kind==="TRANSFER").length;
+  return <section className={styles.workspace}>
+    <header className={styles.header}>
+      <div className={styles.headerCopy}><p className={styles.eyebrow}>Employee self-service</p><h1>Requests</h1><p className={styles.subtitle}>Review time off, open shifts and employee-approved shift changes.</p></div>
+      <button className={styles.refresh} type="button" disabled={loading} onClick={()=>void load()}><RefreshCw className={loading?styles.loadingIcon:undefined} size={16}/>Refresh</button>
+    </header>
+    <section className={styles.summary} aria-label="Request summary">
+      <article><span>Awaiting review</span><strong>{items.length}</strong></article>
+      <article><span>Open shifts</span><strong>{claimCount}</strong></article>
+      <article><span>Changes</span><strong>{transferCount+requestCount}</strong></article>
+    </section>
+    <section className={styles.queue}>
+      <header className={styles.queueHeader}><div><h2>Review queue</h2><p>Oldest requests appear first.</p></div><span className={styles.liveStatus}>Live queue</span></header>
+      {loading?<div className={styles.empty}><RefreshCw className={styles.loadingIcon}/><strong>Loading requests</strong><span>Checking the latest employee requests and shift actions.</span></div>:items.length?<div className={styles.list}>{items.map(item=>{
+        const Icon=item.kind==="REQUEST"?Umbrella:item.kind==="CLAIM"?CalendarClock:Shuffle;
+        return <article className={styles.card} data-kind={item.kind} key={`${item.kind}-${item.id}`}>
+          <header className={styles.cardHeader}><span className={styles.kind}>{item.kind}</span><span className={styles.status}>{item.status.replaceAll('_',' ').toLowerCase()}</span></header>
+          <h3>{item.title}</h3>
+          <div className={styles.meta}><span><Icon size={16}/><p>{item.subtitle}</p></span></div>
+          <div className={styles.actions}><button className={styles.reject} type="button" disabled={busy===item.id} onClick={()=>void review(item,'REJECTED')}><X size={15}/>Reject</button><button className={styles.approve} type="button" disabled={busy===item.id} onClick={()=>void review(item,'APPROVED')}><Check size={15}/>Approve</button></div>
+        </article>})}</div>:<div className={styles.empty}><CheckCircle2/><strong>Queue is clear</strong><span>No employee requests are awaiting a manager decision.</span></div>}
+    </section>
+  </section>
 }
 function actionable(item:QueueItem){return item.kind==='TRANSFER'?item.status==='PENDING_MANAGER':item.status==='PENDING'}
 function range(start?:string|null,end?:string|null){if(!start)return 'Flexible';const f=new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'});return `${f.format(new Date(start))}${end?` – ${f.format(new Date(end))}`:''}`}

@@ -5,6 +5,7 @@ import "./globals.css";
 import "./mono-tokens.css";
 import "./mono-components.css";
 import "./spacing-system.css";
+import "./completion-redesign.css";
 import { PwaRegister } from "./pwa-register";
 
 const inter = Inter({

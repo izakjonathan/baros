@@ -1,6 +1,22 @@
+# Bar Ops v0.18.11 — Complete Interface Redesign
+
+Current release: **v0.18.11**
+
+This release completes Phase D in one coordinated pass. Every remaining employee page, authentication and activation surface, manager and employee pop-up, mobile sheet, top-bar popover, form state, and shared loading/empty/error presentation now follows the accepted iPhone-first Bar Ops visual system. Existing business logic, APIs, permissions and persistence are unchanged.
+
+Rollback checkpoint: **v0.18.10**.
+
+# Bar Ops v0.18.10 — Requests Redesign
+
+Historic release: **v0.18.10**
+
+This release rebuilds the manager Requests workspace as an iPhone-first live review queue. Pending time-off requests, open-shift claims and shift changes now use compact feature-owned cards, operational summaries, clear empty/loading states and equally reachable decision actions while preserving the existing APIs, live refresh, conflict handling, permissions and persistence.
+
+Rollback checkpoint: **v0.18.9**.
+
 # Bar Ops v0.18.9 — Daily Operations & Settings Redesign
 
-Current release: **v0.18.9**
+Historic release: **v0.18.9**
 
 This release redesigns Daily Operations and Settings as compact iPhone-first manager workspaces. Checklists, handovers, operational summaries and time-clock configuration now use feature-owned CSS Modules and the accepted Phase D visual language while preserving existing APIs, permissions and persistence.
 

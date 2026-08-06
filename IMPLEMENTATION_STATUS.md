@@ -1,3 +1,46 @@
+# Implementation Status — v0.18.11
+
+## Completed
+
+- All manager workspace redesigns.
+- All employee workspace redesigns.
+- Login and employee activation redesigns.
+- Dialogs, popovers, mobile sheets, form states, toast and shared state redesigns.
+- iPhone native date/time/month/datetime containment across remaining forms.
+- Phase D redesign inventory closed.
+
+## Next phase
+
+- Site-wide visual correction pass.
+- Physical iPhone and iPad verification.
+- Cross-workspace spacing, typography and interaction consistency corrections.
+
+## Pending external gates
+
+- Clean dependency installation
+- ESLint
+- TypeScript compilation
+- Next.js production build
+- Browser and physical-device verification
+
+# Implementation Status — v0.18.10
+
+## Completed
+
+- Manager Requests workspace redesigned for iPhone-first review.
+- Feature styling moved from legacy global selectors to `features/requests/RequestsWorkspace.module.css`.
+- Request, claim and transfer API behavior preserved.
+- Live refresh, manager decisions and stale-request conflict handling preserved.
+- Focused source regression added.
+
+## Pending external gates
+
+- Clean dependency installation
+- ESLint
+- TypeScript compilation
+- Next.js production build
+- Browser and physical-device verification
+
 ## Current release: v0.18.9
 
 Daily Operations and Settings have completed their Phase D iPhone-first redesign. The next planned workspace is the Employee Workspace.

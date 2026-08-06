@@ -1,5 +1,7 @@
 # Phase D Redesign Inventory
 
+**Status: complete in v0.18.11.** All manager workspaces, employee workspaces, authentication/activation surfaces, shared dialogs, popovers, mobile sheets, forms, and common loading/empty/error states now have redesign coverage. The next release can focus on site-wide visual correction and device verification rather than unfinished page redesigns.
+
 ## Manager workspaces
 
 - Today’s operations

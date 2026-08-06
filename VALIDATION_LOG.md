@@ -1,3 +1,46 @@
+# Validation Log — v0.18.11
+
+## Passed
+
+- `node scripts/test-v01811-completion-redesign.mjs`
+- `node scripts/test-v01852-date-input-sizing.mjs`
+- `node scripts/test-v0110-self-service.mjs`
+- `node scripts/test-v0111-self-service-integrity.mjs`
+- `node scripts/test-v01810-requests-redesign.mjs`
+- release validation
+- stabilization preflight
+- forbidden-artifact audit
+- ZIP integrity
+
+## Not run in this environment
+
+- Clean dependency installation
+- ESLint
+- TypeScript compilation
+- Next.js production build
+- Browser and physical-device verification
+
+# Validation Log — v0.18.10
+
+## Passed
+
+- `node scripts/test-v01810-requests-redesign.mjs`
+- `node scripts/test-v0116-request-queue.mjs`
+- `node scripts/test-v0113-request-availability.mjs`
+- `node scripts/test-v0110-self-service.mjs`
+- `npm run validate:release`
+- `npm run audit:preflight`
+- `npm run audit:artifacts`
+- ZIP integrity
+
+## Not run in this environment
+
+- Clean dependency installation
+- ESLint
+- TypeScript compilation
+- Next.js production build
+- Browser and physical-device verification
+
 ## v0.18.9
 
 - Daily operations/checklist regressions: passed

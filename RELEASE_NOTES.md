@@ -1,3 +1,23 @@
+# Bar Ops v0.18.11 — Complete Interface Redesign
+
+- Completed all remaining employee workspace redesigns: Home, Schedule, Hours, Availability, Requests, Notifications and More navigation.
+- Redesigned login, developer access and employee activation surfaces.
+- Standardized every shared dialog, acknowledgement window, shift/employee editor, action footer, toast, top-bar search and notification popover.
+- Added iPhone-safe sizing for native date, time, month and datetime controls across employee forms and dialogs.
+- Added coordinated loading, empty, error, disabled and transient-state presentation.
+- Recorded Phase D redesign inventory as complete so future releases can focus on site-wide correction and physical-device verification.
+- Preserved all manager and employee APIs, calculations, permissions, authentication behavior and persistence.
+
+# Bar Ops v0.18.10 — Requests Redesign
+
+- Rebuilt the manager Requests workspace as a compact iPhone-first review queue.
+- Added concise Awaiting review, Open shifts and Changes summaries.
+- Added request-type color coding for time off, open-shift claims and transfers.
+- Added clear loading and empty states with the oldest actionable requests shown first.
+- Kept Approve and Reject equally reachable on mobile.
+- Removed legacy global request selectors and established one feature-owned CSS Module.
+- Preserved the three request APIs, 15-second live refresh, conflict handling, permissions and persistence.
+
 ## v0.18.9 — Daily Operations & Settings Redesign
 
 - Rebuilt Daily Operations around a compact date/progress header, operational summary, checklist and manager logbook.
