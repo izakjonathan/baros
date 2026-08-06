@@ -1,6 +1,13 @@
+# Bar Ops v0.18.14 — Draft Shift Visual Simplification
+
+Current release: **v0.18.14**
+
+Draft shifts no longer display a redundant `DRAFT` pill. Their muted treatment and dotted outline remain the sole visual indicators, while the underlying draft status and all schedule behavior are unchanged.
+
+Rollback checkpoint: **v0.18.13.6**.
+
 # Bar Ops v0.18.13.6 — Shift Plan Column Track Fix
 
-Current release: **v0.18.13.6**
 
 This release fixes the recurring wide spacing between mobile Shift Plan days at its layout source. The grid previously created viewport-sized tracks while historical rules capped each day column to a smaller fixed width. The unused space inside each track appeared as a large gap even when `gap: 0`. The mobile grid and each day column now share one authoritative width with only a small deliberate separator. Scheduling behavior, APIs, permissions and persistence are unchanged.
 

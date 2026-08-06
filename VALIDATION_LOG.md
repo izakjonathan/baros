@@ -1,3 +1,17 @@
+# v0.18.14 validation
+
+Focused accessibility regression, release validation, stabilization preflight, artifact audit, and ZIP integrity are required for this package. Dependency-backed lint, type-check and production build depend on installed packages.
+
+# v0.18.14 validation
+
+- Focused draft-visual regression: passed
+- Inherited schedule-column regression: passed
+- Release validation: passed
+- Stabilization preflight: passed
+- Forbidden-artifact audit: passed
+- ZIP integrity: passed
+- Dependency-based lint/typecheck/build: not run because `node_modules` is not present in this environment
+
 # v0.18.13.5 validation
 
 Focused date-control regression, release validation, stabilization preflight, artifact audit, and ZIP integrity checks were run for this release.

@@ -149,8 +149,9 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
 
   return (
     <div className="app-frame">
+      <a className="skip-link" href="#main-content">Skip to main content</a>
       <Sidebar active={active} onChange={(value) => { setActive(value); setMobileNav(false); }} open={mobileNav} onClose={() => setMobileNav(false)} userName={userName} userRole={userRole} devMode={devMode} />
-      <main className="main-shell">
+      <main id="main-content" className="main-shell" tabIndex={-1}>
         <Topbar active={active} onMenu={() => setMobileNav(true)} locations={locations} selectedLocationId={selectedLocationId} onLocationChange={setSelectedLocationId} onNavigate={setActive} theme={theme} onToggleTheme={toggleTheme} />
         <div className="page-wrap" data-workspace={active}>
           <div className="workspace-flow">
@@ -239,7 +240,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       {editingProduct && <ProductDialog product={editingProduct} onClose={() => setEditingProduct(null)} onSave={async (product) => { try { const saved=await persist("/api/products",{method:"PATCH",body:JSON.stringify({...product,locationId:selectedLocationId})}); setProducts(current => current.map(p => p.id === product.id ? {...product,...saved} : p)); setEditingProduct(null); notify("Product updated"); } catch(error) { notify(error instanceof Error?error.message:"Could not update product"); } }} />}
       {dialog === "stockCount" && <StockCountDialog products={products} onClose={() => setDialog(null)} onSave={async (counts) => { try { if (!devMode) { for (const product of products) if (counts[product.id] !== undefined && counts[product.id] !== product.stock) await persist("/api/products", { method:"PATCH", body:JSON.stringify({...product, stock:counts[product.id], locationId:selectedLocationId}) }); } setProducts(current => current.map(p => ({...p,stock:counts[p.id] ?? p.stock}))); setDialog(null); notify("Stock count approved and inventory updated"); } catch(error) { notify(error instanceof Error ? error.message : "Could not save stock count"); } }} />}
       {dialog === "order" && <OrderDialog onClose={() => setDialog(null)} onSave={() => { setDialog(null); notify("Purchase order created"); }} />}
-      {toast && <div className="toast"><span><Check size={16} /></span>{toast}</div>}
+      {toast && <div className="toast" role="status" aria-live="polite" aria-atomic="true"><span aria-hidden="true"><Check size={16} /></span>{toast}</div>}
     </div>
   );
 }
@@ -277,11 +278,11 @@ function Topbar({ active, onMenu, locations, selectedLocationId, onLocationChang
     <button className={`menu-button ${shellStyles.topbarButton} ${shellStyles.menuButton}`} onClick={onMenu} aria-label="Open navigation"><Menu size={21} /></button>
     <label className={`location-switch ${shellStyles.location}`} aria-label="Current location"><span className="status-dot" />{locations.length > 1 ? <><select value={selectedLocationId} onChange={event => onLocationChange(event.target.value)}>{locations.map(location => <option key={location.id} value={location.id}>{location.name}</option>)}</select><ChevronDown size={15} /></> : <span>{selected?.name || "No active location"}</span>}</label>
     <div className={`top-actions ${shellStyles.actions}`}>
-      <button className={`icon-button ${shellStyles.topbarButton}`} onClick={()=>{setSearchOpen(v=>!v);setNotificationsOpen(false)}} aria-label="Search workspace"><Search size={19} /></button>
+      <button className={`icon-button ${shellStyles.topbarButton}`} onClick={()=>{setSearchOpen(v=>!v);setNotificationsOpen(false)}} aria-label="Search workspace" aria-expanded={searchOpen} aria-controls="workspace-search-popover"><Search size={19} /></button>
       <button className={`icon-button ${shellStyles.topbarButton} ${shellStyles.themeButton}`} onClick={onToggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} aria-pressed={theme === "dark"}>{theme === "dark" ? <Sun size={18}/> : <Moon size={18}/>}</button>
-      <button className={`icon-button notification ${shellStyles.topbarButton}`} onClick={()=>{setNotificationsOpen(v=>!v);setSearchOpen(false)}} aria-label="Open notifications"><Bell size={19} /><i /></button>
-      {searchOpen&&<div className="top-popover search-popover"><label><Search size={16}/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search workspace"/></label><div>{matches.map(item=><button key={item.id} onClick={()=>go(item.id)}><item.icon size={17}/><span>{item.label}</span><ArrowRight size={14}/></button>)}</div></div>}
-      {notificationsOpen&&<div className="top-popover notifications-popover"><strong>Notifications</strong><button onClick={()=>go("schedule")}><CalendarDays size={17}/><span><b>Draft schedule</b><small>Review and publish upcoming shifts</small></span></button><button onClick={()=>go("attendance")}><Clock3 size={17}/><span><b>Timesheet review</b><small>Open time and attendance</small></span></button><button onClick={()=>go("requests")}><ClipboardList size={17}/><span><b>Employee requests</b><small>Review leave, open shifts and shift changes</small></span></button><button onClick={()=>go("inventory")}><Package size={17}/><span><b>Stock attention</b><small>Review products below par</small></span></button></div>}
+      <button className={`icon-button notification ${shellStyles.topbarButton}`} onClick={()=>{setNotificationsOpen(v=>!v);setSearchOpen(false)}} aria-label="Open notifications" aria-expanded={notificationsOpen} aria-controls="workspace-notifications-popover"><Bell size={19} /><i /></button>
+      {searchOpen&&<div id="workspace-search-popover" className="top-popover search-popover" role="dialog" aria-label="Search workspace"><label><Search size={16}/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search workspace"/></label><div>{matches.map(item=><button key={item.id} onClick={()=>go(item.id)}><item.icon size={17}/><span>{item.label}</span><ArrowRight size={14}/></button>)}</div></div>}
+      {notificationsOpen&&<div id="workspace-notifications-popover" className="top-popover notifications-popover" role="dialog" aria-label="Notifications"><strong>Notifications</strong><button onClick={()=>go("schedule")}><CalendarDays size={17}/><span><b>Draft schedule</b><small>Review and publish upcoming shifts</small></span></button><button onClick={()=>go("attendance")}><Clock3 size={17}/><span><b>Timesheet review</b><small>Open time and attendance</small></span></button><button onClick={()=>go("requests")}><ClipboardList size={17}/><span><b>Employee requests</b><small>Review leave, open shifts and shift changes</small></span></button><button onClick={()=>go("inventory")}><Package size={17}/><span><b>Stock attention</b><small>Review products below par</small></span></button></div>}
     </div>
   </header>
 }
@@ -581,7 +582,7 @@ function ShiftCard({ shift, conflict, onOpen, onDragStart }: { shift: Shift; con
     <div className="shift-card-top"><span>{shift.start}–{shift.end}{overnight ? " +1" : ""}</span><ChevronRight size={14} /></div>
     <strong>{displayName}</strong>
     <small><span>{shift.role}</span>{overnight ? <span className="shift-overnight-label"> · Overnight</span> : null}</small>
-    {shift.isOpen && <em>Open</em>}{shift.status === "Draft" && <em>Draft</em>}{shift.availabilityConflict && <em className="conflict-badge">{shift.availabilityConflict === "APPROVED_TIME_OFF" ? "Time off" : "Unavailable"}</em>}{conflict && !shift.availabilityConflict && <em className="conflict-badge">Conflict</em>}
+    {shift.isOpen && <em>Open</em>}{shift.availabilityConflict && <em className="conflict-badge">{shift.availabilityConflict === "APPROVED_TIME_OFF" ? "Time off" : "Unavailable"}</em>}{conflict && !shift.availabilityConflict && <em className="conflict-badge">Conflict</em>}
   </button>;
 }
 

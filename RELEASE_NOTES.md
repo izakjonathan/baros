@@ -1,3 +1,21 @@
+# v0.18.14 — Accessibility & Interaction QA
+
+- Added a keyboard-visible skip link and focusable main workspace target.
+- Standardized focus-visible treatment across links, buttons, fields, tabs and custom controls.
+- Verified and regression-guarded shared dialog focus trapping, Escape handling and focus restoration.
+- Added equivalent focus management to the employee More sheet.
+- Exposed expanded/controlled relationships for manager search and notification popovers.
+- Made manager toasts atomic polite live-region updates.
+- Added reduced-motion and forced-colors support.
+- Added a focused physical-device and VoiceOver acceptance checklist.
+- Preserved all business logic, APIs, permissions and persistence.
+
+# v0.18.14 — Draft Shift Visual Simplification
+
+- Removes the visible `DRAFT` pill from draft shift cards.
+- Retains the muted appearance and dotted outline as the complete draft-state treatment.
+- Preserves draft status, publishing, editing, drag-and-drop, APIs, permissions and persistence.
+
 # v0.18.13.6 — Shift Plan Column Track Root-Cause Fix
 
 - Replaces viewport-derived mobile day tracks with one explicit day-column width.

@@ -1,3 +1,11 @@
+# Current release: v0.18.14
+
+Accessibility and interaction QA is implemented at source level. Physical VoiceOver, touch, and Safari keyboard acceptance remains a deployment/device task using `V01814_DEVICE_ACCEPTANCE.md`.
+
+# v0.18.14 implementation status
+
+Complete: the redundant visible Draft pill has been removed from Shift Plan cards. Draft shifts retain their muted styling, dotted outline, state data, publishing behavior and persistence.
+
 # v0.18.13.6 implementation status
 
 Complete: mobile Shift Plan track and day-column widths now have one owner. The false inter-column spacing caused by wider grid tracks surrounding capped child columns has been removed. Physical iPhone verification remains the acceptance step after deployment.

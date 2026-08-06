@@ -9,6 +9,7 @@ import "./completion-redesign.css";
 import "./interface-consistency.css";
 import "./visual-qa-consistency.css";
 import "./button-alignment-corrections.css";
+import "./accessibility-interaction.css";
 import { PwaRegister } from "./pwa-register";
 
 const inter = Inter({
