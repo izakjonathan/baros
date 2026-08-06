@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
-import { getSessionUser, requireUser } from "@/lib/auth/session";
+import { getSessionUser, requireCapability } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
 import { ApiError, enumValue, jsonError, readJsonObject, requiredString, uuid } from "@/lib/http";
@@ -9,7 +9,7 @@ const SECURITY_ACTIONS = ["PASSWORD_RESET_REQUEST", "GDPR_REQUEST", "REVOKE_SESS
 const GDPR_REQUEST_TYPES = ["ACCESS", "EXPORT", "ERASURE", "RECTIFICATION"] as const;
 
 export async function GET() {
-  const user = await requireUser(["OWNER", "ADMIN"]);
+  const user = await requireCapability("security.manage");
   const [sessions, mfa, gdpr, health] = await Promise.all([
     db()`select s.id,s.created_at,s.expires_at,s.location_id from sessions s where s.organization_id=${user.organizationId} and s.user_id=${user.userId} order by s.created_at desc`,
     db()`select id,factor_type,enabled_at,last_used_at,created_at from mfa_factors where user_id=${user.userId}`,

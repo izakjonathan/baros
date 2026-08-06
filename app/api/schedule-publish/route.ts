@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth/session";
+import { requireCapability } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, isoDate, jsonError, readJsonObject, uuid } from "@/lib/http";
 export async function POST(req:Request){
  try{
-  const u=await requireUser(["OWNER","ADMIN","MANAGER","SHIFT_MANAGER"]);const b=await readJsonObject(req);const locationId=uuid(b.locationId||u.locationId,'locationId');const start=isoDate(b.weekStart,'weekStart');const end=isoDate(b.weekEnd,'weekEnd');
+  const u=await requireCapability("schedule.publish");const b=await readJsonObject(req);const locationId=uuid(b.locationId||u.locationId,'locationId');const start=isoDate(b.weekStart,'weekStart');const end=isoDate(b.weekEnd,'weekEnd');
   if(start>=end)throw new ApiError(400,'weekEnd must be after weekStart');
   const idempotencyKey=String(req.headers.get('idempotency-key')||b.idempotencyKey||'').trim()||null;
   const pub=await db().begin(async sql=>{

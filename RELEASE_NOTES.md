@@ -1,3 +1,14 @@
+# v0.19.0-rc.3 — Authorization & Data-Integrity Verification
+
+- Replaced remaining hard-coded manager role arrays in critical APIs with centralized named capabilities.
+- Aligned attendance, schedule publication, operations, payroll CSV, security, checklist, and manager-bootstrap guards.
+- Added a source authorization/integrity regression and an optional live PostgreSQL integrity verifier.
+- Added an explicit authorization verification matrix.
+- Recorded that the employee workspace is functionally implemented but not yet redesigned.
+- No CSS, visual redesign, database migration, or broad architectural refactor is included.
+
+Rollback checkpoint: **v0.19.0-rc.2**.
+
 # v0.19.0-rc.2 — Permission Capability Alignment
 
 Centralizes role capabilities and aligns manager navigation, Team actions, payroll controls, employee invitations, schedule templates, and time-clock settings with the approved role model. No visual redesign or database migration is included.

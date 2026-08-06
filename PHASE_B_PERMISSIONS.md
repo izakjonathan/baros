@@ -1,3 +1,7 @@
+# Bar Ops v0.19.0-rc.3 — Phase B2 Authorization & Integrity Verification
+
+Phase B2 replaces remaining hard-coded management role arrays in critical APIs with the centralized capability model and adds source/live database verification. The employee workspace remains not yet redesigned.
+
 # Bar Ops v0.19.0-rc.2 — Phase B1 Permission Capability Alignment
 
 This release implements the first approved Phase B remediation slice.

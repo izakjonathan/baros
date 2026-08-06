@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth/session";
+import { requireCapability } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, jsonError, uuid } from "@/lib/http";
 
 export async function GET(request: Request) {
   try {
-    const user = await requireUser(["OWNER", "ADMIN", "MANAGER", "SHIFT_MANAGER"]);
+    const user = await requireCapability("manager.workspace");
     const requested = new URL(request.url).searchParams.get("locationId");
     const locations = await db()`select * from locations where organization_id=${user.organizationId} and active order by name`;
     let selectedLocationId: string | null = requested ? uuid(requested, "locationId") : user.locationId || locations[0]?.id || null;

@@ -1,3 +1,28 @@
+# Bar Ops v0.19.0-rc.3 — Validation Log
+
+## Source checks passed
+
+- `npm run acceptance:source`
+- `node scripts/test-v0190rc3-authorization-integrity.mjs`
+- release artifact audit
+- release contract validation
+- stabilization preflight
+- authentication response hardening regression
+- tenant-scope regression
+- transaction-integrity regression
+- database-guardrail regression
+- authentication endpoint consistency regression
+- JavaScript syntax checks for both new verification scripts
+
+## External checks not claimed
+
+- Live PostgreSQL integrity verification
+- Authenticated Owner/Admin/Manager/Shift Manager/Employee direct API verification
+- Two-organization tenant-negative tests
+- Concurrent shift, timesheet, stock, and receipt mutation tests
+- Dependency-backed lint, TypeScript, and Next.js build
+- Vercel staging and physical-device acceptance
+
 # Bar Ops v0.19.0-rc.2 — Validation Log
 
 Source-level capability checks are included. Dependency-backed lint, full type-check, build, live database, staging, and device verification remain external gates.

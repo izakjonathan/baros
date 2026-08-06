@@ -1,4 +1,4 @@
-# Bar Ops v0.19.0-rc.2 — staging acceptance matrix
+# Bar Ops v0.19.0-rc.3 — staging acceptance matrix
 
 This document is the evidence record for the production acceptance release. A checkbox may only be marked complete after the named workflow has been exercised against the staging deployment with the intended production-like database and authentication configuration.
 

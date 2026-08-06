@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/auth/session";
+import { requireCapability } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 
 function csv(value: unknown) {
@@ -7,7 +7,7 @@ function csv(value: unknown) {
 }
 
 export async function GET(req: Request) {
-  const user = await requireUser(["OWNER", "ADMIN", "MANAGER", "SHIFT_MANAGER"]);
+  const user = await requireCapability("payroll.export");
   const url = new URL(req.url);
   const from = url.searchParams.get("from");
   const to = url.searchParams.get("to");

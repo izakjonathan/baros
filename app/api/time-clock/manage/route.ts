@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth/session";
+import { requireCapability } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, jsonError, readJsonObject, uuid } from "@/lib/http";
 
 export async function POST(request: Request) {
   try {
-    const user = await requireUser(["OWNER", "ADMIN", "MANAGER", "SHIFT_MANAGER"]);
+    const user = await requireCapability("attendance.manage");
     const body = await readJsonObject(request);
     const timesheetId = uuid(String(body.timesheetId || ""), "timesheetId");
     const action = String(body.action || "").toUpperCase();

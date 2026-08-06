@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth/session";
+import { requireCapability, requireUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, isoDate, jsonError, readJsonObject, uuid } from "@/lib/http";
 
@@ -15,7 +15,7 @@ type AcknowledgementRow = {
 
 export async function GET(request: Request) {
   try {
-    const user = await requireUser(["OWNER", "ADMIN", "MANAGER", "SHIFT_MANAGER"]);
+    const user = await requireCapability("schedule.read");
     const url = new URL(request.url);
     const locationId = uuid(url.searchParams.get("locationId") || user.locationId, "locationId");
     const weekStart = isoDate(url.searchParams.get("weekStart"), "weekStart");
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
   try {
     const body = await readJsonObject(request);
     if (body.action === "REMIND_OUTSTANDING") {
-      const user = await requireUser(["OWNER", "ADMIN", "MANAGER", "SHIFT_MANAGER"]);
+      const user = await requireCapability("schedule.publish");
       const publicationId = uuid(body.publicationId, "publicationId");
       const result = await db().begin(async (sql) => {
         const publications = await sql<Array<{ id: string; location_id: string; week_start: string; version: number }>>`

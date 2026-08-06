@@ -1,6 +1,14 @@
+# Bar Ops v0.19.0-rc.3 — Authorization & Data-Integrity Verification
+
+Current release: **v0.19.0-rc.3**
+
+This release completes the source-level Phase B authorization alignment by replacing remaining hard-coded management role arrays with named capabilities and adding a live database integrity verifier. It does not redesign the employee workspace, which remains explicitly pending.
+
+Rollback checkpoint: **v0.19.0-rc.2**.
+
 # Bar Ops v0.19.0-rc.2 — Permission Capability Alignment
 
-Current release: **v0.19.0-rc.2**
+Historic release: **v0.19.0-rc.2**
 
 This release implements the first Phase B remediation slice: a centralized capability model, Shift Manager operational-lead boundaries, linked-manager employee portal policy, and UI/server permission parity for the highest-risk management actions. Production approval remains pending.
 
@@ -57,7 +65,7 @@ Rollback checkpoint: **v0.18.11**.
 
 Historic release: **v0.18.11**
 
-This release completes Phase D in one coordinated pass. Every remaining employee page, authentication and activation surface, manager and employee pop-up, mobile sheet, top-bar popover, form state, and shared loading/empty/error presentation now follows the accepted iPhone-first Bar Ops visual system. Existing business logic, APIs, permissions and persistence are unchanged.
+Historical correction: this release completed the manager/interface consistency pass and shared transient-surface foundations, but the employee workspace was not fully redesigned and remains pending a dedicated release. Existing business logic, APIs, permissions and persistence are unchanged.
 
 Rollback checkpoint: **v0.18.10**.
 

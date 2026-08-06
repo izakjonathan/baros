@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth/session";
+import { requireCapability } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, enumValue, finiteNumber, jsonError, objectArray, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
 
-const roles = ["OWNER","ADMIN","MANAGER","SHIFT_MANAGER"] as const;
-
 export async function GET(req: Request) {
   try {
-    const user = await requireUser([...roles]);
+    const user = await requireCapability("operations.read");
     const params = new URL(req.url).searchParams;
     const type = params.get("type");
     const locationId = params.get("locationId") || user.locationId;
@@ -20,7 +18,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const user = await requireUser([...roles]);
+    const user = await requireCapability("operations.manage");
     const body = await readJsonObject(req, 128_000);
     const type = enumValue(body.type, "type", ["WASTE","TRANSFER","RECEIPT"] as const);
     const result = await db().begin(async tx => {

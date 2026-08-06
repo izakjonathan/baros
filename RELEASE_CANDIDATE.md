@@ -1,3 +1,15 @@
+# Bar Ops v0.19.0-rc.3 — release candidate contract
+
+## Scope
+
+This candidate is limited to authorization and data-integrity verification. It introduces no visual redesign and no database schema change.
+
+The employee workspace remains **not yet redesigned**.
+
+## Rollback checkpoint
+
+Application rollback checkpoint: **v0.19.0-rc.2**.
+
 # Bar Ops v0.19.0-rc.2 — release candidate contract
 
 ## Status

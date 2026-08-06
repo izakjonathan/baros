@@ -1,3 +1,9 @@
+# Bar Ops v0.19.0-rc.3 — Implementation Status
+
+Phase B source-level authorization alignment is complete. Live authenticated role testing, multi-tenant negative testing, concurrency testing, database verification, and staging acceptance remain pending.
+
+The employee workspace is **not yet redesigned** and remains a dedicated future scope item.
+
 # Bar Ops v0.19.0-rc.2 — Implementation Status
 
 Phase B1 capability alignment is implemented. Production acceptance remains pending.
