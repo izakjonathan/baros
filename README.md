@@ -1,6 +1,14 @@
+# Bar Ops v0.18.12 — Site-wide Correction Foundation
+
+Current release: **v0.18.12**
+
+This release begins the post-redesign correction phase. It establishes one documented cross-surface containment layer for native controls, flex/grid shrinkability, mobile top-bar popovers, toasts and very narrow dialog actions. Feature modules remain responsible for their own presentation; the new layer only owns problems that can recur across unrelated workspaces.
+
+Rollback checkpoint: **v0.18.11**.
+
 # Bar Ops v0.18.11 — Complete Interface Redesign
 
-Current release: **v0.18.11**
+Historic release: **v0.18.11**
 
 This release completes Phase D in one coordinated pass. Every remaining employee page, authentication and activation surface, manager and employee pop-up, mobile sheet, top-bar popover, form state, and shared loading/empty/error presentation now follows the accepted iPhone-first Bar Ops visual system. Existing business logic, APIs, permissions and persistence are unchanged.
 

@@ -1,3 +1,26 @@
+# Validation Log — v0.18.12
+
+## Passed
+
+- `node scripts/test-v01812-site-wide-corrections.mjs`
+- canonical native temporal-input containment checks
+- cross-surface ownership and viewport-safety checks
+- release validation
+- stabilization preflight
+- forbidden-artifact audit
+- ZIP integrity
+
+## Attempted but blocked by missing dependencies
+
+- ESLint: `eslint: not found`
+- TypeScript: dependency and type modules such as React, Next.js and Node types are unavailable
+- Next.js production build: `next: not found`
+
+## Not run
+
+- Clean dependency installation
+- Browser and physical-device verification
+
 # Validation Log — v0.18.11
 
 ## Passed

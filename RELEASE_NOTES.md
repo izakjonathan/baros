@@ -1,3 +1,13 @@
+# Bar Ops v0.18.12 — Site-wide Correction Foundation
+
+- Added one explicit cross-surface containment stylesheet imported after the completed redesign layer.
+- Standardized shrinkability for form containers and controls without clipping parent cards.
+- Extended the permanent iPhone native date-input solution to date, time, month and datetime controls across manager, employee, authentication and dialog surfaces.
+- Positioned phone-width manager popovers against the viewport and safe-area gutters so right-edge triggers cannot cause overflow.
+- Corrected mobile toast anchoring and added a very-narrow dialog action fallback.
+- Added a documented ownership contract and focused regression guard.
+- Preserved all workspace logic, permissions, APIs and persistence.
+
 # Bar Ops v0.18.11 — Complete Interface Redesign
 
 - Completed all remaining employee workspace redesigns: Home, Schedule, Hours, Availability, Requests, Notifications and More navigation.

@@ -1,0 +1,75 @@
+/* v0.18.12 — site-wide correction foundation
+   This file owns cross-surface containment and transient-UI viewport safety.
+   Feature modules continue to own component presentation and internal spacing. */
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer) {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+:where(.app-frame,.employee-app,.login-page) :where(main,section,article,header,footer,nav,form,fieldset,label) {
+  min-inline-size: 0;
+}
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(input,select,textarea) {
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  box-sizing: border-box;
+}
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(input[type="date"],input[type="time"],input[type="month"],input[type="datetime-local"]) {
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(input[type="date"],input[type="time"],input[type="month"],input[type="datetime-local"])::-webkit-date-and-time-value,
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(input[type="date"],input[type="time"],input[type="month"],input[type="datetime-local"])::-webkit-datetime-edit {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  text-align: start;
+}
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(button,a,[role="button"]) {
+  max-inline-size: 100%;
+}
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(button,a,[role="button"]) > :where(span,strong,small) {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+:where(.app-frame,.employee-app,.login-page) :where(img,video,canvas) {
+  max-inline-size: 100%;
+  block-size: auto;
+}
+
+/* Manager popovers become viewport-owned on phone widths so an icon near the
+   right edge cannot push the surface outside the visual viewport. */
+@media (max-width: 40rem) {
+  .top-popover {
+    position: fixed;
+    inset-inline-start: max(var(--layout-gap), env(safe-area-inset-left));
+    inset-inline-end: max(var(--layout-gap), env(safe-area-inset-right));
+    inset-block-start: calc(env(safe-area-inset-top) + 3.45rem);
+    width: auto;
+    max-width: none;
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4.2rem);
+  }
+
+  .toast {
+    width: auto;
+    inset-inline-start: max(var(--layout-gap), env(safe-area-inset-left));
+    inset-inline-end: max(var(--layout-gap), env(safe-area-inset-right));
+    translate: 0 0;
+  }
+}
+
+/* Very narrow phones keep dialog actions usable without squeezed labels. */
+@media (max-width: 22rem) {
+  .modal-actions,
+  .interaction-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,3 +1,27 @@
+# Implementation Status — v0.18.12
+
+## Completed
+
+- Phase E site-wide correction foundation.
+- Shared containment and native-control contract.
+- Mobile popover and toast viewport safety.
+- Very narrow dialog action fallback.
+- Regression coverage and ownership documentation.
+
+## Next phase
+
+- Physical-device screenshot review.
+- Workspace-by-workspace visual corrections based on rendered evidence.
+- Final typography, spacing and interaction consistency pass.
+
+## Pending external gates
+
+- Clean dependency installation
+- ESLint
+- TypeScript compilation
+- Next.js production build
+- Browser and physical-device verification
+
 # Implementation Status — v0.18.11
 
 ## Completed
