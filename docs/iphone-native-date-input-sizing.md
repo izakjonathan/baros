@@ -1,42 +1,20 @@
-# iPhone native date input sizing
+# iPhone native date controls
 
-## Problem
+## Root cause
 
-Safari gives `input[type="date"]` an intrinsic minimum width. A `width: 100%` rule by itself does not guarantee that two date fields will shrink inside a two-column grid. The result is a control that extends beyond its card or viewport.
+Safari owns the internal text layout of `<input type="date">`. Width containment can be made reliable with shrinkable grid tracks, but vertical and horizontal text placement inside the native control is not reliably controlled by `padding`, `line-height`, `text-align`, `::-webkit-date-and-time-value`, or `::-webkit-datetime-edit`.
 
-## Root-cause correction
+Repeatedly overriding those browser-owned internals caused the Time & Attendance date alignment regression to return.
 
-Use a shrinkable sizing chain from the grid track to the native input:
+## Permanent Bar Ops pattern
 
-```css
-.dateGrid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  min-width: 0;
-}
+For visually designed date controls:
 
-.dateGrid > label {
-  min-inline-size: 0;
-}
+1. Keep the real native date input for accessibility, keyboard interaction, validation, and the platform date picker.
+2. Place it absolutely over the full control and make it visually transparent.
+3. Render the formatted date in a separate component-owned element underneath it.
+4. Center that visible value with normal CSS layout (`display: grid; place-items: center`).
+5. Keep paired controls in `repeat(2, minmax(0, 1fr))` tracks and preserve `min-inline-size: 0` throughout the sizing chain.
+6. Apply focus styling to the wrapper with `:focus-within`.
 
-.dateGrid input[type="date"] {
-  box-sizing: border-box;
-  inline-size: 100%;
-  min-inline-size: 0;
-  max-inline-size: 100%;
-}
-
-.dateGrid input[type="date"]::-webkit-date-and-time-value,
-.dateGrid input[type="date"]::-webkit-datetime-edit {
-  min-width: 0;
-  max-width: 100%;
-}
-```
-
-## Rules
-
-- Use `minmax(0, 1fr)`, not bare `1fr`, for paired form controls.
-- Put `min-inline-size: 0` on the grid item or label as well as the input.
-- Keep `box-sizing: border-box` and a real maximum inline size on the input.
-- Add WebKit date-edit sizing rules for iPhone Safari.
-- Do not hide the bug with parent clipping, negative margins, transforms, or viewport-specific widths.
-- Keep a regression test that confirms the entire sizing chain remains present.
+Do not attempt to align the visible date by styling Safari pseudo-elements. Do not clip a parent or add compensating margins.

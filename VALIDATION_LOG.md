@@ -1,3 +1,7 @@
+# v0.18.13.4 validation
+
+Focused date-control regression, release validation, stabilization preflight, artifact audit, and ZIP integrity checks were run for this release.
+
 # v0.18.13.3 validation
 
 - Focused visual-correction regression: pending execution

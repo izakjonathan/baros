@@ -1,3 +1,7 @@
+# v0.18.13.4
+
+Time & Attendance date controls now use the permanent component-owned visual date pattern. Native iOS date picking, constraints, change handling, and accessibility remain intact.
+
 # v0.18.13.3 implementation status
 
 Complete: physical-device component corrections for nested fills, attendance filters and Team search.

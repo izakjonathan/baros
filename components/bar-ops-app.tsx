@@ -586,6 +586,12 @@ function ShiftCard({ shift, conflict, onOpen, onDragStart }: { shift: Shift; con
 }
 
 function workedHours(entry: TimeEntry) { return entry.clockOut ? Math.max(0, hoursBetween(entry.clockIn, entry.clockOut) - entry.breakMinutes/60) : 0; }
+function formatAttendanceDate(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) return value;
+  return new Date(year, month - 1, day).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
 function Attendance({ employees, shifts, entries, setEntries, notify, onEdit, devMode, persist }: { employees: Employee[]; shifts: Shift[]; entries: TimeEntry[]; setEntries: React.Dispatch<React.SetStateAction<TimeEntry[]>>; notify:(s:string)=>void; onEdit:(entry:TimeEntry)=>void; devMode:boolean; persist:(path:string,options:RequestInit)=>Promise<any> }) {
   const [fromDate, setFromDate] = useState("2026-07-27");
   const [toDate, setToDate] = useState("2026-08-02");
@@ -637,7 +643,10 @@ function Attendance({ employees, shifts, entries, setEntries, notify, onEdit, de
     </header>
 
     <section className={attendanceStyles.filters} aria-label="Timesheet filters">
-      <div className={attendanceStyles.periodFields}><label>From<input type="date" value={fromDate} onChange={e=>setFromDate(e.target.value)}/></label><label>To<input type="date" value={toDate} min={fromDate} onChange={e=>setToDate(e.target.value)}/></label></div>
+      <div className={attendanceStyles.periodFields}>
+        <label>From<span className={attendanceStyles.dateControl}><span aria-hidden="true">{formatAttendanceDate(fromDate)}</span><input aria-label="Payroll period from date" type="date" value={fromDate} onChange={e=>setFromDate(e.target.value)}/></span></label>
+        <label>To<span className={attendanceStyles.dateControl}><span aria-hidden="true">{formatAttendanceDate(toDate)}</span><input aria-label="Payroll period to date" type="date" value={toDate} min={fromDate} onChange={e=>setToDate(e.target.value)}/></span></label>
+      </div>
       <div className={attendanceStyles.filterFields}><label>Employee<select value={employeeFilter} onChange={e=>setEmployeeFilter(e.target.value)}><option>All employees</option>{employees.map(e=><option key={e.name}>{e.name}</option>)}</select></label><label>Status<select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option>Needs review</option><option>All</option><option>Pending</option><option>Approved</option><option>Rejected</option><option>Running</option></select></label></div>
       <div className={attendanceStyles.filterFooter}><span role="status" aria-live="polite">{visible.length} timesheet{visible.length===1?"":"s"}</span><button type="button" onClick={()=>{setEmployeeFilter("All employees");setStatusFilter("Needs review")}} disabled={employeeFilter==="All employees"&&statusFilter==="Needs review"}>Reset</button></div>
     </section>

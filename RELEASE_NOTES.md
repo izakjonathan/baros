@@ -1,3 +1,7 @@
+# v0.18.13.4 — Date Control Root-Cause Fix
+
+Replaced Safari-rendered attendance date text with a component-rendered centered value while preserving the native input as the accessible picker interaction layer. Removed the accumulated WebKit pseudo-element alignment overrides and added a focused regression contract.
+
 # Bar Ops v0.18.13.3 — Physical Device Component Corrections
 
 - Removed beige nested fills from Manager Logbook composition and saved handover entries.

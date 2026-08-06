@@ -1,6 +1,6 @@
 {
   "name": "bar-ops",
-  "version": "0.18.13.3",
+  "version": "0.18.13.4",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -155,7 +155,8 @@
     "test:v01813-visual-qa": "node scripts/test-v01813-visual-qa.mjs",
     "test:v018131-device-corrections": "node scripts/test-v018131-device-corrections.mjs",
     "test:v018132-visual-corrections": "node scripts/test-v018132-visual-corrections.mjs",
-    "test:v018133-alignment": "node scripts/test-v018133-alignment.mjs"
+    "test:v018133-alignment": "node scripts/test-v018133-alignment.mjs",
+    "test:v018134-date-control": "node scripts/test-v018134-date-control-root-cause.mjs"
   },
   "dependencies": {
     "lucide-react": "0.468.0",

@@ -1,6 +1,6 @@
-# Bar Ops v0.18.13.2 — Physical Device Component Corrections
+# Bar Ops v0.18.13.4 — Physical Device Component Corrections
 
-Current release: **v0.18.13.2**
+Current release: **v0.18.13.4**
 
 This release corrects the remaining real-iPhone component issues in Daily Operations, Dashboard, Shift Execution, Time & Attendance and Team. Nested beige empty/composition cards were removed, the payroll date/filter card was corrected at its native-control sizing chain, and Team search/filter presentation now has one feature owner. Business logic, APIs, permissions and persistence are unchanged.
 

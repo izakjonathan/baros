@@ -89,125 +89,11 @@
   .history{padding:.78rem;border-radius:.82rem}
 }
 
-/* v0.18.5.2 — iPhone-safe paired native date controls
-   Native date inputs have intrinsic WebKit widths. The grid and every item in
-   the sizing chain must therefore be explicitly shrinkable. */
-.periodFields{
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  min-width:0;
-  max-width:100%;
-}
-.periodFields > label{
-  min-width:0;
-  min-inline-size:0;
-  max-width:100%;
-}
-.periodFields input[type="date"]{
-  display:block;
-  box-sizing:border-box;
-  width:100%;
-  inline-size:100%;
-  min-width:0;
-  min-inline-size:0;
-  max-width:100%;
-  max-inline-size:100%;
-  overflow:hidden;
-}
-.periodFields input[type="date"]::-webkit-date-and-time-value{
-  min-width:0;
-  width:100%;
-  text-align:center;
-}
-.periodFields input[type="date"]::-webkit-datetime-edit{
-  min-width:0;
-  max-width:100%;
-  padding:0;
-  overflow:hidden;
-}
-@media(max-width:430px){
-  .periodFields{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:.36rem;
-  }
-  .periodFields input[type="date"]{
-    padding-inline:.38rem;
-    font-size:.72rem;
-  }
-}
-
-/* v0.18.5.3 — iPhone Time & Attendance layout polish
-   This refines the accepted mobile structure without changing payroll behavior. */
-@media(max-width:430px){
-  .workspace{gap:.54rem}
-
-  .hero{
-    gap:.56rem;
-    padding:.72rem .82rem;
-    border-radius:.94rem;
-  }
-  .hero p{font-size:.59rem}
-  .hero h1{font-size:1.68rem}
-  .hero span{margin-top:.28rem;font-size:.74rem}
-  .actions{gap:.32rem}
-  .actions button{
-    min-height:2.28rem;
-    padding:.34rem .38rem;
-    font-size:.66rem;
-  }
-  .actions button:disabled{
-    opacity:1;
-    color:rgba(0,0,0,.46);
-  }
-  .actions .approveAll:disabled{background:#efa5a0}
-  .actions .export:disabled{background:#9f4e91;color:#e6a8d8}
-
-  .filters{
-    gap:.5rem;
-    padding:.7rem .72rem;
-    border-radius:.94rem;
-  }
-  .periodFields{gap:.52rem}
-  .filterFields{gap:.42rem}
-  .filters input,.filters select{height:2.22rem}
-  .filterFooter{margin-top:.02rem}
-  .filterFooter button{padding:.34rem .58rem}
-
-  .records{gap:.48rem}
-  .sectionHeader{
-    align-items:flex-end;
-    padding-inline:.12rem;
-  }
-  .sectionHeader>span{
-    flex:0 0 auto;
-    padding-bottom:.06rem;
-    white-space:nowrap;
-  }
-  .empty{
-    min-height:4.1rem;
-    gap:.22rem;
-    padding:.66rem .75rem;
-    border-radius:.78rem;
-  }
-  .empty strong{font-size:.94rem}
-  .empty span{font-size:.68rem;line-height:1.25}
-
-  .summary{gap:.38rem}
-  .summary article{
-    min-height:3.9rem;
-    padding:.6rem .64rem;
-  }
-  .summary strong{font-size:1.32rem}
-}
-
-/* v0.18.13.1 — paired dates remain independent controls */
-@media(max-width:430px){
-  .periodFields{gap:.62rem}
-  .periodFields>label{overflow:hidden;border-radius:.64rem}
-  .periodFields input[type="date"]{border-radius:.64rem}
-}
-
-/* v0.18.13.2 — clean, fully contained mobile payroll filters.
-   The label must remain visible; only the native input itself owns clipping. */
+/* v0.18.13.4 — stable iOS date-control ownership.
+   Safari owns the internal text layout of native date inputs, so the native
+   input is retained only as the accessible interaction layer. The visible
+   date is rendered by the component and therefore remains vertically and
+   horizontally centered on every supported iPhone. */
 .periodFields,
 .filterFields{
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -216,46 +102,67 @@
 }
 .periodFields>label,
 .filterFields>label{
-  overflow:visible;
   min-inline-size:0;
+  overflow:visible;
 }
-.periodFields input[type="date"]{
-  -webkit-appearance:none;
-  appearance:none;
+.dateControl{
+  position:relative;
+  display:grid;
+  place-items:center;
+  inline-size:100%;
+  min-inline-size:0;
+  block-size:2.9rem;
+  padding-inline:.8rem;
+  overflow:hidden;
+  border-radius:.8rem;
+  background:#fff4c4;
+  color:#000;
+  font-size:.95rem;
+  font-weight:700;
+  line-height:1;
+  text-transform:none;
+  letter-spacing:0;
+}
+.dateControl>span{
   display:block;
   inline-size:100%;
   min-inline-size:0;
+  overflow:hidden;
+  text-align:center;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  pointer-events:none;
+}
+.dateControl input[type="date"]{
+  position:absolute;
+  inset:0;
+  inline-size:100%;
+  block-size:100%;
+  min-inline-size:0;
   max-inline-size:100%;
+  margin:0;
+  padding:0;
   border:0;
-  border-radius:.8rem;
-  background:#fff4c4;
-  background-clip:padding-box;
+  opacity:0;
+  cursor:pointer;
+}
+.dateControl:focus-within{
+  outline:3px solid #000;
+  outline-offset:2px;
 }
 @media(max-width:430px){
   .filters{padding:.82rem;gap:.68rem;overflow:visible}
   .periodFields{gap:.72rem}
   .filterFields{gap:.58rem}
   .filters label{gap:.32rem;line-height:1.1}
-  .periodFields input[type="date"],
-  .filters select{min-block-size:2.65rem;height:2.65rem;border-radius:.78rem}
-}
-
-/* v0.18.13.3 — center native date text without weakening iPhone containment. */
-.periodFields input[type="date"]{
-  padding-inline:.5rem;
-  text-align:center;
-  line-height:1;
-}
-.periodFields input[type="date"]::-webkit-date-and-time-value{
-  inline-size:100%;
-  min-inline-size:0;
-  padding:0;
-  text-align:center;
-}
-.periodFields input[type="date"]::-webkit-datetime-edit{
-  display:block;
-  inline-size:100%;
-  min-inline-size:0;
-  padding:0;
-  text-align:center;
+  .dateControl,
+  .filters select{
+    min-block-size:2.65rem;
+    block-size:2.65rem;
+    border-radius:.78rem;
+  }
+  .dateControl{
+    padding-inline:.45rem;
+    font-size:.76rem;
+  }
 }
