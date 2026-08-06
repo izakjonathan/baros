@@ -8,7 +8,7 @@ import "./spacing-system.css";
 import "./completion-redesign.css";
 import "./interface-consistency.css";
 import "./visual-qa-consistency.css";
-import "./button-alignment-corrections.css";
+import "./shared-controls.css";
 import "./accessibility-interaction.css";
 import { PwaRegister } from "./pwa-register";
 

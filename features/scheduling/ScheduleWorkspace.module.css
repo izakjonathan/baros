@@ -2846,54 +2846,17 @@
   }
 }
 
-/* v0.18.13.3 — physical-device schedule density and selector containment. */
-.viewSelect,
-.viewSelect select,
-.headerActions :global(.schedule-view-select),
-.headerActions :global(.schedule-view-select select){
-  min-inline-size:0 !important;
-  max-inline-size:100% !important;
-  overflow:hidden !important;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  text-align:center;
-  text-align-last:center;
-}
-@media(max-width:48rem){
-  .calendarGrid,
-  .calendarPanel :global(.calendar-grid){
-    --iphone-day-gap:.08rem !important;
-    gap:var(--iphone-day-gap) !important;
-    grid-auto-columns:calc((100vw - 2.1rem) / 3) !important;
-  }
-  .dayColumn,
-  .calendarPanel :global(.day-column){
-    gap:.14rem !important;
-  }
-  .viewSelect,
-  .headerActions :global(.schedule-view-select){
-    width:4.65rem !important;
-    min-width:4.65rem !important;
-  }
-  .viewSelect select,
-  .headerActions :global(.schedule-view-select select){
-    padding-inline:.45rem 1.35rem !important;
-    font-size:.68rem !important;
-  }
-}
-
-
-/* v0.18.13.5 — authoritative mobile schedule selector and column ownership.
-   The native select remains the interaction layer, while component-owned text
-   prevents Safari from truncating the visible Week/Month/Period label. The
-   calendar explicitly owns its auto-flow tracks and zero inter-column gap so
-   historical global grid rules cannot reopen spacing. */
+/* v0.19.0-rc.7 — canonical Shift Plan control and mobile track ownership.
+   This is the only final override layer for the accepted schedule toolbar,
+   view selector and mobile day-column geometry. Earlier release-specific
+   correction blocks were retired rather than counteracted. */
 .viewSelect{
-  position:relative !important;
-  display:grid !important;
-  place-items:center !important;
-  min-inline-size:0 !important;
-  overflow:hidden !important;
+  position:relative;
+  display:grid;
+  place-items:center;
+  min-inline-size:0;
+  max-inline-size:100%;
+  overflow:hidden;
 }
 .viewLabel{
   display:flex;
@@ -2911,21 +2874,23 @@
   pointer-events:none;
 }
 .viewSelect select{
-  position:absolute !important;
-  inset:0 !important;
-  inline-size:100% !important;
-  block-size:100% !important;
-  min-inline-size:0 !important;
-  margin:0 !important;
-  padding:0 !important;
-  border:0 !important;
-  opacity:0 !important;
-  cursor:pointer !important;
+  position:absolute;
+  inset:0;
+  inline-size:100%;
+  block-size:100%;
+  min-inline-size:0;
+  max-inline-size:100%;
+  margin:0;
+  padding:0;
+  border:0;
+  opacity:0;
+  cursor:pointer;
 }
 .viewSelect:focus-within{
   outline:3px solid #000;
   outline-offset:2px;
 }
+
 @media(max-width:48rem){
   .toolbar,
   :global(.schedule-toolbar).toolbar{
@@ -2945,41 +2910,20 @@
     block-size:2.35rem !important;
   }
   .viewLabel{
-    font-size:.74rem !important;
+    font-size:.74rem;
   }
   .calendarGrid,
   .calendarPanel :global(.calendar-grid){
+    --mobile-day-column:6.55rem;
+    --mobile-day-separator:.16rem;
     display:grid !important;
     grid-template-columns:none !important;
     grid-auto-flow:column !important;
-    grid-auto-columns:calc((100vw - 1.1rem) / 3) !important;
-    justify-content:start !important;
-    gap:0 !important;
-    column-gap:0 !important;
-    padding-inline:0 !important;
-  }
-  .dayColumn,
-  .calendarPanel :global(.day-column){
-    inline-size:auto !important;
-    min-inline-size:0 !important;
-    margin:0 !important;
-    padding-inline:0 !important;
-  }
-}
-
-/* v0.18.13.6 — authoritative mobile day-track sizing.
-   Root cause: the grid tracks were viewport-derived while historical max-width
-   rules still capped each day column. The unused width inside every track looked
-   like a large column gap even when CSS gap was zero. Track and child now share
-   one explicit width, with only a small deliberate separator. */
-@media(max-width:48rem){
-  .calendarGrid,
-  .calendarPanel :global(.calendar-grid){
-    --mobile-day-column:6.55rem !important;
-    --mobile-day-separator:.16rem !important;
     grid-auto-columns:var(--mobile-day-column) !important;
+    justify-content:start !important;
     gap:var(--mobile-day-separator) !important;
     column-gap:var(--mobile-day-separator) !important;
+    padding-inline:0 !important;
   }
   .dayColumn,
   .calendarPanel :global(.day-column){
@@ -2989,5 +2933,7 @@
     min-width:var(--mobile-day-column) !important;
     max-inline-size:var(--mobile-day-column) !important;
     max-width:var(--mobile-day-column) !important;
+    margin:0 !important;
+    padding-inline:0 !important;
   }
 }

@@ -32,37 +32,6 @@
 }
 
 /* Shared controls use one physical rhythm; feature colors remain untouched. */
-:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(input,select,textarea,button,.button,[role="button"]) {
-  min-block-size: var(--qa-control-size);
-}
-
-:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(button,.button,[role="button"]) {
-  min-inline-size: 0;
-  overflow-wrap: anywhere;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-
-:where(.icon-button,.dialog-close,.sidebar-close,.menu-button,.notification) {
-  inline-size: var(--qa-touch-size);
-  block-size: var(--qa-touch-size);
-  min-inline-size: var(--qa-touch-size);
-  min-block-size: var(--qa-touch-size);
-  padding: 0;
-}
-
-:where(button,.button,[role="button"]):disabled,
-:where(input,select,textarea):disabled {
-  cursor: not-allowed;
-  opacity: .48;
-}
-
-/* A single visible keyboard-focus treatment across all interactive surfaces. */
-:where(a,button,input,select,textarea,[role="button"],[tabindex]):focus-visible {
-  outline: 3px solid currentColor;
-  outline-offset: 3px;
-}
-
 /* Long operational content must wrap inside cards instead of widening them. */
 :where(.panel,.card,.metric-card,.employee-card,.team-card,.inventory-card,.order-card,.request-card,.timesheet-card,.quick-action,.attention-item) {
   min-inline-size: 0;

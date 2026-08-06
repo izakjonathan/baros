@@ -1,4 +1,18 @@
-# Validation log — v0.19.0-rc.4
+# v0.19.0-rc.8 validation
+
+See `RUNTIME_BUILD_READINESS.md` for the failed registry-access attempt and external gates.
+
+Focused CSS ownership and inherited source regressions are recorded for this release. Dependency-backed lint, type-check, build and physical Safari verification remain external gates.
+
+# v0.19.0-rc.6 validation
+
+Source-level validation covers the canonical shared-control owner, removal of the superseded correction import, CSS ownership documentation, release metadata, stabilization, and artifact integrity. Dependency-backed browser and production-build verification remains external.
+
+# v0.19.0-rc.5 — Type Safety, Test Cleanup & Build Reproducibility
+
+This release adds typed client/API response contracts, separates current regression gates from historical assertions, and records the unresolved deterministic-install blocker. No visual design or business behaviour was intentionally changed.
+
+# Validation log — v0.19.0-rc.5
 
 Source-level employee workspace redesign and packaging checks are recorded for this candidate. Dependency-backed lint, TypeScript, build, staging and physical-device acceptance remain external gates.
 

@@ -1,0 +1,35 @@
+/* v0.19.0-rc.6 — canonical shared control contract.
+   This file owns control content alignment, minimum interaction size, focus, busy,
+   and disabled behaviour. Feature styles own color, width, and external placement. */
+
+:where(button,[role="button"],.button){
+  min-inline-size:0;
+  min-block-size:var(--qa-control-size,2.75rem);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  overflow-wrap:anywhere;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+
+:where(button,[role="button"],.button)>svg{flex:0 0 auto}
+
+:where(.icon-button,.dialog-close,.sidebar-close,.menu-button,.notification){
+  inline-size:var(--qa-touch-size,2.75rem);
+  block-size:var(--qa-touch-size,2.75rem);
+  min-inline-size:var(--qa-touch-size,2.75rem);
+  min-block-size:var(--qa-touch-size,2.75rem);
+  padding:0;
+}
+
+:where(a,button,input,select,textarea,[role="button"],[tabindex]):focus-visible{
+  outline:3px solid #000;
+  outline-offset:3px;
+}
+
+[data-theme="dark"] :where(a,button,input,select,textarea,[role="button"],[tabindex]):focus-visible{outline-color:#fff4c4}
+
+:where(button,[role="button"])[aria-busy="true"],.is-loading{cursor:progress}
+:where(button,.button,input,select,textarea):disabled,[aria-disabled="true"]{cursor:not-allowed}

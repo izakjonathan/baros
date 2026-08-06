@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { CalendarClock, Check, CheckCircle2, RefreshCw, Shuffle, Umbrella, X } from "lucide-react";
 import styles from "@/features/requests/RequestsWorkspace.module.css";
+import type { RequestQueueRecord, ShiftClaimQueueRecord, ShiftTransferQueueRecord } from "@/features/requests/types";
 
 type QueueItem={id:string;kind:"REQUEST"|"CLAIM"|"TRANSFER";title:string;subtitle:string;status:string;createdAt:string};
 
@@ -12,14 +13,15 @@ export function RequestsWorkspace({devMode,notify}:{devMode:boolean;notify:(mess
     if(!silent)setLoading(true);
     try{
       const [requests,claims,transfers]=await Promise.all([
-        fetch('/api/requests',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()),
-        fetch('/api/shift-claims',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()),
-        fetch('/api/shift-transfers',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()),
+
+        fetchJsonArray<RequestQueueRecord>('/api/requests'),
+        fetchJsonArray<ShiftClaimQueueRecord>('/api/shift-claims'),
+        fetchJsonArray<ShiftTransferQueueRecord>('/api/shift-transfers'),
       ]);
       const mapped:QueueItem[]=[
-        ...requests.map((r:any)=>({id:r.id,kind:"REQUEST" as const,title:`${r.employee_name} · ${String(r.type).replaceAll('_',' ')}`,subtitle:range(r.starts_at,r.ends_at),status:r.status,createdAt:r.created_at})),
-        ...claims.map((r:any)=>({id:r.id,kind:"CLAIM" as const,title:`${r.employee_name} · Open shift`,subtitle:range(r.starts_at,r.ends_at),status:r.status,createdAt:r.created_at})),
-        ...transfers.map((r:any)=>({id:r.id,kind:"TRANSFER" as const,title:`${r.requested_by_name||'Employee'} · ${r.type==='SWAP'?'Shift swap':'Shift handover'}`,subtitle:range(r.starts_at,r.ends_at),status:r.status,createdAt:r.created_at})),
+        ...requests.map((r)=>({id:r.id,kind:"REQUEST" as const,title:`${r.employee_name} · ${String(r.type).replaceAll('_',' ')}`,subtitle:range(r.starts_at,r.ends_at),status:r.status,createdAt:r.created_at})),
+        ...claims.map((r)=>({id:r.id,kind:"CLAIM" as const,title:`${r.employee_name} · Open shift`,subtitle:range(r.starts_at,r.ends_at),status:r.status,createdAt:r.created_at})),
+        ...transfers.map((r)=>({id:r.id,kind:"TRANSFER" as const,title:`${r.requested_by_name||'Employee'} · ${r.type==='SWAP'?'Shift swap':'Shift handover'}`,subtitle:range(r.starts_at,r.ends_at),status:r.status,createdAt:r.created_at})),
       ].filter(actionable).sort((a,b)=>new Date(a.createdAt).getTime()-new Date(b.createdAt).getTime());
       setItems(mapped);
     }catch{if(!silent)notify('Could not load employee requests');}
@@ -84,3 +86,5 @@ export function RequestsWorkspace({devMode,notify}:{devMode:boolean;notify:(mess
 }
 function actionable(item:QueueItem){return item.kind==='TRANSFER'?item.status==='PENDING_MANAGER':item.status==='PENDING'}
 function range(start?:string|null,end?:string|null){if(!start)return 'Flexible';const f=new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'});return `${f.format(new Date(start))}${end?` – ${f.format(new Date(end))}`:''}`}
+
+async function fetchJsonArray<T>(path:string):Promise<T[]>{const response=await fetch(path,{cache:'no-store'});if(!response.ok)throw new Error(`Could not load ${path}`);const value:unknown=await response.json();if(!Array.isArray(value))throw new Error(`Invalid response from ${path}`);return value as T[]}

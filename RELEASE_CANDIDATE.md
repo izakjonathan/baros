@@ -1,4 +1,4 @@
-# Bar Ops v0.19.0-rc.4 — release candidate contract
+# Bar Ops v0.19.0-rc.6 — release candidate contract
 
 ## Scope
 

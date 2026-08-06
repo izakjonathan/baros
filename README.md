@@ -1,6 +1,18 @@
-# Bar Ops v0.19.0-rc.4 — Employee Workspace Redesign
+# Bar Ops v0.19.0-rc.8 — Runtime Build Recovery & Staging Readiness
 
-Current release: **v0.19.0-rc.4**
+Current release: **v0.19.0-rc.8**
+
+This release consolidates the accepted Shift Plan selector and mobile day-track corrections into one canonical feature-owned block. It preserves the accepted layout and behaviour and does not redesign the schedule.
+
+Rollback checkpoint: **v0.19.0-rc.6**.
+
+# v0.19.0-rc.6 — Type Safety, Test Cleanup & Build Reproducibility
+
+This release adds typed client/API response contracts, separates current regression gates from historical assertions, and records the unresolved deterministic-install blocker. No visual design or business behaviour was intentionally changed.
+
+# Bar Ops v0.19.0-rc.5 — Employee Workspace Redesign
+
+Historic release: **v0.19.0-rc.6**
 
 This release completes the dedicated visual redesign of the employee portal while preserving employee self-service logic, linked-manager access, APIs, permissions and persistence. Employee presentation is now owned by one route-scoped stylesheet rather than the historical global completion layer.
 

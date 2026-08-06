@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { days, initialProducts, initialShifts, orders, team, type NavKey, type Product, type Shift, type ShiftRole } from "@/lib/data";
 import type { ClockSettings, Employee, Location, LogEntry, OpsTask, ScheduleAcknowledgementSummary, ShiftNote, StockAdjustment, TimeEntry } from "@/features/workspace/types";
+import { parseInvitationRecords, parseManagerBootstrapResponse } from "@/features/workspace/bootstrap-contract";
 import { BASE_MONDAY, canonicalShiftDate, conflictIds, dateFromSerial, dateFromShift, dateSerial, hoursBetween, isOvernight, mapDatabaseShift, shiftPositionFromDate, toIsoDate, type DatabaseShiftRecord } from "@/features/workspace/schedule-utils";
 import { DevRoleSwitcher } from "@/components/dev-role-switcher";
 import { RequestsWorkspace } from "@/components/requests-workspace";
@@ -22,6 +23,7 @@ import executionStyles from "@/features/execution/ShiftExecution.module.css";
 import inventoryStyles from "@/features/inventory/InventoryWorkspace.module.css";
 import orderStyles from "@/features/orders/OrdersWorkspace.module.css";
 import operationsStyles from "@/features/operations/DailyOperations.module.css";
+import { parseOperationChecklistRecords } from "@/features/operations/types";
 import settingsStyles from "@/features/settings/SettingsWorkspace.module.css";
 import { hasCapability, type Capability } from "@/lib/auth/capabilities";
 import type { AppRole } from "@/lib/auth/session";
@@ -122,20 +124,20 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
     if (!hasBootstrappedRef.current) setDataReady(false);
     fetch(`/api/manager/bootstrap${requestedLocation}`, { cache: "no-store", signal: controller.signal }).then(async response => {
       if (!response.ok) throw new Error("Could not load workspace");
-      const data = await response.json();
+      const data = parseManagerBootstrapResponse(await response.json());
       const availableLocations: Location[] = data.locations || [];
       setLocations(availableLocations);
       const resolvedLocationId = data.selectedLocationId || availableLocations[0]?.id || "";
       if (resolvedLocationId && resolvedLocationId !== selectedLocationId) setSelectedLocationId(resolvedLocationId);
-      setEmployees((data.employees || []).map((e: any) => ({ id:e.id, name:`${e.first_name} ${e.last_name}`, initials:`${e.first_name?.[0]||""}${e.last_name?.[0]||""}`, role:e.employment_title||"Employee", hours:Number(e.contracted_hours||0), status:e.active?"Active":"Inactive", active:e.active, email:e.email||"", phone:e.phone||"", payrollId:e.payroll_id||"", salaryCode:e.salary_code||"", costCentre:e.cost_centre||"", hourlyRate:Number(e.hourly_rate||0), locationId:(e.locations||[]).find((location:any)=>location.primary)?.id||(e.locations||[])[0]?.id||"", locations:e.locations||[], portalStatus:e.portal_status||"NONE" })));
-      setShifts((data.shifts || []).map((shift: DatabaseShiftRecord) => mapDatabaseShift(shift)));
-      setProducts((data.products || []).map((x:any)=>({id:x.id,name:x.name,category:x.category,supplier:x.supplier||"Unassigned",stock:Number(x.quantity||0),par:Number(x.par_level||0),unit:x.unit,price:Number(x.purchase_price||0)})));
-      setTimeEntries((data.timesheets || []).map((x:any)=>({id:x.id,employee:x.employee_name,date:String(x.work_date).slice(0,10),clockIn:String(x.clocked_in_at).slice(11,16),clockOut:x.clocked_out_at?String(x.clocked_out_at).slice(11,16):undefined,breakMinutes:x.break_minutes,status:(x.status==="OPEN"?"Running":x.status[0]+x.status.slice(1).toLowerCase()) as TimeEntry["status"],scheduledHours:Number(x.scheduled_minutes||0)/60,note:x.manager_note,onBreak:Boolean(x.on_break),breakStartedAt:x.open_break_started_at?String(x.open_break_started_at):null})));
-      setShiftNotes((data.shiftNotes || []).map((n:any)=>({id:n.id,shiftId:n.shift_id,note:n.note,category:n.category,createdAt:String(n.created_at),author:n.author_name,role:n.role,startsAt:String(n.starts_at)})));
+      setEmployees(data.employees.map((e) => ({ id:e.id, name:`${e.first_name} ${e.last_name}`, initials:`${e.first_name?.[0]||""}${e.last_name?.[0]||""}`, role:e.employment_title||"Employee", hours:Number(e.contracted_hours||0), status:e.active?"Active":"Inactive", active:e.active, email:e.email||"", phone:e.phone||"", payrollId:e.payroll_id||"", salaryCode:e.salary_code||"", costCentre:e.cost_centre||"", hourlyRate:Number(e.hourly_rate||0), locationId:(e.locations||[]).find((location)=>location.primary)?.id||(e.locations||[])[0]?.id||"", locations:e.locations||[], portalStatus:e.portal_status||"NONE" })));
+      setShifts(data.shifts.map((shift: DatabaseShiftRecord) => mapDatabaseShift(shift)));
+      setProducts(data.products.map((x)=>({id:x.id,name:x.name,category:x.category,supplier:x.supplier||"Unassigned",stock:Number(x.quantity||0),par:Number(x.par_level||0),unit:x.unit,price:Number(x.purchase_price||0)})));
+      setTimeEntries(data.timesheets.map((x)=>({id:x.id,employee:x.employee_name,date:String(x.work_date).slice(0,10),clockIn:String(x.clocked_in_at).slice(11,16),clockOut:x.clocked_out_at?String(x.clocked_out_at).slice(11,16):undefined,breakMinutes:x.break_minutes,status:(x.status==="OPEN"?"Running":x.status[0]+x.status.slice(1).toLowerCase()) as TimeEntry["status"],scheduledHours:Number(x.scheduled_minutes||0)/60,note:x.manager_note,onBreak:Boolean(x.on_break),breakStartedAt:x.open_break_started_at?String(x.open_break_started_at):null})));
+      setShiftNotes(data.shiftNotes.map((n)=>({id:n.id,shiftId:n.shift_id,note:n.note,category:n.category,createdAt:String(n.created_at),author:n.author_name,role:n.role,startsAt:String(n.starts_at)})));
       setDatabaseStatus(resolvedLocationId ? "PostgreSQL connected" : "No active location configured");
       hasBootstrappedRef.current = true;
       setDataReady(true);
-      fetch("/api/employee-invitations",{cache:"no-store"}).then(r=>r.ok?r.json():[]).then((rows:any[])=>setEmployees(current=>current.map(item=>({...item,portalStatus:(rows.find(row=>row.employee_id===item.id)?.portal_status||item.portalStatus||"NONE")})))).catch(()=>{});
+      fetch("/api/employee-invitations",{cache:"no-store"}).then(async r=>r.ok?parseInvitationRecords(await r.json()):[]).then((rows)=>setEmployees(current=>current.map(item=>({...item,portalStatus:(rows.find(row=>row.employee_id===item.id)?.portal_status||item.portalStatus||"NONE")})))).catch(()=>{});
     }).catch((error) => { if (error?.name !== "AbortError") { setDatabaseStatus("Database connection error"); hasBootstrappedRef.current = true; setDataReady(true); } });
     return () => controller.abort();
   }, [devMode, selectedLocationId]);
@@ -182,7 +184,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
                 if (!employee.id) { notify("Save and reload the employee before inviting"); return; }
                 try {
                   const response = await fetch("/api/employee-invitations", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ employeeId: employee.id, action: employee.portalStatus === "INVITED" ? "resend" : "invite" }) });
-                  const data = await response.json();
+                  const data = parseManagerBootstrapResponse(await response.json());
                   if (!response.ok) throw new Error(data.error || "Could not create invitation");
                   setEmployees(current => current.map(item => item.id === employee.id ? { ...item, portalStatus: "INVITED" } : item));
                   let shared = false;
@@ -200,7 +202,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
                 if (!employee.id || !confirm(`Revoke the pending invitation for ${employee.name}?`)) return;
                 try {
                   const response = await fetch("/api/employee-invitations", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ employeeId: employee.id, action: "revoke" }) });
-                  const data = await response.json();
+                  const data = parseManagerBootstrapResponse(await response.json());
                   if (!response.ok) throw new Error(data.error || "Could not revoke invitation");
                   setEmployees(current => current.map(item => item.id === employee.id ? { ...item, portalStatus: "NONE" } : item));
                   notify("Invitation revoked");
@@ -526,14 +528,15 @@ function Schedule({ shifts, setShifts, employees, onNewShift, onEditShift, notif
     if (!drafts) { notify("This period is already published"); return; }
     if (conflicts.size) { notify(`Resolve ${conflicts.size} conflicting shift${conflicts.size === 1 ? "" : "s"} before publishing`); return; }
     if (availabilityConflicts.size) { notify(`Resolve ${availabilityConflicts.size} employee availability conflict${availabilityConflicts.size === 1 ? "" : "s"} before publishing`); return; }
+    if (!startIso || !endIso) { notify("This schedule period is unavailable"); return; }
     if (!devMode && !selectedLocationId) { notify("Select a location before publishing"); return; }
     setPublishing(true);
     try {
       if (!devMode) {
-        const exclusiveEnd = dateFromSerial(dateSerial(endIso!)+1);
+        const exclusiveEnd = dateFromSerial(dateSerial(endIso)+1);
         await persist("/api/schedule-publish", { method: "POST", headers: { "idempotency-key": crypto.randomUUID() }, body: JSON.stringify({ locationId: selectedLocationId, weekStart: startIso, weekEnd: exclusiveEnd }) });
       }
-      setShifts((current) => current.map((shift) => { const date=canonicalShiftDate(shift); return date>=startIso!&&date<=endIso!&&shift.status==="Draft"?{...shift,status:"Published"}:shift; }));
+      setShifts((current) => current.map((shift) => { const date=canonicalShiftDate(shift); return date>=startIso&&date<=endIso&&shift.status==="Draft"?{...shift,status:"Published"}:shift; }));
       notify(`${drafts} shift${drafts === 1 ? "" : "s"} published`);
       await loadAcknowledgements();
     } catch (error) { notify(error instanceof Error ? error.message : "Could not publish schedule"); }
@@ -724,7 +727,7 @@ function Orders({ products, setProducts, onNewOrder, notify }: { products:Produc
 function DailyOperations({tasks,setTasks,logs,setLogs,notify,devMode,locationId}:{tasks:OpsTask[];setTasks:React.Dispatch<React.SetStateAction<OpsTask[]>>;logs:LogEntry[];setLogs:React.Dispatch<React.SetStateAction<LogEntry[]>>;notify:(s:string)=>void;devMode:boolean;locationId:string}){
  const [title,setTitle]=useState(""); const [type,setType]=useState<OpsTask["type"]>("Task"); const [logText,setLogText]=useState(""); const [savingId,setSavingId]=useState<string|null>(null);const [serviceDate,setServiceDate]=useState(()=>new Date().toISOString().slice(0,10));
  const complete=tasks.filter(t=>t.done).length; const isToday=serviceDate===new Date().toISOString().slice(0,10);
- useEffect(()=>{if(devMode||!locationId)return;fetch(`/api/operation-checklists?locationId=${encodeURIComponent(locationId)}&date=${encodeURIComponent(serviceDate)}`,{cache:"no-store"}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||"Could not load checklist");return d}).then(d=>setTasks((d.items||[]).map((x:any)=>({id:x.id,title:x.title,type:x.task_type,owner:x.owner_label||"Unassigned",due:x.due_label||"Today",done:Boolean(x.completed_at)})))).catch(e=>notify(e.message));},[devMode,locationId,serviceDate]);
+ useEffect(()=>{if(devMode||!locationId)return;fetch(`/api/operation-checklists?locationId=${encodeURIComponent(locationId)}&date=${encodeURIComponent(serviceDate)}`,{cache:"no-store"}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||"Could not load checklist");return d}).then(d=>setTasks(parseOperationChecklistRecords(d).map((x)=>({id:x.id,title:x.title,type:x.task_type,owner:x.owner_label||"Unassigned",due:x.due_label||"Today",done:Boolean(x.completed_at)})))).catch(e=>notify(e.message));},[devMode,locationId,serviceDate]);
  async function addTask(){if(!title.trim())return; if(devMode){setTasks(cur=>[...cur,{id:crypto.randomUUID(),title:title.trim(),type,owner:"Unassigned",due:"Today",done:false}]);setTitle("");notify("Operational task added");return;} try{const r=await fetch("/api/operation-checklists",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({locationId,title:title.trim(),taskType:type})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Could not add task");setTasks(cur=>[...cur,{id:d.id,title:d.title,type:d.task_type,owner:d.owner_label||"Unassigned",due:d.due_label||"Today",done:false}]);setTitle("");notify("Operational task added");}catch(e){notify(e instanceof Error?e.message:"Could not add task");}}
  async function addPreset(preset:"Opening"|"Closing"){const titles=preset==="Opening"?["Check tills and floats","Check fridges and ice","Prepare garnishes and bar stations","Confirm toilets and guest areas are ready"]:["Complete final stock check","Clean bar stations and equipment","Lock doors and secure cash","Set alarm and record handover notes"];for(const itemTitle of titles){if(devMode){setTasks(cur=>[...cur,{id:crypto.randomUUID(),title:itemTitle,type:preset,owner:"Shift manager",due:preset==="Opening"?"Before opening":"Before close",done:false}]);continue;}const r=await fetch("/api/operation-checklists",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({locationId,title:itemTitle,taskType:preset})});const d=await r.json();if(!r.ok){notify(d.error||`Could not add ${preset.toLowerCase()} checklist`);return;}setTasks(cur=>[...cur,{id:d.id,title:d.title,type:d.task_type,owner:d.owner_label||"Unassigned",due:d.due_label||"Today",done:false}]);}notify(`${preset} checklist added`);}
  async function toggleTask(task:OpsTask){if(devMode){setTasks(cur=>cur.map(x=>x.id===task.id?{...x,done:!x.done}:x));return;}setSavingId(task.id);try{const r=await fetch("/api/operation-checklists",{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({id:task.id,done:!task.done})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Could not update task");setTasks(cur=>cur.map(x=>x.id===task.id?{...x,done:Boolean(d.completed_at)}:x));}catch(e){notify(e instanceof Error?e.message:"Could not update task");}finally{setSavingId(null);}}

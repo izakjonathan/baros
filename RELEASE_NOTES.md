@@ -1,4 +1,19 @@
-# v0.19.0-rc.4 — Employee Workspace Redesign
+# v0.19.0-rc.8 — Runtime Build Recovery & Staging Readiness
+
+Prepared deterministic-install and staging contracts, pinned repository npm configuration, added runtime-readiness verification, and recorded the unresolved registry/network blocker without fabricating a lockfile or build result.
+
+# v0.19.0-rc.7 — Shift Plan CSS Ownership Consolidation
+
+Consolidated three late schedule correction layers into one canonical owner, preserved accepted mobile geometry and state presentation, and reduced specificity without changing schedule behaviour.
+
+# v0.19.0-rc.6 — CSS Ownership & Shared Primitive Consolidation
+
+- Added one canonical shared-control stylesheet.
+- Removed the superseded button-alignment correction layer and duplicate shared-control ownership.
+- Added CSS ownership documentation and a focused regression.
+- Preserved accepted feature presentation and excluded Shift Plan consolidation.
+
+# v0.19.0-rc.5 — Employee Workspace Redesign
 
 - redesigned all current employee portal pages and mobile navigation;
 - established one route-scoped employee CSS owner;

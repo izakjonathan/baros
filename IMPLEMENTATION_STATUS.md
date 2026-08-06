@@ -1,4 +1,14 @@
-# Current implementation status — v0.19.0-rc.4
+# v0.19.0-rc.8 implementation status
+
+Runtime build preparation is complete at source level. Deterministic install, lint, type-check, build, and staging remain blocked until a real lockfile can be generated with registry access.
+
+Shift Plan toolbar, selector and mobile track ownership are consolidated. Broader schedule specificity cleanup remains deferred until rendered regression coverage exists.
+
+# v0.19.0-rc.6 — Type Safety, Test Cleanup & Build Reproducibility
+
+This release adds typed client/API response contracts, separates current regression gates from historical assertions, and records the unresolved deterministic-install blocker. No visual design or business behaviour was intentionally changed.
+
+# Current implementation status — v0.19.0-rc.5
 
 The dedicated employee workspace redesign is complete at source level. Runtime, Safari, VoiceOver, staging and dependency-backed production gates remain pending.
 
