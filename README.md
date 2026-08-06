@@ -1,6 +1,14 @@
+# Bar Ops v0.18.9 — Daily Operations & Settings Redesign
+
+Current release: **v0.18.9**
+
+This release redesigns Daily Operations and Settings as compact iPhone-first manager workspaces. Checklists, handovers, operational summaries and time-clock configuration now use feature-owned CSS Modules and the accepted Phase D visual language while preserving existing APIs, permissions and persistence.
+
+Rollback checkpoint: **v0.18.8**.
+
 # Bar Ops v0.18.8 — Inventory & Orders Redesign
 
-Current release: **v0.18.8**
+Historic release: **v0.18.8**
 
 This release rebuilds Inventory and Purchase Orders as iPhone-first operational workspaces. Stock controls, low-stock filtering, product details, replenishment suggestions, deliveries and order statuses are presented as compact feature-owned cards rather than desktop tables. Existing stock calculations, supplier data, adjustments, receiving behavior, permissions, APIs and persistence remain unchanged.
 

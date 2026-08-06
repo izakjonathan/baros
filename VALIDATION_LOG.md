@@ -1,3 +1,13 @@
+## v0.18.9
+
+- Daily operations/checklist regressions: passed
+- Time-clock settings regression: passed
+- ESLint, TypeScript and production build: not run because dependencies are not installed in this environment (`eslint: not found`)
+- Focused Daily Operations & Settings regression: passed
+- Release validation: passed
+- Stabilization preflight: passed
+- Release artifact audit: passed
+
 # Validation Log — v0.18.8
 
 ## Completed

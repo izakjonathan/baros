@@ -1,3 +1,7 @@
+## Current release: v0.18.9
+
+Daily Operations and Settings have completed their Phase D iPhone-first redesign. The next planned workspace is the Employee Workspace.
+
 # Implementation Status — v0.18.8
 
 **Status:** Inventory and Purchase Orders redesign complete.

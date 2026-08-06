@@ -1,3 +1,10 @@
+## v0.18.9 — Daily Operations & Settings Redesign
+
+- Rebuilt Daily Operations around a compact date/progress header, operational summary, checklist and manager logbook.
+- Rebuilt Settings with compact mobile tabs, contained form controls, clearer configuration summaries and locally scoped feature styling.
+- Preserved checklist, handover, time-clock, permission, API and persistence behavior.
+- Added a focused regression test for feature ownership, mobile containment and API preservation.
+
 # Release Notes — v0.18.8
 
 ## Inventory & Orders Redesign
