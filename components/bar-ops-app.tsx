@@ -18,6 +18,7 @@ import dashboardStyles from "@/features/dashboard/Dashboard.module.css";
 import scheduleStyles from "@/features/scheduling/ScheduleWorkspace.module.css";
 import teamStyles from "@/features/employees/TeamWorkspace.module.css";
 import attendanceStyles from "@/features/attendance/AttendanceWorkspace.module.css";
+import executionStyles from "@/features/execution/ShiftExecution.module.css";
 
 const navItems: { id: NavKey; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Today’s operations", icon: LayoutDashboard },
@@ -418,19 +419,19 @@ function ShiftExecution({ shifts, entries, notes, onNavigate }: { shifts: Shift[
   const today = toIsoDate(new Date());
   const todayShifts = shifts.filter((shift) => canonicalShiftDate(shift) === today && !shift.isOpen).sort((a,b)=>a.start.localeCompare(b.start));
   const activeEntries = entries.filter((entry) => entry.date === today && entry.status === "Running");
-  return <>
-    <PageHeader eyebrow="Live operations" title="Shift execution" subtitle="Run the current shift from one operational view" action={<button type="button" className="primary action-button" onClick={()=>onNavigate("attendance")}><Timer size={16}/>Open attendance</button>} />
-    <section className="metric-grid execution-metrics">
+  return <div className={`${executionStyles.workspace} page-flow`}>
+    <div className={executionStyles.header}><PageHeader eyebrow="Live operations" title="Shift execution" subtitle="Run the current shift from one operational view" action={<button type="button" className="primary action-button" onClick={()=>onNavigate("attendance")}><Timer size={16}/>Open attendance</button>} /></div>
+    <section className={`metric-grid execution-metrics ${executionStyles.metrics}`}>
       <Metric icon={Users} label="Assigned today" value={`${todayShifts.length}`} detail="Published employee shifts" trend="Current location" />
       <Metric icon={Play} label="Clocked in" value={`${activeEntries.length}`} detail={`${activeEntries.filter(entry=>entry.onBreak).length} currently on break`} trend="Live attendance" />
       <Metric icon={NotebookPen} label="Shift notes" value={`${notes.length}`} detail="Latest operational notes" trend="Handover context" />
       <Metric icon={AlertTriangle} label="Exceptions" value={`${todayShifts.filter(shift=>shift.availabilityConflict).length}`} detail="Availability conflicts today" trend="Review before service" warning={todayShifts.some(shift=>shift.availabilityConflict)} />
     </section>
-    <section className="panel execution-board"><PanelTitle title="Current shift board" subtitle="Attendance, breaks and shift context" />
+    <section className={`panel execution-board ${executionStyles.board}`}><PanelTitle title="Current shift board" subtitle="Attendance, breaks and shift context" />
       <div className="execution-list">{todayShifts.length===0&&<div className="daily-empty">No assigned shifts today.</div>}{todayShifts.map(shift=>{const entry=activeEntries.find(item=>item.employee===shift.employee); const shiftNotes=notes.filter(note=>note.shiftId===shift.id); return <article key={shift.id}><div className="avatar">{shift.initials}</div><div><strong>{shift.employee}</strong><small>{shift.role} · {shift.start}–{shift.end}</small></div><span className={`execution-state ${entry?.onBreak?"break":entry?"live":"expected"}`}>{entry?.onBreak?"On break":entry?"Clocked in":"Expected"}</span><small>{shiftNotes.length} notes</small><button type="button" className="text-button" onClick={()=>onNavigate(entry?"attendance":"schedule")}>{entry?"Manage":"Open shift"}<ArrowRight size={14}/></button></article>})}</div>
     </section>
-    <div className="dashboard-grid"><section className="panel"><PanelTitle title="Execution actions" subtitle="Existing operational tools"/><div className="quick-grid execution-actions"><Quick icon={Coffee} label="Manage breaks" detail="Start or end an employee break" onClick={()=>onNavigate("attendance")}/><Quick icon={NotebookPen} label="Review notes" detail="See incidents and handover notes" onClick={()=>onNavigate("dashboard")}/><Quick icon={CalendarDays} label="Adjust coverage" detail="Reassign or open a shift" onClick={()=>onNavigate("schedule")}/><Quick icon={CheckCircle2} label="Operations tasks" detail="Opening, closing and maintenance" onClick={()=>onNavigate("operations")}/></div></section></div>
-  </>
+    <section className={`panel ${executionStyles.actionsPanel}`}><PanelTitle title="Execution actions" subtitle="Existing operational tools"/><div className="quick-grid execution-actions"><Quick icon={Coffee} label="Manage breaks" detail="Start or end an employee break" onClick={()=>onNavigate("attendance")}/><Quick icon={NotebookPen} label="Review notes" detail="See incidents and handover notes" onClick={()=>onNavigate("dashboard")}/><Quick icon={CalendarDays} label="Adjust coverage" detail="Reassign or open a shift" onClick={()=>onNavigate("schedule")}/><Quick icon={CheckCircle2} label="Operations tasks" detail="Opening, closing and maintenance" onClick={()=>onNavigate("operations")}/></div></section>
+  </div>
 }
 
 function Metric({ icon: Icon, label, value, detail, trend, warning }: { icon: typeof Users; label: string; value: string; detail: string; trend: string; warning?: boolean }) {

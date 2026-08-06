@@ -22,3 +22,32 @@
 .heroPanel :global(.panel-title h2),.panel :global(.panel-title h2),.quickPanel :global(.panel-title h2),.summary :global(.panel-title h2){font-size:clamp(1.45rem,3vw,2rem);line-height:1.05}
 .quickPanel :global(.quick-action){border-radius:1rem;padding:1rem 1.1rem}.quickPanel :global(.quick-action strong){font-size:1.05rem}
 @media(max-width:640px){.metrics :global(.metric-card){min-height:8.75rem;padding:1.2rem}.heroPanel,.panel,.quickPanel,.summary{border-radius:1.5rem}}
+
+/* v0.18.7 dashboard consistency pass */
+.dashboard :global(.page-header){padding:0;background:transparent;color:inherit}
+.dashboard :global(.page-header h1){font-size:clamp(2rem,6vw,3rem);line-height:.95}
+.dashboard :global(.page-subtitle){max-width:42rem}
+.metrics :global(.metric-card){min-height:8rem;padding:1rem;border-radius:1rem}
+.metrics :global(.metric-label){font-size:1rem}
+.metrics :global(.metric-card strong){font-size:2.25rem}
+.heroPanel,.panel,.quickPanel,.summary{border-radius:1.25rem}
+.quickPanel{padding:1rem}
+.quickPanel :global(.quick-grid){gap:.65rem}
+.quickPanel :global(.quick-action){min-height:4.5rem;padding:.8rem 1rem;border-radius:.9rem}
+@media(max-width:640px){
+  .dashboard{gap:.75rem}
+  .dashboard :global(.page-header){display:block}
+  .dashboard :global(.page-header h1){font-size:2.35rem}
+  .dashboard :global(.page-subtitle){font-size:.95rem}
+  .metrics{gap:.65rem}
+  .metrics :global(.metric-card){min-height:7rem;padding:.9rem}
+  .metrics :global(.metric-label){font-size:.95rem}
+  .metrics :global(.metric-card strong){font-size:2rem}
+  .metrics :global(.metric-card small){font-size:.75rem}
+  .heroPanel :global(.panel-title),.panel :global(.panel-title),.summary :global(.panel-title){padding:.9rem}
+  .heroPanel :global(.live-board-row),.attention :global(.attention-item){padding:.8rem .9rem}
+  .summary :global(.operational-summary-grid){padding:0 .9rem .9rem}
+  .quickPanel{padding:.9rem}
+  .quickPanel :global(.quick-grid){grid-template-columns:1fr}
+  .quickPanel :global(.quick-action){min-height:4rem}
+}

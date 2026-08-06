@@ -1,3 +1,21 @@
+# Validation Log — v0.18.7
+
+## Completed
+
+- `node scripts/test-v0187-ops-consistency.mjs`
+- `node scripts/validate-release.mjs`
+- `node scripts/preflight-stabilization.mjs`
+- `node scripts/check-release-artifacts.mjs`
+- ZIP integrity check
+
+## Pending in this environment
+
+- Dependency installation
+- ESLint
+- TypeScript type-check
+- Next.js production build
+- Browser/device visual verification
+
 # Validation Log — v0.18.6
 
 ## Completed

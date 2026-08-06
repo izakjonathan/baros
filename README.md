@@ -1,6 +1,14 @@
+# Bar Ops v0.18.7 — Dashboard & Shift Execution Consistency Pass
+
+Current release: **v0.18.7**
+
+This release aligns Today’s Operations and Shift Execution with the accepted iPhone-first Shift Plan, Time & Attendance and Team baseline. It reduces oversized surfaces, restores consistent two-column operational metrics, gives Shift Execution a dedicated local CSS owner, and reorganizes live boards and action lists without changing operational behavior.
+
+Rollback checkpoint: **v0.18.6**.
+
 # Bar Ops v0.18.6 — Team Redesign
 
-Current release: **v0.18.6**
+Historic release: **v0.18.6**
 
 This release rebuilds the Team workspace as a compact iPhone-first people-management view. Team totals, search, filtering, employee identity, scheduled hours, contact details, portal access and employee actions are reorganized into a denser operational hierarchy while preserving all existing employee behavior.
 

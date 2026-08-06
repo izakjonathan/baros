@@ -1,3 +1,12 @@
+# v0.18.7 — Dashboard & Shift Execution Consistency Pass
+
+- Tightened Today’s Operations typography, metrics, live-board rows, summaries and quick actions for iPhone.
+- Added a dedicated Shift Execution CSS module instead of relying on accumulated global overrides.
+- Rebuilt Shift Execution around a compact pink header, two-column live metrics, a purple current-shift board and a neon action surface.
+- Preserved attendance, scheduling, notes, task, inventory and navigation behavior.
+
+---
+
 # v0.18.6 — Team Redesign
 
 - Rebuilt the Team workspace as a compact iPhone-first people-management screen.
