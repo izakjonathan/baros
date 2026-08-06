@@ -134,3 +134,67 @@
     font-size:.72rem;
   }
 }
+
+/* v0.18.5.3 — iPhone Time & Attendance layout polish
+   This refines the accepted mobile structure without changing payroll behavior. */
+@media(max-width:430px){
+  .workspace{gap:.54rem}
+
+  .hero{
+    gap:.56rem;
+    padding:.72rem .82rem;
+    border-radius:.94rem;
+  }
+  .hero p{font-size:.59rem}
+  .hero h1{font-size:1.68rem}
+  .hero span{margin-top:.28rem;font-size:.74rem}
+  .actions{gap:.32rem}
+  .actions button{
+    min-height:2.28rem;
+    padding:.34rem .38rem;
+    font-size:.66rem;
+  }
+  .actions button:disabled{
+    opacity:1;
+    color:rgba(0,0,0,.46);
+  }
+  .actions .approveAll:disabled{background:#efa5a0}
+  .actions .export:disabled{background:#9f4e91;color:#e6a8d8}
+
+  .filters{
+    gap:.5rem;
+    padding:.7rem .72rem;
+    border-radius:.94rem;
+  }
+  .periodFields{gap:.52rem}
+  .filterFields{gap:.42rem}
+  .filters input,.filters select{height:2.22rem}
+  .filterFooter{margin-top:.02rem}
+  .filterFooter button{padding:.34rem .58rem}
+
+  .records{gap:.48rem}
+  .sectionHeader{
+    align-items:flex-end;
+    padding-inline:.12rem;
+  }
+  .sectionHeader>span{
+    flex:0 0 auto;
+    padding-bottom:.06rem;
+    white-space:nowrap;
+  }
+  .empty{
+    min-height:4.1rem;
+    gap:.22rem;
+    padding:.66rem .75rem;
+    border-radius:.78rem;
+  }
+  .empty strong{font-size:.94rem}
+  .empty span{font-size:.68rem;line-height:1.25}
+
+  .summary{gap:.38rem}
+  .summary article{
+    min-height:3.9rem;
+    padding:.6rem .64rem;
+  }
+  .summary strong{font-size:1.32rem}
+}

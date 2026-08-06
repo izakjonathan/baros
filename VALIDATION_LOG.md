@@ -1,3 +1,22 @@
+# v0.18.5.3 validation
+
+## Completed
+
+- Focused v0.18.5.3 attendance regression
+- Inherited v0.18.5.2 native-date sizing regression
+- Release validation
+- Stabilization preflight
+- Release artifact audit
+- ZIP integrity
+
+## Not completed in this environment
+
+- ESLint: dependencies are not installed (`eslint` was not found).
+- TypeScript compilation: dependencies are not installed.
+- Next.js production build: dependencies are not installed.
+
+---
+
 # v0.18.5.2 validation
 
 - iPhone date-input sizing regression: passed

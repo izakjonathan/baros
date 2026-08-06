@@ -1,3 +1,13 @@
+# v0.18.5.3 — Time & Attendance Layout Polish
+
+- Added a visible gap between paired iPhone date controls while preserving the native-date containment fix.
+- Reduced payroll header and action height without changing workflow priority.
+- Improved disabled Approve and Export contrast without making unavailable actions look active.
+- Tightened the Timesheets heading, empty state and payroll summary cards.
+- Preserved payroll calculations, filters, approval rules, exports, permissions, APIs and persistence.
+
+---
+
 # v0.18.5.2 — iPhone Date Input Containment Fix
 
 - Corrected the root cause of paired native date inputs overflowing the Time & Attendance filter card on iPhone Safari.

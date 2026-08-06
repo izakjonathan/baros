@@ -1,3 +1,13 @@
+# v0.18.5.3 implementation status
+
+**Status:** Time & Attendance mobile layout polish complete.
+
+- Paired native date controls remain fully contained and now read as separate controls.
+- Header, actions, empty state and summaries use a denser iPhone rhythm.
+- No payroll behavior or data contracts changed.
+
+---
+
 # v0.18.5.2 implementation status
 
 The Time & Attendance paired date controls now remain inside their filter card and viewport on iPhone Safari. The fix corrects the grid and native-input sizing chain rather than clipping the parent or adding compensating layout rules. Permanent implementation guidance and a regression test are included.

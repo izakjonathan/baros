@@ -1,10 +1,10 @@
-# Bar Ops v0.18.5.2 — iPhone Date Input Containment Fix
+# Bar Ops v0.18.5.3 — Time & Attendance Layout Polish
 
-Current release: **v0.18.5.2**
+Current release: **v0.18.5.3**
 
 This patch fixes the recurring iPhone Safari overflow of the paired From and To native date controls in Time & Attendance. The correction is applied at the sizing source: shrinkable grid tracks, shrinkable labels, bounded date inputs, and WebKit-specific date-edit containment. The reusable solution is documented and protected by a regression test.
 
-Rollback checkpoint: **v0.18.5.1**.
+Rollback checkpoint: **v0.18.5.2**.
 
 ---
 
