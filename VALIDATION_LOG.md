@@ -1,3 +1,25 @@
+# Validation Log — v0.18.13
+
+## Passed
+
+- `node scripts/test-v01813-visual-qa.mjs`
+- inherited v0.18.12 containment regression
+- release validation
+- stabilization preflight
+- forbidden-artifact audit
+- ZIP integrity
+
+## Attempted but blocked by missing dependencies
+
+- ESLint: `eslint: not found`
+- TypeScript: React, Next.js, PostgreSQL and Node type modules are unavailable
+- Next.js production build: `next: not found`
+
+## Not run
+
+- Clean dependency installation
+- Browser and physical-device verification
+
 # Validation Log — v0.18.12
 
 ## Passed

@@ -1,0 +1,171 @@
+/* v0.18.13 — full visual QA and consistency pass
+   This layer owns cross-product visual contracts only. Feature modules retain
+   responsibility for their internal composition and business-specific color. */
+
+:root {
+  --qa-control-size: 2.75rem;
+  --qa-touch-size: 2.75rem;
+  --qa-copy-measure: 62ch;
+  --qa-state-padding: 1rem;
+}
+
+/* Predictable text rhythm and wrapping across manager, employee and auth UI. */
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(h1,h2,h3,p,small,strong,span) {
+  min-inline-size: 0;
+}
+
+:where(.page-header,.workspace-header,.employee-page-title,.employee-hero,.login-card,.modal-head) h1,
+:where(.page-header,.workspace-header,.employee-page-title,.employee-hero,.login-card,.modal-head) h2 {
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+:where(.page-header,.workspace-header,.employee-page-title,.employee-hero,.login-card,.modal-head) p {
+  max-inline-size: var(--qa-copy-measure);
+  text-wrap: pretty;
+}
+
+:where(.page-header,.workspace-header,.employee-page-title) h1 {
+  font-size: clamp(1.75rem, 7vw, 3rem);
+  line-height: .95;
+  letter-spacing: -.045em;
+}
+
+/* Shared controls use one physical rhythm; feature colors remain untouched. */
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(input,select,textarea,button,.button,[role="button"]) {
+  min-block-size: var(--qa-control-size);
+}
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(button,.button,[role="button"]) {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(.icon-button,.dialog-close,.sidebar-close,.menu-button,.notification) {
+  inline-size: var(--qa-touch-size);
+  block-size: var(--qa-touch-size);
+  min-inline-size: var(--qa-touch-size);
+  min-block-size: var(--qa-touch-size);
+  padding: 0;
+}
+
+:where(button,.button,[role="button"]):disabled,
+:where(input,select,textarea):disabled {
+  cursor: not-allowed;
+  opacity: .48;
+}
+
+/* A single visible keyboard-focus treatment across all interactive surfaces. */
+:where(a,button,input,select,textarea,[role="button"],[tabindex]):focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
+
+/* Long operational content must wrap inside cards instead of widening them. */
+:where(.panel,.card,.metric-card,.employee-card,.team-card,.inventory-card,.order-card,.request-card,.timesheet-card,.quick-action,.attention-item) {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+:where(.panel,.card,.employee-card,.team-card,.inventory-card,.order-card,.request-card,.timesheet-card) :where(p,small,strong,span,a) {
+  overflow-wrap: anywhere;
+}
+
+/* Dense data may scroll on its own axis; page-level horizontal overflow is not
+   used as a substitute for fixing a component's intrinsic width. */
+:where(.table-scroll,.table-wrap,.data-table-wrap) {
+  max-inline-size: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Shared state surfaces use consistent compact proportions. */
+:where(.workspace-loading,.workspace-loading-card,.empty-state,.empty-portal,.error-state,.attendance-empty) {
+  min-block-size: 6rem;
+  padding: var(--qa-state-padding);
+  display: grid;
+  place-items: center;
+  align-content: center;
+  text-align: center;
+}
+
+:where(.workspace-loading,.workspace-loading-card,.empty-state,.empty-portal,.error-state,.attendance-empty) > * {
+  max-inline-size: 36ch;
+  margin-inline: auto;
+}
+
+/* Popovers, sheets, dialogs and toasts share safe viewport bounds. */
+:where(.modal,.employee-more-sheet,.top-popover,.toast) {
+  max-inline-size: calc(100vw - max(1rem, env(safe-area-inset-left)) - max(1rem, env(safe-area-inset-right)));
+}
+
+.modal {
+  max-block-size: calc(100dvh - env(safe-area-inset-top));
+  scrollbar-gutter: stable;
+}
+
+.modal-head,
+.modal-actions,
+.interaction-actions {
+  padding-inline-start: max(1rem, env(safe-area-inset-left));
+  padding-inline-end: max(1rem, env(safe-area-inset-right));
+}
+
+.modal-actions,
+.interaction-actions,
+.page-actions,
+.header-actions,
+.workspace-actions {
+  align-items: stretch;
+}
+
+.modal-actions > *,
+.interaction-actions > *,
+.page-actions > *,
+.header-actions > *,
+.workspace-actions > * {
+  min-inline-size: 0;
+}
+
+/* Keep section labels attached to their actions and avoid edge collisions. */
+:where(.panel-title,.section-heading,.workspace-section-head) {
+  min-inline-size: 0;
+  gap: var(--layout-gap);
+}
+
+:where(.panel-title,.section-heading,.workspace-section-head) > :first-child {
+  min-inline-size: 0;
+}
+
+@media (max-width: 40rem) {
+  :root {
+    --qa-state-padding: .875rem;
+  }
+
+  :where(.page-header,.workspace-header,.employee-page-title) h1 {
+    font-size: clamp(1.7rem, 9vw, 2.45rem);
+  }
+
+  :where(.page-actions,.header-actions,.workspace-actions) {
+    max-inline-size: 100%;
+  }
+
+  :where(.panel-title,.section-heading,.workspace-section-head) {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 22rem) {
+  :where(.page-actions,.header-actions,.workspace-actions) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(*, *::before, *::after) {
+    scroll-behavior: auto !important;
+  }
+}

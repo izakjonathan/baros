@@ -8,7 +8,7 @@ const css = read("app/interface-consistency.css");
 const pkg = JSON.parse(read("package.json"));
 
 const checks = [
-  [pkg.version === "0.18.12", "package version is 0.18.12"],
+  [["0.18.12", "0.18.13"].includes(pkg.version), "package version retains the v0.18.12 containment contract"],
   [layout.includes('import "./completion-redesign.css";\nimport "./interface-consistency.css";'), "correction layer is imported after redesign surfaces"],
   [css.includes('input[type="date"]') && css.includes('input[type="datetime-local"]'), "native temporal inputs are covered"],
   [css.includes("min-inline-size: 0") && css.includes("max-inline-size: 100%") && css.includes("box-sizing: border-box"), "controls use the canonical shrinkability contract"],

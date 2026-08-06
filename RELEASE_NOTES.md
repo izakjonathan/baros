@@ -1,3 +1,16 @@
+# Bar Ops v0.18.13 — Full Visual QA & Consistency Pass
+
+- Audited all manager, employee, authentication and transient surfaces as one product.
+- Standardized responsive page-title scale and readable supporting-copy measure.
+- Established a shared 44px physical control and icon-action target.
+- Added one consistent keyboard focus-visible treatment.
+- Hardened long-content wrapping in cards, controls and operational records.
+- Standardized self-contained horizontal scrolling for dense data surfaces.
+- Bounded dialogs, sheets, popovers and toasts to dynamic viewport and safe-area gutters.
+- Normalized loading, empty and error-state proportions.
+- Added a documented QA ownership contract and focused regression guard.
+- Preserved all business logic, calculations, permissions, APIs and persistence.
+
 # Bar Ops v0.18.12 — Site-wide Correction Foundation
 
 - Added one explicit cross-surface containment stylesheet imported after the completed redesign layer.

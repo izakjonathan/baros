@@ -1,3 +1,27 @@
+# Implementation Status — v0.18.13
+
+## Completed
+
+- Full cross-product visual QA and consistency pass.
+- Shared typography, control sizing, touch-target and focus contracts.
+- Long-content, dense-data and transient-surface containment.
+- Consistent loading, empty and error states.
+- Regression coverage and documented ownership boundaries.
+
+## Next phase
+
+- Accessibility and interaction QA.
+- Physical iPhone and iPad screenshot verification.
+- Corrections based on rendered-device evidence.
+
+## Pending external gates
+
+- Clean dependency installation
+- ESLint
+- TypeScript compilation
+- Next.js production build
+- Browser and physical-device verification
+
 # Implementation Status — v0.18.12
 
 ## Completed

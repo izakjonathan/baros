@@ -1,6 +1,14 @@
+# Bar Ops v0.18.13 — Full Visual QA & Consistency Pass
+
+Current release: **v0.18.13**
+
+This release applies one shared visual QA contract across every manager, employee, authentication and transient surface. It standardizes typography rhythm, control and touch-target sizing, focus visibility, content wrapping, dense-data containment, state proportions and safe-area bounds without moving feature presentation out of its owning CSS Module.
+
+Rollback checkpoint: **v0.18.12**.
+
 # Bar Ops v0.18.12 — Site-wide Correction Foundation
 
-Current release: **v0.18.12**
+Historic release: **v0.18.12**
 
 This release begins the post-redesign correction phase. It establishes one documented cross-surface containment layer for native controls, flex/grid shrinkability, mobile top-bar popovers, toasts and very narrow dialog actions. Feature modules remain responsible for their own presentation; the new layer only owns problems that can recur across unrelated workspaces.
 
