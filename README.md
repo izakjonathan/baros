@@ -1,12 +1,10 @@
-# Bar Ops v0.18.15 — Performance & Production Readiness
+# Bar Ops v0.18.16 — Production Acceptance & Deployment Sign-off
 
-Current release: **v0.18.15**
+Current release: **v0.18.16**
 
-This release closes the redesign and hardening phase with one production-gate contract, static artifact and deployment audits, explicit acceptance and rollback instructions, and regression coverage for the release package. It does not claim a successful dependency-backed build where the required package registry is unavailable.
+This release adds an auditable staging acceptance matrix, exact-deployment promotion rules, explicit sign-off evidence, critical rollback triggers, and source-level regression coverage. Production approval remains pending until dependency-backed gates, staging workflows, database verification, and physical-device checks are completed externally.
 
 Rollback checkpoint: **v0.18.14**.
-
-Rollback checkpoint: **v0.18.13.6**.
 
 # Bar Ops v0.18.13.6 — Shift Plan Column Track Fix
 

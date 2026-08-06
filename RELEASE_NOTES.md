@@ -1,3 +1,14 @@
+# Bar Ops v0.18.16 — Production Acceptance & Deployment Sign-off
+
+- Added a staging acceptance matrix for manager, employee, database, browser, device and accessibility workflows.
+- Added a formal deployment sign-off record with exact-deployment promotion and blocking-defect rules.
+- Strengthened rollback triggers and post-promotion smoke testing.
+- Added a dependency-free source acceptance command and focused v0.18.16 regression.
+- Kept production status explicitly pending until external build, staging, database and device gates pass.
+- No business logic, API contract, permission, persistence or database schema changes.
+
+Rollback checkpoint: **v0.18.14**.
+
 # Bar Ops v0.18.15 — Performance & Production Readiness
 
 - Added a single production release quality command covering artifact audit, stabilization, regression, lint, type-check, environment validation, and production build.

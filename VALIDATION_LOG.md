@@ -1,3 +1,12 @@
+# v0.18.16 validation log
+
+- Source acceptance regression: passed.
+- Artifact audit, production audit, release validation and stabilization preflight: passed.
+- Clean install: attempted and blocked because the configured registry returns 404 for `@types/node@22.10.2`.
+- Inherited accessibility, draft-shift and schedule-column regressions: passed.
+- ESLint, complete TypeScript validation and Next.js build: external gates because dependencies are unavailable.
+- Database, staging and physical-device acceptance: external gates and not claimed as complete.
+
 # v0.18.15 validation
 
 ## Passed

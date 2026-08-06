@@ -14,10 +14,10 @@ for (const artifact of [".next", "node_modules", "tsconfig.tsbuildinfo", ".verce
 for (const file of [".env", ".env.local", ".env.production", ".env.development.local"]) {
   if (exists(file)) failures.push(`Secret-bearing environment file is present: ${file}`);
 }
-for (const required of [".env.example", "PRODUCTION_ACCEPTANCE.md", "DEPLOYMENT_ROLLBACK.md", "V01814_DEVICE_ACCEPTANCE.md"]) {
+for (const required of [".env.example", "PRODUCTION_ACCEPTANCE.md", "DEPLOYMENT_ROLLBACK.md", "V01814_DEVICE_ACCEPTANCE.md", "STAGING_ACCEPTANCE.md", "DEPLOYMENT_SIGNOFF.md"]) {
   if (!exists(required)) failures.push(`Required production document is missing: ${required}`);
 }
-if (pkg.version !== "0.18.15") failures.push("package.json version must be 0.18.15");
+if (pkg.version !== "0.18.16") failures.push("package.json version must be 0.18.16");
 if (pkg.engines?.node !== "24.x") failures.push("Production Node runtime must remain pinned to 24.x");
 if (!pkg.scripts?.lint || !pkg.scripts?.typecheck || !pkg.scripts?.build) failures.push("Lint, type-check and build scripts are required");
 if (!pkg.scripts?.["quality:release"]) failures.push("A single production release quality command is required");

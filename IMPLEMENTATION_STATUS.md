@@ -1,3 +1,26 @@
+# Current release: v0.18.16
+
+Production acceptance tooling and documentation are complete at source level. Production sign-off is explicitly pending external dependency installation, lint, type-check, production build, staging deployment, database verification, critical workflow testing and physical-device acceptance.
+
+## Added
+
+- Staging acceptance matrix
+- Deployment sign-off evidence record
+- Exact-tested-deployment promotion rule
+- Critical rollback triggers
+- Focused source regression and acceptance command
+
+## External gates still required
+
+- Clean dependency installation
+- ESLint
+- Complete TypeScript validation
+- Next.js production build
+- Staging database verification
+- Manager and employee end-to-end workflows
+- iPhone Safari, desktop Safari and Chrome acceptance
+- Final production approval
+
 # Current release: v0.18.15
 
 Production-readiness source hardening is complete. The release now has explicit quality, deployment, acceptance and rollback contracts. Dependency-backed lint, type-check and production build remain external gates because the available package registry does not contain the pinned `@types/node@22.10.2` package.
