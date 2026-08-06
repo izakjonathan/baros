@@ -1,10 +1,10 @@
-# Bar Ops v0.18.5.1 — Time & Attendance Mobile Density Pass
+# Bar Ops v0.18.5.2 — iPhone Date Input Containment Fix
 
-Current release: **v0.18.5.1**
+Current release: **v0.18.5.2**
 
-This release applies the first precise iPhone-specific Shift Plan redesign. Day headers are reduced to a single compact line, decorative dividers and the role legend are removed, the view selector moves into the beige period controls, acknowledgement controls are removed from this screen, employee names are smaller, day-column spacing is tighter, and per-day Add shift actions are reduced to icon-only controls.
+This patch fixes the recurring iPhone Safari overflow of the paired From and To native date controls in Time & Attendance. The correction is applied at the sizing source: shrinkable grid tracks, shrinkable labels, bounded date inputs, and WebKit-specific date-edit containment. The reusable solution is documented and protected by a regression test.
 
-Rollback checkpoint: **v0.18.4.28**.
+Rollback checkpoint: **v0.18.5.1**.
 
 ---
 

@@ -1,3 +1,13 @@
+# v0.18.5.2 validation
+
+- iPhone date-input sizing regression: passed
+- Stabilization preflight: passed
+- Release artifact audit: passed
+- ZIP integrity: pending until packaging
+- Lint/type-check/build: not run because the configured package registry returned 404 for `@types/node@22.10.2` during dependency installation
+
+---
+
 ## Environment limitation
 
 Dependency installation failed because the configured package registry does not provide `@types/node@22.10.2`. ESLint, TypeScript and the Next.js production build therefore could not be executed in this environment.

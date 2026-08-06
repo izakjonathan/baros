@@ -1,3 +1,9 @@
+# v0.18.5.2 implementation status
+
+The Time & Attendance paired date controls now remain inside their filter card and viewport on iPhone Safari. The fix corrects the grid and native-input sizing chain rather than clipping the parent or adding compensating layout rules. Permanent implementation guidance and a regression test are included.
+
+---
+
 # v0.18.5.1 implementation status
 
 Time & Attendance mobile density pass complete. The workspace now prioritises timesheet records and empty-state feedback on iPhone while retaining the v0.18.5 functional redesign.

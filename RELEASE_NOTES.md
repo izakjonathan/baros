@@ -1,3 +1,14 @@
+# v0.18.5.2 — iPhone Date Input Containment Fix
+
+- Corrected the root cause of paired native date inputs overflowing the Time & Attendance filter card on iPhone Safari.
+- Changed the date grid to shrinkable `minmax(0, 1fr)` tracks.
+- Made labels and native date controls explicitly shrinkable through the full sizing chain.
+- Added WebKit-specific date value/edit containment rules.
+- Added permanent project guidance and a regression test so the issue is not reintroduced.
+- No payroll logic, date values, filtering behavior, APIs, permissions, or persistence changed.
+
+---
+
 # v0.18.5.1 — Time & Attendance Mobile Density Pass
 
 - Reduced the payroll header height and shortened supporting copy.

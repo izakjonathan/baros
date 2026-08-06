@@ -1,0 +1,14 @@
+import fs from "node:fs";
+const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
+const css=fs.readFileSync("features/attendance/AttendanceWorkspace.module.css","utf8");
+const docs=fs.readFileSync("docs/iphone-native-date-input-sizing.md","utf8");
+const fail=(message)=>{console.error(`v0.18.5.2 regression: ${message}`);process.exit(1)};
+if(pkg.version!=="0.18.5.2") fail("package version mismatch");
+if(!css.includes("repeat(2,minmax(0,1fr))")) fail("paired date grid is not shrinkable");
+if(!css.includes('input[type="date"]')) fail("date-specific sizing rule missing");
+if(!css.includes("min-inline-size:0")) fail("minimum inline size reset missing");
+if(!css.includes("max-inline-size:100%")) fail("maximum inline size guard missing");
+if(!css.includes("::-webkit-date-and-time-value")) fail("iOS date value sizing rule missing");
+if(!css.includes("::-webkit-datetime-edit")) fail("iOS date edit sizing rule missing");
+if(!docs.includes("Do not hide the bug with parent clipping")) fail("permanent guidance missing");
+console.log("v0.18.5.2 iPhone date input sizing regression passed");

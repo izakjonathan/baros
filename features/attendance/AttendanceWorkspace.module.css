@@ -88,3 +88,49 @@
   .previewList dd{font-size:1rem}
   .history{padding:.78rem;border-radius:.82rem}
 }
+
+/* v0.18.5.2 — iPhone-safe paired native date controls
+   Native date inputs have intrinsic WebKit widths. The grid and every item in
+   the sizing chain must therefore be explicitly shrinkable. */
+.periodFields{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  min-width:0;
+  max-width:100%;
+}
+.periodFields > label{
+  min-width:0;
+  min-inline-size:0;
+  max-width:100%;
+}
+.periodFields input[type="date"]{
+  display:block;
+  box-sizing:border-box;
+  width:100%;
+  inline-size:100%;
+  min-width:0;
+  min-inline-size:0;
+  max-width:100%;
+  max-inline-size:100%;
+  overflow:hidden;
+}
+.periodFields input[type="date"]::-webkit-date-and-time-value{
+  min-width:0;
+  width:100%;
+  text-align:center;
+}
+.periodFields input[type="date"]::-webkit-datetime-edit{
+  min-width:0;
+  max-width:100%;
+  padding:0;
+  overflow:hidden;
+}
+@media(max-width:430px){
+  .periodFields{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:.36rem;
+  }
+  .periodFields input[type="date"]{
+    padding-inline:.38rem;
+    font-size:.72rem;
+  }
+}
