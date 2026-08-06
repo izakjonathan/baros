@@ -1,3 +1,7 @@
+# v0.18.13.6 implementation status
+
+Complete: mobile Shift Plan track and day-column widths now have one owner. The false inter-column spacing caused by wider grid tracks surrounding capped child columns has been removed. Physical iPhone verification remains the acceptance step after deployment.
+
 # v0.18.13.5
 
 Time & Attendance date controls now use the permanent component-owned visual date pattern. Native iOS date picking, constraints, change handling, and accessibility remain intact.

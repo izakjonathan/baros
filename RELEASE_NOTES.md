@@ -1,3 +1,11 @@
+# v0.18.13.6 — Shift Plan Column Track Root-Cause Fix
+
+- Replaces viewport-derived mobile day tracks with one explicit day-column width.
+- Removes hidden unused space inside each grid track.
+- Gives the grid and day columns the same authoritative width.
+- Retains only a small deliberate separator between days.
+- Preserves horizontal scrolling, schedule navigation, shifts, publishing, APIs, permissions and persistence.
+
 # v0.18.13.5 — Schedule Control Root-Cause Corrections
 
 - Gives visible date labels a descender-safe line box so letters such as “g” are not clipped.

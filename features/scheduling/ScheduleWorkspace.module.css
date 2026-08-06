@@ -2966,3 +2966,28 @@
     padding-inline:0 !important;
   }
 }
+
+/* v0.18.13.6 — authoritative mobile day-track sizing.
+   Root cause: the grid tracks were viewport-derived while historical max-width
+   rules still capped each day column. The unused width inside every track looked
+   like a large column gap even when CSS gap was zero. Track and child now share
+   one explicit width, with only a small deliberate separator. */
+@media(max-width:48rem){
+  .calendarGrid,
+  .calendarPanel :global(.calendar-grid){
+    --mobile-day-column:6.55rem !important;
+    --mobile-day-separator:.16rem !important;
+    grid-auto-columns:var(--mobile-day-column) !important;
+    gap:var(--mobile-day-separator) !important;
+    column-gap:var(--mobile-day-separator) !important;
+  }
+  .dayColumn,
+  .calendarPanel :global(.day-column){
+    inline-size:var(--mobile-day-column) !important;
+    width:var(--mobile-day-column) !important;
+    min-inline-size:var(--mobile-day-column) !important;
+    min-width:var(--mobile-day-column) !important;
+    max-inline-size:var(--mobile-day-column) !important;
+    max-width:var(--mobile-day-column) !important;
+  }
+}

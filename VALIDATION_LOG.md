@@ -655,3 +655,12 @@ Not run locally:
 - Dashboard nesting and compact-action regression: passed
 - Full inherited regression suite: passed (`npm run test:all`)
 - Dependency-based lint/typecheck/build: not available unless dependencies are installable in this environment
+
+## v0.18.13.6 validation
+- Focused schedule-column regression: passed
+- Inherited v0.18.13.5 schedule root-cause regression: passed
+- Release validation: passed
+- Stabilization preflight: passed
+- Release artifact audit: passed
+- Dependency-based lint, type-check and production build: not available unless dependencies are installed
+

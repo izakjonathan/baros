@@ -1,6 +1,14 @@
+# Bar Ops v0.18.13.6 — Shift Plan Column Track Fix
+
+Current release: **v0.18.13.6**
+
+This release fixes the recurring wide spacing between mobile Shift Plan days at its layout source. The grid previously created viewport-sized tracks while historical rules capped each day column to a smaller fixed width. The unused space inside each track appeared as a large gap even when `gap: 0`. The mobile grid and each day column now share one authoritative width with only a small deliberate separator. Scheduling behavior, APIs, permissions and persistence are unchanged.
+
+Rollback checkpoint: **v0.18.13.5**.
+
 # Bar Ops v0.18.13.5 — Physical Device Component Corrections
 
-Current release: **v0.18.13.5**
+Historic release: **v0.18.13.5**
 
 This release corrects the remaining real-iPhone component issues in Daily Operations, Dashboard, Shift Execution, Time & Attendance and Team. Nested beige empty/composition cards were removed, the payroll date/filter card was corrected at its native-control sizing chain, and Team search/filter presentation now has one feature owner. Business logic, APIs, permissions and persistence are unchanged.
 
