@@ -1,2 +1,30 @@
 .workspace{display:grid;gap:var(--layout-gap);min-width:0}.workspace :global(.page-header){margin:0;padding:1rem;background:#eb6746;color:#000;border:0;border-radius:1rem}.workspace :global(.page-header h1){font-size:clamp(2rem,7vw,3.25rem);line-height:.94}.workspace :global(.page-subtitle){color:#000}.addButton{min-height:2.5rem;border:0;border-radius:.75rem;background:#000;color:#fff4c4;padding-inline:1rem;font-weight:800}.suggestion,.delivery{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem;border-radius:1rem;color:#000}.suggestion{background:#dfee4b}.delivery{background:#9561e6}.suggestion>div,.delivery>div{display:flex;align-items:center;gap:.7rem;min-width:0}.suggestion p,.suggestion strong,.suggestion small,.delivery p,.delivery strong,.delivery small{display:block;margin:0}.suggestion p,.delivery p{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.suggestion strong,.delivery strong{font-size:1.05rem}.suggestion small,.delivery small{font-size:.72rem}.suggestion button,.delivery button{flex:0 0 auto;min-height:2.4rem;border:0;border-radius:.7rem;background:#000;color:#fff4c4;padding-inline:.8rem;font-weight:800}.ordersPanel{display:grid;gap:.65rem}.toolbar{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(9rem,1fr) auto;gap:.5rem;align-items:center;padding:.65rem;background:#fff4c4;color:#000;border-radius:1rem}.search{min-width:0;background:#fff;border:0}.search input{min-width:0}.filter{position:relative;min-width:0}.filter select{width:100%;height:2.5rem;appearance:none;border:0;border-radius:.75rem;background:#f47add;color:#000;padding-inline:.75rem 2rem;font-weight:800}.filter svg{position:absolute;right:.65rem;top:50%;transform:translateY(-50%);pointer-events:none}.clear{min-height:2.5rem;border:2px solid #000;border-radius:.75rem;background:transparent;color:#000;padding-inline:.75rem;font-weight:800}.resultCount{grid-column:1/-1;font-size:.75rem;font-weight:800}.orderList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--layout-gap)}.orderCard{display:grid;gap:.8rem;min-width:0;padding:1rem;background:#fff4c4;color:#000;border-radius:1rem}.orderCard:nth-child(4n+2){background:#f47add}.orderCard:nth-child(4n+3){background:#dfee4b}.orderCard:nth-child(4n+4){background:#9561e6}.orderCard header{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem}.orderCard p,.orderCard h2{margin:0}.orderCard p{font-size:.65rem;font-weight:800;letter-spacing:.08em}.orderCard h2{font-size:1.2rem;line-height:1.05;overflow-wrap:anywhere}.orderCard header>span{flex:0 0 auto;padding:.35rem .55rem;border-radius:999px;background:#000;color:#fff4c4;font-size:.65rem;font-weight:800}.orderCard dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;margin:0}.orderCard dl div{display:grid;gap:.2rem;min-width:0}.orderCard dt{font-size:.65rem;font-weight:800}.orderCard dd{margin:0;font-size:.82rem;font-weight:700;overflow-wrap:anywhere}.receiveButton{min-height:2.35rem;border:0;border-radius:.7rem;background:#000;color:#fff4c4;font-weight:800}.empty{display:grid;place-items:center;gap:.25rem;min-height:7rem;padding:1rem;background:#dfee4b;color:#000;border-radius:1rem;text-align:center}
 @media(max-width:640px){.workspace :global(.page-header){padding:.8rem;border-radius:.85rem}.workspace :global(.page-header h1){font-size:2rem}.workspace :global(.page-subtitle){font-size:.78rem}.addButton{min-height:2.35rem;font-size:.78rem}.suggestion,.delivery{padding:.8rem;border-radius:.85rem}.suggestion button,.delivery button{min-height:2.25rem;font-size:.72rem}.toolbar{grid-template-columns:minmax(0,1fr) minmax(0,1fr);padding:.55rem;border-radius:.85rem}.search{grid-column:1/-1}.filter select,.clear{min-height:2.35rem;height:2.35rem;font-size:.75rem}.resultCount{font-size:.7rem}.orderList{grid-template-columns:1fr}.orderCard{padding:.8rem;border-radius:.85rem}.orderCard h2{font-size:1.05rem}.orderCard dl{gap:.35rem}}
+
+/* v0.18.13.1 physical-device corrections */
+.search{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:.55rem;
+  inline-size:100%;
+  max-inline-size:none;
+  min-block-size:2.5rem;
+  block-size:2.5rem;
+  padding-inline:.75rem;
+  overflow:hidden;
+  border-radius:.75rem;
+  background:#fff4c4;
+  color:#000;
+}
+.search input{
+  inline-size:100%;
+  min-inline-size:0;
+  min-block-size:0!important;
+  block-size:100%;
+  padding:0;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:#000;
+}

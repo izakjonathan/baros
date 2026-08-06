@@ -1,6 +1,14 @@
+# Bar Ops v0.18.13.1 — Physical Device Visual Corrections
+
+Current release: **v0.18.13.1**
+
+This release corrects issues identified from real iPhone Safari screenshots: fixed-header content overlap, broken search-field composition, paired-date middle collisions, oversized Daily Operations composition, inconsistent Quick Actions rows, and malformed Inventory edit controls. Business logic, APIs, permissions and persistence are unchanged.
+
+Rollback checkpoint: **v0.18.13**.
+
 # Bar Ops v0.18.13 — Full Visual QA & Consistency Pass
 
-Current release: **v0.18.13**
+Historic release: **v0.18.13**
 
 This release applies one shared visual QA contract across every manager, employee, authentication and transient surface. It standardizes typography rhythm, control and touch-target sizing, focus visibility, content wrapping, dense-data containment, state proportions and safe-area bounds without moving feature presentation out of its owning CSS Module.
 

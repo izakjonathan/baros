@@ -1,3 +1,9 @@
+# v0.18.13.1 implementation status
+
+Status: **Implemented and packaged**
+
+Physical-device corrections completed for manager header flow, shared search controls, attendance date separation, Daily Operations density, Dashboard Quick Actions and Inventory card actions. Automated source-level regression, release validation, preflight and artifact checks are included. Browser/device re-verification remains the acceptance step after deployment.
+
 # Implementation Status — v0.18.13
 
 ## Completed

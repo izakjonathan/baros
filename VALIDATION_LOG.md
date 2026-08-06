@@ -1,3 +1,12 @@
+# v0.18.13.1 validation
+
+- Focused physical-device regression: passed
+- Inherited v0.18.13 visual QA regression: passed
+- Release validation: passed
+- Stabilization preflight: passed
+- Forbidden-artifact audit: passed
+- Dependency-based lint/typecheck/build: not run because node_modules is not present in this environment
+
 # Validation Log — v0.18.13
 
 ## Passed

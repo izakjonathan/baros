@@ -132,3 +132,17 @@
     border-radius:.72rem;
   }
 }
+
+/* v0.18.13.1 — physical-device header correction
+   On mobile the manager header participates in document flow as a sticky row.
+   This prevents workspace cards from disappearing underneath a fixed overlay
+   while retaining the persistent navigation and safe-area placement. */
+@media(max-width:960px){
+  .topbar{
+    position:sticky;
+    top:0;
+    left:auto;
+    right:auto;
+    width:100%;
+  }
+}

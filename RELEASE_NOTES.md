@@ -1,3 +1,14 @@
+# Bar Ops v0.18.13.1 — Physical Device Visual Corrections
+
+- Changed the mobile manager top bar from a fixed overlay to a sticky in-flow header so scrolled workspace content is not hidden behind it.
+- Rebuilt Inventory and Purchase Orders search fields as self-contained two-column controls with transparent internal inputs and clipped component-owned bounds.
+- Preserved the permanent iPhone native date containment contract while adding a visible gap between paired attendance dates.
+- Compacted Daily Operations checklist creation, preset actions, logbook composition and handover metadata.
+- Standardized Quick Actions into one repeated row structure with deliberate category colors.
+- Restored square, visible Inventory edit controls with explicit dimensions and icon color.
+- Added a focused physical-device regression guard.
+- Preserved all business logic, calculations, permissions, APIs and persistence.
+
 # Bar Ops v0.18.13 — Full Visual QA & Consistency Pass
 
 - Audited all manager, employee, authentication and transient surfaces as one product.

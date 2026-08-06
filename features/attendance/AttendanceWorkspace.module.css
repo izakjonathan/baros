@@ -198,3 +198,10 @@
   }
   .summary strong{font-size:1.32rem}
 }
+
+/* v0.18.13.1 — paired dates remain independent controls */
+@media(max-width:430px){
+  .periodFields{gap:.62rem}
+  .periodFields>label{overflow:hidden;border-radius:.64rem}
+  .periodFields input[type="date"]{border-radius:.64rem}
+}

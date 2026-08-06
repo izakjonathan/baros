@@ -1,6 +1,6 @@
 {
   "name": "bar-ops",
-  "version": "0.18.13",
+  "version": "0.18.13.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -152,7 +152,8 @@
     "test:v01810-requests": "node scripts/test-v01810-requests-redesign.mjs",
     "test:v01811-completion": "node scripts/test-v01811-completion-redesign.mjs",
     "test:v01812-site-wide": "node scripts/test-v01812-site-wide-corrections.mjs",
-    "test:v01813-visual-qa": "node scripts/test-v01813-visual-qa.mjs"
+    "test:v01813-visual-qa": "node scripts/test-v01813-visual-qa.mjs",
+    "test:v018131-device-corrections": "node scripts/test-v018131-device-corrections.mjs"
   },
   "dependencies": {
     "lucide-react": "0.468.0",

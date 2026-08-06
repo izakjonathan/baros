@@ -169,3 +169,13 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* v0.18.13.1 — mobile shell flow correction */
+@media (max-width: 60rem) {
+  .main-shell {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .main-shell > .page-wrap {
+    scroll-margin-top: calc(var(--app-header-height) + var(--layout-gap));
+  }
+}

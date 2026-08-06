@@ -9,7 +9,7 @@ const css = read("app/visual-qa-consistency.css");
 const docs = read("docs/full-visual-qa-v01813.md");
 
 const checks = [
-  [pkg.version === "0.18.13", "package version is 0.18.13"],
+  [pkg.version.startsWith("0.18.13"), "package remains on the v0.18.13 visual-QA line"],
   [layout.includes('import "./interface-consistency.css";\nimport "./visual-qa-consistency.css";'), "visual QA layer follows containment foundation"],
   [css.includes("--qa-control-size: 2.75rem") && css.includes("--qa-touch-size: 2.75rem"), "controls and icon actions use the 44px touch contract"],
   [css.includes(":focus-visible") && css.includes("outline-offset: 3px"), "shared keyboard focus remains visible"],

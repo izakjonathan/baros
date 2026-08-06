@@ -51,3 +51,16 @@
   .quickPanel :global(.quick-grid){grid-template-columns:1fr}
   .quickPanel :global(.quick-action){min-height:4rem}
 }
+
+/* v0.18.13.1 physical-device consistency */
+.quickPanel :global(.quick-action){display:grid;grid-template-columns:2.5rem minmax(0,1fr) auto;align-items:center}
+.quickPanel :global(.quick-action:nth-child(1)){background:#dfee4b}
+.quickPanel :global(.quick-action:nth-child(2)){background:#eb6746}
+.quickPanel :global(.quick-action:nth-child(3)){background:#f47add}
+.quickPanel :global(.quick-action:nth-child(4)){background:#9561e6}
+.quickPanel :global(.quick-action:nth-child(5)){background:#dfee4b}
+.quickPanel :global(.quick-action:nth-child(6)){background:#f47add}
+@media(max-width:640px){
+  .quickPanel :global(.quick-action){min-height:4.25rem;padding:.75rem .9rem}
+  .quickPanel :global(.quick-action>span){inline-size:2.5rem;block-size:2.5rem}
+}
