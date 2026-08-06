@@ -623,7 +623,7 @@ function Attendance({ employees, shifts, entries, setEntries, notify, onEdit, de
   const payrollRows=employees.map(emp=>{const scheduledEmp=visibleShifts.filter(s=>s.employee===emp.name).reduce((n,s)=>n+hoursBetween(s.start,s.end),0);const approvedEntries=approved.filter(e=>e.employee===emp.name);const workedEmp=approvedEntries.reduce((n,e)=>n+workedHours(e),0);return {emp,scheduledEmp,approvedEntries,workedEmp};}).filter(row=>row.scheduledEmp>0||row.approvedEntries.length>0);
   return <div className={attendanceStyles.workspace}>
     <header className={attendanceStyles.hero}>
-      <div><p>Payroll review</p><h1>Time & attendance</h1><span>Review hours, resolve exceptions and prepare payroll.</span></div>
+      <div><p>Payroll review</p><h1>Time & attendance</h1><span>Review hours and prepare payroll.</span></div>
       <div className={attendanceStyles.actions}>
         <button className={periodLocked ? attendanceStyles.locked : attendanceStyles.outline} onClick={()=>{setPeriodLocked(v=>!v);notify(periodLocked?"Payroll period unlocked":"Payroll period locked for export")}}>{periodLocked?<><LockKeyhole size={17}/>Locked</>:<><UnlockKeyhole size={17}/>Lock period</>}</button>
         <button className={attendanceStyles.approveAll} onClick={approveAllVisible} disabled={periodLocked||!visible.some(e=>e.status==="Pending")}><CheckCheck size={17}/>Approve visible</button>
@@ -637,13 +637,6 @@ function Attendance({ employees, shifts, entries, setEntries, notify, onEdit, de
       <div className={attendanceStyles.filterFooter}><span role="status" aria-live="polite">{visible.length} timesheet{visible.length===1?"":"s"}</span><button type="button" onClick={()=>{setEmployeeFilter("All employees");setStatusFilter("Needs review")}} disabled={employeeFilter==="All employees"&&statusFilter==="Needs review"}>Reset</button></div>
     </section>
 
-    <section className={attendanceStyles.summary} aria-label="Payroll summary">
-      <article><span>Scheduled</span><strong>{scheduled.toFixed(1)}h</strong></article>
-      <article><span>Approved</span><strong>{worked.toFixed(1)}h</strong></article>
-      <article className={pending?attendanceStyles.needsAction:""}><span>Awaiting</span><strong>{pending}</strong></article>
-      <article className={exceptions.length?attendanceStyles.exceptions:""} aria-label="Exceptions: Variance, no break, or edited"><span>Exceptions</span><strong>{exceptions.length}</strong></article>
-    </section>
-
     <section className={attendanceStyles.records}>
       <div className={attendanceStyles.sectionHeader}><div><h2>Timesheets</h2><p>Review each record and act on exceptions.</p></div><span>{periodLocked?"Period locked":"Open period"}</span></div>
       <div className={attendanceStyles.recordList}>{visible.map(e=>{const actual=e.clockOut?workedHours(e):0;const variance=actual-e.scheduledHours;const exception=e.status!=="Running"&&(Math.abs(variance)>=.5||e.breakMinutes===0||e.edited);return <article className={`${attendanceStyles.record} ${exception?attendanceStyles.recordException:""}`} key={e.id}>
@@ -653,6 +646,13 @@ function Attendance({ employees, shifts, entries, setEntries, notify, onEdit, de
         {e.edited&&<small className={attendanceStyles.edited}>Manager corrected</small>}
         <div className={attendanceStyles.recordActions}>{e.status==="Running"&&<button type="button" onClick={()=>void toggleBreak(e)}>{e.onBreak?"End break":"Start break"}</button>}{e.status==="Pending"&&<><button aria-label={`Edit ${e.employee} timesheet`} onClick={()=>onEdit(e)}><Pencil size={16}/></button><button aria-label={`Reject ${e.employee} timesheet`} onClick={()=>rejectTimesheet(e.id)}><Ban size={16}/></button><button className={attendanceStyles.primaryAction} onClick={()=>approveTimesheet(e.id)}>Approve</button></>}{e.status==="Approved"&&<button onClick={()=>reopenTimesheet(e.id)}><RotateCcw size={15}/>Reopen</button>}{e.status==="Rejected"&&<button onClick={()=>reopenTimesheet(e.id)}><RotateCcw size={15}/>Return to review</button>}</div>
       </article>})}{!visible.length&&<div className={attendanceStyles.empty}><strong>No timesheets found</strong><span>Change the filters or date range to widen the results.</span></div>}</div>
+    </section>
+
+    <section className={attendanceStyles.summary} aria-label="Payroll summary">
+      <article><span>Scheduled</span><strong>{scheduled.toFixed(1)}h</strong></article>
+      <article><span>Approved</span><strong>{worked.toFixed(1)}h</strong></article>
+      <article className={pending?attendanceStyles.needsAction:""}><span>Awaiting</span><strong>{pending}</strong></article>
+      <article className={exceptions.length?attendanceStyles.exceptions:""} aria-label="Exceptions: Variance, no break, or edited"><span>Exceptions</span><strong>{exceptions.length}</strong></article>
     </section>
 
     <section className={attendanceStyles.preview}>

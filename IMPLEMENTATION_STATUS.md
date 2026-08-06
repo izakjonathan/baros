@@ -1,3 +1,9 @@
+# v0.18.5.1 implementation status
+
+Time & Attendance mobile density pass complete. The workspace now prioritises timesheet records and empty-state feedback on iPhone while retaining the v0.18.5 functional redesign.
+
+---
+
 # Implementation Status — v0.18.5
 
 Time & Attendance redesign implemented with locally scoped CSS Modules and preserved payroll behavior.

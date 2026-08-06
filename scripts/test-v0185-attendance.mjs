@@ -3,7 +3,7 @@ const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
 const app=fs.readFileSync("components/bar-ops-app.tsx","utf8");
 const css=fs.readFileSync("features/attendance/AttendanceWorkspace.module.css","utf8");
 const fail=(message)=>{console.error(`v0.18.5 attendance regression: ${message}`);process.exit(1)};
-if(pkg.version!=="0.18.5")fail("package version mismatch");
+if(!["0.18.5","0.18.5.1"].includes(pkg.version))fail("package version mismatch");
 if(!app.includes('import attendanceStyles from "@/features/attendance/AttendanceWorkspace.module.css"'))fail("attendance module import missing");
 if(!app.includes("Review each record and act on exceptions."))fail("calendar-first records section missing");
 if(!app.includes("Approve visible"))fail("bulk approval action missing");

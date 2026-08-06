@@ -1,3 +1,14 @@
+# v0.18.5.1 — Time & Attendance Mobile Density Pass
+
+- Reduced the payroll header height and shortened supporting copy.
+- Placed Lock, Approve and Export in one compact iPhone action row.
+- Reduced filter-card padding, field heights and Reset prominence.
+- Moved the Timesheets section ahead of summary cards so review records and empty states appear sooner.
+- Compressed timesheet cards, payroll summaries, previews and empty states without changing payroll logic.
+- Preserved calculations, filters, approvals, exports, permissions, APIs and persistence.
+
+---
+
 # v0.18.5 — Time & Attendance Redesign
 
 - Rebuilt Time & Attendance around iPhone-first payroll review cards rather than a compressed desktop table.

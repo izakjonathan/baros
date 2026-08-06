@@ -37,4 +37,54 @@
 .previewList article{display:grid;gap:.75rem;padding:1rem;background:#fff4c4;color:#000;border-radius:1rem}.previewList article>div:first-child{display:flex;align-items:center;gap:.7rem}.previewList p{display:grid;gap:.1rem;margin:0}.previewList p small{color:#51483e}.avatar{width:2.5rem;height:2.5rem;border-radius:50%;display:grid;place-items:center;background:#9561e6;font-weight:800}.previewList dl{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin:0}.previewList dl div{padding:.7rem;background:#dfee4b;border-radius:.7rem}.previewList dl div:nth-child(2){background:#f47add}.previewList dt{font-size:.7rem;text-transform:uppercase;font-weight:800}.previewList dd{margin:.25rem 0 0;font-size:1.2rem;font-weight:800}
 .history{padding:1rem;background:#fff4c4;color:#000;border-radius:1rem}.history .sectionHeader p{color:#51483e}.history>p{margin:.25rem 0}.history>div:last-child{display:grid}.history article{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:.65rem;padding:.75rem 0;border-bottom:1px solid rgba(0,0,0,.2)}.history article:last-child{border-bottom:0}.history article span{display:grid}.history article small{color:#51483e}
 @media(min-width:760px){.hero{grid-template-columns:1fr auto;align-items:end}.actions{grid-template-columns:repeat(3,auto)}.actions .export{grid-column:auto}.summary{grid-template-columns:repeat(4,1fr)}.recordList{grid-template-columns:repeat(2,minmax(0,1fr))}.previewList{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:430px){.workspace{gap:.8rem}.hero{padding:1rem}.hero h1{font-size:2.25rem}.hero span{font-size:.88rem}.filters{padding:.9rem}.periodFields,.filterFields{gap:.5rem}.filters input,.filters select{height:2.65rem;font-size:.88rem}.summary{gap:.5rem}.summary article{min-height:5.8rem;padding:.85rem}.summary strong{font-size:1.75rem}.record{padding:.9rem}.timeLine b{font-size:1.25rem}.recordStats{gap:.35rem}.recordStats span{padding:.55rem}.sectionHeader h2{font-size:1.35rem}}
+
+
+/* v0.18.5.1 iPhone density pass */
+@media(max-width:430px){
+  .workspace{gap:.62rem}
+  .hero{gap:.68rem;padding:.82rem .9rem;border-radius:1rem}
+  .hero p{margin:0 0 .18rem;font-size:.62rem;letter-spacing:.1em}
+  .hero h1{font-size:1.82rem;line-height:.98;letter-spacing:-.04em}
+  .hero span{margin-top:.35rem;font-size:.78rem;line-height:1.25}
+  .actions{grid-template-columns:repeat(3,minmax(0,1fr));gap:.38rem}
+  .actions button{min-height:2.45rem;padding:.4rem .45rem;border-radius:.72rem;font-size:.72rem;gap:.28rem;white-space:nowrap}
+  .actions button svg{width:.9rem;height:.9rem}
+  .actions .export{grid-column:auto}
+  .filters{gap:.58rem;padding:.78rem;border-radius:1rem}
+  .periodFields,.filterFields{gap:.42rem}
+  .filters label{gap:.22rem;font-size:.62rem;letter-spacing:.06em}
+  .filters input,.filters select{height:2.3rem;padding:0 .58rem;border-radius:.64rem;font-size:.76rem}
+  .filterFooter{gap:.5rem;font-size:.76rem}
+  .filterFooter button{padding:.38rem .65rem;font-size:.7rem}
+  .records,.preview,.history{gap:.58rem}
+  .sectionHeader{gap:.65rem}
+  .sectionHeader h2{font-size:1.12rem}
+  .sectionHeader p{margin-top:.18rem;font-size:.74rem}
+  .sectionHeader>span{font-size:.62rem}
+  .recordList,.previewList{gap:.48rem}
+  .record{gap:.55rem;padding:.78rem;border-radius:.85rem}
+  .record header strong{font-size:1rem}
+  .record header span{font-size:.7rem}
+  .status{padding:.26rem .42rem;font-size:.58rem}
+  .timeLine b{font-size:1.05rem}
+  .timeLine span{font-size:.7rem}
+  .recordStats{gap:.28rem}
+  .recordStats span{padding:.44rem;border-radius:.58rem;font-size:.58rem}
+  .recordStats b{font-size:.86rem}
+  .recordActions{gap:.32rem}
+  .recordActions button{min-height:2.2rem;padding:.38rem .62rem;font-size:.68rem}
+  .empty{min-height:4.8rem;padding:.78rem;border-radius:.82rem}
+  .empty strong{font-size:1rem}
+  .empty span{font-size:.72rem}
+  .summary{gap:.42rem}
+  .summary article{min-height:4.25rem;padding:.68rem;border-radius:.78rem}
+  .summary span{font-size:.62rem;letter-spacing:.05em}
+  .summary strong{font-size:1.42rem}
+  .previewList article{gap:.56rem;padding:.78rem;border-radius:.82rem}
+  .avatar{width:2.15rem;height:2.15rem;font-size:.78rem}
+  .previewList dl{gap:.4rem}
+  .previewList dl div{padding:.55rem;border-radius:.58rem}
+  .previewList dt{font-size:.58rem}
+  .previewList dd{font-size:1rem}
+  .history{padding:.78rem;border-radius:.82rem}
+}

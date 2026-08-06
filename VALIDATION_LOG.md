@@ -1,3 +1,17 @@
+## Environment limitation
+
+Dependency installation failed because the configured package registry does not provide `@types/node@22.10.2`. ESLint, TypeScript and the Next.js production build therefore could not be executed in this environment.
+
+# v0.18.5.1 validation
+
+- Focused attendance density regression: passed
+- Inherited v0.18.5 attendance regression: passed
+- Stabilization preflight: passed
+- Release validation: passed
+- ZIP integrity: passed after packaging
+
+---
+
 # Validation Log — v0.18.5
 
 Focused regression and release preflight completed; lint, type-check, build, and full regression results follow below.
