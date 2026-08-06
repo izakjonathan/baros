@@ -1,3 +1,7 @@
+# Current release: v0.18.15
+
+Production-readiness source hardening is complete. The release now has explicit quality, deployment, acceptance and rollback contracts. Dependency-backed lint, type-check and production build remain external gates because the available package registry does not contain the pinned `@types/node@22.10.2` package.
+
 # Current release: v0.18.14
 
 Accessibility and interaction QA is implemented at source level. Physical VoiceOver, touch, and Safari keyboard acceptance remains a deployment/device task using `V01814_DEVICE_ACCEPTANCE.md`.

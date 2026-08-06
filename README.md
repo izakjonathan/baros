@@ -1,8 +1,10 @@
-# Bar Ops v0.18.14 — Draft Shift Visual Simplification
+# Bar Ops v0.18.15 — Performance & Production Readiness
 
-Current release: **v0.18.14**
+Current release: **v0.18.15**
 
-Draft shifts no longer display a redundant `DRAFT` pill. Their muted treatment and dotted outline remain the sole visual indicators, while the underlying draft status and all schedule behavior are unchanged.
+This release closes the redesign and hardening phase with one production-gate contract, static artifact and deployment audits, explicit acceptance and rollback instructions, and regression coverage for the release package. It does not claim a successful dependency-backed build where the required package registry is unavailable.
+
+Rollback checkpoint: **v0.18.14**.
 
 Rollback checkpoint: **v0.18.13.6**.
 

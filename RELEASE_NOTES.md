@@ -1,3 +1,14 @@
+# Bar Ops v0.18.15 — Performance & Production Readiness
+
+- Added a single production release quality command covering artifact audit, stabilization, regression, lint, type-check, environment validation, and production build.
+- Added a static production-readiness audit for generated artifacts, exact dependency pins, required CI gates, deployment documentation, and oversized public assets.
+- Added production acceptance and rollback runbooks.
+- Removed packaged TypeScript incremental build output.
+- Added focused v0.18.15 regression coverage.
+- No business logic, API contract, permission, persistence, or database schema changes.
+
+Rollback checkpoint: **v0.18.14**.
+
 # v0.18.14 — Accessibility & Interaction QA
 
 - Added a keyboard-visible skip link and focusable main workspace target.

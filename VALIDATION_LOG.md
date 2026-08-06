@@ -1,3 +1,28 @@
+# v0.18.15 validation
+
+## Passed
+
+- `node scripts/test-v01815-production-readiness.mjs`
+- `node scripts/audit-production-readiness.mjs`
+- `node scripts/test-v01814-accessibility-interaction.mjs`
+- `node scripts/test-v018137-draft-visual.mjs`
+- `node scripts/validate-release.mjs`
+- `node scripts/preflight-stabilization.mjs`
+- `node scripts/check-release-artifacts.mjs`
+
+## Attempted but blocked
+
+- Clean package-lock generation and dependency installation: registry returned 404 for the exactly pinned `@types/node@22.10.2`.
+- ESLint: `eslint` is unavailable without installed dependencies.
+- TypeScript: attempted, but React, Next.js, PostgreSQL and Node type packages are unavailable.
+- Next.js production build: `next` is unavailable without installed dependencies.
+
+## External acceptance still required
+
+- Production database verification
+- Preview deployment
+- Physical iPhone Safari and VoiceOver checklist
+
 # v0.18.14 validation
 
 Focused accessibility regression, release validation, stabilization preflight, artifact audit, and ZIP integrity are required for this package. Dependency-backed lint, type-check and production build depend on installed packages.
