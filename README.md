@@ -1,6 +1,14 @@
+# Bar Ops v0.18.6 — Team Redesign
+
+Current release: **v0.18.6**
+
+This release rebuilds the Team workspace as a compact iPhone-first people-management view. Team totals, search, filtering, employee identity, scheduled hours, contact details, portal access and employee actions are reorganized into a denser operational hierarchy while preserving all existing employee behavior.
+
+Rollback checkpoint: **v0.18.5.3**.
+
 # Bar Ops v0.18.5.3 — Time & Attendance Layout Polish
 
-Current release: **v0.18.5.3**
+Historic release: **v0.18.5.3**
 
 This patch fixes the recurring iPhone Safari overflow of the paired From and To native date controls in Time & Attendance. The correction is applied at the sizing source: shrinkable grid tracks, shrinkable labels, bounded date inputs, and WebKit-specific date-edit containment. The reusable solution is documented and protected by a regression test.
 

@@ -1,3 +1,20 @@
+# Validation Log — v0.18.6
+
+## Completed
+
+- `node scripts/test-v0186-team.mjs`
+- `node scripts/test-team-scheduled-hours.mjs`
+- `node scripts/validate-release.mjs`
+- `node scripts/preflight-stabilization.mjs`
+
+## Pending in this environment
+
+- Dependency installation
+- ESLint
+- TypeScript type-check
+- Next.js production build
+- Browser/device visual verification
+
 # v0.18.5.3 validation
 
 ## Completed

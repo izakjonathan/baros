@@ -1,3 +1,13 @@
+# Implementation Status — v0.18.6
+
+**Status:** Team workspace redesign complete.
+
+- Team summary is compact and iPhone-first.
+- Search, status filters and result count share one contained filter surface.
+- Employee cards are concise operational records with contained long text.
+- Historical Team CSS override blocks were removed in favor of one CSS-module owner.
+- Employee logic, scheduled hours, invitations, permissions, APIs and persistence are unchanged.
+
 # v0.18.5.3 implementation status
 
 **Status:** Time & Attendance mobile layout polish complete.

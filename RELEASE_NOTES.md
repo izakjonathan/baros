@@ -1,3 +1,14 @@
+# v0.18.6 — Team Redesign
+
+- Rebuilt the Team workspace as a compact iPhone-first people-management screen.
+- Kept team totals, active staff and portal access visible without oversized cards.
+- Consolidated search, status filtering, result count and reset behavior into one compact filter surface.
+- Reworked employee cards into concise operational records with identity, status, upcoming hours, contact, portal access and actions.
+- Removed accumulated historical Team CSS override blocks and restored one clear CSS-module owner.
+- Preserved employee data, scheduled-hours calculations, invite/revoke behavior, permissions, APIs and persistence.
+
+---
+
 # v0.18.5.3 — Time & Attendance Layout Polish
 
 - Added a visible gap between paired iPhone date controls while preserving the native-date containment fix.
