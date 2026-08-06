@@ -2881,3 +2881,88 @@
     font-size:.68rem !important;
   }
 }
+
+
+/* v0.18.13.5 — authoritative mobile schedule selector and column ownership.
+   The native select remains the interaction layer, while component-owned text
+   prevents Safari from truncating the visible Week/Month/Period label. The
+   calendar explicitly owns its auto-flow tracks and zero inter-column gap so
+   historical global grid rules cannot reopen spacing. */
+.viewSelect{
+  position:relative !important;
+  display:grid !important;
+  place-items:center !important;
+  min-inline-size:0 !important;
+  overflow:hidden !important;
+}
+.viewLabel{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  inline-size:100%;
+  block-size:100%;
+  min-inline-size:0;
+  padding-inline:.35rem;
+  color:#000;
+  font-size:.75rem;
+  font-weight:800;
+  line-height:1.2;
+  white-space:nowrap;
+  pointer-events:none;
+}
+.viewSelect select{
+  position:absolute !important;
+  inset:0 !important;
+  inline-size:100% !important;
+  block-size:100% !important;
+  min-inline-size:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  opacity:0 !important;
+  cursor:pointer !important;
+}
+.viewSelect:focus-within{
+  outline:3px solid #000;
+  outline-offset:2px;
+}
+@media(max-width:48rem){
+  .toolbar,
+  :global(.schedule-toolbar).toolbar{
+    grid-template-columns:minmax(0,1fr) 4.9rem 2.35rem !important;
+    column-gap:.28rem !important;
+    overflow:visible !important;
+  }
+  .periodControls{
+    grid-template-columns:2.35rem minmax(0,1fr) 2.35rem !important;
+    min-inline-size:0 !important;
+  }
+  .viewSelect,
+  :global(.schedule-view-select).viewSelect{
+    inline-size:4.9rem !important;
+    min-inline-size:4.9rem !important;
+    max-inline-size:4.9rem !important;
+    block-size:2.35rem !important;
+  }
+  .viewLabel{
+    font-size:.74rem !important;
+  }
+  .calendarGrid,
+  .calendarPanel :global(.calendar-grid){
+    display:grid !important;
+    grid-template-columns:none !important;
+    grid-auto-flow:column !important;
+    grid-auto-columns:calc((100vw - 1.1rem) / 3) !important;
+    justify-content:start !important;
+    gap:0 !important;
+    column-gap:0 !important;
+    padding-inline:0 !important;
+  }
+  .dayColumn,
+  .calendarPanel :global(.day-column){
+    inline-size:auto !important;
+    min-inline-size:0 !important;
+    margin:0 !important;
+    padding-inline:0 !important;
+  }
+}

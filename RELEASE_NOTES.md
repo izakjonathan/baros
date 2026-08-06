@@ -1,4 +1,12 @@
-# v0.18.13.4 — Date Control Root-Cause Fix
+# v0.18.13.5 — Schedule Control Root-Cause Corrections
+
+- Gives visible date labels a descender-safe line box so letters such as “g” are not clipped.
+- Replaces browser-rendered view-selector text with component-owned Week/Month/Period text over an accessible native select.
+- Makes the mobile toolbar own its three tracks so the selector cannot overlap adjacent actions.
+- Explicitly removes the legacy seven-column grid template and owns zero-gap mobile day tracks.
+- Preserves scheduling, period navigation, publishing, date selection, APIs, permissions and persistence.
+
+# v0.18.13.5 — Date Control Root-Cause Fix
 
 Replaced Safari-rendered attendance date text with a component-rendered centered value while preserving the native input as the accessible picker interaction layer. Removed the accumulated WebKit pseudo-element alignment overrides and added a focused regression contract.
 
