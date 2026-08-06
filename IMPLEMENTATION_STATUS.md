@@ -1,3 +1,9 @@
+# Implementation Status — v0.18.5
+
+Time & Attendance redesign implemented with locally scoped CSS Modules and preserved payroll behavior.
+
+---
+
 # v0.18.4.30 status
 
 Focused iPhone Shift Plan cleanup complete: remaining overview dividers removed, day headers shortened, and day-column spacing tightened. No scheduling logic, APIs, permissions, recurrence, drag-and-drop, or persistence behaviour changed.

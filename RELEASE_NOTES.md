@@ -1,3 +1,15 @@
+# v0.18.5 — Time & Attendance Redesign
+
+- Rebuilt Time & Attendance around iPhone-first payroll review cards rather than a compressed desktop table.
+- Made timesheet review the primary surface, with lock, approval, and export actions secondary.
+- Consolidated period, employee, and status filters into a compact mobile filter panel.
+- Replaced oversized metric cards with a compact four-part payroll summary.
+- Added readable per-timesheet cards with scheduled, worked, break, variance, status, and contextual actions.
+- Reduced payroll preview to relevant employees in the selected period.
+- Preserved payroll calculations, filtering, correction, approval, export, API, permission, and persistence behavior.
+
+---
+
 # v0.18.4.30 — Shift Plan Divider & Density Cleanup
 
 - Removed the remaining beige and grey divider rules around the schedule overview.

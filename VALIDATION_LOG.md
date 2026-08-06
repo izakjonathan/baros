@@ -1,3 +1,19 @@
+# Validation Log — v0.18.5
+
+Focused regression and release preflight completed; lint, type-check, build, and full regression results follow below.
+
+---
+
+## v0.18.5 execution results
+
+- Focused attendance regression: passed.
+- Payroll/audit regressions reached and passed after preserving the existing exception-detection contract.
+- Release contract, stabilization preflight, and forbidden-artifact audit: passed.
+- Full legacy regression suite progressed through v0.9.3 and then stopped at an unrelated historical v0.9.4 assertion expecting the old Schedule dropdown markup.
+- Type-check could not complete because dependencies were unavailable; the package registry returned 404 for `@types/node@22.10.2`.
+- Lint and Next.js production build could not run for the same dependency-installation reason.
+- Global `tsc` found no syntax parse failure in the changed TSX before reporting missing Node, Next.js, React, and Postgres declarations.
+
 # v0.18.4.30 validation
 
 - Focused Shift Plan regression script
