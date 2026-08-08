@@ -16,23 +16,8 @@
   color: var(--employee-cream);
 }
 .employee-app *, .employee-app *::before, .employee-app *::after { box-sizing: border-box; }
-.employee-app main { min-width: 0; padding-bottom: calc(5.35rem + env(safe-area-inset-bottom)); }
+.employee-app main { min-width: 0; }
 
-.employee-app .employee-header {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  min-height: calc(3.55rem + env(safe-area-inset-top));
-  padding: env(safe-area-inset-top) max(.85rem, env(safe-area-inset-right)) 0 max(.85rem, env(safe-area-inset-left));
-  background: var(--employee-canvas);
-  border: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.employee-app .employee-brand { color: var(--employee-cream); gap: .55rem; text-decoration: none; }
-.employee-app .employee-brand span { background: var(--employee-cream); color: var(--employee-ink); width: 2.1rem; height: 2.1rem; border-radius: .72rem; display: grid; place-items: center; }
-.employee-app .employee-user-name { color: var(--employee-cream); font-size: .76rem; font-weight: 850; max-inline-size: 9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .employee-app .employee-page {
   width: min(100%, 46rem);
@@ -187,20 +172,6 @@
 .employee-app .employee-loading-inline { background: var(--employee-cream); color: var(--employee-ink); }
 .employee-app .employee-form-message { background: var(--employee-neon); color: var(--employee-ink); }
 
-.employee-app .employee-nav {
-  position: fixed; z-index: 40; left: 0; right: 0; bottom: 0;
-  min-height: calc(4.75rem + env(safe-area-inset-bottom));
-  padding: .38rem max(.45rem,env(safe-area-inset-right)) max(.38rem,env(safe-area-inset-bottom)) max(.45rem,env(safe-area-inset-left));
-  display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: .22rem;
-  background: var(--employee-cream); border: 0; box-shadow: none;
-}
-.employee-app .employee-nav a, .employee-app .employee-nav button { min-width: 0; min-height: 3.55rem; padding: .3rem .15rem; border: 0; border-radius: .78rem; background: transparent; color: var(--employee-ink); display: grid; place-content: center; justify-items: center; gap: .18rem; font: inherit; font-size: .62rem; font-weight: 820; text-decoration: none; }
-.employee-app .employee-nav a.active, .employee-app .employee-nav button.active, .employee-app .employee-nav [aria-current="page"] { background: var(--employee-ink); color: var(--employee-cream); }
-.employee-app .employee-more-scrim { position: fixed; inset: 0; z-index: 45; border: 0; background: rgb(0 0 0 / .72); }
-.employee-app .employee-more-sheet { position: fixed; z-index: 50; left: .65rem; right: .65rem; bottom: calc(5rem + env(safe-area-inset-bottom)); padding: .55rem; border: 0; border-radius: 1.2rem; background: var(--employee-cream); color: var(--employee-ink); display: grid; gap: .25rem; box-shadow: none; }
-.employee-app .employee-more-sheet > a, .employee-app .employee-more-sheet > button { min-height: 3.15rem; padding: 0 .8rem; border: 0; border-radius: .75rem; background: transparent; color: var(--employee-ink); display: flex; align-items: center; gap: .65rem; font: inherit; font-weight: 850; text-decoration: none; }
-.employee-app .employee-more-sheet > a:hover, .employee-app .employee-more-sheet > button:hover { background: var(--employee-neon); }
-.employee-app .employee-more-handle { width: 2.6rem; height: .25rem; margin: .1rem auto .35rem; border-radius: 999px; background: var(--employee-ink); }
 
 .employee-app :focus-visible { outline: 3px solid var(--employee-pink); outline-offset: 3px; }
 .employee-app button:disabled { opacity: .52; cursor: not-allowed; }
@@ -209,15 +180,22 @@
   .employee-app .employee-page { padding-inline: max(.65rem,env(safe-area-inset-left)); }
   .employee-app .employee-home-grid { grid-template-columns: 1fr; }
   .employee-app .request-date-grid, .employee-app .availability-times, .employee-app .clock-actions { grid-template-columns: 1fr; }
-  .employee-app .employee-nav a, .employee-app .employee-nav button { font-size: .57rem; }
 }
 @media (min-width: 700px) {
   .employee-app .employee-page { padding-top: 1.35rem; }
   .employee-app .employee-home-grid { grid-template-columns: repeat(4,minmax(0,1fr)); }
-  .employee-app .employee-nav { left: 50%; right: auto; width: min(42rem,calc(100% - 2rem)); transform: translateX(-50%); bottom: .75rem; border-radius: 1.15rem; padding-bottom: .38rem; }
-  .employee-app main { padding-bottom: 6.5rem; }
-  .employee-app .employee-more-sheet { left: 50%; right: auto; width: min(30rem,calc(100% - 2rem)); transform: translateX(-50%); bottom: 6.1rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .employee-app *, .employee-app *::before, .employee-app *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+/* v0.19.0-rc.10 — employee workspace now uses the shared manager shell.
+   The shell owns top bar, side navigation, safe-area positioning and theme chrome. */
+.employee-app,
+.employee-app .main-shell,
+.employee-app .employee-page-wrap { background: #000; color: var(--employee-cream); }
+.employee-app .employee-page-wrap { min-height: calc(100dvh - var(--app-header-height)); padding-bottom: max(1.25rem, env(safe-area-inset-bottom)); }
+.employee-app .employee-page { padding-top: .7rem; padding-bottom: 1.25rem; }
+@media(max-width:960px){
+  .employee-app .employee-page-wrap { padding-top: 0; }
 }

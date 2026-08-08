@@ -12,9 +12,8 @@ import { days, initialProducts, initialShifts, orders, team, type NavKey, type P
 import type { ClockSettings, Employee, Location, LogEntry, OpsTask, ScheduleAcknowledgementSummary, ShiftNote, StockAdjustment, TimeEntry } from "@/features/workspace/types";
 import { parseInvitationRecords, parseManagerBootstrapResponse } from "@/features/workspace/bootstrap-contract";
 import { BASE_MONDAY, canonicalShiftDate, conflictIds, dateFromSerial, dateFromShift, dateSerial, hoursBetween, isOvernight, mapDatabaseShift, shiftPositionFromDate, toIsoDate, type DatabaseShiftRecord } from "@/features/workspace/schedule-utils";
-import { DevRoleSwitcher } from "@/components/dev-role-switcher";
 import { RequestsWorkspace } from "@/components/requests-workspace";
-import shellStyles from "@/components/shell/ManagerShell.module.css";
+import { WorkspaceSidebar, WorkspaceTopbar } from "@/components/shell/workspace-chrome";
 import dashboardStyles from "@/features/dashboard/Dashboard.module.css";
 import scheduleStyles from "@/features/scheduling/ScheduleWorkspace.module.css";
 import teamStyles from "@/features/employees/TeamWorkspace.module.css";
@@ -132,7 +131,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       setEmployees(data.employees.map((e) => ({ id:e.id, name:`${e.first_name} ${e.last_name}`, initials:`${e.first_name?.[0]||""}${e.last_name?.[0]||""}`, role:e.employment_title||"Employee", hours:Number(e.contracted_hours||0), status:e.active?"Active":"Inactive", active:e.active, email:e.email||"", phone:e.phone||"", payrollId:e.payroll_id||"", salaryCode:e.salary_code||"", costCentre:e.cost_centre||"", hourlyRate:Number(e.hourly_rate||0), locationId:(e.locations||[]).find((location)=>location.primary)?.id||(e.locations||[])[0]?.id||"", locations:e.locations||[], portalStatus:e.portal_status||"NONE" })));
       setShifts(data.shifts.map((shift: DatabaseShiftRecord) => mapDatabaseShift(shift)));
       setProducts(data.products.map((x)=>({id:x.id,name:x.name,category:x.category,supplier:x.supplier||"Unassigned",stock:Number(x.quantity||0),par:Number(x.par_level||0),unit:x.unit,price:Number(x.purchase_price||0)})));
-      setTimeEntries(data.timesheets.map((x)=>({id:x.id,employee:x.employee_name,date:String(x.work_date).slice(0,10),clockIn:String(x.clocked_in_at).slice(11,16),clockOut:x.clocked_out_at?String(x.clocked_out_at).slice(11,16):undefined,breakMinutes:x.break_minutes,status:(x.status==="OPEN"?"Running":x.status[0]+x.status.slice(1).toLowerCase()) as TimeEntry["status"],scheduledHours:Number(x.scheduled_minutes||0)/60,note:x.manager_note,onBreak:Boolean(x.on_break),breakStartedAt:x.open_break_started_at?String(x.open_break_started_at):null})));
+      setTimeEntries(data.timesheets.map((x)=>({id:x.id,employee:x.employee_name,date:String(x.work_date).slice(0,10),clockIn:String(x.clocked_in_at).slice(11,16),clockOut:x.clocked_out_at?String(x.clocked_out_at).slice(11,16):undefined,breakMinutes:x.break_minutes,status:(x.status==="OPEN"?"Running":x.status[0]+x.status.slice(1).toLowerCase()) as TimeEntry["status"],scheduledHours:Number(x.scheduled_minutes||0)/60,note:x.manager_note ?? undefined,onBreak:Boolean(x.on_break),breakStartedAt:x.open_break_started_at?String(x.open_break_started_at):null})));
       setShiftNotes(data.shiftNotes.map((n)=>({id:n.id,shiftId:n.shift_id,note:n.note,category:n.category,createdAt:String(n.created_at),author:n.author_name,role:n.role,startsAt:String(n.starts_at)})));
       setDatabaseStatus(resolvedLocationId ? "PostgreSQL connected" : "No active location configured");
       hasBootstrappedRef.current = true;
@@ -258,44 +257,41 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
 
 
 function Sidebar({ items, active, onChange, open, onClose, userName, userRole, devMode }: { items: ManagerNavItem[]; active: NavKey; onChange: (id: NavKey) => void; open: boolean; onClose: () => void; userName: string; userRole: AppRole; devMode: boolean }) {
-  return <>
-    {open && <button className="scrim" aria-label="Close navigation" onClick={onClose} />}
-    <aside className={`sidebar ${shellStyles.sidebar} ${open ? "sidebar-open" : ""}`}>
-      <div className={`brand ${shellStyles.brand}`}><div className={`brand-mark ${shellStyles.brandMark}`}><Wine size={22} /></div><div><strong>Bar Ops</strong><span>Temple Bar</span></div><button type="button" className="sidebar-close" onClick={onClose} aria-label="Close navigation"><X size={20} /></button></div>
-      <nav className={`side-nav ${shellStyles.navigation}`}>
-        <p>Workspace</p>
-        {items.map((item) => <button type="button" key={item.id} className={active === item.id ? "active" : ""} aria-current={active === item.id ? "page" : undefined} onClick={() => onChange(item.id)}><item.icon size={19} /><span>{item.label}</span>{item.id === "inventory" && <em>5</em>}</button>)}
-      </nav>
-      <div className={`side-bottom ${shellStyles.bottom}`}>
-        {hasCapability(userRole, "settings.read") && <button type="button" className={active === "settings" ? "active" : ""} aria-current={active === "settings" ? "page" : undefined} onClick={() => onChange("settings")}><Settings size={19} /><span>Settings</span></button>}
-        <button type="button" onClick={async () => {
-          await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
-          window.location.assign("/login");
-        }}><LogOut size={19} /><span>Sign out</span></button>
-        {devMode && <DevRoleSwitcher currentRole={userRole} />}<div className={`profile ${shellStyles.profile}`}><div className="avatar dark">{userName.split(" ").map(part => part[0]).join("").slice(0,2)}</div><div><strong>{userName}</strong><span>{userRole.replace("_", " ").toLowerCase()}</span></div><ChevronDown size={16} /></div>
-      </div>
-    </aside>
-  </>
+  return <WorkspaceSidebar
+    items={items.map(item => ({ ...item, badge: item.id === "inventory" ? 5 : undefined }))}
+    active={active}
+    onNavigate={(id) => onChange(id as NavKey)}
+    open={open}
+    onClose={onClose}
+    userName={userName}
+    userRole={userRole}
+    devMode={devMode}
+    settingsItem={hasCapability(userRole, "settings.read") ? { id: "settings", label: "Settings", icon: Settings } : undefined}
+    locationLabel="Temple Bar"
+    onSignOut={async () => {
+      await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
+      window.location.assign("/login");
+    }}
+  />;
 }
 
-function Topbar({ items, active, onMenu, locations, selectedLocationId, onLocationChange, onNavigate, theme, onToggleTheme }: { items: ManagerNavItem[]; active: NavKey; onMenu: () => void; locations: Location[]; selectedLocationId: string; onLocationChange: (id: string) => void; onNavigate: (id: NavKey) => void; theme: "light" | "dark"; onToggleTheme: () => void }) {
-  const selected = locations.find(location => location.id === selectedLocationId);
-  const [searchOpen,setSearchOpen]=useState(false);
-  const [notificationsOpen,setNotificationsOpen]=useState(false);
-  const [query,setQuery]=useState("");
-  const matches=items.filter(item=>item.label.toLowerCase().includes(query.toLowerCase()));
-  const go=(id:NavKey)=>{onNavigate(id);setSearchOpen(false);setQuery("");};
-  return <header className={`topbar ${shellStyles.topbar}`}>
-    <button className={`menu-button ${shellStyles.topbarButton} ${shellStyles.menuButton}`} onClick={onMenu} aria-label="Open navigation"><Menu size={21} /></button>
-    <label className={`location-switch ${shellStyles.location}`} aria-label="Current location"><span className="status-dot" />{locations.length > 1 ? <><select value={selectedLocationId} onChange={event => onLocationChange(event.target.value)}>{locations.map(location => <option key={location.id} value={location.id}>{location.name}</option>)}</select><ChevronDown size={15} /></> : <span>{selected?.name || "No active location"}</span>}</label>
-    <div className={`top-actions ${shellStyles.actions}`}>
-      <button className={`icon-button ${shellStyles.topbarButton}`} onClick={()=>{setSearchOpen(v=>!v);setNotificationsOpen(false)}} aria-label="Search workspace" aria-expanded={searchOpen} aria-controls="workspace-search-popover"><Search size={19} /></button>
-      <button className={`icon-button ${shellStyles.topbarButton} ${shellStyles.themeButton}`} onClick={onToggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} aria-pressed={theme === "dark"}>{theme === "dark" ? <Sun size={18}/> : <Moon size={18}/>}</button>
-      <button className={`icon-button notification ${shellStyles.topbarButton}`} onClick={()=>{setNotificationsOpen(v=>!v);setSearchOpen(false)}} aria-label="Open notifications" aria-expanded={notificationsOpen} aria-controls="workspace-notifications-popover"><Bell size={19} /><i /></button>
-      {searchOpen&&<div id="workspace-search-popover" className="top-popover search-popover" role="dialog" aria-label="Search workspace"><label><Search size={16}/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search workspace"/></label><div>{matches.map(item=><button key={item.id} onClick={()=>go(item.id)}><item.icon size={17}/><span>{item.label}</span><ArrowRight size={14}/></button>)}</div></div>}
-      {notificationsOpen&&<div id="workspace-notifications-popover" className="top-popover notifications-popover" role="dialog" aria-label="Notifications"><strong>Notifications</strong><button onClick={()=>go("schedule")}><CalendarDays size={17}/><span><b>Draft schedule</b><small>Review and publish upcoming shifts</small></span></button><button onClick={()=>go("attendance")}><Clock3 size={17}/><span><b>Timesheet review</b><small>Open time and attendance</small></span></button><button onClick={()=>go("requests")}><ClipboardList size={17}/><span><b>Employee requests</b><small>Review leave, open shifts and shift changes</small></span></button><button onClick={()=>go("inventory")}><Package size={17}/><span><b>Stock attention</b><small>Review products below par</small></span></button></div>}
-    </div>
-  </header>
+function Topbar({ items, active: _active, onMenu, locations, selectedLocationId, onLocationChange, onNavigate, theme, onToggleTheme }: { items: ManagerNavItem[]; active: NavKey; onMenu: () => void; locations: Location[]; selectedLocationId: string; onLocationChange: (id: string) => void; onNavigate: (id: NavKey) => void; theme: "light" | "dark"; onToggleTheme: () => void }) {
+  return <WorkspaceTopbar
+    items={items}
+    onMenu={onMenu}
+    locations={locations}
+    selectedLocationId={selectedLocationId}
+    onLocationChange={onLocationChange}
+    onNavigate={(id) => onNavigate(id as NavKey)}
+    theme={theme}
+    onToggleTheme={onToggleTheme}
+    notificationItems={[
+      { id: "schedule", label: "Draft schedule", detail: "Review and publish upcoming shifts", icon: CalendarDays },
+      { id: "attendance", label: "Timesheet review", detail: "Open time and attendance", icon: Clock3 },
+      { id: "requests", label: "Employee requests", detail: "Review leave, open shifts and shift changes", icon: ClipboardList },
+      { id: "inventory", label: "Stock attention", detail: "Review products below par", icon: Package },
+    ]}
+  />;
 }
 
 function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; title: string; subtitle?: string; action?: React.ReactNode }) {

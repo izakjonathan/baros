@@ -1,10 +1,10 @@
-# Bar Ops v0.19.0-rc.8 — Runtime Build Recovery & Staging Readiness
+# Bar Ops v0.19.0-rc.10 — Employee Workspace Shell Unification
 
-Current release: **v0.19.0-rc.8**
+Current release: **v0.19.0-rc.10**
 
-This release consolidates the accepted Shift Plan selector and mobile day-track corrections into one canonical feature-owned block. It preserves the accepted layout and behaviour and does not redesign the schedule.
+This release unifies the employee workspace with the shared owner/manager application shell. Employee pages now use the same dark-mode top bar, side navigation, safe-area chrome and shared navigation components while preserving role-aware employee modules, permissions and APIs.
 
-Rollback checkpoint: **v0.19.0-rc.6**.
+Rollback checkpoint: **v0.19.0-rc.9**.
 
 # v0.19.0-rc.6 — Type Safety, Test Cleanup & Build Reproducibility
 

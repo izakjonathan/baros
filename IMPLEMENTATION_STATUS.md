@@ -1,4 +1,10 @@
-# v0.19.0-rc.8 implementation status
+# v0.19.0-rc.10 implementation status
+
+Employee shell unification is complete at source level. Owner/manager and employee workspaces now share the same top bar and side-navigation components. The employee workspace defaults to dark mode and retains role-aware employee-only navigation. Employee business logic, APIs, permissions and persistence are unchanged.
+
+Physical iPhone Safari verification, dependency-backed TypeScript/build validation and Vercel staging remain acceptance gates.
+
+# v0.19.0-rc.9 implementation status
 
 Runtime build preparation is complete at source level. Deterministic install, lint, type-check, build, and staging remain blocked until a real lockfile can be generated with registry access.
 

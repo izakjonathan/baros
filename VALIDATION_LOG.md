@@ -1,4 +1,18 @@
-# v0.19.0-rc.8 validation
+# v0.19.0-rc.10 validation
+
+Passed source-level gates:
+
+- current risk-based regression suite;
+- shared shell regression;
+- employee shell unification regression;
+- accessibility regression updated for shared chrome;
+- Shift Plan, authorization, tenant, transaction and production-foundation regressions;
+- release contract, stabilization preflight and release-artifact audit;
+- ZIP integrity.
+
+Not claimed complete: dependency-backed ESLint, complete TypeScript validation, Next.js production build, Vercel staging, iPhone Safari and VoiceOver acceptance.
+
+# v0.19.0-rc.9 validation
 
 See `RUNTIME_BUILD_READINESS.md` for the failed registry-access attempt and external gates.
 

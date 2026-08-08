@@ -5,7 +5,7 @@ const failures = [];
 const warnings = [];
 const packageJson = JSON.parse(readFileSync("package.json", "utf8"));
 
-if (packageJson.version !== "0.19.0-rc.8") failures.push("package version is not 0.19.0-rc.8");
+if (!/^0\.19\.0-rc\.(?:8|9|[1-9]\d+)$/.test(packageJson.version)) failures.push("package version is older than v0.19.0-rc.8");
 if (!packageJson.packageManager) failures.push("packageManager is not pinned");
 if (!existsSync(".npmrc")) failures.push(".npmrc is missing");
 if (!existsSync("package-lock.json")) warnings.push("package-lock.json is not available; deterministic npm ci remains blocked");

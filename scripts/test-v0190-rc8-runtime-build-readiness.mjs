@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
-assert.equal(pkg.version, "0.19.0-rc.8");
+assert.match(pkg.version, /^0\.19\.0-rc\.(?:8|9|[1-9]\d+)$/);
 assert.equal(pkg.packageManager, "npm@10.9.2");
 assert.equal(pkg.scripts["verify:runtime-build"], "node scripts/verify-runtime-build-readiness.mjs");
 assert.equal(pkg.scripts["test:rc8"], "node scripts/test-v0190-rc8-runtime-build-readiness.mjs");

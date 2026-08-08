@@ -1,4 +1,16 @@
-# v0.19.0-rc.8 — Runtime Build Recovery & Staging Readiness
+# Bar Ops v0.19.0-rc.10 — Employee Workspace Shell Unification
+
+- Shared `WorkspaceSidebar` and `WorkspaceTopbar` now power both manager and employee shells.
+- Employee-only header, bottom navigation and More sheet were retired.
+- Employee workspace defaults to the shared dark shell.
+- Employee navigation remains role-aware: Home, Schedule, Clock, Requests, Availability and Notifications.
+- Linked-manager employee portal access remains supported.
+- Employee Time Off datetime fields now use a shared native-interaction/controlled-visual field to avoid Safari rendering instability.
+- No employee API, permission, database or persistence behavior changed.
+
+Rollback checkpoint: **v0.19.0-rc.9**.
+
+# v0.19.0-rc.9 — Runtime Build Recovery & Staging Readiness
 
 Prepared deterministic-install and staging contracts, pinned repository npm configuration, added runtime-readiness verification, and recorded the unresolved registry/network blocker without fabricating a lockfile or build result.
 

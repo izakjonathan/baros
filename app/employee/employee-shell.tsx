@@ -1,57 +1,108 @@
 "use client";
-import Link from "next/link";
+
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, CalendarDays, Clock3, Ellipsis, Home, LogOut, SlidersHorizontal, Umbrella, UserRound, Wine } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { DevRoleSwitcher } from "@/components/dev-role-switcher";
-import styles from "./EmployeeShell.module.css";
+import { Bell, CalendarDays, Clock3, Home, SlidersHorizontal, Umbrella } from "lucide-react";
+import { WorkspaceSidebar, WorkspaceTopbar, type WorkspaceChromeItem } from "@/components/shell/workspace-chrome";
+import type { AppRole } from "@/lib/auth/session";
 
-const primary = [
-  ["/employee", "Home", Home],
-  ["/employee/shifts", "Schedule", CalendarDays],
-  ["/employee/hours", "Clock", Clock3],
-  ["/employee/requests", "Requests", Umbrella],
-] as const;
+const employeeItems: Array<WorkspaceChromeItem & { href: string }> = [
+  { id: "home", href: "/employee", label: "Home", icon: Home },
+  { id: "schedule", href: "/employee/shifts", label: "Schedule", icon: CalendarDays },
+  { id: "clock", href: "/employee/hours", label: "Clock", icon: Clock3 },
+  { id: "requests", href: "/employee/requests", label: "Requests", icon: Umbrella },
+  { id: "availability", href: "/employee/availability", label: "Availability", icon: SlidersHorizontal },
+  { id: "notifications", href: "/employee/notifications", label: "Notifications", icon: Bell },
+];
 
-export function EmployeeShell({name,role,devMode,children}:{name:string;role:string;devMode:boolean;children:React.ReactNode}){
-  const path=usePathname(),router=useRouter();
-  const [moreOpen,setMoreOpen]=useState(false);
-  const moreButtonRef=useRef<HTMLButtonElement>(null);
-  const sheetRef=useRef<HTMLElement>(null);
-  useEffect(()=>{
-    if(!moreOpen)return;
-    const previous=document.activeElement instanceof HTMLElement?document.activeElement:null;
-    const first=sheetRef.current?.querySelector<HTMLElement>('a,button');
-    first?.focus();
-    function onKeyDown(event:KeyboardEvent){
-      if(event.key==='Escape'){event.preventDefault();setMoreOpen(false);return;}
-      if(event.key!=='Tab'||!sheetRef.current)return;
-      const items=Array.from(sheetRef.current.querySelectorAll<HTMLElement>('a,button:not([disabled]),[tabindex]:not([tabindex="-1"])'));
-      if(!items.length)return;
-      const firstItem=items[0],lastItem=items[items.length-1];
-      if(event.shiftKey&&document.activeElement===firstItem){event.preventDefault();lastItem.focus();}
-      else if(!event.shiftKey&&document.activeElement===lastItem){event.preventDefault();firstItem.focus();}
-    }
-    document.addEventListener('keydown',onKeyDown);
-    return()=>{document.removeEventListener('keydown',onKeyDown);(previous||moreButtonRef.current)?.focus();};
-  },[moreOpen]);
-  async function logout(){await fetch('/api/auth/logout',{method:'POST'});router.push('/login');router.refresh()}
-  const activeMore=path.startsWith('/employee/availability')||path.startsWith('/employee/notifications');
-  return <div className="employee-app">
-    <header className={`employee-header ${styles.header}`}>
-      <Link href="/employee" className={`employee-brand ${styles.brand}`}><span className={styles.brandMark}><Wine size={19}/></span>Bar Ops</Link>
-      <div>{devMode&&<DevRoleSwitcher currentRole={role}/>}<span className="employee-user-name">{name}</span></div>
-    </header>
-    <main>{children}</main>
-    <nav className={`employee-nav ${styles.navigation}`} aria-label="Employee navigation">
-      {primary.map(([href,label,Icon])=><Link aria-current={path===href?'page':undefined} className={path===href?`active ${styles.active}`:''} href={href} key={href}><Icon size={20}/><span>{label}</span></Link>)}
-      <button ref={moreButtonRef} aria-expanded={moreOpen} aria-controls="employee-more-sheet" className={activeMore||moreOpen?`active ${styles.active}`:''} onClick={()=>setMoreOpen(v=>!v)}><Ellipsis size={20}/><span>More</span></button>
-    </nav>
-    {moreOpen&&<><button className="employee-more-scrim" aria-label="Close menu" onClick={()=>setMoreOpen(false)}/><section ref={sheetRef} id="employee-more-sheet" className={`employee-more-sheet ${styles.sheet}`} role="dialog" aria-modal="true" aria-label="More employee options">
-      <div className="employee-more-handle"/>
-      <Link href="/employee/availability" onClick={()=>setMoreOpen(false)}><SlidersHorizontal/>Availability</Link>
-      <Link href="/employee/notifications" onClick={()=>setMoreOpen(false)}><Bell/>Notifications</Link>
-      <button onClick={logout}><LogOut/>Sign out</button>
-    </section></>}
-  </div>
+function activeEmployeeItem(path: string) {
+  if (path.startsWith("/employee/shifts")) return "schedule";
+  if (path.startsWith("/employee/hours")) return "clock";
+  if (path.startsWith("/employee/requests")) return "requests";
+  if (path.startsWith("/employee/availability")) return "availability";
+  if (path.startsWith("/employee/notifications")) return "notifications";
+  return "home";
+}
+
+export function EmployeeShell({
+  name,
+  role,
+  devMode,
+  locationName,
+  children,
+}: {
+  name: string;
+  role: AppRole;
+  devMode: boolean;
+  locationName: string;
+  children: React.ReactNode;
+}) {
+  const path = usePathname();
+  const router = useRouter();
+  const active = activeEmployeeItem(path);
+  const [mobileNav, setMobileNav] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
+
+  useEffect(() => {
+    setTheme("dark");
+    document.documentElement.dataset.theme = "dark";
+    window.localStorage.setItem("bar-ops-theme", "dark");
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", "#000000");
+  }, []);
+
+  function toggleTheme() {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    document.documentElement.dataset.theme = next;
+    window.localStorage.setItem("bar-ops-theme", next);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next === "dark" ? "#000000" : "#fff4c4");
+  }
+
+  function navigate(id: string) {
+    const item = employeeItems.find(entry => entry.id === id);
+    if (!item) return;
+    setMobileNav(false);
+    router.push(item.href);
+  }
+
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+    router.refresh();
+  }
+
+  return <div className="app-frame employee-app">
+    <a className="skip-link" href="#main-content">Skip to main content</a>
+    <WorkspaceSidebar
+      items={employeeItems}
+      active={active}
+      onNavigate={navigate}
+      open={mobileNav}
+      onClose={() => setMobileNav(false)}
+      userName={name}
+      userRole={role}
+      devMode={devMode}
+      locationLabel={locationName}
+      onSignOut={logout}
+    />
+    <main id="main-content" className="main-shell" tabIndex={-1}>
+      <WorkspaceTopbar
+        items={employeeItems}
+        onMenu={() => setMobileNav(true)}
+        staticLocationLabel={locationName}
+        onNavigate={navigate}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        notificationItems={[
+          { id: "schedule", label: "Schedule", detail: "Review upcoming and available shifts", icon: CalendarDays },
+          { id: "clock", label: "Time & attendance", detail: "Open your clock and worked hours", icon: Clock3 },
+          { id: "requests", label: "Requests", detail: "Review time off and shift requests", icon: Umbrella },
+          { id: "notifications", label: "Notifications", detail: "Open your employee notifications", icon: Bell },
+        ]}
+      />
+      <div className="page-wrap employee-page-wrap" data-workspace={`employee-${active}`}>
+        {children}
+      </div>
+    </main>
+  </div>;
 }

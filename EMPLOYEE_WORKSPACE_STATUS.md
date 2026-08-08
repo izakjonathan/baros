@@ -1,44 +1,36 @@
 # Employee Workspace Status
 
-The dedicated employee workspace redesign is complete for the current employee portal surfaces in **v0.19.0-rc.4**.
+## Current status — v0.19.0-rc.10
 
-## Redesigned surfaces
+The employee workspace has now received its dedicated redesign and shell-unification pass.
 
-- Employee Home
-- My Shifts
-- Open Shifts
-- Hours and clock state
-- Availability
-- Requests
-- Notifications
-- More sheet and mobile navigation
-- Employee forms, loading, empty, success and error states
+### Shared application system
 
-## Preserved operational behavior
+The employee workspace now reuses the same application chrome as owner/manager workspaces:
 
-- published-shift visibility;
-- open-shift claims;
-- schedule acknowledgements;
-- shift transfers and notes;
-- clock-in, breaks and clock-out;
-- correction requests;
-- availability rules;
-- time-off requests;
-- notifications;
-- APIs, permissions and persistence.
+- shared top bar;
+- shared side navigation / mobile drawer;
+- shared dark shell foundation;
+- shared location presentation;
+- shared theme control;
+- shared search and notification popovers;
+- shared focus and interaction contracts.
 
-A linked manager may intentionally use the employee workspace when the account has a linked employee profile. Employee self-service data remains scoped to that linked employee identity.
+Employee-only navigation chrome, bottom navigation and More-sheet presentation have been retired.
 
-## Presentation ownership
+### Role-aware employee modules
 
-`app/employee/EmployeeWorkspace.css` is the route-scoped presentation owner for the employee shell and employee pages. The earlier employee presentation block was removed from `app/completion-redesign.css` to avoid competing cascade owners.
+Employee navigation exposes only employee self-service modules:
 
-## Verification still required
+- Home;
+- Schedule;
+- Clock;
+- Requests;
+- Availability;
+- Notifications.
 
-- real employee and linked-manager accounts;
-- iPhone Safari at 320, 375, 390 and 430 px;
-- software-keyboard interaction;
-- native date, time, month and datetime pickers;
-- VoiceOver and keyboard navigation;
-- real API loading, error and empty states;
-- Vercel preview acceptance.
+Managers with a linked employee profile retain intentional employee-portal access through the existing `employee.self_service` capability and remain scoped to their linked employee identity.
+
+### Remaining verification
+
+The exact RC still requires physical iPhone Safari testing, VoiceOver acceptance, full TypeScript/build validation and staging verification.
