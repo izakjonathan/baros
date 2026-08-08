@@ -17,10 +17,10 @@ export async function GET(request: Request) {
         and s.status='PUBLISHED' and s.starts_at::date between ${from}::date and ${to}::date
     `;
     const [approved] = await db()<Array<{ approved_minutes: number }>>`
-      select coalesce(sum(t.worked_minutes), 0)::int approved_minutes
+      select coalesce(sum(greatest(0, (date_part('epoch', t.clocked_out_at - t.clocked_in_at) / 60)::int - coalesce(t.break_minutes,0))), 0)::int approved_minutes
       from timesheets t
       where t.organization_id=${user.organizationId} and t.employee_id=${user.employeeId}
-        and t.status='APPROVED' and t.work_date between ${from}::date and ${to}::date
+        and t.status='APPROVED' and t.clocked_out_at is not null and t.work_date between ${from}::date and ${to}::date
     `;
     const summary = {
       scheduled_minutes: Number(scheduled?.scheduled_minutes || 0),
@@ -38,7 +38,9 @@ export async function GET(request: Request) {
       employee_note: string | null;
       manager_note: string | null;
     }>>`
-      select t.id,t.work_date,t.clocked_in_at,t.clocked_out_at,t.scheduled_minutes,t.worked_minutes,t.break_minutes,t.status,t.employee_note,t.manager_note
+      select t.id,t.work_date,t.clocked_in_at,t.clocked_out_at,t.scheduled_minutes,
+        case when t.clocked_out_at is not null then greatest(0, (date_part('epoch', t.clocked_out_at - t.clocked_in_at) / 60)::int - coalesce(t.break_minutes,0)) else coalesce(t.worked_minutes,0) end::int worked_minutes,
+        t.break_minutes,t.status,t.employee_note,t.manager_note
       from timesheets t
       where t.organization_id=${user.organizationId} and t.employee_id=${user.employeeId}
         and t.work_date between ${from}::date and ${to}::date

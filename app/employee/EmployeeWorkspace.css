@@ -123,7 +123,7 @@
 
 .employee-app .clock-card { display: grid; gap: .8rem; background: var(--employee-pink); }
 .employee-app .clock-card.clock-running { background: var(--employee-neon); }
-.employee-app .clock-card small { font-size: .7rem; font-weight: 850; opacity: .64; }
+.employee-app .clock-card small { font-size: .7rem; font-weight: 850; color: rgb(0 0 0 / .72); opacity: 1; }
 .employee-app .clock-card strong { display: block; margin-top: .2rem; font-size: 1.25rem; line-height: 1.08; }
 .employee-app .clock-card p { margin: .25rem 0 0; color: rgb(0 0 0 / .65); }
 .employee-app .clock-card > button, .employee-app .clock-actions button { border: 2px solid var(--employee-ink); background: var(--employee-ink); color: var(--employee-cream); }
@@ -135,6 +135,9 @@
 .employee-app .employee-hour-cards article { min-width: 0; min-height: 5rem; padding: .75rem; border-radius: 1rem; color: var(--employee-ink); display: grid; grid-template-columns: 1.65rem minmax(0,1fr); gap: .5rem; background: var(--employee-purple); }
 .employee-app .employee-hour-cards article:nth-child(2) { background: var(--employee-neon); }
 .employee-app .employee-hour-cards span, .employee-app .employee-hour-cards strong { min-width: 0; display: block; }
+.employee-app .employee-hour-cards span { color: rgb(0 0 0 / .70); font-weight: 760; }
+.employee-app .employee-hour-cards strong { color: var(--employee-ink); }
+.employee-app .employee-hour-cards svg { color: var(--employee-ink); }
 .employee-app .employee-hour-cards strong { margin-top: .2rem; font-size: 1.35rem; }
 
 .employee-app .availability-mode { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .25rem; padding: .28rem; margin: 0; border-radius: .95rem; background: var(--employee-cream); }
@@ -184,6 +187,15 @@
 @media (min-width: 700px) {
   .employee-app .employee-page { padding-top: 1.35rem; }
   .employee-app .employee-home-grid { grid-template-columns: repeat(4,minmax(0,1fr)); }
+}
+/* v0.19.0-rc.13 — employee mobile polish and hours integrity presentation. */
+@media (max-width: 560px) {
+  .employee-app .monthly-availability-grid article { grid-template-columns: 2.8rem minmax(0,1fr); gap: .65rem; }
+  .employee-app .availability-times { grid-template-columns: minmax(0,1fr); gap: .5rem; }
+  .employee-app .availability-times label,
+  .employee-app .availability-times input { min-inline-size: 0; inline-size: 100%; max-inline-size: 100%; }
+  .employee-app .availability-times input { font-size: 1rem; }
+  .employee-app .monthly-controls .text-button { inline-size: 100%; justify-content: flex-start; padding-block-start: .5rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .employee-app *, .employee-app *::before, .employee-app *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }

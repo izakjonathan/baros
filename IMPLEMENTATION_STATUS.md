@@ -1,4 +1,4 @@
-# v0.19.0-rc.10 implementation status
+# Bar Ops Implementation Status — v0.19.0-rc.13
 
 Employee shell unification is complete at source level. Owner/manager and employee workspaces now share the same top bar and side-navigation components. The employee workspace defaults to dark mode and retains role-aware employee-only navigation. Employee business logic, APIs, permissions and persistence are unchanged.
 

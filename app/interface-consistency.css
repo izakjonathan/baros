@@ -58,6 +58,20 @@
     max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4.2rem);
   }
 
+  .search-popover {
+    max-height: min(24rem, 46dvh);
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+
+  .search-popover > div:last-child {
+    min-height: 0;
+    max-height: min(17rem, 32dvh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .toast {
     width: auto;
     inset-inline-start: max(var(--layout-gap), env(safe-area-inset-left));
