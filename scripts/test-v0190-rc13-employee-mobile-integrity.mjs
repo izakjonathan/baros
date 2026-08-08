@@ -4,7 +4,7 @@ const css=fs.readFileSync("app/employee/EmployeeWorkspace.css","utf8");
 const consistency=fs.readFileSync("app/interface-consistency.css","utf8");
 const hours=fs.readFileSync("app/api/employee/hours-summary/route.ts","utf8");
 const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
-assert.equal(pkg.version,"0.19.0-rc.13");
+assert.match(pkg.version,/^0\.19\.0-rc\.(?:1[3-9]|[2-9]\d+)$/);
 assert.match(css,/@media \(max-width: 560px\)[\s\S]*?\.employee-app \.availability-times \{ grid-template-columns: minmax\(0,1fr\);/);
 assert.match(css,/\.employee-app \.employee-hour-cards span \{ color: rgb\(0 0 0 \/ \.70\);/);
 assert.match(css,/\.employee-app \.clock-card small \{[^}]*color: rgb\(0 0 0 \/ \.72\);[^}]*opacity: 1;/);

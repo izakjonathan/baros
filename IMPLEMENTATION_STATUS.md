@@ -191,3 +191,6 @@ Daily Operations and Settings have completed their Phase D iPhone-first redesign
 - Today’s Operations now follows the accepted mobile density and card hierarchy.
 - Shift Execution has a dedicated locally scoped CSS owner.
 - Existing operational calculations and navigation paths remain unchanged.
+
+## v0.19.0-rc.14
+Employee mobile refinement: Safari bottom clearance, compact schedule actions, availability density, and human-readable notification change labels.

@@ -1,11 +1,12 @@
-# Bar Ops v0.19.0-rc.13 — Employee Mobile Polish & Integrity
+# Bar Ops v0.19.0-rc.14 — Employee Mobile Refinement
 
-Built from v0.19.0-rc.12.
+Focused employee-workspace refinement based on device screenshots from rc.13.
 
 ## Changes
-- Fixes employee Availability time-control overflow on iPhone by stacking the paired native time fields at phone widths.
-- Improves employee Hours contrast on coloured cards with explicit semantic foreground colours.
-- Derives closed timesheet worked minutes from clock-in, clock-out and break timestamps at the API boundary, preventing stale/corrupt stored totals from producing implausible employee-hour displays and approved summaries.
-- Constrains workspace search to the visible mobile viewport and makes its results independently scrollable when the iOS keyboard is open.
+- Adds extra bottom viewport clearance so employee content and controls do not sit beneath Safari browser chrome.
+- Makes shift-card actions more compact with a two-column mobile action layout and a narrow-screen fallback.
+- Tightens monthly availability card spacing while retaining the safe stacked native time-input layout introduced in rc.13.
+- Improves notification text contrast and replaces internal schedule-change codes such as `NEW_SHIFT` with human-readable labels.
 
-No database migration is required. No new feature scope is introduced.
+## Scope
+No new business features, API changes, database migrations, or permission changes.

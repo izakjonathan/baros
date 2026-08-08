@@ -302,3 +302,8 @@ Use `DATABASE_URL` for the pooled Neon runtime URL and `DATABASE_DIRECT_URL` for
 ## Installed app
 
 The web app manifest, Apple metadata, icons and `public/sw.js` remain included. The service worker does not cache authenticated API responses or operational pages.
+
+
+## Current release
+
+v0.19.0-rc.14 — Employee Mobile Refinement.
