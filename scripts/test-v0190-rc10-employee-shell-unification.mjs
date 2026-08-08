@@ -9,7 +9,7 @@ const requestForm = read('app/employee/request-form.tsx');
 const packageJson = JSON.parse(read('package.json'));
 
 const checks = [
-  ['rc10 version is current', packageJson.version === '0.19.0-rc.10'],
+  ['rc10 version is current', /^0\.19\.0-rc\.(?:1[0-9]|[2-9][0-9])$/.test(packageJson.version)],
   ['manager and employee both use shared sidebar', managerApp.includes('WorkspaceSidebar') && employeeShell.includes('WorkspaceSidebar')],
   ['manager and employee both use shared topbar', managerApp.includes('WorkspaceTopbar') && employeeShell.includes('WorkspaceTopbar')],
   ['shared chrome owns manager shell module', chrome.includes('ManagerShell.module.css')],

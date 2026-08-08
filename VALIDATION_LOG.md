@@ -1,3 +1,14 @@
+# v0.19.0-rc.12 validation
+
+Passed source-level gates:
+
+- focused black page-canvas regression;
+- complete current source regression suite (`npm run test:current`);
+- package metadata/version check;
+- ZIP integrity.
+
+Production Vercel TypeScript/build remains the dependency-backed gate. No database migration is required.
+
 # v0.19.0-rc.10 validation
 
 Passed source-level gates:

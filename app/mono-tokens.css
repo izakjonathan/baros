@@ -3,7 +3,7 @@
    typography and tonal surfaces. Borders are reserved for focus, errors and
    dense data structures only. */
 :root {
-  --mono-canvas: #fff4c4;
+  --mono-canvas: #000000;
   --mono-surface: #fff4c4;
   --mono-inset: #f3e8b9;
   --mono-hover: #efe3b3;

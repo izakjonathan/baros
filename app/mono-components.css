@@ -760,7 +760,7 @@ button:disabled,
 
 /*  Installed PWA and iOS standalone viewport handling.  */
 @media (display-mode: standalone) {
-  html, body { min-height: 100%; background: var(--mono-canvas, #f4f4f2); }
+  html, body { min-height: 100%; background: var(--mono-canvas, #000); }
   body { overscroll-behavior-y: none; }
   .app-frame, .employee-app { min-height: 100dvh; }
   .topbar { top: env(safe-area-inset-top, 0px); padding-top: 0; }

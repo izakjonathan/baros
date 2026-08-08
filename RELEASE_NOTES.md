@@ -1,3 +1,14 @@
+# Bar Ops v0.19.0-rc.12 — Black Page Canvas
+
+- Sets the application page/canvas background to true black across Owner, Admin, Manager, Shift Manager and Employee workspaces.
+- Corrects the semantic page/shell token, legacy mono canvas, manager top-bar shell and browser theme-colour fallback at their shared ownership points.
+- Preserves beige/colour cards, dialogs, inputs and elevated content surfaces; this is a canvas correction, not a flattening of component surfaces.
+- Employee workspace remains on its existing black canvas.
+- No API, database, permission, workflow or business-logic changes.
+- No migration required.
+
+Rollback checkpoint: **v0.19.0-rc.11**.
+
 # Bar Ops v0.19.0-rc.10 — Employee Workspace Shell Unification
 
 - Shared `WorkspaceSidebar` and `WorkspaceTopbar` now power both manager and employee shells.

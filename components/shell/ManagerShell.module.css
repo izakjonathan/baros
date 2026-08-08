@@ -22,7 +22,7 @@
   left:246px;
   right:0;
   z-index:var(--z-header);
-  background:#fff4c4;
+  background:#000;
   border:0;
 }
 .workspace{display:none}

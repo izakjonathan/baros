@@ -9,8 +9,8 @@
   --color-orange:#eb6746;
 
   /* Semantic surfaces */
-  --surface-page:var(--color-beige);
-  --surface-shell:var(--color-beige);
+  --surface-page:var(--color-black);
+  --surface-shell:var(--color-black);
   --surface-card:var(--color-beige);
   --surface-muted:color-mix(in srgb,var(--color-beige) 82%,var(--color-black));
   --surface-inverse:var(--color-black);
