@@ -56,6 +56,14 @@ export type InvitationBootstrapRecord = {
   portal_status: "NONE" | "INVITED" | "ACTIVE" | "EXPIRED";
 };
 
+
+export type EmployeeInvitationMutationResponse = {
+  ok?: boolean;
+  error?: string;
+  activationUrl?: string;
+  status?: string;
+};
+
 export type ManagerBootstrapResponse = {
   locations: Location[];
   selectedLocationId: string | null;
@@ -96,4 +104,13 @@ export function parseInvitationRecords(value: unknown): InvitationBootstrapRecor
   return value.filter((item): item is InvitationBootstrapRecord =>
     isRecord(item) && typeof item.employee_id === "string" && typeof item.portal_status === "string"
   );
+}
+
+export function parseEmployeeInvitationMutationResponse(value: unknown): EmployeeInvitationMutationResponse {
+  if (!isRecord(value)) throw new Error("Invitation mutation response is not an object");
+  if (value.error !== undefined && typeof value.error !== "string") throw new Error("Invitation mutation response has an invalid error");
+  if (value.activationUrl !== undefined && typeof value.activationUrl !== "string") throw new Error("Invitation mutation response has an invalid activation URL");
+  if (value.status !== undefined && typeof value.status !== "string") throw new Error("Invitation mutation response has an invalid status");
+  if (value.ok !== undefined && typeof value.ok !== "boolean") throw new Error("Invitation mutation response has an invalid ok flag");
+  return value as EmployeeInvitationMutationResponse;
 }

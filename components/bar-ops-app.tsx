@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { days, initialProducts, initialShifts, orders, team, type NavKey, type Product, type Shift, type ShiftRole } from "@/lib/data";
 import type { ClockSettings, Employee, Location, LogEntry, OpsTask, ScheduleAcknowledgementSummary, ShiftNote, StockAdjustment, TimeEntry } from "@/features/workspace/types";
-import { parseInvitationRecords, parseManagerBootstrapResponse } from "@/features/workspace/bootstrap-contract";
+import { parseEmployeeInvitationMutationResponse, parseInvitationRecords, parseManagerBootstrapResponse } from "@/features/workspace/bootstrap-contract";
 import { BASE_MONDAY, canonicalShiftDate, conflictIds, dateFromSerial, dateFromShift, dateSerial, hoursBetween, isOvernight, mapDatabaseShift, shiftPositionFromDate, toIsoDate, type DatabaseShiftRecord } from "@/features/workspace/schedule-utils";
 import { RequestsWorkspace } from "@/components/requests-workspace";
 import { WorkspaceSidebar, WorkspaceTopbar } from "@/components/shell/workspace-chrome";
@@ -183,8 +183,9 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
                 if (!employee.id) { notify("Save and reload the employee before inviting"); return; }
                 try {
                   const response = await fetch("/api/employee-invitations", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ employeeId: employee.id, action: employee.portalStatus === "INVITED" ? "resend" : "invite" }) });
-                  const data = parseManagerBootstrapResponse(await response.json());
+                  const data = parseEmployeeInvitationMutationResponse(await response.json());
                   if (!response.ok) throw new Error(data.error || "Could not create invitation");
+                  if (!data.activationUrl) throw new Error("Invitation response did not include an activation link");
                   setEmployees(current => current.map(item => item.id === employee.id ? { ...item, portalStatus: "INVITED" } : item));
                   let shared = false;
                   if (navigator.share) {
@@ -201,7 +202,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
                 if (!employee.id || !confirm(`Revoke the pending invitation for ${employee.name}?`)) return;
                 try {
                   const response = await fetch("/api/employee-invitations", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ employeeId: employee.id, action: "revoke" }) });
-                  const data = parseManagerBootstrapResponse(await response.json());
+                  const data = parseEmployeeInvitationMutationResponse(await response.json());
                   if (!response.ok) throw new Error(data.error || "Could not revoke invitation");
                   setEmployees(current => current.map(item => item.id === employee.id ? { ...item, portalStatus: "NONE" } : item));
                   notify("Invitation revoked");
