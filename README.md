@@ -1,38 +1,31 @@
-# Bar Ops v0.19.0-rc.15 — Environment & Configuration Integrity
+# Bar Ops v0.19.0-rc.16 — Refinement Closeout Audit
 
-Current release: **v0.19.0-rc.15**
+Current release: **v0.19.0-rc.16**
 
-This release audits and tightens the current runtime/deployment configuration without changing product behavior.
+This release closes the current refinement RC audit at source level. It verifies shared shell ownership across manager and employee portals, role coverage, black page-canvas ownership, mobile safe-area handling, production configuration integrity, and the installed PWA launch surface.
 
-## Runtime data source
+## Closeout correction
 
-Production Bar Ops is PostgreSQL-backed through `DATABASE_URL`. There is **no `CONTENT_SOURCE` setting** in the current application and no `local`/`database` runtime switch to configure.
+The live application canvas was already black, but `app/manifest.ts` still advertised the legacy cream background/theme color for installed PWA launch surfaces. Both manifest colors are now `#000000`, matching the application and viewport theme colors.
 
-The browser-local demo workspace remains available only when the explicit development-auth mode is enabled. `DEV_AUTH_ENABLED=true` is rejected in `NODE_ENV=production`, so it cannot act as a production fallback.
+## Workspace coverage
 
-## Supported application environment variables
+The audit covers the role families used by Bar Ops:
 
-Runtime:
-- `DATABASE_URL` — required in production.
-- `APP_URL` — required in production and must use HTTPS there.
-- `SESSION_COOKIE_NAME` — optional session cookie override.
-- `SESSION_TTL_DAYS` — optional session lifetime, 1–365 days.
+- Owner
+- Admin
+- Manager
+- Shift Manager
+- Employee / Bartender
 
-Database administration:
-- `DATABASE_DIRECT_URL` — direct connection used by migration/verification tooling when available.
-- `SEED_OWNER_EMAIL` and `SEED_OWNER_PASSWORD` — seed-only credentials.
-- `ALLOW_DATABASE_SEED` — one-time seed confirmation; do not persist in Vercel.
+Manager-capable roles continue to share the manager workspace shell and employee self-service continues to use the same shared sidebar/topbar primitives through the employee shell.
 
-Development only:
-- `DEV_AUTH_ENABLED`
-- `DEV_AUTH_EMAIL`
-- `DEV_AUTH_PASSWORD`
-- `DEV_AUTH_SECRET`
+## Production data/configuration
 
-Vercel-provided release metadata such as `VERCEL_ENV`, `VERCEL_GIT_COMMIT_SHA`, and `VERCEL_DEPLOYMENT_ID` is read automatically and should not be manually recreated.
+Production remains PostgreSQL-backed through `DATABASE_URL`. `CONTENT_SOURCE` is not supported or required. Development authentication remains forbidden in production.
 
-## Quality workflow correction
+## Acceptance
 
-The GitHub production-build gate now runs with development authentication disabled and a production-shaped environment contract. This aligns the build step with the existing environment validator.
+Source-level closeout checks are included in `test:rc16`. Physical-device verification on iPhone/iPad Safari and the dependency-backed Vercel build remain the final external acceptance gates.
 
-Rollback checkpoint: **v0.19.0-rc.14**.
+Rollback checkpoint: **v0.19.0-rc.15**.

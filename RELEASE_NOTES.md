@@ -1,17 +1,15 @@
-# Bar Ops v0.19.0-rc.15 — Environment & Configuration Integrity
+# Bar Ops v0.19.0-rc.16 — Refinement Closeout Audit
 
 ## Changes
 
-- Audited all application-owned environment-variable references.
-- Confirmed that `CONTENT_SOURCE` is obsolete and unsupported; no replacement `CONTENT_SOURCE=database` value is needed.
-- Clarified `.env.example` so PostgreSQL is the canonical production data source.
-- Preserved explicit development-only local demo persistence, while documenting that it cannot run as a production fallback.
-- Corrected the GitHub quality workflow so the production build uses `DEV_AUTH_ENABLED=false` rather than enabling development authentication.
-- Added a focused configuration-integrity regression test.
-- Reduced current release documentation to current-state information instead of carrying historical release prose forward.
+- Added a source-level closeout audit for all Bar Ops role families and shared workspace-shell ownership.
+- Verified black page-canvas ownership across semantic tokens, legacy canvas tokens and the employee workspace.
+- Corrected the PWA manifest `background_color` and `theme_color` from the legacy cream value to `#000000`.
+- Added regression coverage for shared manager/employee chrome, black canvas, mobile safe-area rules and production environment guards.
+- Preserved the streamlined five-document release package.
 
 ## Scope
 
-No UI, business logic, database schema, API contract, permission, or operational workflow changes.
+No business features, database schema, API contracts, permissions or operational workflows changed.
 
 No database migration is required.

@@ -1,35 +1,25 @@
-# Validation Log — v0.19.0-rc.15
-
-Baseline: **v0.19.0-rc.14**
-
-Focus: environment/configuration integrity and removal of stale deployment assumptions.
+# Validation Log — v0.19.0-rc.16
 
 ## Passed
 
 - `npm run test:current`
-- `npm run test:rc15`
+- `npm run test:rc16`
 - `npm run validate:release`
 - `npm run audit:artifacts`
 - production-shaped `npm run validate:env`
-- syntax checks for the configuration-integrity and inherited build-readiness regression scripts
+- ZIP structure and integrity validation
 
-The current suite also exposed two inherited tests that still depended on historical root Markdown artifacts removed by the slim packaging standard. Those tests were corrected to validate the actual package/workflow contracts instead of requiring obsolete documentation. The rc.14 regression was also made forward-compatible with newer RC version numbers.
+The current source regression chain includes the rc.10 employee shared-shell checks, rc.11 invitation response contract, rc.12 black canvas, rc.13/rc.14 employee mobile refinements, rc.15 environment/configuration integrity, and the new rc.16 closeout checks.
 
-## Configuration assertions
+## Closeout audit result
 
-- no `CONTENT_SOURCE` environment assignment or `process.env.CONTENT_SOURCE` runtime reference;
-- `DATABASE_URL` remains required in production;
-- `APP_URL` remains required in production;
-- `DEV_AUTH_ENABLED=true` remains forbidden in production;
-- browser-local operational persistence remains gated to explicit `devMode`;
-- GitHub production build now sets `DEV_AUTH_ENABLED=false`.
+- Shared workspace chrome is reused by manager and employee portals.
+- Owner, Admin, Manager, Shift Manager and Employee role families remain represented in the capability model.
+- Semantic, legacy and employee page canvases resolve to black.
+- The PWA manifest launch/background colors now match the black application canvas.
+- Mobile safe-area rules remain present.
+- Production requires PostgreSQL and rejects development authentication.
 
-## Not run locally
+## External gate
 
-- dependency-backed ESLint
-- full TypeScript compilation
-- Next.js production build
-
-The extracted release does not contain installed dependencies. GitHub/Vercel remains the dependency-backed production gate.
-
-Database migration: **none**.
+A dependency-backed Vercel Next.js build / TypeScript run and physical-device iPhone/iPad Safari smoke test remain external acceptance gates.

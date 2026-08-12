@@ -1,20 +1,20 @@
-# Bar Ops Implementation Status — v0.19.0-rc.15
+# Bar Ops Implementation Status — v0.19.0-rc.16
 
-Environment/configuration integrity cleanup is complete at source level.
+The current refinement RC cycle is closed at source level.
 
 ## Confirmed
 
-- `CONTENT_SOURCE` is not part of the current codebase, `.env.example`, GitHub workflows, or supported runtime contract.
-- Production requires PostgreSQL through `DATABASE_URL`.
-- Production requires `APP_URL`.
-- Explicit development authentication is rejected in production.
-- Browser-local operational persistence is reachable only through explicit development mode and is not a production fallback.
-- The GitHub quality workflow no longer enables development authentication during its production build.
+- Owner, Admin, Manager, Shift Manager and Employee role families remain represented by the capability model.
+- Manager and employee portals reuse the shared workspace sidebar/topbar primitives.
+- Manager and employee page canvases resolve to black.
+- PWA manifest launch/background colors now match the black application canvas.
+- Mobile safe-area ownership remains present for manager and employee shells.
+- Production remains database-backed and rejects development authentication.
+- No `CONTENT_SOURCE` runtime switch exists.
 
-## Deliberately retained
+## Remaining external acceptance gates
 
-Database-free development auth and browser-local demo persistence remain available for explicit local development. They are gated by `DEV_AUTH_ENABLED` and the production guard in `lib/auth/dev-auth.ts`.
+- Vercel dependency-backed Next.js build and TypeScript validation.
+- Physical iPhone/iPad Safari smoke test across representative owner/manager/employee routes.
 
-## External acceptance gate
-
-The dependency-backed lint, TypeScript and Next.js production build should run in GitHub/Vercel after deployment.
+No new business feature, API contract, permission model or database migration is introduced by this release.
