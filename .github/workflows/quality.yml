@@ -64,8 +64,8 @@ jobs:
 
       - name: Production build
         env:
-          DEV_AUTH_ENABLED: "true"
-          DEV_AUTH_EMAIL: "ci@baros.local"
-          DEV_AUTH_PASSWORD: "ci-development-password"
-          DEV_AUTH_SECRET: "ci-only-development-secret-at-least-32-characters"
+          NODE_ENV: production
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/barops
+          APP_URL: https://barops.example
+          DEV_AUTH_ENABLED: "false"
         run: npm run build

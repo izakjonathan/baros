@@ -1,12 +1,17 @@
-# Bar Ops v0.19.0-rc.14 — Employee Mobile Refinement
-
-Focused employee-workspace refinement based on device screenshots from rc.13.
+# Bar Ops v0.19.0-rc.15 — Environment & Configuration Integrity
 
 ## Changes
-- Adds extra bottom viewport clearance so employee content and controls do not sit beneath Safari browser chrome.
-- Makes shift-card actions more compact with a two-column mobile action layout and a narrow-screen fallback.
-- Tightens monthly availability card spacing while retaining the safe stacked native time-input layout introduced in rc.13.
-- Improves notification text contrast and replaces internal schedule-change codes such as `NEW_SHIFT` with human-readable labels.
+
+- Audited all application-owned environment-variable references.
+- Confirmed that `CONTENT_SOURCE` is obsolete and unsupported; no replacement `CONTENT_SOURCE=database` value is needed.
+- Clarified `.env.example` so PostgreSQL is the canonical production data source.
+- Preserved explicit development-only local demo persistence, while documenting that it cannot run as a production fallback.
+- Corrected the GitHub quality workflow so the production build uses `DEV_AUTH_ENABLED=false` rather than enabling development authentication.
+- Added a focused configuration-integrity regression test.
+- Reduced current release documentation to current-state information instead of carrying historical release prose forward.
 
 ## Scope
-No new business features, API changes, database migrations, or permission changes.
+
+No UI, business logic, database schema, API contract, permission, or operational workflow changes.
+
+No database migration is required.

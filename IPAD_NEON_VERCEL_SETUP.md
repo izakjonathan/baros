@@ -1,3 +1,7 @@
+# Bar Ops v0.19.0-rc.15 — Deployment Setup Note
+
+Production is PostgreSQL-backed via `DATABASE_URL`; there is no `CONTENT_SOURCE` runtime variable. Keep `DEV_AUTH_ENABLED` false/absent in production.
+
 # Bar Ops v0.16.21 — iPad, Neon and Vercel Setup
 
 iPad-only Neon and Vercel setup for `baros`
