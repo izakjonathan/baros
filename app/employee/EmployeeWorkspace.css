@@ -243,3 +243,30 @@
 .employee-app .empty-portal{min-height:4.5rem;padding:var(--space-4);border-radius:var(--radius-md);font-size:var(--text-helper)}
 .employee-app .employee-error,.employee-app .employee-loading-inline,.employee-app .employee-form-message{font-size:var(--text-helper);font-weight:var(--font-weight-medium)}
 
+
+/* v0.19.0-rc.23 — employee mobile/iPad viewport polish. */
+@media (max-width: 560px) {
+  .employee-app .employee-page,
+  .employee-app .employee-page-wrap {
+    scroll-padding-bottom: calc(8rem + env(safe-area-inset-bottom));
+  }
+  .employee-app .employee-page {
+    padding-bottom: calc(8rem + env(safe-area-inset-bottom));
+  }
+  .employee-app .shift-action-row {
+    gap: .32rem;
+  }
+  .employee-app .shift-action-row .shift-card-action {
+    max-inline-size: 100%;
+  }
+}
+
+@media (min-width: 700px) and (max-width: 1024px) {
+  .employee-app .employee-page {
+    width: min(100%, 52rem);
+    padding-top: 1rem;
+  }
+  .employee-app .employee-home-grid {
+    gap: .7rem;
+  }
+}

@@ -2,7 +2,9 @@ import fs from "node:fs";
 import assert from "node:assert/strict";
 const read=(p)=>fs.readFileSync(new URL(`../${p}`,import.meta.url),"utf8");
 const pkg=JSON.parse(read("package.json"));
-assert.equal(pkg.version,"0.19.0-rc.22");
+const rcNumber=Number(pkg.version.split("rc.")[1]);
+assert.ok(pkg.version.startsWith("0.19.0-rc."));
+assert.ok(Number.isFinite(rcNumber) && rcNumber >= 22);
 const targets=[
   "app/employee/EmployeeWorkspace.css",
   "features/attendance/AttendanceWorkspace.module.css",

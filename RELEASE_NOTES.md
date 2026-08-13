@@ -1,19 +1,19 @@
-# Bar Ops v0.19.0-rc.22 — Feature-Surface Micro-Refinement
+# Bar Ops v0.19.0-rc.23 — Mobile/iPhone/iPad Micro-Polish
 
-Baseline: v0.19.0-rc.21.
+Baseline: v0.19.0-rc.22.
 
 ## Scope
-This release migrates high-use feature-owned UI surfaces onto the canonical micro-design roles established in rc.20 and rc.21. It does not change the approved black/pastel visual direction, navigation, business workflows, APIs, permissions, or database schema.
+This release performs a focused responsive polish pass across the shared interaction layer and employee workspace. It preserves the approved black/pastel direction, existing workflows, APIs, permissions, and feature behavior.
 
 ## Changes
-- Employee: normalized secondary headings, helper text, form-field typography, textarea density, availability controls, status metadata, and empty-state sizing.
-- Attendance: normalized action buttons, filter labels/fields, status metadata, helper copy, record actions, and empty-state density.
-- Requests: normalized eyebrow/status metadata, helper copy, refresh/approval actions, card metadata, and empty-state density.
-- Team: normalized primary/clear controls, filter select, summary metadata, and result counts.
-- Inventory: normalized header/filter controls, search/select geometry, product metadata, helper text, and empty states.
-- Orders: normalized add/filter/receive controls, metadata/help text, and empty-state density.
-- Daily Operations: normalized summary/task metadata, preset/create controls, and handover textarea geometry.
-- Settings: normalized navigation controls, field labels/inputs/selects, helper text, and action buttons.
+- Prevents iOS text-size inflation from changing the intended interface hierarchy.
+- Standardizes native date/time/month/datetime controls to a 16px mobile input size to avoid Safari focus zoom while retaining intrinsic-control containment.
+- Adds scroll margin/padding so focused controls and validation content have clearance above the Safari keyboard/browser chrome.
+- Reinforces `min-inline-size: 0` on paired and grid-based form fields so native controls cannot force mobile overflow.
+- Improves mobile dialog/body overscroll containment and momentum scrolling.
+- Adds extra employee-page bottom clearance for Safari toolbar/safe-area overlap.
+- Tightens Employee Schedule action-row spacing without changing the 34px action-height contract.
+- Adds an iPad/tablet gutter pass for manager and employee workspaces without changing desktop layout.
 
 ## Database
 No migration required.

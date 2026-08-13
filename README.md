@@ -1,23 +1,20 @@
-# Bar Ops v0.19.0-rc.21 — Design-System Micro-Audit
+# Bar Ops v0.19.0-rc.23 — Mobile/iPhone/iPad Micro-Polish
 
-Current release: **v0.19.0-rc.21**
+Current release: **v0.19.0-rc.23**
 
-This release begins the site-wide micro-design refinement without changing the established visual direction. The audit found extensive low-level UI variation across the current CSS: 162 distinct font-size values, 15 font-weight values, 90 border-radius values, and more than 130 min-height values.
-
-Rather than mass-rewriting pages, rc.20 establishes canonical typography and control geometry roles and migrates the genuinely shared control primitives first. This creates a safe target for subsequent workspace-by-workspace cleanup and avoids adding another override layer.
+This release is the responsive-device polish pass following the rc.20–22 micro-design refinement work. It improves Apple-device input behavior, viewport clearance, safe-area handling and tablet gutters without changing the established black/pastel visual direction or any business workflow.
 
 ## Scope
-- Site-wide micro-design audit of typography, button/control sizing, form fields, radii and spacing.
-- Canonical small-UI typography roles and compact/default/large control geometry tokens.
-- Shared Button primitive migrated to the new control roles.
-- Shared native date/time field migrated to the new label/control roles while preserving intrinsic iOS sizing safety.
-- Employee form labels, inputs and general action buttons migrated to the same shared roles.
-- Existing 34px Employee Schedule compact action contract preserved.
+- Native date/time/month/datetime containment and Safari focus behavior.
+- Keyboard/browser-toolbar clearance for focused controls and transient UI.
+- Safe-area-aware employee bottom spacing.
+- Compact Employee Schedule action-row spacing while preserving the 34px action contract.
+- iPad/tablet content gutters across shared workspaces.
 - No API, database, permission or workflow changes.
 - No migration required.
 
 ## Validation
-The complete current regression chain, focused rc.20 design-system contract, release validation and release artifact audit pass.
+See `VALIDATION_LOG.md` for the executed release checks.
 
 ## Rollback checkpoint
-If rc.20 introduces an unexpected UI regression, roll back to v0.19.0-rc.19. rc.20 contains no database migration or data-model change.
+If rc.23 introduces an unexpected responsive regression, roll back to v0.19.0-rc.22. rc.23 contains no database or data-model change.

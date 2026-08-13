@@ -87,3 +87,49 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* v0.19.0-rc.23 — mobile/iPhone/iPad micro-polish.
+   Owns viewport-safe interaction geometry only; feature styles keep their
+   visual identity, colors and feature-specific layout decisions. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer) {
+  scroll-padding-block-end: calc(5.5rem + env(safe-area-inset-bottom));
+}
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(input,select,textarea) {
+  scroll-margin-block: 5rem;
+}
+
+@media (max-width: 40rem) {
+  :where(.app-frame,.employee-app,.login-page,.modal-layer) :where(input[type="date"],input[type="time"],input[type="month"],input[type="datetime-local"]) {
+    min-block-size: var(--control-height-default);
+    block-size: auto;
+    padding-block: .5rem;
+    padding-inline: var(--control-padding-x);
+    font-size: 16px;
+    line-height: 1.15;
+  }
+
+  :where(.request-date-grid,.availability-times,.custom-range,.form-grid,.settings-field-grid) > * {
+    min-inline-size: 0;
+  }
+
+  :where(.modal,.interaction-dialog,.employee-dialog) :where(.modal-body,.interaction-body,.dialog-body,form) {
+    min-block-size: 0;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (min-width: 40.01rem) and (max-width: 64rem) {
+  .app-frame .main-shell > .page-wrap,
+  .employee-app .employee-page,
+  .workspace-page {
+    padding-inline-start: max(1rem, env(safe-area-inset-left));
+    padding-inline-end: max(1rem, env(safe-area-inset-right));
+  }
+}
