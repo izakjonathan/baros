@@ -59,6 +59,20 @@
   --leading-body:1.42;
   --tracking-tight:-.045em;
 
+  /* Micro-design roles: canonical small UI typography and control geometry. */
+  --text-control:.875rem;
+  --text-label:.8125rem;
+  --text-helper:.875rem;
+  --text-caption:.75rem;
+  --weight-control:var(--font-weight-semibold);
+  --weight-label:var(--font-weight-semibold);
+  --control-height-compact:2.125rem;
+  --control-height-default:2.75rem;
+  --control-height-large:3rem;
+  --control-padding-x:.9rem;
+  --control-border-width:1.5px;
+  --control-radius:.85rem;
+
   /* Spacing */
   --space-0:0;
   --space-1:.25rem;
@@ -98,7 +112,7 @@
   --page-gutter:var(--layout-gap);
   --header-height:3.5rem;
   --sidebar-width:17.5rem;
-  --control-height:2.75rem;
+  --control-height:var(--control-height-default);
   --duration-fast:140ms;
   --duration-normal:220ms;
   --ease-standard:cubic-bezier(.2,0,0,1);

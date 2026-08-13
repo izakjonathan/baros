@@ -4,7 +4,7 @@
 
 :where(button,[role="button"],.button){
   min-inline-size:0;
-  min-block-size:var(--qa-control-size,2.75rem);
+  min-block-size:var(--qa-control-size,var(--control-height-default));
   display:inline-flex;
   align-items:center;
   justify-content:center;

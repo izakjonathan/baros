@@ -1,13 +1,23 @@
-# Bar Ops v0.19.0-rc.19 — Shift Action Height Root-Cause Fix
+# Bar Ops v0.19.0-rc.21 — Shared Interaction Micro-Refinement
 
 ## Baseline
-- v0.19.0-rc.18
+- v0.19.0-rc.20
 
-## Fix
-The employee Schedule action buttons now share one explicit 34px height contract.
+## Purpose
+This is the first controlled migration release after the rc.20 design-system micro-audit. It reduces clunky control typography and geometry at the shared interaction layer instead of patching individual pages.
 
-Root cause: `Add shift note` matched the existing `.secondary.compact` rule and rendered at 34px, while `Hand over / swap` and `Request shift` matched the global `.portal-action` rule, which forced 42px. The `compact` class alone did not define a height for portal actions.
+## Changes
+- Migrated login/auth labels, inputs, primary action and error messaging to the canonical micro-design typography and control geometry.
+- Migrated shared modal/dialog labels, inputs, selects, textareas and action buttons to the same canonical roles.
+- Reduced dialog control border weight from the historical 2px treatment to the shared control-border token.
+- Migrated top-bar search/notification popover controls to compact shared typography, padding and radii.
+- Standardized workspace helper copy on the canonical helper-text role.
+- Reduced shared empty/loading/error state bulk while keeping the same surfaces and visual direction.
+- Preserved the rc.19 34px Employee Schedule action-height ownership fix.
 
-The employee-specific `.shift-card-action` rule now explicitly owns both `height` and `min-height` at 34px and removes vertical padding, overriding the generic portal-action control height consistently.
+## Deliberately unchanged
+- Black canvas, pastel palette, card colour composition and top-bar/navigation direction.
+- Feature-specific layouts and business workflows.
+- APIs, permissions and database schema.
 
-No API, database, permission, or workflow changes.
+No database migration is required.

@@ -106,13 +106,13 @@
 
 .employee-app .portal-form, .employee-app .clock-card { margin: 0; padding: .9rem; border: 0; border-radius: 1.15rem; background: var(--employee-cream); color: var(--employee-ink); }
 .employee-app .portal-form { display: grid; gap: .7rem; }
-.employee-app .portal-form label, .employee-app .availability-times label, .employee-app .month-picker label, .employee-app .correction-field { min-width: 0; display: grid; gap: .32rem; font-size: .71rem; font-weight: 850; }
+.employee-app .portal-form label, .employee-app .availability-times label, .employee-app .month-picker label, .employee-app .correction-field { min-width: 0; display: grid; gap: .32rem; font-size: var(--text-label); font-weight: var(--weight-label); }
 .employee-app .portal-form input, .employee-app .portal-form select, .employee-app .portal-form textarea,
 .employee-app .availability-times input, .employee-app .month-picker input, .employee-app .correction-field textarea,
 .employee-app .hours-period select {
   inline-size: 100%; max-inline-size: 100%; min-inline-size: 0; box-sizing: border-box;
-  border: 2px solid var(--employee-ink); border-radius: .78rem; background: transparent; color: var(--employee-ink);
-  min-height: 2.85rem; padding: .62rem .72rem; font: inherit; font-size: 1rem;
+  border: var(--control-border-width) solid var(--employee-ink); border-radius: var(--control-radius); background: transparent; color: var(--employee-ink);
+  min-height: var(--control-height-default); padding: .58rem var(--control-padding-x); font: inherit; font-size: .95rem;
 }
 .employee-app .portal-form textarea, .employee-app .correction-field textarea { resize: vertical; min-height: 5.5rem; }
 .employee-app .request-date-grid, .employee-app .availability-times { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .55rem; }
@@ -120,9 +120,9 @@
 .employee-app input[type="date"], .employee-app input[type="time"], .employee-app input[type="month"], .employee-app input[type="datetime-local"] { inline-size: 100%; max-inline-size: 100%; min-inline-size: 0; }
 .employee-app input::-webkit-date-and-time-value, .employee-app input::-webkit-datetime-edit { min-inline-size: 0; }
 .employee-app .primary, .employee-app .secondary, .employee-app .icon-button, .employee-app .text-button,
-.employee-app .clock-card button, .employee-app .request-success button { display: inline-flex; align-items: center; justify-content: center; gap: .42rem; min-height: 2.85rem; border-radius: 999px; font-weight: 850; text-align: center; }
-.employee-app .primary { border: 2px solid var(--employee-ink); background: var(--employee-ink); color: var(--employee-cream); }
-.employee-app .secondary { border: 2px solid var(--employee-ink); background: transparent; color: var(--employee-ink); }
+.employee-app .clock-card button, .employee-app .request-success button { display: inline-flex; align-items: center; justify-content: center; gap: .42rem; min-height: var(--control-height-default); border-radius: 999px; font-size: var(--text-control); font-weight: var(--weight-control); line-height: 1.15; text-align: center; }
+.employee-app .primary { border: var(--control-border-width) solid var(--employee-ink); background: var(--employee-ink); color: var(--employee-cream); }
+.employee-app .secondary { border: var(--control-border-width) solid var(--employee-ink); background: transparent; color: var(--employee-ink); }
 .employee-app .full { width: 100%; }
 
 .employee-app .clock-card { display: grid; gap: .8rem; background: var(--employee-pink); }
@@ -130,7 +130,7 @@
 .employee-app .clock-card small { font-size: .7rem; font-weight: 850; color: rgb(0 0 0 / .72); opacity: 1; }
 .employee-app .clock-card strong { display: block; margin-top: .2rem; font-size: 1.25rem; line-height: 1.08; }
 .employee-app .clock-card p { margin: .25rem 0 0; color: rgb(0 0 0 / .65); }
-.employee-app .clock-card > button, .employee-app .clock-actions button { border: 2px solid var(--employee-ink); background: var(--employee-ink); color: var(--employee-cream); }
+.employee-app .clock-card > button, .employee-app .clock-actions button { border: var(--control-border-width) solid var(--employee-ink); background: var(--employee-ink); color: var(--employee-cream); }
 .employee-app .clock-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .5rem; }
 .employee-app .clock-actions .clock-out { background: transparent; color: var(--employee-ink); }
 .employee-app .hours-period { display: flex; justify-content: flex-end; }

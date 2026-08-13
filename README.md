@@ -1,20 +1,23 @@
-# Bar Ops v0.19.0-rc.19 — Shift Action Height Root-Cause Fix
+# Bar Ops v0.19.0-rc.21 — Design-System Micro-Audit
 
-Current release: **v0.19.0-rc.19**
+Current release: **v0.19.0-rc.21**
 
-This release fixes the remaining Employee Schedule action-height inconsistency at the CSS ownership level. `Add shift note` was 34px because it matched `.secondary.compact`; `Hand over / swap` and `Request shift` remained 42px because the global `.portal-action` rule still owned their height.
+This release begins the site-wide micro-design refinement without changing the established visual direction. The audit found extensive low-level UI variation across the current CSS: 162 distinct font-size values, 15 font-weight values, 90 border-radius values, and more than 130 min-height values.
 
-The shared employee `.shift-card-action` rule now explicitly owns `height: 34px` and `min-height: 34px`, so all three schedule actions render with the same height regardless of their underlying base button class.
+Rather than mass-rewriting pages, rc.20 establishes canonical typography and control geometry roles and migrates the genuinely shared control primitives first. This creates a safe target for subsequent workspace-by-workspace cleanup and avoids adding another override layer.
 
 ## Scope
-- Employee Schedule action height only.
-- No API changes.
-- No database changes.
-- No permission or workflow changes.
+- Site-wide micro-design audit of typography, button/control sizing, form fields, radii and spacing.
+- Canonical small-UI typography roles and compact/default/large control geometry tokens.
+- Shared Button primitive migrated to the new control roles.
+- Shared native date/time field migrated to the new label/control roles while preserving intrinsic iOS sizing safety.
+- Employee form labels, inputs and general action buttons migrated to the same shared roles.
+- Existing 34px Employee Schedule compact action contract preserved.
+- No API, database, permission or workflow changes.
 - No migration required.
 
 ## Validation
-The focused rc.19 regression and the complete current regression chain pass. Dependency-backed Next.js build/TypeScript validation remains the Vercel build gate when dependencies are not installed locally.
+The complete current regression chain, focused rc.20 design-system contract, release validation and release artifact audit pass.
 
 ## Rollback checkpoint
-If rc.19 introduces an unexpected regression, roll back to the confirmed v0.19.0-rc.18 package. rc.19 contains no database migration or data-model change.
+If rc.20 introduces an unexpected UI regression, roll back to v0.19.0-rc.19. rc.20 contains no database migration or data-model change.

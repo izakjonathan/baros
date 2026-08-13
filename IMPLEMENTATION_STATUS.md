@@ -1,17 +1,25 @@
-# Bar Ops Implementation Status — v0.19.0-rc.19
+# Bar Ops Implementation Status — v0.19.0-rc.21
 
-The current release is **v0.19.0-rc.19**.
+The current release is **v0.19.0-rc.21**.
 
-## Current correction
-The Employee Schedule shift-card actions now share one explicit 34px control height. This removes the previous CSS cascade mismatch between `.secondary.compact` and `.portal-action`.
+## Current refinement
+The canonical micro-design roles introduced in rc.20 are now applied to the shared interaction layer: authentication forms, dialogs, modal actions, top-bar popovers, workspace helper copy and shared empty/loading/error states.
 
-## Confirmed
-- Owner, Admin, Manager, Shift Manager and Employee role families remain represented by the capability model.
-- Manager and employee portals continue to reuse shared workspace shell primitives.
-- Production remains database-backed.
-- No `CONTENT_SOURCE` runtime switch exists.
-- No new business feature, API contract, permission model or database migration is introduced by rc.19.
+## Design direction preserved
+- Black page canvas.
+- Beige typography and established pastel surfaces.
+- Existing top-bar and navigation composition.
+- Existing feature/card colour identities.
 
-## Remaining external acceptance gates
-- Vercel dependency-backed Next.js build and TypeScript validation.
-- Physical iPhone/iPad Safari verification of the corrected Schedule action heights.
+## Architecture
+The migration remains deliberately incremental. Feature-specific CSS is not being mass-rewritten; following RCs should move controlled workspace groups onto the canonical roles only after inspecting their active selectors and inheritance.
+
+## Confirmed unchanged
+- Business logic and workflows.
+- Authorization and role capability model.
+- API contracts.
+- PostgreSQL schema and migrations.
+- rc.19 Employee Schedule action-height root-cause fix.
+
+## Next refinement
+Continue with a controlled feature-workspace pass for page-specific field labels, filters, secondary actions and metadata typography, reusing the rc.20/rc.21 shared roles rather than adding new local values.
