@@ -1,14 +1,8 @@
-# Bar Ops v0.19.0-rc.17 — Employee Schedule UI Refinement
+# Bar Ops v0.19.0-rc.18
 
-Baseline: v0.19.0-rc.16.
+## Employee schedule action height alignment
 
-## Changes
-- Removed the `Schedule` eyebrow above `My schedule`.
-- Removed the schedule helper sentence.
-- Made weekday and month labels in black date tiles explicitly cream/beige.
-- Removed icons from the Handover / swap and Add shift note card actions.
-- Standardized Handover / swap, Add shift note and Request shift as compact black buttons with cream text.
-- Reduced action font size, weight, vertical padding and height.
-- Kept action labels on one line while allowing the action row itself to wrap safely if the viewport becomes exceptionally narrow.
-
-No API, database, permissions or workflow changes are included.
+- Hand over / swap now uses the same compact control-height treatment as Add shift note.
+- Request shift now uses the same compact control-height treatment as Add shift note.
+- No workflow, API, database, permission, or other visual changes.
+- No migration required.
