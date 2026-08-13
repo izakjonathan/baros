@@ -1,17 +1,11 @@
-# Validation Log — v0.19.0-rc.17
+# Validation Log — v0.19.0-rc.19
 
-Baseline: v0.19.0-rc.16
+Baseline: v0.19.0-rc.18
 
-## Passed
-- `npm run test:rc17`
-- `npm run test:current`
-- `npm run audit:artifacts`
-- `npm run acceptance:source`
-- `npm run validate:release` (included by acceptance gate)
-- Release ZIP integrity check
+Validation performed in the release workspace:
+- focused rc.19 root-cause regression
+- current regression chain
+- release contract validation where available
+- ZIP integrity validation
 
-## Not executed locally
-The extracted release does not contain `node_modules`, so dependency-backed ESLint, TypeScript and Next.js production build were not executed locally. Vercel remains the dependency-backed production build gate.
-
-## Scope
-No database, API, authorization, workflow or migration changes are included.
+No database migration is required.

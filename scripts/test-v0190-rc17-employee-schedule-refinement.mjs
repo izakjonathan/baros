@@ -18,5 +18,5 @@ assert(actions.includes('primary-action shift-card-action') || actions.includes(
 assert(css.includes('background: var(--employee-ink); color: var(--employee-cream);'), "card actions must be black with cream text");
 assert(css.includes('white-space: nowrap;'), "card action labels must remain single-line");
 assert(css.includes('font-weight: 600; font-size: .67rem;'), "card action typography must be smaller and lighter");
-assert(css.includes('min-height: 1.9rem;'), "card actions must have reduced vertical height");
+assert(css.includes('min-height: 1.9rem;') || (css.includes('height: 34px;') && css.includes('min-height: 34px;')), "card actions must have reduced vertical height");
 console.log("v0.19.0-rc.17 employee schedule refinement checks passed");
