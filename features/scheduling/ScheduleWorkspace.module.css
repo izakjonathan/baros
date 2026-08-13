@@ -1,8 +1,8 @@
-.workspace{--schedule-foundation-surface:var(--surface-card);display:grid;}.header{justify-content:space-between;}.headerActions{justify-content:flex-end;flex-wrap:wrap;}.headerActions :global(select){color:#f47add}
+.workspace{display:grid;}.header{justify-content:space-between;}.headerActions{justify-content:flex-end;flex-wrap:wrap;}.headerActions :global(select){color:#f47add}
 .toolbar{box-shadow:none}.periodControls strong{min-width:0;text-align:center;white-space:nowrap}.summaryText{color:#000;font-size:var(--text-sm);white-space:nowrap}.calendarPanel{min-width:0;}.calendarScroll{min-width:0;}.dayHeader{top:0;align-items:center;backdrop-filter:none}.shiftCard{text-align:start;background:#f47add;transition:transform var(--duration-fast) var(--ease-standard);}.shiftCard:hover{transform:translateY(-1px)}.shiftCard:focus-visible{outline:3px solid #000;outline-offset:2px}.shiftCard[data-draft="true"]{outline:2px dashed #000;outline-offset:-5px}.shiftCard[data-conflict="true"]{outline:3px solid #000;outline-offset:-3px}
 .periodControls button{border:0;box-shadow:none}.summary :global(button){background:#000;color:#eb6746;border:0}.shiftCard strong,.shiftCard small{color:#000}
 @media(max-width:70rem){.toolbar{grid-template-columns:1fr auto}.toolbar>:nth-child(2){grid-column:1/-1;grid-row:2}}
-@media(max-width:48rem){.header{align-items:stretch;flex-direction:column;}.toolbar{align-items:stretch;}.toolbar>:nth-child(2){grid-column:auto;grid-row:auto}.summaryText{flex-basis:100%;}.periodControls button{padding:0}}
+@media(max-width:48rem){.header{flex-direction:column;}.toolbar{align-items:stretch;}.toolbar>:nth-child(2){grid-column:auto;grid-row:auto}.summaryText{flex-basis:100%;}.periodControls button{padding:0}}
 @media(prefers-reduced-motion:reduce){.shiftCard{transition:none}.shiftCard:hover{transform:none}}
 
 /* v0.18.4.5 top chrome refinement */
@@ -51,7 +51,7 @@
 .workspace{min-width:0;overflow-x:clip;}
 .header,.toolbar{min-width:0;max-width:100%;}
 .headerActions>*{min-width:0;}
-.periodControls,.summary{min-width:0;}
+.periodControls,.summary{}
 .periodControls button{display:grid;place-items:center;}
 .periodControls button svg{display:block;}
 .summary button svg{display:block;stroke:currentColor;}
@@ -69,7 +69,7 @@
   
   .toolbar{display:grid;width:100%;}
   .periodControls{width:100%;}
-  .periodControls button{border-radius:.8rem;color:#eb6746}
+  .periodControls button{color:#eb6746}
   
   .summary{grid-template-columns:repeat(3,auto);justify-content:start;align-items:center;}
   .summaryText{grid-column:1/-1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.75rem}
@@ -125,7 +125,7 @@
 .shiftCard strong{
 
 
-  overflow-wrap:normal;
+  
   word-break:normal;
 
 
@@ -141,16 +141,16 @@
   
   
   .toolbar{
-    grid-template-columns:minmax(0,1fr) auto;
+    
 
-    gap:.45rem;
+    
 
   }
   
   .periodControls button{
-    width:2.3rem;
-    height:2.3rem;
-    min-width:2.3rem;
+    
+    
+    
   }
   
   .summary{
@@ -184,7 +184,7 @@
 
 .calendarPanel{
 
-  outline:none;
+  
 }
 
 
@@ -216,9 +216,9 @@
 .shiftCard strong{
 
 
-  white-space:normal;
-  overflow:visible;
-  text-overflow:clip;
+  
+  
+  
 
 }
 
@@ -256,11 +256,11 @@
   
   
   .periodControls button{
-    width:2rem;
-    min-width:2rem;
-    height:2rem;
-    min-height:2rem;
-    border-radius:.55rem;
+    
+    
+    
+    
+    
   }
   
   
@@ -270,7 +270,7 @@
   
   .dayBody{
 
-    padding:.38rem;
+    
 
   }
   
@@ -286,13 +286,13 @@
 /* v0.18.4.17 header-only schedule columns */
 .calendarPanel{
 
-  border:0;
+  
 
-  box-shadow:none;
+  
 
 }
 .calendarScroll{
-  background:transparent;
+  
   padding-block-end:.2rem;
 }
 
@@ -488,25 +488,25 @@
 
 @media(max-width:48rem){
   .calendarGrid{
-    min-width:36.8rem;
-    grid-template-columns:repeat(7,minmax(6.45rem,1fr));
-    gap:.36rem;
+    
+    
+    
   }
   .dayColumn{
-    gap:.3rem;
+    
   }
   
   
   
   
   .dayBody{
-    min-height:12.5rem;
-    gap:.26rem;
+    
+    
   }
   
   
   .shiftCard small{
-    font-size:.5rem;
+    
   }
   
 }
@@ -581,8 +581,8 @@
 
   }
   .dayColumn{
-    width:var(--schedule-column-width);
-    min-width:var(--schedule-column-width);
+    
+    
     min-height:0;
   }
   
@@ -628,8 +628,8 @@
   
   
   .shiftCard{
-    width:100% ;
-    max-width:100% ;
+    
+    
 
 
   }
@@ -683,7 +683,7 @@
   isolation:isolate;
   contain:layout paint;
   background:#000 ;
-  border:0 ;
+  
 }
 .dayHeader{
   flex:0 0 auto;
@@ -778,8 +778,8 @@
   
   
   .shiftCard{
-    padding:.3rem .34rem ;
-    border-radius:.52rem ;
+    
+    
   }
 }
 
@@ -837,10 +837,10 @@
 @media(max-width:48rem){
   
   .header{
-    grid-template-columns:minmax(0,1fr) auto ;
-    padding:.62rem .68rem ;
-    gap:.38rem ;
-    border-radius:.85rem ;
+    
+    
+    
+    
   }
   
   
@@ -849,8 +849,8 @@
   
   
   .toolbar{
-    padding:.28rem .34rem ;
-    border-radius:.68rem ;
+    
+    
   }
   
   
@@ -1313,12 +1313,12 @@
 
 }
 .calendarPanel,.calendarScroll,.calendarGrid{
-  border-block:0 ;
-  box-shadow:none ;
+  
+  
 }
 .calendarPanel::before,.calendarPanel::after,.calendarScroll::before,.calendarScroll::after,.calendarGrid::before,.calendarGrid::after{
-  display:none ;
-  content:none ;
+  
+  
 }
 
 @media(max-width:48rem){
@@ -1399,26 +1399,26 @@
   }
   
   .dayHeader{
-    min-height:2.1rem ;
+    
     display:flex ;
     flex-direction:row ;
     align-items:center ;
     justify-content:center ;
-    gap:.32rem ;
-    padding:.28rem .4rem ;
-    border-radius:.68rem ;
+    
+    
+    
     white-space:nowrap ;
   }
   .dayHeader span{
-    font-size:.53rem ;
-    line-height:1 ;
-    letter-spacing:.08em ;
+    
+    
+    
     font-weight:400 ;
   }
   .dayHeader strong{
     margin:0 ;
-    font-size:.78rem ;
-    line-height:1 ;
+    
+    
     font-weight:800 ;
   }
   .today .dayHeader{
@@ -1428,8 +1428,8 @@
     display:inline ;
     inline-size:auto ;
     block-size:auto ;
-    padding:.14rem .28rem ;
-    font-size:.78rem ;
+    
+    
     line-height:1 ;
   }
   
@@ -1635,3 +1635,101 @@
 /* v0.19.0-rc.30 — schedule acknowledgement overlay ownership. */
 .ackModal{max-width:34rem;}.ackList{padding:.25rem 0 1rem;}.ackList>div{display:flex;align-items:center;gap:.75rem;padding:.7rem 0;border-bottom:1px solid rgb(0 0 0 / .16);}.ackList>div:last-child{border-bottom:0;}.ackDot{width:.7rem;height:.7rem;border-radius:999px;background:#d5d5d1;flex:0 0 auto;}.ackComplete{background:#2e8b57;}.ackList strong,.ackList small{display:block;}.ackList small{margin-top:.18rem;color:var(--text-secondary);}
 @media(max-width:640px){.ackModal{max-width:none}}
+
+/* v0.19.0-rc.33 — scoped shift editor ownership. Generic dialog/form
+   presentation belongs to completion-redesign.css; this module owns only the
+   scheduling-specific composition. */
+.shiftEditorDialog{
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  width:min(100%,46rem);
+  max-height:min(92dvh,54rem);
+  overflow:hidden;
+}
+.shiftEditorBody{
+  min-width:0;
+  min-height:0;
+  overflow:auto;
+  overscroll-behavior:contain;
+  display:grid;
+  gap:.75rem;
+  padding:.25rem 1rem 1rem;
+}
+.shiftEditorDialog :global(.assignment-toggle){
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:.3rem;
+  padding:.3rem;
+  background:#f3f1eb;
+  border-radius:var(--control-radius);
+}
+.shiftEditorDialog :global(.assignment-toggle button){
+  min-width:0;
+  min-height:var(--control-height-default);
+  border:0;
+  border-radius:var(--radius-control);
+  background:transparent;
+  font-size:var(--text-control);
+  font-weight:var(--weight-control);
+}
+.shiftEditorDialog :global(.assignment-toggle button[aria-pressed="true"]){background:#e4d69a;}
+.shiftEditorDialog :global(.shift-dialog-fields){
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:.75rem;
+}
+.shiftEditorDialog :global(.shift-date-field),
+.shiftEditorDialog :global(.full-field){grid-column:1/-1;}
+.shiftEditorDialog :global(.open-shift-note),
+.shiftEditorDialog :global(.series-edit-note),
+.shiftEditorDialog :global(.repeat-switch){
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:start;
+  gap:.65rem;
+  padding:.75rem;
+  border:var(--control-border-width) solid #000;
+  border-radius:var(--control-radius);
+  background:rgba(255,255,255,.3);
+}
+.shiftEditorDialog :global(.open-shift-note strong),
+.shiftEditorDialog :global(.series-edit-note strong),
+.shiftEditorDialog :global(.repeat-switch strong){display:block;font-size:var(--text-label);}
+.shiftEditorDialog :global(.open-shift-note span),
+.shiftEditorDialog :global(.series-edit-note span),
+.shiftEditorDialog :global(.repeat-switch small),
+.shiftEditorDialog :global(.field-help){color:rgba(0,0,0,.62);font-size:var(--text-helper);line-height:1.35;}
+.shiftEditorDialog :global(.repeat-switch){align-items:center;}
+.shiftEditorDialog :global(.repeat-switch input){inline-size:1rem;block-size:1rem;accent-color:#000;}
+.shiftEditorDialog :global(.repeat-panel){display:grid;gap:.65rem;padding:0;background:transparent;}
+.shiftEditorDialog :global(.frequency-toggle){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.4rem;}
+.shiftEditorDialog :global(.weekday-picker){display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.4rem;}
+.shiftEditorDialog :global(.frequency-toggle button),
+.shiftEditorDialog :global(.weekday-picker button){
+  min-height:var(--control-height-compact);
+  border:var(--control-border-width) solid #000;
+  border-radius:var(--radius-control);
+  background:transparent;
+  font-size:var(--text-caption);
+  font-weight:var(--weight-control);
+}
+.shiftEditorDialog :global(.frequency-toggle button[aria-pressed="true"]),
+.shiftEditorDialog :global(.weekday-picker button[aria-pressed="true"]){background:#f47add;}
+.shiftEditorDialog :global(.repeat-count){display:grid;grid-template-columns:auto minmax(0,5.75rem) auto;align-items:center;gap:.5rem;}
+.shiftEditorDialog :global(.repeat-count input){text-align:center;}
+.shiftEditorDialog :global(.edit-shift-actions){
+  display:grid;
+  grid-template-columns:minmax(0,.72fr) minmax(0,1.45fr);
+  align-items:center;
+  gap:.6rem;
+  padding:.65rem 1rem max(.65rem,env(safe-area-inset-bottom));
+  background:#fff4c4;
+}
+.shiftEditorDialog :global(.edit-shift-actions>div){display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:.5rem;}
+.shiftEditorDialog :global(.danger-button){border-color:#b43636;color:#b43636;background:transparent;}
+@media(max-width:600px){
+  .shiftEditorDialog{width:calc(100% - 1rem);max-height:calc(100dvh - max(1rem,env(safe-area-inset-top)) - max(1rem,env(safe-area-inset-bottom)));}
+  .shiftEditorDialog :global(.shift-dialog-fields){grid-template-columns:repeat(2,minmax(0,1fr));}
+  .shiftEditorDialog :global(.weekday-picker){grid-template-columns:repeat(4,minmax(0,1fr));}
+  .shiftEditorDialog :global(.edit-shift-actions){grid-template-columns:1fr;}
+  .shiftEditorDialog :global(.edit-shift-actions>div){grid-template-columns:repeat(2,minmax(0,1fr));}
+}

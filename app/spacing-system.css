@@ -1,4 +1,0 @@
-/* v0.19.0-rc.30 — minimal external-flow ownership.
-   Layout tokens live in styles/tokens.css; feature geometry stays feature-owned. */
-.workspace-flow,.page-flow{display:grid;gap:var(--layout-gap);min-width:0}
-.workspace-flow>*,.page-flow>*{margin-block:0!important;min-width:0}

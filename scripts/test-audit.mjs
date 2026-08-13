@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const app=fs.readFileSync(new URL('../components/bar-ops-app.tsx',import.meta.url),'utf8');
-const css=fs.readFileSync(new URL('../app/globals.css',import.meta.url),'utf8');
+const css=fs.readFileSync(new URL('../app/system-contracts.css',import.meta.url),'utf8');
 const modalCss=fs.readFileSync(new URL('../app/completion-redesign.css',import.meta.url),'utf8');
 const attendanceCss=fs.readFileSync(new URL('../features/attendance/AttendanceWorkspace.module.css',import.meta.url),'utf8');
 const checks=[

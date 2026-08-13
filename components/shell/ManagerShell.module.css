@@ -3,7 +3,7 @@
 .brandMark{background:var(--surface-inverse);color:var(--text-inverse);border-radius:var(--radius-md)}
 .navigation{padding:var(--space-3)}
 .navigation button{border-radius:var(--radius-md);transition:background var(--duration-fast) var(--ease-standard),color var(--duration-fast) var(--ease-standard)}
-.navigation button:hover{background:var(--surface-muted)}
+.navigation button:hover{}
 
 
 .bottom{padding:var(--space-3);border-block-start:1px solid var(--border-subtle)}
@@ -81,10 +81,10 @@
   .topbar{padding-inline:max(var(--layout-gap),env(safe-area-inset-left));padding-right:max(var(--layout-gap),env(safe-area-inset-right))}
 }
 @media(max-width:640px){
-  .topbar{gap:var(--layout-gap);grid-template-columns:auto minmax(0,1fr) auto;padding-block:0}
-  .location{min-height:2.5rem;padding-inline:.75rem;max-width:10.5rem}
-  .location select{font-size:1rem}
-  .topbarButton{width:2.5rem;height:2.5rem;min-width:2.5rem;min-height:2.5rem;border-radius:.9rem}
+  .topbar{grid-template-columns:auto minmax(0,1fr) auto;padding-block:0}
+  .location{max-width:10.5rem}
+  .location select{}
+  .topbarButton{}
 }
 
 .themeButton{flex:none;}
@@ -103,10 +103,10 @@
 [data-theme="dark"] .actions>button:nth-of-type(1){background:#9561e6;color:#000;}
 [data-theme="dark"] .actions>button:nth-of-type(2){background:#eb6746;color:#000;}
 [data-theme="dark"] .actions>button:nth-of-type(3){background:#fff4c4;color:#000;}
-@media(max-width:640px){.topbar{padding-inline:max(var(--layout-gap),env(safe-area-inset-left));padding-right:max(var(--layout-gap),env(safe-area-inset-right));gap:var(--layout-gap)}}
+@media(max-width:640px){.topbar{padding-inline:max(var(--layout-gap),env(safe-area-inset-left));padding-right:max(var(--layout-gap),env(safe-area-inset-right));}}
 
 /* v0.18.4.10 stable iOS top-bar placement */
-@media(max-width:960px){.topbar{left:0;top:env(safe-area-inset-top,0px);height:3.35rem;padding-top:0;padding-bottom:0}}
+@media(max-width:960px){.topbar{height:3.35rem;padding-top:0;padding-bottom:0}}
 
 /* v0.18.4.24 compact mobile top bar */
 @media(max-width:640px){

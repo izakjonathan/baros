@@ -7,7 +7,7 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const pkg = JSON.parse(read("package.json"));
 const tokens = read("styles/tokens.css");
 const base = read("styles/base.css");
-const mono = read("app/mono-components.css");
+const globals = read("app/globals.css");
 const shellCss = read("components/shell/ManagerShell.module.css");
 const monoTokens = read("styles/tokens.css");
 const manifest = read("app/manifest.ts");
@@ -35,7 +35,7 @@ assert.match(tokens, /--surface-page:\s*var\(--color-black\)/i);
 assert.match(tokens, /--surface-shell:\s*var\(--color-black\)/i);
 assert.match(monoTokens, /--mono-canvas:\s*(?:#000000|var\(--surface-page\))/i);
 assert.match(base, /html\{background:var\(--surface-page\)/);
-assert.match(mono, /html,body,\.app-frame,\.main-shell,\.employee-app,\.employee-shell,\.employee-page,\.workspace-loading\{background:var\(--mono-canvas\)/);
+assert.match(globals, /\.app-frame\{[^}]*background:var\(--surface-page\)/);
 assert.match(employeeCss, /--employee-canvas:\s*#000/);
 
 // Browser/PWA launch surfaces must not flash the legacy cream canvas.

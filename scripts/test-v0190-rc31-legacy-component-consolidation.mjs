@@ -9,5 +9,5 @@ const declarations=(css.match(/[-\w]+\s*:\s*[^;{}]+[;}]/g)||[]).length;
 const important=(css.match(/!important/g)||[]).length;
 if(declarations>5180) throw new Error(`CSS declaration budget exceeded: ${declarations}`);
 if(important>10) throw new Error(`!important budget exceeded: ${important}`);
-if(/v0\.15\.2 — search and productivity/.test(fs.readFileSync('app/mono-components.css','utf8'))) throw new Error('empty legacy release section remains');
+if(fs.existsSync('app/mono-components.css')) throw new Error('legacy mono-components.css returned');
 console.log(`v0.19.0-rc.31 legacy component consolidation passed (${declarations} declarations, ${important} !important)`);

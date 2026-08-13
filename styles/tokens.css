@@ -19,42 +19,42 @@
   --surface-shift:var(--color-pink);
   --surface-inventory:var(--color-blue);
   --surface-order:var(--color-orange);
-  --surface-neon:var(--color-neon);
-  --surface-pink:var(--color-pink);
-  --surface-blue:var(--color-blue);
-  --surface-orange:var(--color-orange);
+  
+  
+  
+  
 
   /* Semantic text and borders */
   --text-primary:var(--color-black);
   --text-secondary:color-mix(in srgb,var(--color-black) 72%,transparent);
   --text-inverse:var(--color-beige);
-  --text-on-color:var(--color-black);
+  
   --border-subtle:color-mix(in srgb,var(--color-black) 20%,transparent);
-  --border-default:var(--color-black);
-  --border-strong:var(--color-black);
+  
+  
 
   /* Status colours use small indicators, not full-card fills */
-  --status-success:var(--color-neon);
-  --status-warning:var(--color-orange);
+  
+  
   --status-danger:var(--color-pink);
-  --status-info:var(--color-blue);
+  
 
   /* Typography */
   --font-body:var(--font-inter),Arial,sans-serif;
   --font-display:var(--font-space-grotesk),var(--font-inter),Arial,sans-serif;
-  --font-weight-regular:400;
+  
   --font-weight-medium:500;
   --font-weight-semibold:600;
-  --font-weight-bold:700;
+  
   --text-xs:.75rem;
   --text-sm:.875rem;
-  --text-md:1rem;
-  --text-lg:1.125rem;
+  
+  
   --text-xl:1.375rem;
-  --text-2xl:1.75rem;
-  --text-3xl:2.25rem;
-  --text-4xl:clamp(2.6rem,6vw,4.75rem);
-  --leading-tight:.98;
+  
+  
+  
+  
   --leading-heading:1.08;
   --leading-body:1.42;
   --tracking-tight:-.045em;
@@ -74,29 +74,29 @@
   --control-radius:.85rem;
 
   /* Spacing */
-  --space-0:0;
+  
   --space-1:.25rem;
   --space-2:.5rem;
   --space-3:.75rem;
   --space-4:1rem;
   --space-5:1.25rem;
   --space-6:1.5rem;
-  --space-8:2rem;
-  --space-10:2.5rem;
-  --space-12:3rem;
-  --space-16:4rem;
-  --space-20:5rem;
-  --space-24:6rem;
+  
+  
+  
+  
+  
+  
 
   /* Radius: bold, rounded, and consistent */
-  --radius-xs:.35rem;
-  --radius-sm:.75rem;
+  
+  
   --radius-md:1rem;
   --radius-lg:1.25rem;
-  --radius-xl:1.5rem;
-  --radius-2xl:2rem;
+  
+  
   --radius-full:9999px;
-  --radius-pill:var(--radius-full);
+  
   --radius-control:var(--radius-full);
   --radius-card:1.25rem;
   --radius-panel:1.75rem;
@@ -107,35 +107,35 @@
 
   /* Layout, motion, layering */
   --content-width:90rem;
-  --content-width-reading:45rem;
+  
   --layout-gap:.5rem;
   --page-gutter:var(--layout-gap);
-  --header-height:3.5rem;
-  --sidebar-width:17.5rem;
+  
+  
   --control-height:var(--control-height-default);
   --duration-fast:140ms;
   --duration-normal:220ms;
   --ease-standard:cubic-bezier(.2,0,0,1);
   --z-header:100;
-  --z-dropdown:200;
+  
   --z-modal:300;
-  --z-toast:400;
+  
 
   /* Legacy application aliases retained while old global components are migrated. */
-  --mono-hover:#efe3b3;
-  --mono-pressed:#e7daa8;
-  --mono-disabled:#aaa9a3;
+  
+  
+  
   --app-header-height:66px;
-  --canvas:var(--surface-page);
+  
   --surface:var(--surface-card);
-  --ink:var(--text-primary);
-  --muted:var(--text-secondary);
-  --line:var(--border-subtle);
+  
+  
+  
   --accent:var(--text-primary);
   --shadow:none;
-  --accent-dark:var(--color-beige);
-  --sidebar:var(--surface-shell);
-  --focus-ring:0 0 0 3px rgba(17,17,17,.18);
+  
+  
+  
   --workspace-inline:var(--layout-gap);
   --workspace-block:var(--layout-gap);
   --workspace-section-gap:var(--layout-gap);
@@ -148,7 +148,7 @@
   --mono-ink:var(--text-primary);
   --mono-secondary:var(--text-secondary);
   --mono-tertiary:color-mix(in srgb,var(--text-secondary) 72%,transparent);
-  --mono-separator:var(--border-subtle);
+  
   --mono-danger:var(--status-danger);
   --mono-radius-sm:var(--radius-control);
   --mono-radius-md:var(--radius-card);
@@ -166,8 +166,8 @@
   --text-primary:var(--color-beige);
   --text-secondary:color-mix(in srgb,var(--color-beige) 72%,transparent);
   --text-inverse:var(--color-black);
-  --border-default:var(--color-beige);
-  --border-strong:var(--color-beige);
+  
+  
   --border-subtle:color-mix(in srgb,var(--color-beige) 28%,transparent);
 }
 }

@@ -315,3 +315,7 @@ html{
   :where(button,a,input,select,textarea,.modal,.top-popover){forced-color-adjust:auto}
   .status-dot,.notification i{border:1px solid CanvasText}
 }
+
+/* v0.19.0-rc.34 — canonical external page flow. */
+.workspace-flow,.page-flow{display:grid;gap:var(--layout-gap);min-width:0}
+.workspace-flow>*,.page-flow>*{margin-block:0;min-width:0}

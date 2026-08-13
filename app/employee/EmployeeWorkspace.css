@@ -10,10 +10,10 @@
   --employee-pink: #f47add;
   --employee-purple: #9561e6;
   --employee-orange: #eb6746;
-  --employee-gutter: max(.8rem, env(safe-area-inset-left));
+  
   min-height: 100dvh;
-  background: var(--employee-canvas);
-  color: var(--employee-cream);
+  
+  
 }
 .employee-app *, .employee-app *::before, .employee-app *::after { box-sizing: border-box; }
 .employee-app main { min-width: 0; }
@@ -31,7 +31,7 @@
 .employee-app .employee-page > .eyebrow:first-child { margin: 0; color: var(--employee-neon); font-size: .7rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
 .employee-app .employee-page h1 { margin: 0; color: var(--employee-cream); font-size: clamp(2.15rem, 10vw, 3.35rem); line-height: .92; letter-spacing: -.05em; }
 .employee-app .employee-page h2 { margin: .45rem 0 0; color: var(--employee-cream); }
-.employee-app .employee-lead { margin: -.15rem 0 .2rem; color: rgb(255 244 196 / .72); line-height: 1.42; max-width: 38rem; }
+.employee-app .employee-lead { margin: -.15rem 0 .2rem; color: rgb(255 244 196 / .72);  max-width: 38rem; }
 .employee-app .employee-page-title { display: flex; align-items: end; justify-content: space-between; gap: .7rem; }
 .employee-app .history-title { margin-top: .75rem; }
 
@@ -49,7 +49,7 @@
 }
 .employee-app .employee-hero > span { width: 2.6rem; height: 2.6rem; border-radius: .78rem; background: var(--employee-ink); color: var(--employee-cream); display: grid; place-items: center; }
 .employee-app .employee-hero small, .employee-app .employee-hero strong, .employee-app .employee-hero p { display: block; }
-.employee-app .employee-hero small { font-size: .69rem; font-weight: 850; opacity: .65; }
+.employee-app .employee-hero small {   opacity: .65; }
 .employee-app .employee-hero strong { margin-top: .18rem; font-size: 1.15rem; line-height: 1.08; }
 .employee-app .employee-hero p { margin: .28rem 0 0; color: rgb(0 0 0 / .68); line-height: 1.35; }
 
@@ -125,7 +125,7 @@
 
 .employee-app .clock-card { display: grid; gap: .8rem; background: var(--employee-pink); }
 .employee-app .clock-card.clock-running { background: var(--employee-neon); }
-.employee-app .clock-card small { font-size: .7rem; font-weight: 850; color: rgb(0 0 0 / .72); opacity: 1; }
+.employee-app .clock-card small {   color: rgb(0 0 0 / .72); opacity: 1; }
 .employee-app .clock-card strong { display: block; margin-top: .2rem; font-size: 1.25rem; line-height: 1.08; }
 .employee-app .clock-card p { margin: .25rem 0 0; color: rgb(0 0 0 / .65); }
 .employee-app .clock-card > button, .employee-app .clock-actions button { border: var(--control-border-width) solid var(--employee-ink); background: var(--employee-ink); color: var(--employee-cream); }
@@ -145,7 +145,7 @@
 .employee-app .availability-mode { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .25rem; padding: .28rem; margin: 0; border-radius: .95rem; background: var(--employee-cream); }
 .employee-app .availability-mode button { min-width: 0; border: 0; border-radius: .72rem; background: transparent; color: var(--employee-ink); font: inherit; }
 .employee-app .availability-mode button.selected { background: var(--employee-ink); color: var(--employee-cream); }
-.employee-app .availability-help { margin: 0; color: rgb(255 244 196 / .7); line-height: 1.4; }
+.employee-app .availability-help { margin: 0; color: rgb(255 244 196 / .7);  }
 .employee-app .availability-grid article, .employee-app .monthly-availability-grid article { background: var(--employee-cream); }
 .employee-app .availability-grid article.unavailable, .employee-app .monthly-availability-grid article.unavailable { opacity: .72; }
 .employee-app .availability-switch { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }

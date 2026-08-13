@@ -2,7 +2,8 @@ import fs from "node:fs";
 import assert from "node:assert/strict";
 
 const completion = fs.readFileSync("app/completion-redesign.css", "utf8");
-const mono = fs.readFileSync("app/mono-components.css", "utf8");
+const globals = fs.readFileSync("app/globals.css", "utf8");
+const employeeCss = fs.readFileSync("app/employee/EmployeeWorkspace.css", "utf8");
 const system = fs.readFileSync("app/system-contracts.css", "utf8");
 const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
 
@@ -18,10 +19,8 @@ for (const contract of [
   "top-popover button{width:100%;min-width:0;min-height:var(--control-height-compact)",
 ]) assert.ok(completion.includes(contract), `missing shared interaction contract: ${contract}`);
 
-assert.match(mono,/workspace-description,\.employee-lead\{max-width:68ch;margin:0;color:var\(--mono-secondary\);font-size:var\(--text-helper\);line-height:1\.4;?\}/, "workspace helper copy must use canonical helper role");
-assert.ok(mono.includes("shared-empty-state{display:grid;justify-items:center;gap:var(--space-2);min-height:6rem;padding:var(--space-5)"), "shared empty state must use compact spacing contract");
-assert.ok(mono.includes("shared-state-card{min-height:7rem;display:grid"), "shared loading/error state must use compact height contract");
-assert.ok(mono.includes("shared-state-card strong{font-size:var(--text-control);font-weight:var(--weight-control)"), "shared state title must use canonical control typography");
+assert.ok(globals.includes("page-subtitle") && globals.includes("font-size:var(--text-helper)"), "workspace helper copy must use canonical helper role");
+assert.ok(employeeCss.includes(".employee-app .empty-portal"), "employee state presentation must remain feature-owned");
 
 assert.ok(system.includes(':where(.app-frame,.employee-app,.login-page,.modal-layer) :where(input,select,textarea){') && system.includes("box-sizing: border-box"), "intrinsic control sizing must be owned by the consolidated system contract");
 

@@ -3,14 +3,13 @@ import path from 'node:path';
 
 const root=process.cwd();
 const pkg=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
-if(pkg.version!=='0.19.0-rc.32') throw new Error(`Expected rc.32, got ${pkg.version}`);
+if(!/^0\.19\.0-rc\.(?:3[2-9]|[4-9]\d|\d{3,})$/.test(pkg.version)) throw new Error(`Expected rc.32 or later, got ${pkg.version}`);
 const globals=fs.readFileSync(path.join(root,'app/globals.css'),'utf8');
-const mono=fs.readFileSync(path.join(root,'app/mono-components.css'),'utf8');
 const shell=fs.readFileSync(path.join(root,'components/shell/ManagerShell.module.css'),'utf8');
 for(const selector of ['.sidebar{','.brand{','.side-nav ','.side-bottom','.profile{','.menu-button{','.location-switch','.top-actions']){
   if(globals.includes(selector)) throw new Error(`Legacy manager-shell selector remains in globals.css: ${selector}`);
 }
-if(/\.topbar\s*\{/.test(mono)||/\.sidebar\s*\{/.test(mono)) throw new Error('Legacy topbar/sidebar ownership remains in mono-components.css');
+if(fs.existsSync(path.join(root,'app/mono-components.css'))) throw new Error('Legacy mono-components.css returned');
 for(const contract of ['position:fixed','width:246px','transform:translateX(-105%)',':global(.sidebar-open)','min-height:var(--mono-control)']){
   if(!shell.includes(contract)) throw new Error(`ManagerShell module missing contract: ${contract}`);
 }

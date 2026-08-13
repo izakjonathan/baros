@@ -13,7 +13,7 @@ for(const source of [app,requests]) assert.match(source,/FeatureSurface\.module\
 for(const dead of ["schedule-head","schedule-head-actions","compact-schedule-toolbar","schedule-view-select","schedule-calendar","calendar-grid","day-column","day-header","day-body","shift-card-button","add-slot"]){
   assert.ok(!app.includes(`className=\"${dead}`) && !app.includes(` ${dead}`),`manager Schedule still depends on legacy global class ${dead}`);
 }
-const globalCss=["app/globals.css","app/mono-components.css"].map(f=>fs.readFileSync(path.join(root,f),"utf8")).join("\n");
+const globalCss=fs.readFileSync(path.join(root,"app/globals.css"),"utf8");
 for(const dead of [".schedule-head",".compact-schedule-toolbar",".schedule-view-select",".schedule-calendar",".calendar-grid",".day-column",".day-header",".day-body",".shift-card-button",".add-slot"]){assert.ok(!globalCss.includes(dead),`legacy global Schedule selector returned: ${dead}`);}
 const cssFiles=[];function walk(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const full=path.join(dir,e.name);if(e.isDirectory()){if(!["node_modules",".next"].includes(e.name))walk(full);}else if(e.name.endsWith(".css"))cssFiles.push(full);}}walk(root);
 let declarations=0,bytes=0,important=0;
