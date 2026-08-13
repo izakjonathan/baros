@@ -1,8 +1,8 @@
-# Bar Ops v0.19.0-rc.16 — Refinement Closeout Audit
+# Bar Ops v0.19.0-rc.17 — Employee Schedule UI Refinement
 
-Current release: **v0.19.0-rc.16**
+Current release: **v0.19.0-rc.17**
 
-This release closes the current refinement RC audit at source level. It verifies shared shell ownership across manager and employee portals, role coverage, black page-canvas ownership, mobile safe-area handling, production configuration integrity, and the installed PWA launch surface.
+This release applies a focused employee Schedule UI refinement on top of the completed rc.16 closeout audit. It removes redundant heading copy and standardizes shift-card actions as smaller black/cream single-line controls without changing schedule behavior.
 
 ## Closeout correction
 
@@ -28,4 +28,4 @@ Production remains PostgreSQL-backed through `DATABASE_URL`. `CONTENT_SOURCE` is
 
 Source-level closeout checks are included in `test:rc16`. Physical-device verification on iPhone/iPad Safari and the dependency-backed Vercel build remain the final external acceptance gates.
 
-Rollback checkpoint: **v0.19.0-rc.15**.
+Rollback checkpoint: **v0.19.0-rc.16**.

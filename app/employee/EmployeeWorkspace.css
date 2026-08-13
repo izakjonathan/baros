@@ -95,10 +95,14 @@
 .employee-app .shift-feed small { display: block; margin-top: .4rem; color: rgb(0 0 0 / .67); }
 .employee-app .shift-date, .employee-app .date-tile { width: 3.05rem; min-height: 3.6rem; border: 0; border-radius: .8rem; background: var(--employee-ink); color: var(--employee-cream); display: grid; place-content: center; justify-items: center; line-height: 1; }
 .employee-app .shift-date b, .employee-app .shift-date span, .employee-app .date-tile span { font-size: .62rem; text-transform: uppercase; }
+.employee-app .shift-date b, .employee-app .shift-date span { color: var(--employee-cream); }
 .employee-app .shift-date strong, .employee-app .date-tile b { font-size: 1.28rem; }
 .employee-app .portal-status, .employee-app .claim-state, .employee-app .request-history > article > span { display: inline-flex; width: fit-content; align-items: center; min-height: 1.55rem; padding: .25rem .5rem; border: 0; border-radius: 999px; background: var(--employee-ink); color: var(--employee-cream); font-size: .61rem; font-weight: 900; letter-spacing: .045em; }
-.employee-app .shift-action-row { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .42rem; margin-top: .58rem; }
-.employee-app .shift-action-row button { inline-size: 100%; min-width: 0; min-height: 2.45rem; border: 2px solid var(--employee-ink); border-radius: 999px; background: transparent; color: var(--employee-ink); padding: .42rem .55rem; font-weight: 850; font-size: .76rem; line-height: 1.05; }
+.employee-app .shift-action-row { display: flex; flex-wrap: wrap; align-items: center; gap: .38rem; margin-top: .52rem; }
+.employee-app .shift-action-row > * { min-width: 0; }
+.employee-app .shift-action-row .shift-card-action { inline-size: auto; min-width: 0; min-height: 1.9rem; border: 1.5px solid var(--employee-ink); border-radius: 999px; background: var(--employee-ink); color: var(--employee-cream); padding: .26rem .62rem; font-weight: 600; font-size: .67rem; line-height: 1; white-space: nowrap; }
+.employee-app .shift-action-row .shift-card-action:hover, .employee-app .shift-action-row .shift-card-action:focus-visible { background: var(--employee-ink); color: var(--employee-cream); }
+.employee-app .shift-action-row .shift-card-action:disabled { opacity: .5; }
 
 .employee-app .portal-form, .employee-app .clock-card { margin: 0; padding: .9rem; border: 0; border-radius: 1.15rem; background: var(--employee-cream); color: var(--employee-ink); }
 .employee-app .portal-form { display: grid; gap: .7rem; }
@@ -220,6 +224,6 @@
   .employee-app .availability-times input { min-height: 2.55rem; padding-block: .5rem; }
   .employee-app .monthly-controls .text-button { min-height: 2.15rem; padding-block: .38rem 0; font-size: .72rem; }
 }
-@media (max-width: 370px) {
-  .employee-app .shift-action-row { grid-template-columns: 1fr; }
-}
+
+/* v0.19.0-rc.17 — employee Schedule action-density refinement. */
+.employee-app .employee-schedule-page > h1:first-child { margin-bottom: .12rem; }

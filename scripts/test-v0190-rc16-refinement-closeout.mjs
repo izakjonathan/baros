@@ -16,7 +16,7 @@ const employeeCss = read("app/employee/EmployeeWorkspace.css");
 const capabilities = read("lib/auth/capabilities.ts");
 const envValidation = read("scripts/validate-environment.mjs");
 
-assert.equal(pkg.version, "0.19.0-rc.16");
+assert.match(pkg.version, /^0\.19\.0-rc\.(?:16|1[7-9]|[2-9]\d+)$/);
 
 // Shared workspace chrome is the canonical navigation/topbar implementation for both portals.
 assert.match(managerApp, /WorkspaceSidebar, WorkspaceTopbar/);

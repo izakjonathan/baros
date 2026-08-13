@@ -1,6 +1,6 @@
-# Bar Ops Implementation Status — v0.19.0-rc.16
+# Bar Ops Implementation Status — v0.19.0-rc.17
 
-The current refinement RC cycle is closed at source level.
+The current refinement RC cycle remains closed at source level; rc.17 adds only the requested employee Schedule presentation refinement.
 
 ## Confirmed
 
