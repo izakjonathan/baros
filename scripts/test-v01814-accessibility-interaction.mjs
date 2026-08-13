@@ -5,8 +5,8 @@ const app = read('components/bar-ops-app.tsx');
 const dialog = read('components/ui/interaction-ui.tsx');
 const employeeShell = read('app/employee/employee-shell.tsx');
 const workspaceChrome = read('components/shell/workspace-chrome.tsx');
-const css = read('app/accessibility-interaction.css');
-const sharedControls = read('app/shared-controls.css');
+const css = read('app/system-contracts.css');
+const sharedControls = css;
 const layout = read('app/layout.tsx');
 
 const checks = [
@@ -18,7 +18,7 @@ const checks = [
   ['global focus-visible contract exists', sharedControls.includes(':focus-visible') && sharedControls.includes('outline:3px solid')],
   ['reduced motion is respected', css.includes('prefers-reduced-motion: reduce')],
   ['forced colors are supported', css.includes('forced-colors: active')],
-  ['accessibility stylesheet is loaded', layout.includes('accessibility-interaction.css')],
+  ['accessibility stylesheet is loaded', layout.includes('system-contracts.css')],
 ];
 
 const failed = checks.filter(([, ok]) => !ok);

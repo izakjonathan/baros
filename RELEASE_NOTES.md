@@ -1,17 +1,20 @@
-# Release Notes — v0.19.0-rc.30
+# Bar Ops v0.19.0-rc.32 — Manager Shell Single-Owner Consolidation
 
-## Global Tail & Ownership Consolidation
+Baseline: v0.19.0-rc.31.
 
-Compared with rc.29:
+This release continues the CSS architecture consolidation by making `ManagerShell.module.css` the authoritative owner for the shared manager shell used by Owner, Admin, Manager, and Shift Manager. Legacy sidebar/topbar/navigation branches were removed from `globals.css` and `mono-components.css` rather than overridden again.
 
-- CSS declarations reduced from **5,999 to 5,510**.
-- CSS bytes reduced from **206,485 to 184,658**.
-- `globals.css` reduced to **31,896 bytes**.
-- `!important` declarations reduced from **13 to 11**.
-- The historical v0.9.5–v0.18.4.12 release-patch tail was removed from `globals.css`.
-- Remaining live employee/dashboard/execution/schedule/team styles were migrated to their actual owners.
-- Redundant employee availability compatibility CSS was removed from `mono-components.css`.
-- The spacing compatibility stylesheet now contains only the live page-flow contract.
-- Historical black-canvas tests now validate current token/base/shell ownership instead of requiring deleted global patches.
+## Changes
+- Consolidated sidebar positioning, width, navigation layout, profile layout, responsive drawer behavior, location status indicator, notification indicator, and top-bar shell behavior into `ManagerShell.module.css`.
+- Removed 73 legacy manager-shell selector branches from global/mono compatibility CSS.
+- Ran a same-owner cascade reducer after the move, removing a further 57 superseded declarations from Schedule, Dashboard, and ManagerShell without changing their winning values.
+- Preserved the existing shared shell appearance and responsive behavior.
+- Added an rc.32 single-owner and CSS-budget regression gate.
 
-No migration required.
+## Current CSS position
+- 27 CSS files.
+- 5,104 parsed declarations.
+- 172,331 CSS bytes.
+- 10 `!important` declarations.
+
+No database migration, API, permission, workflow, or business-logic changes are included.

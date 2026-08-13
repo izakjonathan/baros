@@ -4,12 +4,12 @@ import path from "node:path";
 const root = process.cwd();
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const layout = read("app/layout.tsx");
-const css = read("app/interface-consistency.css");
+const css = read("app/system-contracts.css");
 const pkg = JSON.parse(read("package.json"));
 
 const checks = [
   [["0.18.12", "0.18.13"].includes(pkg.version), "package version retains the v0.18.12 containment contract"],
-  [layout.includes('import "./completion-redesign.css";\nimport "./interface-consistency.css";'), "correction layer is imported after redesign surfaces"],
+  [layout.includes('import "./completion-redesign.css";\nimport "./system-contracts.css";'), "correction layer is imported after redesign surfaces"],
   [css.includes('input[type="date"]') && css.includes('input[type="datetime-local"]'), "native temporal inputs are covered"],
   [css.includes("min-inline-size: 0") && css.includes("max-inline-size: 100%") && css.includes("box-sizing: border-box"), "controls use the canonical shrinkability contract"],
   [css.includes("position: fixed") && css.includes("inset-inline-end: max(var(--layout-gap), env(safe-area-inset-right))"), "phone popovers are viewport-owned and safe-area bounded"],

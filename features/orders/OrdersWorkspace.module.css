@@ -6,17 +6,8 @@
 
 
 /* v0.18.13.3 — order actions center icon and label as one unit. */
-.addButton,.receiveButton,.suggestion button,.delivery button{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:.42rem;
-  text-align:center;
-  line-height:1;
-}
 
 /* v0.19.0-rc.22 — order feature surface alignment. */
-.addButton,.suggestion button,.delivery button,.clear,.receiveButton{min-height:var(--control-height-default);padding-inline:var(--control-padding-x);font-size:var(--text-control);font-weight:var(--weight-control)}
 .filter select,.search{height:var(--control-height-default);min-height:var(--control-height-default);border-radius:var(--control-radius);font-size:var(--text-control);font-weight:var(--font-weight-medium)}
 .suggestion p,.delivery p,.orderCard p,.orderCard dt,.orderCard header>span,.resultCount{font-size:var(--text-caption);font-weight:var(--weight-label)}
 .suggestion small,.delivery small{font-size:var(--text-helper);line-height:1.35}

@@ -20,18 +20,9 @@
 }
 
 /* v0.18.13.3 — authoritative mobile button alignment. */
-.headerActions button,.lowFilter,.clear{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:.42rem;
-  text-align:center;
-  line-height:1;
-}
 
 
 /* v0.19.0-rc.22 — inventory controls and metadata follow the canonical micro scale. */
-.headerActions button,.lowFilter,.clear{min-height:var(--control-height-default);padding-inline:var(--control-padding-x);font-size:var(--text-control);font-weight:var(--weight-control)}
 .toolbar select,.search{height:var(--control-height-default);min-height:var(--control-height-default);border-radius:var(--control-radius);font-size:var(--text-control)}
 .summary span,.productCard p,.stockRow span,.resultCount,.history time{font-size:var(--text-caption);font-weight:var(--weight-label)}
 .productCard small,.sectionHeader p{font-size:var(--text-helper);line-height:1.35}

@@ -1,13 +1,17 @@
-# Validation Log — v0.19.0-rc.30
+# Validation Log — v0.19.0-rc.32
+
+Baseline: v0.19.0-rc.31.
 
 Validation performed:
+- CSS parse validation with `tinycss2`: no parse errors.
+- Full `npm run test:current` after the shell ownership move.
+- Same-owner cascade consolidation: 57 superseded declarations removed.
+- Focused `npm run test:rc32`.
+- `npm run validate:release`.
+- `npm run audit:artifacts`.
+- `npm run audit:preflight`.
+- ZIP integrity validation.
 
-- focused `npm run test:rc30`
-- full `npm run test:current`
-- CSS declaration/byte/`!important` budget verification
-- release contract validation
-- release artifact audit
-- stabilization preflight
-- ZIP integrity validation
+Current CSS metrics: 27 files, 5,104 parsed declarations, 172,331 bytes, 10 `!important` declarations.
 
-Dependency-backed lint/typecheck/Next.js build remain Vercel build gates because the extracted release workspace does not include `node_modules`.
+The extracted release workspace does not contain installed dependencies, so the dependency-backed Next.js production build remains a Vercel build gate.

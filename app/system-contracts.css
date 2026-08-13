@@ -1,0 +1,317 @@
+/* v0.19.0-rc.31 — consolidated cross-product viewport, visual, control and accessibility contracts. */
+
+/* v0.18.12 — site-wide correction foundation
+   This file owns cross-surface containment and transient-UI viewport safety.
+   Feature modules continue to own component presentation and internal spacing. */
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer){
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+:where(.app-frame,.employee-app,.login-page) :where(main,section,article,header,footer,nav,form,fieldset,label){
+  min-inline-size: 0;
+}
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(input,select,textarea){
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  box-sizing: border-box;
+}
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(input[type="date"],input[type="time"],input[type="month"],input[type="datetime-local"]){
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(input[type="date"],input[type="time"],input[type="month"],input[type="datetime-local"])::-webkit-date-and-time-value,:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(input[type="date"],input[type="time"],input[type="month"],input[type="datetime-local"])::-webkit-datetime-edit{
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  text-align: start;
+}
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(button,a,[role="button"]){
+  max-inline-size: 100%;
+}
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(button,a,[role="button"]) > :where(span,strong,small){
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+:where(.app-frame,.employee-app,.login-page) :where(img,video,canvas){
+  max-inline-size: 100%;
+  block-size: auto;
+}
+
+/* Manager popovers become viewport-owned on phone widths so an icon near the
+   right edge cannot push the surface outside the visual viewport. */
+@media (max-width: 40rem) {
+  .top-popover{
+    position: fixed;
+    inset-inline-start: max(var(--layout-gap), env(safe-area-inset-left));
+    inset-inline-end: max(var(--layout-gap), env(safe-area-inset-right));
+    inset-block-start: calc(env(safe-area-inset-top) + 3.45rem);
+    width: auto;
+    max-width: none;
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4.2rem);
+  }
+
+  .search-popover{
+    max-height: min(24rem, 46dvh);
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+
+  .search-popover > div:last-child{
+    min-height: 0;
+    max-height: min(17rem, 32dvh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .toast{
+    width: auto;
+    inset-inline-start: max(var(--layout-gap), env(safe-area-inset-left));
+    inset-inline-end: max(var(--layout-gap), env(safe-area-inset-right));
+    translate: 0 0;
+  }
+}
+
+/* Very narrow phones keep dialog actions usable without squeezed labels. */
+@media (max-width: 22rem) {
+  .modal-actions,.interaction-actions{
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* v0.19.0-rc.23 — mobile/iPhone/iPad micro-polish.
+   Owns viewport-safe interaction geometry only; feature styles keep their
+   visual identity, colors and feature-specific layout decisions. */
+html{
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer){
+  scroll-padding-block-end: calc(5.5rem + env(safe-area-inset-bottom));
+}
+
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(input,select,textarea){
+  scroll-margin-block: 5rem;
+}
+
+@media (max-width: 40rem) {
+  :where(.app-frame,.employee-app,.login-page,.modal-layer) :where(input[type="date"],input[type="time"],input[type="month"],input[type="datetime-local"]){
+    min-block-size: var(--control-height-default);
+    block-size: auto;
+    padding-block: .5rem;
+    padding-inline: var(--control-padding-x);
+    font-size: 16px;
+    line-height: 1.15;
+  }
+
+  :where(.request-date-grid,.availability-times,.custom-range,.form-grid,.settings-field-grid) > *{
+    min-inline-size: 0;
+  }
+
+  :where(.modal,.interaction-dialog,.employee-dialog) :where(.modal-body,.interaction-body,.dialog-body,form){
+    min-block-size: 0;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (min-width: 40.01rem) and (max-width: 64rem) {
+  .app-frame .main-shell > .page-wrap,.employee-app .employee-page,.workspace-page{
+    padding-inline-start: max(1rem, env(safe-area-inset-left));
+    padding-inline-end: max(1rem, env(safe-area-inset-right));
+  }
+}
+
+
+/* v0.18.13 — full visual QA and consistency pass
+   This layer owns cross-product visual contracts only. Feature modules retain
+   responsibility for their internal composition and business-specific color. */
+
+:root{
+  --qa-copy-measure: 62ch;
+  --qa-state-padding: 1rem;
+}
+
+/* Predictable text rhythm and wrapping across manager, employee and auth UI. */
+:where(.app-frame,.employee-app,.login-page,.modal-layer) :where(h1,h2,h3,p,small,strong,span){
+  min-inline-size: 0;
+}
+
+:where(.page-header,.workspace-header,.employee-page-title,.employee-hero,.login-card,.modal-head) h1,:where(.page-header,.workspace-header,.employee-page-title,.employee-hero,.login-card,.modal-head) h2{
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+:where(.page-header,.workspace-header,.employee-page-title,.employee-hero,.login-card,.modal-head) p{
+  max-inline-size: var(--qa-copy-measure);
+  text-wrap: pretty;
+}
+
+:where(.page-header,.workspace-header,.employee-page-title) h1{
+  font-size: clamp(1.75rem, 7vw, 3rem);
+  line-height: .95;
+  letter-spacing: -.045em;
+}
+
+/* Shared controls use one physical rhythm; feature colors remain untouched. */
+/* Long operational content must wrap inside cards instead of widening them. */
+:where(.panel,.card,.metric-card,.employee-card,.team-card,.inventory-card,.order-card,.request-card,.timesheet-card){
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+:where(.panel,.card,.employee-card,.team-card,.inventory-card,.order-card,.request-card,.timesheet-card) :where(p,small,strong,span,a){
+  overflow-wrap: anywhere;
+}
+
+/* Dense data may scroll on its own axis; page-level horizontal overflow is not
+   used as a substitute for fixing a component's intrinsic width. */
+
+
+/* Shared state surfaces use consistent compact proportions. */
+:where(.workspace-loading,.workspace-loading-card,.empty-state,.empty-portal,.error-state,.attendance-empty){
+  min-block-size: 6rem;
+  padding: var(--qa-state-padding);
+  display: grid;
+  place-items: center;
+  align-content: center;
+  text-align: center;
+}
+
+:where(.workspace-loading,.workspace-loading-card,.empty-state,.empty-portal,.error-state,.attendance-empty) > *{
+  max-inline-size: 36ch;
+  margin-inline: auto;
+}
+
+/* Popovers, sheets, dialogs and toasts share safe viewport bounds. */
+:where(.modal,.employee-more-sheet,.top-popover,.toast){
+  max-inline-size: calc(100vw - max(1rem, env(safe-area-inset-left)) - max(1rem, env(safe-area-inset-right)));
+}
+
+.modal{
+  max-block-size: calc(100dvh - env(safe-area-inset-top));
+  scrollbar-gutter: stable;
+}
+
+.modal-head,.modal-actions,.interaction-actions{
+  padding-inline-start: max(1rem, env(safe-area-inset-left));
+  padding-inline-end: max(1rem, env(safe-area-inset-right));
+}
+
+.modal-actions,.interaction-actions,.page-actions,.header-actions,.workspace-actions{
+  align-items: stretch;
+}
+
+.modal-actions > *,.interaction-actions > *,.page-actions > *,.header-actions > *,.workspace-actions > *{
+  min-inline-size: 0;
+}
+
+/* Keep section labels attached to their actions and avoid edge collisions. */
+:where(.section-heading,.workspace-section-head){
+  min-inline-size: 0;
+  gap: var(--layout-gap);
+}
+
+:where(.section-heading,.workspace-section-head) > :first-child{
+  min-inline-size: 0;
+}
+
+@media (max-width: 40rem) {
+  :root{
+    --qa-state-padding: .875rem;
+  }
+
+  :where(.page-header,.workspace-header,.employee-page-title) h1{
+    font-size: clamp(1.7rem, 9vw, 2.45rem);
+  }
+
+  :where(.page-actions,.header-actions,.workspace-actions){
+    max-inline-size: 100%;
+  }
+
+  :where(.section-heading,.workspace-section-head){
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 22rem) {
+  :where(.page-actions,.header-actions,.workspace-actions){
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+
+/* v0.18.13.1 — mobile shell flow correction */
+@media (max-width: 60rem) {
+  .main-shell{
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .main-shell > .page-wrap{
+    scroll-margin-top: calc(var(--app-header-height) + var(--layout-gap));
+  }
+}
+
+
+/* v0.19.0-rc.6 — canonical shared control contract.
+   This file owns control content alignment, minimum interaction size, focus, busy,
+   and disabled behaviour. Feature styles own color, width, and external placement. */
+
+:where(button,[role="button"],.button){
+  min-inline-size:0;
+  min-block-size:var(--control-height-default);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  overflow-wrap:anywhere;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+
+:where(button,[role="button"],.button)>svg{flex:0 0 auto}
+
+:where(.icon-button,.dialog-close,.sidebar-close,.menu-button,.notification){
+  inline-size:var(--control-height-default);
+  block-size:var(--control-height-default);
+  min-inline-size:var(--control-height-default);
+  min-block-size:var(--control-height-default);
+  padding:0;
+}
+
+:where(a,button,input,select,textarea,[role="button"],[tabindex]):focus-visible{
+  outline:3px solid #000;
+  outline-offset:3px;
+}
+
+[data-theme="dark"] :where(a,button,input,select,textarea,[role="button"],[tabindex]):focus-visible{outline-color:#fff4c4}
+
+:where(button,[role="button"])[aria-busy="true"],.is-loading{cursor:progress}
+:where(button,.button,input,select,textarea):disabled,[aria-disabled="true"]{cursor:not-allowed}
+
+
+/* v0.18.14 accessibility and interaction contract */
+.skip-link{
+  position:fixed;inset-block-start:max(.5rem,env(safe-area-inset-top));inset-inline-start:max(.5rem,env(safe-area-inset-left));
+  z-index:10000;padding:.75rem 1rem;border:3px solid #000;border-radius:999px;background:#fff4c4;color:#000;
+  font-weight:800;transform:translateY(-180%);transition:transform .15s ease;
+}
+.skip-link:focus{transform:translateY(0)}
+[data-theme="dark"] .modal-layer[role="presentation"]{isolation:isolate}
+.top-popover[role="dialog"]{outline:none}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
+}
+@media (forced-colors: active){
+  :where(button,a,input,select,textarea,.modal,.top-popover){forced-color-adjust:auto}
+  .status-dot,.notification i{border:1px solid CanvasText}
+}

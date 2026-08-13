@@ -3,7 +3,6 @@
 /* v0.19.0-rc.22 — request surface micro-design alignment. */
 .eyebrow,.summary span,.kind,.status{font-size:var(--text-caption);font-weight:var(--weight-label)}
 .subtitle,.queueHeader p,.empty span{font-size:var(--text-helper);font-weight:var(--font-weight-medium);line-height:1.4}
-.refresh,.actions button{min-height:var(--control-height-default);padding-inline:var(--control-padding-x);border-width:var(--control-border-width);font-size:var(--text-control);font-weight:var(--weight-control)}
 .liveStatus{min-height:var(--control-height-compact);font-size:var(--text-caption);font-weight:var(--weight-control)}
 .meta span{font-size:var(--text-helper);font-weight:var(--font-weight-medium)}
 

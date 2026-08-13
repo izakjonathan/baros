@@ -117,8 +117,6 @@
 .employee-app .portal-form textarea, .employee-app .correction-field textarea { resize: vertical;  }
 .employee-app .request-date-grid, .employee-app .availability-times { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .55rem; }
 .employee-app .request-date-grid > *, .employee-app .availability-times > * { min-inline-size: 0; }
-.employee-app input[type="date"], .employee-app input[type="time"], .employee-app input[type="month"], .employee-app input[type="datetime-local"] { inline-size: 100%; max-inline-size: 100%; min-inline-size: 0; }
-.employee-app input::-webkit-date-and-time-value, .employee-app input::-webkit-datetime-edit { min-inline-size: 0; }
 .employee-app .primary, .employee-app .secondary, .employee-app .icon-button, .employee-app .text-button,
 .employee-app .clock-card button, .employee-app .request-success button { display: inline-flex; align-items: center; justify-content: center; gap: .42rem; min-height: var(--control-height-default); border-radius: 999px; font-size: var(--text-control); font-weight: var(--weight-control); line-height: 1.15; text-align: center; }
 .employee-app .primary { border: var(--control-border-width) solid var(--employee-ink); background: var(--employee-ink); color: var(--employee-cream); }
@@ -259,7 +257,6 @@
   .employee-app .shift-action-row .shift-card-action {
     max-inline-size: 100%;
   }
-}
 
 @media (min-width: 700px) and (max-width: 1024px) {
   .employee-app .employee-page {

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import assert from "node:assert/strict";
 
 const tokens=fs.readFileSync("styles/tokens.css","utf8");
-const shared=fs.readFileSync("app/shared-controls.css","utf8");
+const shared=fs.readFileSync("app/system-contracts.css","utf8");
 const employee=fs.readFileSync("app/employee/EmployeeWorkspace.css","utf8");
 const native=fs.readFileSync("components/ui/NativeDateTimeField.module.css","utf8");
 const button=fs.readFileSync("components/ui/primitives/Button.module.css","utf8");
@@ -14,7 +14,7 @@ assert.ok(Number(rcMatch[1]) >= 20, "rc.20 design-system contract applies to rc.
 for (const token of ["--text-control","--text-label","--text-helper","--text-caption","--control-height-compact","--control-height-default","--control-height-large","--control-padding-x","--control-border-width","--control-radius"]) {
   assert.ok(tokens.includes(token+":"),`missing canonical micro token ${token}`);
 }
-assert.ok(shared.includes("var(--qa-control-size,var(--control-height-default))"),"shared controls must consume default control height token");
+assert.ok(shared.includes("var(--control-height-default)"),"shared controls must consume default control height token");
 assert.ok(button.includes("font-size:var(--text-control)"),"Button primitive must consume control typography role");
 assert.ok(button.includes("min-height:var(--control-height-default)"),"Button primitive must consume default control height");
 assert.ok(native.includes("font-size:var(--text-label)"),"native date/time label must consume label role");

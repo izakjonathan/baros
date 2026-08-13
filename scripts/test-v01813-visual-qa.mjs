@@ -5,13 +5,13 @@ const root = process.cwd();
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const pkg = JSON.parse(read("package.json"));
 const layout = read("app/layout.tsx");
-const css = read("app/visual-qa-consistency.css");
+const css = read("app/system-contracts.css");
 const docs = read("docs/full-visual-qa-v01813.md");
 
 const checks = [
   [pkg.version.startsWith("0.18.13"), "package remains on the v0.18.13 visual-QA line"],
-  [layout.includes('import "./interface-consistency.css";\nimport "./visual-qa-consistency.css";'), "visual QA layer follows containment foundation"],
-  [css.includes("--qa-control-size: 2.75rem") && css.includes("--qa-touch-size: 2.75rem"), "controls and icon actions use the 44px touch contract"],
+  [layout.includes('import "./completion-redesign.css";\nimport "./system-contracts.css";'), "visual QA layer follows containment foundation"],
+  [css.includes("min-block-size:var(--control-height-default)") && css.includes("inline-size:var(--control-height-default)"), "controls and icon actions use the 44px touch contract"],
   [css.includes(":focus-visible") && css.includes("outline-offset: 3px"), "shared keyboard focus remains visible"],
   [css.includes("overflow-wrap: anywhere") && css.includes("text-wrap: balance"), "long titles and operational content remain contained"],
   [css.includes("overflow-x: auto") && css.includes("overscroll-behavior-inline: contain"), "dense data owns its horizontal scrolling"],

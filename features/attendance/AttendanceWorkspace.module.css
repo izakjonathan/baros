@@ -177,7 +177,6 @@
 .filters label{font-size:var(--text-label);font-weight:var(--weight-label);letter-spacing:0;text-transform:none}
 .filters input,.filters select{height:var(--control-height-default);padding-inline:var(--control-padding-x);border-radius:var(--control-radius);font-size:var(--text-control);font-weight:var(--font-weight-medium)}
 .filterFooter{font-size:var(--text-helper);font-weight:var(--font-weight-semibold)}
-.filterFooter button,.recordActions button{min-height:var(--control-height-compact);padding-inline:var(--control-padding-x);font-size:var(--text-control);font-weight:var(--weight-control);border-width:var(--control-border-width)}
 .summary span,.sectionHeader>span,.status,.recordStats span,.previewList dt{font-size:var(--text-caption);font-weight:var(--weight-label);letter-spacing:.035em}
 .sectionHeader p,.empty span{font-size:var(--text-helper);line-height:1.4}
 

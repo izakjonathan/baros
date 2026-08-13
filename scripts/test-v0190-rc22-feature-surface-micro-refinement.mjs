@@ -17,11 +17,11 @@ const targets=[
 ];
 for (const target of targets){
   const css=read(target);
-  assert.match(css,/v0\.19\.0-rc\.22/);
   assert.match(css,/--text-(?:control|label|helper|caption)/);
 }
 assert.match(read("app/employee/EmployeeWorkspace.css"),/\.shift-action-row \.shift-card-action \{[^}]*height: 34px;[^}]*min-height: 34px;/s);
 assert.match(read("features/attendance/AttendanceWorkspace.module.css"),/\.filters input,\.filters select\{height:var\(--control-height-default\)/);
-assert.match(read("features/requests/RequestsWorkspace.module.css"),/\.refresh,\.actions button\{min-height:var\(--control-height-default\)/);
+assert.match(read("features/workspace/FeatureSurface.module.css"),/\.control\{[^}]*min-height:var\(--control-height-default\)/);
+assert.match(read("components/requests-workspace.tsx"),/surfaceStyles\.control/);
 assert.match(read("features/settings/SettingsWorkspace.module.css"),/\.fields input,\.fields select\{min-height:var\(--control-height-default\)/);
 console.log("v0.19.0-rc.22 feature-surface micro-refinement regression passed");

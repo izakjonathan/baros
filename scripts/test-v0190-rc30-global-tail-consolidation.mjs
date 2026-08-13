@@ -4,7 +4,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 const root=process.cwd();
 const pkg=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
-assert.equal(pkg.version,'0.19.0-rc.30');
+assert.match(pkg.version,/^0\.19\.0-rc\.(?:3[0-9]|[4-9]\d|\d{3,})$/);
 const globals=fs.readFileSync(path.join(root,'app/globals.css'),'utf8');
 for(const marker of ['v0.9.5 employee portal rebuild','v0.13.1 Live shift board','v0.13.4 Operational summary','v0.14.0 Shift execution foundation','v0.18.4.12 compact external grid spacing']) assert.ok(!globals.includes(marker),`legacy globals release block remains: ${marker}`);
 const employee=fs.readFileSync(path.join(root,'app/employee/EmployeeWorkspace.css'),'utf8');

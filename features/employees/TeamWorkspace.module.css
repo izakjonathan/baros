@@ -361,8 +361,7 @@
   .resultCount{grid-column:1/-1}
 }
 
-/* v0.19.0-rc.22 — team feature controls use the shared interaction scale. */
-.addButton,.clearButton{min-height:var(--control-height-default);padding-inline:var(--control-padding-x);font-size:var(--text-control);font-weight:var(--weight-control)}
+/* v0.19.0-rc.31 — shared FeatureSurface.control owns button geometry. */
 .toolbar select{min-height:var(--control-height-default);padding-inline:var(--control-padding-x);border-width:var(--control-border-width);font-size:var(--text-control);font-weight:var(--font-weight-medium)}
 .summary span{letter-spacing:.05em;}
 .resultCount{font-size:var(--text-helper);font-weight:var(--font-weight-medium)}
