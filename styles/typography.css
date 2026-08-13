@@ -1,5 +1,0 @@
-@layer base {
-.ds-heading-page{font-family:var(--font-display);font-size:clamp(2rem,4vw,var(--text-3xl));font-weight:var(--font-weight-bold);line-height:var(--leading-tight);letter-spacing:var(--tracking-tight)}
-.ds-heading-section{font-family:var(--font-display);font-size:clamp(1.4rem,2.5vw,var(--text-2xl));font-weight:var(--font-weight-semibold);line-height:var(--leading-heading);letter-spacing:-.02em}
-.ds-heading-card{font-size:var(--text-lg);font-weight:var(--font-weight-semibold);line-height:var(--leading-heading)} .ds-meta{font-size:var(--text-sm);color:var(--text-secondary)}
-}

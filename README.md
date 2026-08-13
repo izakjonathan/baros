@@ -1,20 +1,13 @@
-# Bar Ops v0.19.0-rc.23 — Mobile/iPhone/iPad Micro-Polish
+# Bar Ops — v0.19.0-rc.30
 
-Current release: **v0.19.0-rc.23**
+Bar Ops release candidate focused on aggressive global CSS tail consolidation and feature ownership.
 
-This release is the responsive-device polish pass following the rc.20–22 micro-design refinement work. It improves Apple-device input behavior, viewport clearance, safe-area handling and tablet gutters without changing the established black/pastel visual direction or any business workflow.
+Current release: **v0.19.0-rc.30**
 
-## Scope
-- Native date/time/month/datetime containment and Safari focus behavior.
-- Keyboard/browser-toolbar clearance for focused controls and transient UI.
-- Safe-area-aware employee bottom spacing.
-- Compact Employee Schedule action-row spacing while preserving the 34px action contract.
-- iPad/tablet content gutters across shared workspaces.
-- No API, database, permission or workflow changes.
-- No migration required.
+## v0.19.0-rc.30
 
-## Validation
-See `VALIDATION_LOG.md` for the executed release checks.
+This release removes the historical release-patch tail from `app/globals.css`, migrates the remaining live styles to their owning Employee, Dashboard, Shift Execution, Schedule and Team stylesheets, removes the redundant employee availability compatibility block, and collapses the spacing compatibility layer to its live page-flow contract.
 
-## Rollback checkpoint
-If rc.23 introduces an unexpected responsive regression, roll back to v0.19.0-rc.22. rc.23 contains no database or data-model change.
+No business logic, API, database, permission, or workflow changes are included.
+
+Rollback checkpoint: **v0.19.0-rc.29**.

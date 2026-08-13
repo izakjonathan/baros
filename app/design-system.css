@@ -2,6 +2,3 @@
 @import "../styles/reset.css" layer(reset);
 @import "../styles/tokens.css" layer(tokens);
 @import "../styles/base.css" layer(base);
-@import "../styles/typography.css" layer(base);
-@import "../styles/layouts.css" layer(layouts);
-@import "../styles/utilities.css" layer(utilities);

@@ -39,3 +39,9 @@ The separate v0.18.13.3, v0.18.13.5 and v0.18.13.6 correction blocks were supers
 ## Change rule
 
 Do not add another later schedule correction block. Change the canonical owner after tracing the component, parent layout, global CSS, media queries and state classes. Any change requires focused checks for 320, 375, 390 and 430px widths plus physical iPhone Safari verification.
+
+## rc.25 consolidation
+
+The full CSS trace found that historical Schedule release blocks still contained hundreds of declarations that were provably superseded by a later declaration for the exact same selector/property/context. rc.25 removes those declarations without changing the winning cascade value. The accepted rc.7 mobile toolbar and day-track block remains the final responsive owner.
+
+Do not restore retired declarations to satisfy source-text tests. Regression tests should assert the accepted rendered contract and canonical owner, not the presence of obsolete historical declarations.

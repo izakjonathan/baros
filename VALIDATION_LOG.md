@@ -1,16 +1,13 @@
-# Bar Ops v0.19.0-rc.23 Validation Log
+# Validation Log — v0.19.0-rc.30
 
-Baseline: v0.19.0-rc.22.
+Validation performed:
 
-## Executed
-- `npm run test:rc23` — passed.
-- `npm run test:current` — passed after updating the inherited rc.22 version assertion to remain valid on rc.22-or-later while retaining all rc.22 feature-surface assertions.
-- `npm run validate:release` — passed.
-- `npm run audit:artifacts` — passed.
-- ZIP integrity validation — passed.
+- focused `npm run test:rc30`
+- full `npm run test:current`
+- CSS declaration/byte/`!important` budget verification
+- release contract validation
+- release artifact audit
+- stabilization preflight
+- ZIP integrity validation
 
-## Dependency-backed checks
-Lint, TypeScript and Next.js production build are attempted only when installed dependencies are available in the local release workspace. Vercel remains the production dependency-backed build gate when they are unavailable.
-
-## Database
-No migration required.
+Dependency-backed lint/typecheck/Next.js build remain Vercel build gates because the extracted release workspace does not include `node_modules`.

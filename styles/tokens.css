@@ -121,6 +121,26 @@
   --z-modal:300;
   --z-toast:400;
 
+  /* Legacy application aliases retained while old global components are migrated. */
+  --mono-hover:#efe3b3;
+  --mono-pressed:#e7daa8;
+  --mono-disabled:#aaa9a3;
+  --app-header-height:66px;
+  --canvas:var(--surface-page);
+  --surface:var(--surface-card);
+  --ink:var(--text-primary);
+  --muted:var(--text-secondary);
+  --line:var(--border-subtle);
+  --accent:var(--text-primary);
+  --shadow:none;
+  --accent-dark:var(--color-beige);
+  --sidebar:var(--surface-shell);
+  --focus-ring:0 0 0 3px rgba(17,17,17,.18);
+  --workspace-inline:var(--layout-gap);
+  --workspace-block:var(--layout-gap);
+  --workspace-section-gap:var(--layout-gap);
+  --workspace-card-padding:18px;
+
   /* Compatibility aliases during phased migration */
   --mono-canvas:var(--surface-page);
   --mono-surface:var(--surface-card);

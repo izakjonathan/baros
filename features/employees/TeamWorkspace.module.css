@@ -1,48 +1,44 @@
-.workspace{
-  display:grid;
-  gap:var(--layout-gap);
-  min-width:0;
-}
+
 
 .addButton{
   display:inline-grid;
   grid-auto-flow:column;
   place-items:center;
   gap:.45rem;
-  min-height:2.75rem;
-  padding-inline:1rem;
+  
+  
   border:0;
   border-radius:999px;
   background:#000;
   color:#dfee4b;
-  font-weight:750;
+  
   box-shadow:none;
   white-space:nowrap;
 }
 
 .summary{
-  display:grid;
+  
   grid-template-columns:2fr 1fr 1fr;
-  gap:var(--layout-gap);
+  
 }
 .summary article{
-  display:grid;
+  
   align-content:space-between;
   gap:.4rem;
   min-height:5.75rem;
-  padding:1rem;
+  
   border:0;
-  border-radius:1.25rem;
-  color:#000;
+  
+  
   box-shadow:none;
 }
 .summary article:nth-child(1){background:#dfee4b}
 .summary article:nth-child(2){background:#f47add}
 .summary article:nth-child(3){background:#9561e6}
 .summary span{
-  font-size:.72rem;
-  font-weight:800;
-  letter-spacing:.09em;
+
+
+
   text-transform:uppercase;
 }
 .summary strong{
@@ -69,16 +65,13 @@
 .search{
   min-width:0;
   min-inline-size:0;
-  background:transparent;
-  border:0;
+
+
   border-bottom:2px solid #000;
-  border-radius:0;
+
 }
 .search svg{color:#000}
-.search input{
-  min-inline-size:0;
-  color:#000;
-}
+
 .search input::placeholder{color:rgba(0,0,0,.58)}
 .toolbar select,
 .clearButton{
@@ -97,8 +90,8 @@
   grid-column:1/-1;
   margin:0;
   color:#000;
-  font-size:.82rem;
-  font-weight:750;
+
+
 }
 
 .grid{
@@ -118,21 +111,15 @@
   color:#000;
   box-shadow:none;
 }
-.card:nth-child(4n+2){background:#f47add}
-.card:nth-child(4n+3){background:#eb6746}
+.card:nth-child(4n/**/+2){background:#f47add}
+.card:nth-child(4n/**/+3){background:#eb6746}
 .card:nth-child(4n){background:#9561e6}
 .inactive{
   background:#fff4c4;
   border:2px solid #000;
   opacity:.72;
 }
-.cardHeader{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:.75rem;
-  min-width:0;
-}
+
 .identity{
   display:flex;
   align-items:center;
@@ -243,20 +230,20 @@
   font-weight:800;
   box-shadow:none;
 }
-.outlineButton{background:transparent;color:#000}
-.filledButton{background:#000;color:#fff4c4}
+
+
 .outlineButton:disabled,
 .filledButton:disabled{opacity:.42}
 .note{font-size:.68rem;font-weight:600}
 .empty{
   grid-column:1/-1;
-  padding:1.5rem;
-  border:2px solid #000;
-  border-radius:1.25rem;
+  
+  
+  
   background:#fff4c4;
-  color:#000;
-  text-align:center;
-  font-weight:750;
+  
+  
+  
 }
 
 @media(max-width:900px){
@@ -266,14 +253,14 @@
 }
 
 @media(max-width:600px){
-  .workspace{gap:.75rem}
+  
   .addButton{
     inline-size:3rem;
     block-size:3rem;
-    min-height:3rem;
+    
     padding:0;
     border-radius:50%;
-    font-size:0;
+    
   }
   .addButton svg{
     display:block;
@@ -284,27 +271,27 @@
   }
   .summary{
     grid-template-columns:1fr 1fr;
-    gap:.65rem;
+    
   }
   .summary article:first-child{grid-column:1/-1}
   .summary article{
     min-height:4.7rem;
-    padding:.85rem;
-    border-radius:1.05rem;
+    
+    
   }
   .summary article:first-child{min-height:5rem}
-  .summary span{font-size:.67rem}
+  
   .summary strong{font-size:2rem}
   .toolbar{
-    grid-template-columns:minmax(0,1fr) auto;
+
     gap:.65rem;
     padding:.85rem;
     border-radius:1.1rem;
   }
-  .search{grid-column:1/-1}
+  
   .toolbar select{inline-size:100%}
   .clearButton{padding-inline:.8rem}
-  .resultCount{grid-column:1/-1;font-size:.78rem}
+  .resultCount{font-size:.78rem}
   .grid{gap:.65rem}
   .card{
     gap:.65rem;
@@ -321,14 +308,14 @@
   }
   .details strong{font-size:.86rem}
   .actions{gap:.42rem}
-  .outlineButton,.filledButton{min-height:2.3rem;font-size:.72rem}
+  
 }
 
 @media(max-width:390px){
   .toolbar{grid-template-columns:1fr}
   .search,.resultCount{grid-column:auto}
   .clearButton{justify-self:start}
-  .cardHeader{gap:.5rem}
+  
   .identity{gap:.55rem}
   .activeStatus,.inactiveStatus{font-size:.62rem}
   .details{grid-template-columns:1fr}
@@ -377,6 +364,9 @@
 /* v0.19.0-rc.22 — team feature controls use the shared interaction scale. */
 .addButton,.clearButton{min-height:var(--control-height-default);padding-inline:var(--control-padding-x);font-size:var(--text-control);font-weight:var(--weight-control)}
 .toolbar select{min-height:var(--control-height-default);padding-inline:var(--control-padding-x);border-width:var(--control-border-width);font-size:var(--text-control);font-weight:var(--font-weight-medium)}
-.summary span{font-size:var(--text-caption);font-weight:var(--weight-label);letter-spacing:.05em}
+.summary span{letter-spacing:.05em;}
 .resultCount{font-size:var(--text-helper);font-weight:var(--font-weight-medium)}
 
+/* v0.19.0-rc.30 — Team owns its page-header treatment. */
+.workspace :global(.page-header){padding:clamp(1.15rem,3.5vw,1.8rem);border:0;border-radius:var(--radius-panel);background:#dfee4b;color:#000}.workspace :global(.page-header p),.workspace :global(.page-header .eyebrow){color:#000}.workspace :global(.team-add-button){background:#000;color:#dfee4b;border:0}
+@media(max-width:600px){.workspace :global(.page-header){padding:1.15rem;border-radius:2rem;grid-template-columns:minmax(0,1fr) auto}.workspace :global(.page-subtitle){font-size:.93rem;line-height:1.35}}

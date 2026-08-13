@@ -5,9 +5,9 @@ const required = [
   "v0.19.0-rc.7 — canonical Shift Plan control and mobile track ownership",
   "--mobile-day-column:6.55rem",
   "--mobile-day-separator:.16rem",
-  "grid-auto-columns:var(--mobile-day-column) !important",
-  "column-gap:var(--mobile-day-separator) !important",
-  "max-width:var(--mobile-day-column) !important",
+  "grid-auto-columns:var(--mobile-day-column)",
+  "column-gap:var(--mobile-day-separator)",
+  "max-width:var(--mobile-day-column)",
 ];
 for (const token of required) {
   if (!css.includes(token)) throw new Error(`Missing schedule-column containment token: ${token}`);

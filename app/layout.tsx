@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./design-system.css";
 import "./globals.css";
-import "./mono-tokens.css";
 import "./mono-components.css";
 import "./spacing-system.css";
 import "./completion-redesign.css";

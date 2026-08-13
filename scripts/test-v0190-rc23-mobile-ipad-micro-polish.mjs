@@ -5,7 +5,7 @@ const pkg = JSON.parse(fs.readFileSync('package.json','utf8'));
 const consistency = fs.readFileSync('app/interface-consistency.css','utf8');
 const employee = fs.readFileSync('app/employee/EmployeeWorkspace.css','utf8');
 
-assert.equal(pkg.version, '0.19.0-rc.23');
+assert.match(pkg.version, /^0\.19\.0-rc\.(?:2[3-9]|[3-9]\d|\d{3,})$/, 'rc.23 mobile/iPad contract must remain valid on rc.23 or later');
 assert.match(consistency, /v0\.19\.0-rc\.23 — mobile\/iPhone\/iPad micro-polish/);
 assert.match(consistency, /font-size:\s*16px/);
 assert.match(consistency, /scroll-margin-block:\s*5rem/);

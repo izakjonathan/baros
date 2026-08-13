@@ -1,3 +1,0 @@
-@layer layouts {
-.ds-container{width:min(calc(100% - var(--page-gutter)*2),var(--content-width));margin-inline:auto}.ds-stack{display:flex;flex-direction:column;gap:var(--stack-gap,var(--layout-gap))}.ds-cluster{display:flex;flex-wrap:wrap;align-items:center;gap:var(--cluster-gap,var(--layout-gap))}.ds-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:var(--grid-gap,var(--layout-gap))}
-}

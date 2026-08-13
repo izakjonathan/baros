@@ -6,8 +6,10 @@ const root = process.cwd();
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const pkg = JSON.parse(read("package.json"));
 const tokens = read("styles/tokens.css");
-const globals = read("app/globals.css");
-const monoTokens = read("app/mono-tokens.css");
+const base = read("styles/base.css");
+const mono = read("app/mono-components.css");
+const shellCss = read("components/shell/ManagerShell.module.css");
+const monoTokens = read("styles/tokens.css");
 const manifest = read("app/manifest.ts");
 const rootLayout = read("app/layout.tsx");
 const managerApp = read("components/bar-ops-app.tsx");
@@ -31,8 +33,9 @@ for (const role of ["OWNER", "ADMIN", "MANAGER", "SHIFT_MANAGER", "EMPLOYEE"]) {
 assert.match(tokens, /--color-black:\s*#000000/i);
 assert.match(tokens, /--surface-page:\s*var\(--color-black\)/i);
 assert.match(tokens, /--surface-shell:\s*var\(--color-black\)/i);
-assert.match(monoTokens, /--mono-canvas:\s*#000000/i);
-assert.match(globals, /html:has\(\.app-frame\),body:has\(\.app-frame\),\.app-frame,\.app-frame \.main-shell,\.app-frame \.page-wrap\{background:var\(--surface-page\)\}/);
+assert.match(monoTokens, /--mono-canvas:\s*(?:#000000|var\(--surface-page\))/i);
+assert.match(base, /html\{background:var\(--surface-page\)/);
+assert.match(mono, /html,body,\.app-frame,\.main-shell,\.employee-app,\.employee-shell,\.employee-page,\.workspace-loading\{background:var\(--mono-canvas\)/);
 assert.match(employeeCss, /--employee-canvas:\s*#000/);
 
 // Browser/PWA launch surfaces must not flash the legacy cream canvas.
@@ -43,8 +46,8 @@ assert.match(rootLayout, /prefers-color-scheme: dark[\s\S]*color: "#000000"/);
 
 // Mobile shells retain safe-area handling and employee browser-toolbar clearance.
 assert.match(employeeCss, /padding-bottom:\s*calc\(6\.75rem \+ env\(safe-area-inset-bottom\)\)/);
-assert.match(globals, /env\(safe-area-inset-left\)/);
-assert.match(globals, /env\(safe-area-inset-right\)/);
+assert.match(shellCss, /env\(safe-area-inset-left\)/);
+assert.match(shellCss, /env\(safe-area-inset-right\)/);
 
 // Production remains database-backed with dev auth rejected.
 assert.match(envValidation, /DATABASE_URL is required in production/);
