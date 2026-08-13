@@ -227,3 +227,19 @@
 
 /* v0.19.0-rc.17 — employee Schedule action-density refinement. */
 .employee-app .employee-schedule-page > h1:first-child { margin-bottom: .12rem; }
+
+/* v0.19.0-rc.22 — feature-surface micro refinement.
+   Employee feature owns these density and typography decisions; shared tokens
+   provide the canonical control geometry established in rc.20-21. */
+.employee-app .employee-page h2{font-size:var(--text-xl);font-weight:var(--font-weight-semibold);line-height:var(--leading-heading)}
+.employee-app .employee-lead,.employee-app .availability-help{font-size:var(--text-helper);line-height:1.4}
+.employee-app .employee-hero small,.employee-app .clock-card small{font-size:var(--text-caption);font-weight:var(--weight-label)}
+.employee-app .portal-status,.employee-app .claim-state,.employee-app .request-history>article>span{font-size:var(--text-caption);font-weight:var(--weight-control)}
+.employee-app .portal-form,.employee-app .clock-card{padding:var(--space-3);border-radius:var(--radius-card)}
+.employee-app .portal-form input,.employee-app .portal-form select,.employee-app .portal-form textarea,.employee-app .correction-field textarea{font-size:var(--text-control);font-weight:var(--font-weight-medium)}
+.employee-app .portal-form textarea,.employee-app .correction-field textarea{min-height:4.75rem}
+.employee-app .availability-mode button{min-height:var(--control-height-default);font-size:var(--text-control);font-weight:var(--weight-control)}
+.employee-app .employee-hour-cards span{font-size:var(--text-helper);font-weight:var(--font-weight-semibold)}
+.employee-app .empty-portal{min-height:4.5rem;padding:var(--space-4);border-radius:var(--radius-md);font-size:var(--text-helper)}
+.employee-app .employee-error,.employee-app .employee-loading-inline,.employee-app .employee-form-message{font-size:var(--text-helper);font-weight:var(--font-weight-medium)}
+

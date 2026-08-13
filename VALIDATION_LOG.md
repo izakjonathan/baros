@@ -1,21 +1,16 @@
-# Validation Log — v0.19.0-rc.21
+# Bar Ops v0.19.0-rc.22 Validation Log
 
-Baseline: v0.19.0-rc.20
+Baseline: v0.19.0-rc.21.
 
-## Executed and passed
-- `npm run test:rc21`
-- `npm run test:current`
-- `npm run validate:release`
-- `npm run audit:artifacts`
-
-The inherited rc.20 regression was updated from an exact package-version assertion to an rc.20-or-later assertion so its design-system contract remains valid for subsequent RCs. No design assertion from that test was removed.
+## Executed
+- `npm run test:rc22` — passed.
+- `npm run test:current` — passed after updating the inherited rc.21 version assertion to remain valid on rc.21-or-later while retaining all rc.21 UI contract assertions.
+- `npm run validate:release` — passed.
+- `npm run audit:artifacts` — passed.
+- ZIP integrity validation — passed.
 
 ## Not executed locally
-- `npm run lint`
-- `npm run typecheck`
-- `npm run build`
-
-The extracted release workspace does not include installed `node_modules`; Vercel remains the dependency-backed production build/type gate.
+Dependency-backed lint, TypeScript, and Next.js production build were not run because this release workspace does not include installed `node_modules`. Vercel remains the dependency-backed production build gate.
 
 ## Database
-No schema or migration change is included in rc.21.
+No migration required.

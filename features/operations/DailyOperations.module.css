@@ -52,3 +52,10 @@
   padding-top:.35rem;
 }
 .logList{gap:.85rem}
+
+/* v0.19.0-rc.22 — daily-operations micro-density alignment. */
+.summary span,.task small,.logEntry small{font-size:var(--text-caption);font-weight:var(--weight-label)}
+.presets button,.create button{min-height:var(--control-height-default);padding-inline:var(--control-padding-x);font-size:var(--text-control);font-weight:var(--weight-control)}
+.create input,.create select,.compose textarea{font-size:var(--text-control);font-weight:var(--font-weight-medium);border-width:var(--control-border-width);border-radius:var(--control-radius)}
+.compose textarea{min-height:5rem;padding:var(--space-3) var(--control-padding-x)}
+

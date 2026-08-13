@@ -41,3 +41,11 @@
   text-align:center;
   line-height:1;
 }
+
+/* v0.19.0-rc.22 — order feature surface alignment. */
+.addButton,.suggestion button,.delivery button,.clear,.receiveButton{min-height:var(--control-height-default);padding-inline:var(--control-padding-x);font-size:var(--text-control);font-weight:var(--weight-control)}
+.filter select,.search{height:var(--control-height-default);min-height:var(--control-height-default);border-radius:var(--control-radius);font-size:var(--text-control);font-weight:var(--font-weight-medium)}
+.suggestion p,.delivery p,.orderCard p,.orderCard dt,.orderCard header>span,.resultCount{font-size:var(--text-caption);font-weight:var(--weight-label)}
+.suggestion small,.delivery small{font-size:var(--text-helper);line-height:1.35}
+.empty{min-height:5.5rem;padding:var(--space-4)}
+

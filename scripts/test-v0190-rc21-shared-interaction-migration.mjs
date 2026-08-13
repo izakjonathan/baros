@@ -5,7 +5,7 @@ const completion = fs.readFileSync("app/completion-redesign.css", "utf8");
 const mono = fs.readFileSync("app/mono-components.css", "utf8");
 const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
 
-assert.equal(pkg.version, "0.19.0-rc.21");
+assert.match(pkg.version, /^0\.19\.0-rc\.(?:2[1-9]|[3-9]\d|\d{3,})$/, "rc.21 interaction contract must remain valid on rc.21 or later");
 
 for (const contract of [
   "login-card label{display:grid;gap:var(--space-2);font-size:var(--text-label);font-weight:var(--weight-label)",
