@@ -1,10 +1,11 @@
 # Changelog
-## v0.19.0-rc.42
+## v0.19.0-rc.43
 
-- Reduced the global card architecture to one base card plus compact/flush density modifiers.
-- Removed the legacy panel surface and obsolete card variants.
-- Migrated feature and employee surfaces to the shared card contract without adding CSS files.
-- Added an existing-code-first rule for future CSS/functionality changes.
+- Consolidated the active repository from 200 historical `.mjs` scripts to 26 current scripts.
+- Reduced npm command surface from 208 historical commands to 25 active commands.
+- Removed generated `tsconfig.tsbuildinfo` from the release package.
+- Made the shared top navigation fixed at every viewport width.
+- Contained Shift Plan horizontal scrolling to the day-grid scroller instead of the whole page.
 
 ## v0.19.0-rc.42
 

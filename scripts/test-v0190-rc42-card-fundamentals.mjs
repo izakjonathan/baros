@@ -12,7 +12,7 @@ const request=read('app/employee/request-form.tsx');
 const manager=read('components/bar-ops-app.tsx');
 const card=read('components/ui/primitives/Card.tsx');
 const checks=[
- ['version is rc.42',pkg.version==='0.19.0-rc.42'],
+ ['version is rc.42 or later',/^0\.19\.0-rc\.(?:4[2-9]|[5-9]\d|\d{3,})$/.test(pkg.version)],
  ['standard card is the single base surface',/\.card\{[^}]*display:grid[^}]*padding:var\(--space-4\)[^}]*border-radius:var\(--radius-lg\)[^}]*background:var\(--cream\)/.test(css)],
  ['compact card only changes density',/\.card-compact\{gap:var\(--space-2\);padding:\.8rem\}/.test(css)],
  ['flush card only removes internal spacing',/\.card-flush\{gap:0;padding:0\}/.test(css)],

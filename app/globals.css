@@ -23,7 +23,7 @@ button:disabled,[aria-disabled="true"]{opacity:.48;cursor:not-allowed}
 
 /* ===== App shell ===== */
 .app-frame,.employee-app{min-height:100dvh;background:var(--canvas);color:var(--text)}
-.main-shell{min-width:0;min-height:100dvh;margin-left:var(--sidebar-w);padding-top:var(--topbar-h);background:var(--canvas)}
+.main-shell{min-width:0;min-height:100dvh;margin-left:var(--sidebar-w);padding-top:calc(var(--topbar-h) + env(safe-area-inset-top));background:var(--canvas)}
 .page-wrap{width:min(100%,var(--content-max));margin-inline:auto;padding-top:var(--page-y);padding-left:max(var(--page-x),env(safe-area-inset-left));padding-right:max(var(--page-x),env(safe-area-inset-right));padding-bottom:calc(4rem + env(safe-area-inset-bottom));display:grid;gap:var(--gap);min-width:0}
 .page-wrap>*{min-width:0}
 .page-flow,.workspace-flow,.workspace,.workspace-page,.attendance-workspace,.execution-workspace,.ops-workspace,.settings-workspace{display:grid;gap:var(--gap);min-width:0}
@@ -41,7 +41,7 @@ button:disabled,[aria-disabled="true"]{opacity:.48;cursor:not-allowed}
 .profile{display:flex;align-items:center;gap:.65rem;margin-top:.6rem;padding:.6rem;border:1px solid #333;border-radius:var(--radius-md)}
 .profile>div:nth-child(2){min-width:0;flex:1}.profile strong,.profile span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.profile span{color:rgb(255 244 196 / .5);font-size:var(--text-xs)}
 
-.topbar{position:fixed;top:env(safe-area-inset-top,0);left:var(--sidebar-w);right:0;z-index:var(--z-header);height:var(--topbar-h);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:.5rem;padding-inline:var(--page-x);background:var(--black)}
+.topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;z-index:var(--z-header);height:calc(var(--topbar-h) + env(safe-area-inset-top));display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:.5rem;padding-top:env(safe-area-inset-top);padding-inline:var(--page-x);background:var(--black)}
 .menu-button,.icon-button{width:2.35rem;height:2.35rem;min-width:2.35rem;min-height:2.35rem;display:grid;place-items:center;padding:0;border:0;border-radius:.8rem;color:var(--ink)}
 .menu-button{background:var(--neon)}
 .top-actions{justify-self:end;display:flex;align-items:center;gap:.4rem;position:relative}.top-actions>.icon-button:first-of-type{background:var(--purple)}.top-actions>.notification{background:var(--cream);position:relative}.notification i{position:absolute;right:.38rem;top:.35rem;width:.38rem;height:.38rem;border-radius:50%;background:var(--red)}
@@ -134,11 +134,11 @@ label{min-width:0}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(
 
 /* ===== Responsive ===== */
 @media(max-width:64rem){
-  .main-shell{margin-left:0;padding-top:0}.sidebar{transform:translateX(-105%)}.sidebar.sidebar-open{transform:none}.sidebar-close{display:grid}.topbar{position:sticky;top:0;left:auto;right:auto;width:100%}.menu-button{display:grid}.page-wrap{padding-left:max(var(--mobile-gutter),env(safe-area-inset-left));padding-right:max(var(--mobile-gutter),env(safe-area-inset-right))}
+  .main-shell{margin-left:0;padding-top:calc(var(--topbar-h) + env(safe-area-inset-top))}.sidebar{transform:translateX(-105%)}.sidebar.sidebar-open{transform:none}.sidebar-close{display:grid}.topbar{left:0;right:0;width:100%;padding-left:max(var(--mobile-gutter),env(safe-area-inset-left));padding-right:max(var(--mobile-gutter),env(safe-area-inset-right))}.menu-button{display:grid}.page-wrap{padding-left:max(var(--mobile-gutter),env(safe-area-inset-left));padding-right:max(var(--mobile-gutter),env(safe-area-inset-right))}
   .dashboard-metrics,.execution-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-content-grid,.ops-layout,.settings-layout{grid-template-columns:1fr}.team-grid,.product-list,.order-list{grid-template-columns:1fr}.period-fields,.filter-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.settings-nav{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(max-width:40rem){
-  :root{--topbar-h:2.9rem}.topbar{height:var(--topbar-h);gap:.35rem;padding-left:max(var(--mobile-gutter),env(safe-area-inset-left));padding-right:max(var(--mobile-gutter),env(safe-area-inset-right))}.menu-button,.icon-button{width:2.15rem;height:2.15rem;min-width:2.15rem;min-height:2.15rem}.location-switch{height:2.15rem;max-width:9rem;padding-inline:.6rem;font-size:.85rem}
+  :root{--topbar-h:2.9rem}.topbar{height:calc(var(--topbar-h) + env(safe-area-inset-top));gap:.35rem;padding-left:max(var(--mobile-gutter),env(safe-area-inset-left));padding-right:max(var(--mobile-gutter),env(safe-area-inset-right))}.menu-button,.icon-button{width:2.15rem;height:2.15rem;min-width:2.15rem;min-height:2.15rem}.location-switch{height:2.15rem;max-width:9rem;padding-inline:.6rem;font-size:.85rem}
   .page-wrap{padding-top:.85rem;padding-left:max(var(--mobile-gutter),env(safe-area-inset-left));padding-right:max(var(--mobile-gutter),env(safe-area-inset-right));padding-bottom:calc(5.5rem + env(safe-area-inset-bottom))}.workspace-header{align-items:stretch;flex-direction:column}.workspace-actions,.header-actions{width:100%;display:grid;grid-template-columns:1fr}.form-grid,.period-fields,.filter-fields,.settings-fields{grid-template-columns:1fr}.full-field{grid-column:auto}.metrics,.attendance-summary,.team-summary,.inventory-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.toolbar{grid-template-columns:1fr}.search-field{grid-column:1/-1}.execution-list article{grid-template-columns:auto minmax(0,1fr) auto}.execution-list article>small{grid-column:2}.execution-action-grid,.quick-grid{grid-template-columns:1fr}.settings-nav{grid-template-columns:1fr 1fr}.ops-presets,.ops-progress,.ops-create,.ops-compose{align-items:stretch;flex-direction:column}.ops-create>* ,.ops-compose>*{width:100%}
   .request-date-grid,.availability-times,.clock-actions{grid-template-columns:1fr}.monthly-availability-grid article{grid-template-columns:2.75rem minmax(0,1fr)}.employee-home-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   input[type="date"],input[type="time"],input[type="month"],input[type="datetime-local"]{font-size:16px;min-inline-size:0}

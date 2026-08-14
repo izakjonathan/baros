@@ -1,16 +1,15 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.42**
+Version: **v0.19.0-rc.43**
 
-CSS architecture reset remains intact and the global card contract is now consolidated.
-
-- Exactly three CSS files remain.
-- Shared styling is global across Owner, Admin, Manager, Shift Manager, and Employee workspaces.
-- Card fundamentals are limited to `.card`, `.card-compact`, and `.card-flush`.
-- Feature classes may alter card tone or internal composition but may not redefine the shared card radius/padding contract.
-- Shared state/loading/error/success surfaces compose the base card instead of creating separate card fundamentals.
-- Shift Plan remains the only custom feature stylesheet and its shift card is the only custom card exception.
-- `.page-wrap` remains the sole owner of outer page gutters and safe-area spacing.
-- Existing-code-first modification is the default development rule; adding parallel CSS/components requires a genuine new behavior/owner.
+- CSS architecture remains exactly three files: tokens, global application CSS, and Shift Plan custom CSS.
+- Shared styling remains global across Owner, Admin, Manager, Shift Manager, and Employee workspaces.
+- Shared top navigation is fixed site-wide and implemented by the same `WorkspaceTopbar` component for every workspace.
+- `.main-shell` is the single owner of fixed-topbar content clearance.
+- Shift Plan is the only feature with custom CSS and `.calendarScroll` is the only owner of its horizontal day-grid scrolling.
+- The active repository no longer ships the historical release-test archive: 26 active scripts remain instead of 200.
+- npm command surface is reduced to 25 current development/database/validation/test commands instead of 208 historical commands.
+- Card fundamentals remain limited to `.card`, `.card-compact`, and `.card-flush` plus the Shift Plan shift-card exception.
+- Existing-code-first modification remains mandatory: change/replace/merge the current owner before adding new code where possible.
 - No database migration.
-- Physical-device visual QA remains required because no final visual baseline has been approved.
+- No final visual baseline has been approved; physical-device visual QA remains required.

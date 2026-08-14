@@ -1,18 +1,23 @@
 # Testing
 
-`npm run test:current` runs the current business/security/integrity regression set plus the rc.38 CSS architecture contract, rc.41 CSS contract-integrity gate, and rc.42 card-fundamentals gate.
+`npm run test:current` is the active regression gate. It covers current business logic, payroll, integrity, production foundations, inventory/operations, security remediation, authentication, tenant isolation, transaction/API boundaries, type-safety contracts, release contracts and the current CSS/UI architecture.
 
-The rc.38 CSS test verifies:
-- exactly three CSS files;
-- only Shift Plan uses a CSS Module;
-- global ownership of shell, controls, cards, metrics, and employee presentation;
-- no release-patch comments in CSS;
-- reduced-motion is the only accepted use of `!important`.
+The active command groups are intentionally small:
 
-Historical tests remain available through `npm run test:historical`, but old tests that assert superseded CSS implementations are not part of the current release gate.
+- `test:logic`
+- `test:payroll`
+- `test:integrity`
+- `test:production`
+- `test:inventory`
+- `test:remediation`
+- `test:auth`
+- `test:boundaries`
+- `test:release-contract`
+- `test:ui`
+- `test:current`
 
-Vercel is the dependency-backed production build gate when local `node_modules` are unavailable.
+Historical release-specific test scripts are no longer shipped in the active repository. Previous ZIP releases and Git history remain the historical record. A superseded source-text test must not force obsolete implementation code to remain in production.
 
-The rc.41 gate additionally verifies single-owner gutters/safe areas, shared Dialog/state/header contracts, Shift Plan editor ownership, mapped class integrity, dark-only theme behavior, and the documented global-error exception.
+The rc.38 CSS gate protects the three-file CSS architecture. The rc.41 gate protects CSS/source ownership, shared page/dialog/state/header contracts and Shift Plan-only custom CSS. The rc.42 gate protects the three global card fundamentals. The rc.43 gate protects the compact repository/test surface, fixed shared topbar, and Shift Plan scroll containment.
 
-The rc.42 gate verifies that all non-Shift-Plan card surfaces compose one global base card with only compact/flush density modifiers, and prevents feature classes from reclaiming card geometry.
+Vercel/GitHub Actions are the dependency-backed production gates for lint, TypeScript and Next.js build validation when local `node_modules` are unavailable.

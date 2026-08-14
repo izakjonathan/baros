@@ -8,6 +8,7 @@ const forbidden = [
   ".vercel",
   "vercel.json",
   "public/offline.html",
+  "tsconfig.tsbuildinfo",
 ];
 const failures = forbidden.filter((entry) => fs.existsSync(path.join(root, entry)));
 if (failures.length) {

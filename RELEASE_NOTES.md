@@ -1,26 +1,32 @@
-# v0.19.0-rc.42 — Card Fundamentals Consolidation
+# v0.19.0-rc.43 — Repository Consolidation, Fixed Topbar & Shift Plan Scroll Containment
 
-Baseline: **v0.19.0-rc.41**. **v0.19.0-rc.36** remains the technical/functionality rollback checkpoint.
+Baseline: **v0.19.0-rc.42**. **v0.19.0-rc.36** remains the technical/functionality rollback checkpoint.
 
 ## What changed
 
-- Reduced the global card system to three fundamentals only:
-  1. `.card` — the one standard padded surface.
-  2. `.card-compact` — density modifier only.
-  3. `.card-flush` — removes internal spacing for structured panels whose children own their padding.
-- Loading/error/success alignment is now composition on the base card (`shared-state-card`), not a separate card type.
-- Removed the obsolete `.panel` surface contract.
-- Removed obsolete `card-state`, `card-muted`, and `card-elevated` fundamentals.
-- Team, Requests, Attendance, Inventory, Orders, Operations, Settings, Dashboard/Execution and Employee surfaces now compose the same base card.
-- Feature hooks such as `team-card`, `clock-card`, `attendance-hero`, and product/order cycling now control only feature layout/tone; they do not own global card padding or radius.
-- Employee hero, home tiles, schedule cards, request/history rows, availability rows, hour/timesheet cards, forms, notifications and authentication surfaces now use the shared card fundamentals.
-- Metrics now use the compact card fundamental rather than having a second card geometry embedded in `.metrics`.
-- The internal React `Card` primitive was simplified to the same `default | compact | flush` density contract.
-- Shift Plan remains the sole custom card exception via `ScheduleWorkspace.module.css .shiftCard`.
+### Repository and test consolidation
 
-## Development rule reinforced
+- Removed the historical release-specific test-script archive from the active release package.
+- Reduced `scripts/` from 200 `.mjs` files to 26 active scripts.
+- Reduced npm scripts from 208 commands to 25 current commands.
+- Removed `test:historical`; previous ZIP releases and Git history remain the historical record.
+- Preserved the current business, payroll, integrity, production, inventory, remediation, authentication, tenant, transaction, API-boundary, type-safety, release-contract and CSS/UI gates.
+- Simplified the GitHub quality workflow so it runs the current regression suite instead of two obsolete release-specific acceptance commands plus the current suite.
+- Removed generated `tsconfig.tsbuildinfo` from the release package.
 
-Existing code is now the default modification point. New CSS selectors, components, or parallel implementations should only be introduced when the existing owner cannot represent the required behavior. Prefer changing/replacing/merging existing code over adding another layer.
+### Fixed shared top navigation
+
+- The shared `WorkspaceTopbar` remains the single topbar component for Owner, Admin, Manager, Shift Manager and Employee.
+- `.topbar` is now fixed at all viewport widths; mobile no longer switches it to `position: sticky`.
+- `.main-shell` reserves the shared topbar height plus the device top safe area so content cannot slide underneath the fixed bar.
+- Mobile topbar left/right padding uses the same global mobile gutter and safe-area ownership as page content.
+
+### Shift Plan horizontal-scroll containment
+
+- Shift Plan workspace now clips page-level inline overflow.
+- The schedule panel is explicitly constrained to the workspace width.
+- `.calendarScroll` is the sole horizontal-scrolling owner for the day columns.
+- The wide seven-day grid remains horizontally scrollable without allowing the entire workspace/page to pan sideways.
 
 ## CSS architecture
 
@@ -30,4 +36,6 @@ Still exactly three CSS files:
 2. `app/globals.css`
 3. `features/scheduling/ScheduleWorkspace.module.css`
 
-No database migration required.
+No new stylesheet, wrapper or compatibility layer was introduced.
+
+No database migration is required.
