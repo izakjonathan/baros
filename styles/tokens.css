@@ -25,16 +25,13 @@
   --text-page:clamp(2rem,7vw,3.25rem);
   --weight-normal:500;
   --weight-medium:600;
-  --weight-bold:750;
+  --weight-bold:700;
 
-  --space-1:.25rem;
   --space-2:.5rem;
   --space-3:.75rem;
   --space-4:1rem;
-  --space-5:1.25rem;
-  --space-6:1.5rem;
-  --space-8:2rem;
   --gap:.75rem;
+  --mobile-gutter:.75rem;
 
   --radius-sm:.7rem;
   --radius-md:1rem;

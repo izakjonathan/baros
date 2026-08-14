@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { CalendarClock, Check, CheckCircle2, RefreshCw, Shuffle, Umbrella, X } from "lucide-react";
 import { requestStyles as styles, surfaceStyles } from "@/lib/ui-classes";
+import { WorkspaceHeader } from "@/components/ui/workspace-ui";
 import type { RequestQueueRecord, ShiftClaimQueueRecord, ShiftTransferQueueRecord } from "@/features/requests/types";
 
 type QueueItem={id:string;kind:"REQUEST"|"CLAIM"|"TRANSFER";title:string;subtitle:string;status:string;createdAt:string};
@@ -62,10 +63,7 @@ export function RequestsWorkspace({devMode,notify}:{devMode:boolean;notify:(mess
   const claimCount=items.filter(item=>item.kind==="CLAIM").length;
   const transferCount=items.filter(item=>item.kind==="TRANSFER").length;
   return <section className={surfaceStyles.workspace}>
-    <header className={styles.header}>
-      <div className={styles.headerCopy}><p className={styles.eyebrow}>Employee self-service</p><h1>Requests</h1><p className={styles.subtitle}>Review time off, open shifts and employee-approved shift changes.</p></div>
-      <button className={`${surfaceStyles.control} ${surfaceStyles.outline} ${styles.refresh}`} type="button" disabled={loading} onClick={()=>void load()}><RefreshCw className={loading?styles.loadingIcon:undefined} size={16}/>Refresh</button>
-    </header>
+    <WorkspaceHeader eyebrow="Employee self-service" title="Requests" description="Review time off, open shifts and employee-approved shift changes." actions={<button className={`${surfaceStyles.control} ${surfaceStyles.outline} ${styles.refresh}`} type="button" disabled={loading} onClick={()=>void load()}><RefreshCw className={loading?styles.loadingIcon:undefined} size={16}/>Refresh</button>}/>
     <section className={`${surfaceStyles.metrics} ${styles.summary}`} aria-label="Request summary">
       <article><span>Awaiting review</span><strong>{items.length}</strong></article>
       <article><span>Open shifts</span><strong>{claimCount}</strong></article>

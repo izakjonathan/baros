@@ -19,5 +19,5 @@ export function ScheduleAcknowledgement({ publicationId }: { publicationId: stri
       setError(cause instanceof Error ? cause.message : "Could not acknowledge schedule");
     } finally { setBusy(false); }
   }
-  return <div className="schedule-ack-action"><button type="button" className="portal-action primary-action" disabled={busy} onClick={acknowledge}><CheckCheck size={15}/>{busy ? "Saving…" : "Acknowledge schedule"}</button>{error&&<small className="form-error" role="alert">{error}</small>}</div>;
+  return <div className="schedule-ack-action"><button type="button" className="primary" disabled={busy} onClick={acknowledge}><CheckCheck size={15}/>{busy ? "Saving…" : "Acknowledge schedule"}</button>{error&&<small className="form-error" role="alert">{error}</small>}</div>;
 }

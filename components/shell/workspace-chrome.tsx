@@ -7,9 +7,7 @@ import {
   ChevronDown,
   LogOut,
   Menu,
-  Moon,
   Search,
-  Sun,
   Wine,
   X,
   type LucideIcon,
@@ -81,8 +79,6 @@ export function WorkspaceTopbar({
   onLocationChange,
   staticLocationLabel,
   onNavigate,
-  theme,
-  onToggleTheme,
   notificationItems = [],
 }: {
   items: WorkspaceChromeItem[];
@@ -92,8 +88,6 @@ export function WorkspaceTopbar({
   onLocationChange?: (id: string) => void;
   staticLocationLabel?: string;
   onNavigate: (id: string) => void;
-  theme: "light" | "dark";
-  onToggleTheme: () => void;
   notificationItems?: Array<{ id: string; label: string; detail: string; icon: LucideIcon }>;
 }) {
   const selected = locations?.find(location => location.id === selectedLocationId);
@@ -108,7 +102,6 @@ export function WorkspaceTopbar({
     <div className={"location-switch"} aria-label="Current location"><span className="status-dot" />{locations && locations.length > 1 && selectedLocationId && onLocationChange ? <><select aria-label="Current location" value={selectedLocationId} onChange={event => onLocationChange(event.target.value)}>{locations.map(location => <option key={location.id} value={location.id}>{location.name}</option>)}</select><ChevronDown size={15} /></> : <span>{label}</span>}</div>
     <div className={"top-actions"}>
       <button className={"icon-button"} onClick={()=>{setSearchOpen(v=>!v);setNotificationsOpen(false)}} aria-label="Search workspace" aria-expanded={searchOpen} aria-controls="workspace-search-popover"><Search size={19} /></button>
-      <button className={"icon-button"} onClick={onToggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} aria-pressed={theme === "dark"}>{theme === "dark" ? <Sun size={18}/> : <Moon size={18}/>}</button>
       <button className={"icon-button notification"} onClick={()=>{setNotificationsOpen(v=>!v);setSearchOpen(false)}} aria-label="Open notifications" aria-expanded={notificationsOpen} aria-controls="workspace-notifications-popover"><Bell size={19} /><i /></button>
       {searchOpen&&<div id="workspace-search-popover" className="top-popover search-popover" role="dialog" aria-label="Search workspace"><label><Search size={16}/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search workspace"/></label><div>{matches.map(item=><button key={item.id} onClick={()=>go(item.id)}><item.icon size={17}/><span>{item.label}</span><ArrowRight size={14}/></button>)}</div></div>}
       {notificationsOpen&&<div id="workspace-notifications-popover" className="top-popover notifications-popover" role="dialog" aria-label="Notifications"><strong>Notifications</strong>{notificationItems.length ? notificationItems.map(item=><button key={item.id} onClick={()=>go(item.id)}><item.icon size={17}/><span><b>{item.label}</b><small>{item.detail}</small></span></button>) : <div className="top-popover-empty">No new notifications</div>}</div>}

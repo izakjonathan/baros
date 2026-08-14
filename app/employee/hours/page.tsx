@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarDays, CheckCircle2, Clock3, MessageSquareWarning, Pause, Play, Square } from "lucide-react";
+import { Dialog, DialogActions } from "@/components/ui/interaction-ui";
+import { WorkspaceHeader } from "@/components/ui/workspace-ui";
 
 type ActiveClock = {
   id: string;
@@ -165,9 +167,7 @@ export default function HoursPage() {
 
   return (
     <div className="employee-page">
-      <p className="eyebrow">Time &amp; attendance</p>
-      <h1>My hours</h1>
-      <p className="employee-lead">Clock in and out, then review your scheduled and approved worked hours.</p>
+      <WorkspaceHeader eyebrow="Time & attendance" title="My hours" description="Clock in and out, then review your scheduled and approved worked hours."/>
 
       {error && <div className="employee-error" role="alert">{error}</div>}
 
@@ -226,7 +226,7 @@ export default function HoursPage() {
       </section>
 
       <p className="hours-note">Worked hours become payroll-ready only after manager approval.</p>
-      {correction && <div className="modal-layer"><button type="button" className="modal-scrim" aria-label="Close" onClick={()=>setCorrection(null)}/><section className="modal" role="dialog" aria-modal="true" aria-labelledby="correction-title"><div className="modal-head"><div><h2 id="correction-title">Request a correction</h2><p>{dateLabel(correction.work_date)} · {time(correction.clocked_in_at)}–{time(correction.clocked_out_at)}</p></div></div><label className="correction-field">What needs correcting?<textarea rows={5} value={correctionReason} onChange={e=>setCorrectionReason(e.target.value)} placeholder="Describe the correct clock-in, clock-out or break time"/></label><div className="modal-actions"><button type="button" className="secondary" onClick={()=>setCorrection(null)}>Cancel</button><button type="button" className="primary" disabled={busy||!correctionReason.trim()} onClick={requestCorrection}>{busy?'Sending…':'Send request'}</button></div></section></div>}
+      {correction && <Dialog title="Request a correction" description={`${dateLabel(correction.work_date)} · ${time(correction.clocked_in_at)}–${time(correction.clocked_out_at)}`} onClose={()=>setCorrection(null)}><label className="correction-field">What needs correcting?<textarea rows={5} value={correctionReason} onChange={e=>setCorrectionReason(e.target.value)} placeholder="Describe the correct clock-in, clock-out or break time"/></label><DialogActions onClose={()=>setCorrection(null)} onConfirm={requestCorrection} confirmLabel={busy?'Sending…':'Send request'} busy={busy} disabled={!correctionReason.trim()}/></Dialog>}
     </div>
   );
 }

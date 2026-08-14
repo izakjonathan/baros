@@ -1,29 +1,39 @@
-# v0.19.0-rc.39 Validation
-
-Executed locally:
-- `npm run test:rc39` — passed.
-- `npm run test:current` — passed after updating the rc.38 architecture test to accept rc.38-or-later while preserving all CSS architecture assertions.
-- Vercel production build is the dependency-backed TypeScript/build gate.
-
-The specific rc.39 regression verifies that all four dynamically addressed Attendance status class keys exist in the typed class map and have matching global CSS selectors.
-
-# Validation Log — v0.19.0-rc.39
+# v0.19.0-rc.41 Validation
 
 ## Passed
 
 - `npm run test:current`
-- `npm run test:rc38`
-- `npm run validate:release`
-- `npm run audit:artifacts`
-- `npm run audit:preflight`
-- structural CSS parsing with `tinycss2`: 3 files, 457 rules, 1,518 declarations, 0 parse errors
-- TypeScript syntax transpilation across 99 TS/TSX files using TypeScript 5.8.3: 0 syntax failures
+- `npm run test:rc41`
+- structural CSS parsing with `tinycss2`: 3 CSS files, 0 parse errors
+- static runtime class-to-CSS contract scan: 0 unresolved class names
+- `ui-classes.ts` mapped class-to-CSS contract scan: 0 unresolved class names
+- TypeScript syntax transpilation across 99 TS/TSX files: 0 syntax failures
 
-## Attempted but not dependency-backed
+## rc.41 focused assertions
 
-- `npm run lint` — could not run because local `eslint` dependency is not installed.
-- `npm run typecheck` — global `tsc` ran, but React/Next/Postgres/Node project dependencies and type packages are absent, so the output is not a valid project typecheck.
-- `npm run build` — could not run because local `next` dependency is not installed.
-- `npm install --package-lock-only --ignore-scripts` — attempted so the release could gain a lockfile, but the local environment timed out before completion.
+- exactly three CSS files remain;
+- `.page-wrap` solely owns page/safe-area gutters;
+- Employee does not own outer page padding/margin;
+- top bar and page content use the same mobile gutter token;
+- headings/paragraphs have fully reset margins;
+- bold typography uses a loaded font weight;
+- native controls on light surfaces use a light native color scheme;
+- the nonfunctional theme toggle is removed;
+- shared loading/error/empty-state components are styled;
+- shared Dialog renders a real body wrapper;
+- all `ui-classes.ts` mappings resolve to CSS;
+- Shift Plan editor styling is module-owned;
+- Employee transfer actions use shared form/control primitives;
+- Schedule acknowledgement uses a real global button primitive;
+- manager PageHeader uses the shared WorkspaceHeader primitive;
+- root global-error inline styling is explicitly documented as an intentional exception.
 
-Vercel remains the dependency-backed production build/type gate for this ZIP.
+## Dependency-backed validation attempts
+
+The constitution-required commands were attempted in the extracted release workspace:
+
+- `npm run lint` — could not execute because `eslint` is not installed (`node_modules` is absent).
+- `npm run typecheck` — the available TypeScript executable ran, but cannot resolve React, Next.js, Postgres, Node, or their type declarations because project dependencies are not installed; this is not an authoritative application typecheck.
+- `npm run build` — could not execute because `next` is not installed (`node_modules` is absent).
+
+Vercel remains the production dependency-backed TypeScript/build gate. No pass is claimed for these three commands.

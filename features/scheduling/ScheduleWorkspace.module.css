@@ -23,3 +23,20 @@
 .monthView .calendarGrid{grid-template-columns:repeat(7,minmax(8rem,1fr))}.monthView .dayBody{min-height:14rem}.weekView .dayBody{min-height:28rem}
 @media(max-width:60rem){.header{align-items:stretch;flex-direction:column}.toolbar,.customMode{grid-template-columns:1fr 1fr}.summary{grid-column:1/-1}.calendarGrid{grid-template-columns:repeat(7,minmax(8.5rem,1fr));min-width:59.5rem}}
 @media(max-width:40rem){.toolbar,.customMode{grid-template-columns:1fr}.periodControls,.viewSelect,.customRange,.summary{grid-column:1}.customRange{grid-template-columns:repeat(2,minmax(0,1fr))}.summary{align-items:stretch;flex-direction:column}.summary>*{width:100%}.headerActions{display:grid;grid-template-columns:1fr 1fr}.headerActions>*{width:100%}.calendarGrid{grid-template-columns:repeat(7,minmax(8rem,1fr));min-width:56rem}.dayBody{min-height:23rem}.shiftEditorDialog{border-radius:var(--radius-lg) var(--radius-lg) 0 0}}
+/* Shift editor composition stays feature-owned. Shared controls still come from globals.css. */
+.assignmentToggle{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.2rem;padding:.25rem;border-radius:var(--radius-md);background:rgb(0 0 0 / .07)}
+.assignmentToggle button,.frequencyToggle button,.weekdayPicker button{min-height:var(--control-h-sm);border:0;border-radius:calc(var(--radius-md) - .2rem);background:transparent;color:var(--ink)}
+.assignmentToggle button[aria-pressed="true"],.frequencyToggle button[aria-pressed="true"],.weekdayPicker button[aria-pressed="true"]{background:var(--black);color:var(--cream)}
+.shiftDialogFields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--gap);min-width:0}
+.shiftDialogFields>label{display:grid;gap:.3rem;min-width:0;font-size:var(--text-xs);font-weight:var(--weight-bold)}
+.shiftDateField{grid-column:1/-1}.shiftTimeField{min-width:0}.shiftTimeField small{font-weight:var(--weight-normal);color:var(--muted-ink)}
+.openShiftNote,.seriesEditNote{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr);gap:.55rem;align-items:start;padding:.65rem;border-radius:var(--radius-sm);background:rgb(0 0 0 / .06)}
+.openShiftNote span,.seriesEditNote span{display:block;margin-top:.15rem;color:var(--muted-ink);font-size:var(--text-xs)}
+.repeatSwitch{display:flex;align-items:center;gap:.55rem;padding:.65rem;border-radius:var(--radius-sm);background:rgb(0 0 0 / .06)}.repeatSwitch span{display:grid}.repeatSwitch small{color:var(--muted-ink)}
+.repeatPanel{display:grid;gap:.55rem;padding:.65rem;border:1px solid rgb(0 0 0 / .15);border-radius:var(--radius-md)}
+.frequencyToggle{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.2rem;padding:.2rem;border-radius:var(--radius-md);background:rgb(0 0 0 / .06)}
+.weekdayPicker{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.25rem}.weekdayPicker button{padding-inline:.2rem;font-size:var(--text-xs)}
+.repeatCount{display:flex;align-items:center;gap:.45rem;font-size:var(--text-xs);font-weight:var(--weight-bold)}.repeatCount input{width:5rem}.repeatCount span{font-weight:var(--weight-normal)}
+.seriesEditNote select{margin-top:.45rem}
+.editShiftActions{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}.editShiftActions>div{display:flex;gap:.5rem;margin-left:auto}
+@media(max-width:40rem){.shiftDialogFields{grid-template-columns:1fr}.shiftDateField{grid-column:auto}.weekdayPicker{grid-template-columns:repeat(4,minmax(0,1fr))}.editShiftActions,.editShiftActions>div{display:grid;grid-template-columns:1fr;width:100%}.editShiftActions>div{margin-left:0}.openShiftNote,.seriesEditNote{grid-column:auto}}

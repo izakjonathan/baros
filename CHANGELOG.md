@@ -1,4 +1,11 @@
 # Changelog
+## v0.19.0-rc.41
+
+- Repaired CSS/source ownership mismatches found by the full rc.40 audit.
+- Standardized page gutters, safe areas, headers, Dialog body structure, shared states, and dark-only theme behavior.
+- Moved Shift Plan editor-only layout rules into the Shift Plan CSS module.
+- Reconciled runtime class contracts without restoring legacy CSS files.
+
 
 ## 0.19.0-rc.38
 

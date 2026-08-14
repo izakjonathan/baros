@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, CalendarDays, Clock3, Home, SlidersHorizontal, Umbrella } from "lucide-react";
 import { WorkspaceSidebar, WorkspaceTopbar, type WorkspaceChromeItem } from "@/components/shell/workspace-chrome";
@@ -41,23 +41,6 @@ export function EmployeeShell({
   const router = useRouter();
   const active = activeEmployeeItem(path);
   const [mobileNav, setMobileNav] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
-
-  useEffect(() => {
-    setTheme("dark");
-    document.documentElement.dataset.theme = "dark";
-    window.localStorage.setItem("bar-ops-theme", "dark");
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", "#000000");
-  }, []);
-
-  function toggleTheme() {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    document.documentElement.dataset.theme = next;
-    window.localStorage.setItem("bar-ops-theme", next);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next === "dark" ? "#000000" : "#fff4c4");
-  }
-
   function navigate(id: string) {
     const item = employeeItems.find(entry => entry.id === id);
     if (!item) return;
@@ -91,8 +74,6 @@ export function EmployeeShell({
         onMenu={() => setMobileNav(true)}
         staticLocationLabel={locationName}
         onNavigate={navigate}
-        theme={theme}
-        onToggleTheme={toggleTheme}
         notificationItems={[
           { id: "schedule", label: "Schedule", detail: "Review upcoming and available shifts", icon: CalendarDays },
           { id: "clock", label: "Time & attendance", detail: "Open your clock and worked hours", icon: Clock3 },
