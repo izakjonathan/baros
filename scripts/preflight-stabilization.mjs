@@ -51,10 +51,8 @@ if (failures.length) {
 
 for (const command of [
   ["node", ["scripts/validate-release.mjs"]],
-  ["node", ["scripts/test-v01618-api-boundary-completion.mjs"]],
-  ["node", ["scripts/test-v01619-type-safety-stabilization.mjs"]],
-  ["node", ["scripts/test-v01620-release-metadata.mjs"]],
-  ["node", ["scripts/test-v01621-final-stabilization.mjs"]],
+  ["node", ["scripts/test-api-integrity.mjs"]],
+  ["node", ["scripts/test-release-contract.mjs"]],
 ]) {
   const result = spawnSync(command[0], command[1], { stdio: "inherit", cwd: root });
   if (result.status !== 0) process.exit(result.status ?? 1);

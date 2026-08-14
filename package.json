@@ -1,6 +1,6 @@
 {
   "name": "bar-ops",
-  "version": "0.19.0-rc.43",
+  "version": "0.19.0-rc.46",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -21,11 +21,10 @@
     "test:production": "node scripts/test-production-foundation.mjs",
     "test:inventory": "node scripts/test-inventory-operations.mjs",
     "test:remediation": "node scripts/test-remediation.mjs",
-    "test:auth": "node scripts/test-v01610-auth-responses.mjs && node scripts/test-v01613-auth-endpoint-consistency.mjs && node scripts/test-v01614-tenant-scope.mjs",
-    "test:boundaries": "node scripts/test-v01615-transaction-integrity.mjs && node scripts/test-v01618-api-boundary-completion.mjs && node scripts/test-v01619-type-safety-stabilization.mjs",
-    "test:release-contract": "node scripts/test-v01620-release-metadata.mjs && node scripts/test-v01621-final-stabilization.mjs",
-    "test:ui": "node scripts/test-v0190-rc38-css-reset.mjs && node scripts/test-v0190-rc41-css-contract-integrity.mjs && node scripts/test-v0190-rc42-card-fundamentals.mjs && node scripts/test-v0190-rc43-repository-shell-shiftplan.mjs",
-    "test:rc43": "node scripts/test-v0190-rc43-repository-shell-shiftplan.mjs",
+    "test:auth": "node scripts/test-auth-contract.mjs",
+    "test:boundaries": "node scripts/test-api-integrity.mjs",
+    "test:release-contract": "node scripts/test-release-contract.mjs",
+    "test:ui": "node scripts/test-ui-contract.mjs",
     "test:current": "npm run test:logic && npm run test:payroll && npm run test:integrity && npm run test:production && npm run test:inventory && npm run test:remediation && npm run test:auth && npm run test:boundaries && npm run test:release-contract && npm run test:ui",
     "test:all": "npm run test:current"
   },

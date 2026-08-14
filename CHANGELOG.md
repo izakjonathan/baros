@@ -1,4 +1,13 @@
 # Changelog
+
+## v0.19.0-rc.44
+
+- Consolidated active version-numbered regression scripts into semantic auth, API-integrity, release, and UI contract tests.
+- Reduced active `scripts/*.mjs` from 26 to 17 and total packaged files from 179 to 169.
+- Updated stabilization preflight and npm commands to use semantic current-contract tests.
+- Removed completed `docs/plans/css-reset-validation.md`.
+- No application, CSS, database, permission, or workflow behavior changed.
+
 ## v0.19.0-rc.43
 
 - Consolidated the active repository from 200 historical `.mjs` scripts to 26 current scripts.
@@ -28,3 +37,5 @@
 - Reduced application styling to global tokens, global application CSS, and one Shift Plan CSS Module.
 - Removed all other CSS Modules, route-specific CSS, compatibility layers, release patch stylesheets, and CSS release-history sections.
 - Kept existing application routes, APIs, permissions, database behavior, and business workflows unchanged.
+## v0.19.0-rc.46
+- Decomposed manager workspace implementations into feature/domain modules; no behavior or CSS changes.
