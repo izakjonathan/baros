@@ -161,7 +161,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
           {active === "orders" && <OrdersWorkspace products={products} setProducts={setProducts} onNewOrder={() => setDialog("order")} notify={notify} />}
           {active === "operations" && <DailyOperationsWorkspace tasks={opsTasks} setTasks={setOpsTasks} logs={logEntries} setLogs={setLogEntries} notify={notify} devMode={devMode} locationId={selectedLocationId} />}
           {active === "team" && (
-            <Team
+            <TeamWorkspace
               employees={employees}
               shifts={shifts}
               devMode={devMode}

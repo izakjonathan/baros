@@ -42,7 +42,7 @@ const architectureModules = [
 const architectureOwned = architectureModules.every(([file, symbol]) => fs.existsSync(path.join(root, file)) && read(file).includes(`export function ${symbol}`) && managerApp.includes(symbol));
 
 const checks = [
-  ["release is rc.46", pkg.version === "0.19.0-rc.46"],
+  ["release is rc.47", pkg.version === "0.19.0-rc.47"],
   ["only three CSS files exist", JSON.stringify(cssRelative) === JSON.stringify(["app/globals.css", "features/scheduling/ScheduleWorkspace.module.css", "styles/tokens.css"])],
   ["root imports only global CSS", layout.includes('import "./globals.css";') && !layout.includes("completion-redesign.css") && !layout.includes("system-contracts.css") && !layout.includes("design-system.css")],
   ["employee has no route CSS import", !employeeLayout.includes(".css")],
@@ -67,6 +67,7 @@ const checks = [
   ["main shell reserves fixed topbar", /\.main-shell\{[^}]*padding-top:calc\(var\(--topbar-h\) \+ env\(safe-area-inset-top\)\)/.test(global)],
   ["only day scroller owns horizontal Shift Plan scrolling", schedule.includes(':global(.page-wrap[data-workspace="schedule"]){overflow-x:hidden}') && /\.workspace\{[^}]*overflow-x:hidden[^}]*contain:inline-size/.test(schedule) && /\.calendarPanel\{[^}]*overflow:hidden[^}]*contain:inline-size/.test(schedule) && /\.calendarScroll\{[^}]*overflow-x:auto[^}]*contain:inline-size/.test(schedule)],
   ["manager workspaces are feature-owned", architectureOwned && Buffer.byteLength(managerApp) < 60000],
+  ["orchestrator has no stale Team component reference", !managerApp.includes("<Team\n") && managerApp.includes("<TeamWorkspace")],
   ["active script surface remains compact", scriptFiles.length <= 20 && Object.keys(pkg.scripts).length <= 25],
   ["quality workflow runs current suite", quality.includes("npm run test:all")],
   ["root global-error exception remains documented", exceptionRegister.includes("global-error.tsx") && exceptionRegister.includes("root error boundary")],

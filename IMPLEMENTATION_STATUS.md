@@ -1,16 +1,16 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.46**
+Version: **v0.19.0-rc.47**
 
 ## Current focus
-Shift Plan mobile scroll containment after source-architecture decomposition.
+Source-decomposition wiring integrity after the rc.45 feature split.
 
-## rc.46
-- Corrected document-level horizontal scrolling on Shift Plan.
-- `.page-wrap[data-workspace="schedule"]` now rejects horizontal overflow.
-- Shift Plan workspace, calendar panel, and calendar scroller now form explicit inline-size containment boundaries.
-- Only `.calendarScroll` owns horizontal scrolling for the day grid.
-- No new CSS file, component layer, database change, or business behavior change.
+## rc.47
+- Replaced the stale `<Team>` render path in `components/bar-ops-app.tsx` with the already-imported feature-owned `<TeamWorkspace>`.
+- Added the regression assertion to the existing semantic UI contract.
+- Scanned the remaining extracted manager workspace render paths for stale pre-decomposition component names.
+- No CSS, database, API, permission, or business-behavior changes.
 
-## Previous structural baseline
-- rc.45 split manager workspaces into feature/domain owners and reduced `components/bar-ops-app.tsx` to orchestration/state/dialog coordination.
+## Previous checkpoints
+- rc.46: Shift Plan mobile horizontal-scroll containment.
+- rc.45: manager workspace feature/domain decomposition.

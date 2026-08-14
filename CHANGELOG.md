@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.19.0-rc.47
+
+- Fixed the stale `<Team>` render reference left by the rc.45 source decomposition; the orchestrator now renders `TeamWorkspace`.
+- Added stale decomposed-workspace wiring coverage to the existing UI contract.
+- No CSS, database, API, permission, or workflow changes.
+
+## v0.19.0-rc.46
+
+- Contained Shift Plan horizontal scrolling to the day-grid scroller on Safari/iPhone.
+- Added inline-size containment so the wide week grid cannot widen the document.
+- Kept the shared top navbar fixed site-wide.
+
 ## v0.19.0-rc.44
 
 - Consolidated active version-numbered regression scripts into semantic auth, API-integrity, release, and UI contract tests.
@@ -37,5 +49,5 @@
 - Reduced application styling to global tokens, global application CSS, and one Shift Plan CSS Module.
 - Removed all other CSS Modules, route-specific CSS, compatibility layers, release patch stylesheets, and CSS release-history sections.
 - Kept existing application routes, APIs, permissions, database behavior, and business workflows unchanged.
-## v0.19.0-rc.46
+## v0.19.0-rc.45
 - Decomposed manager workspace implementations into feature/domain modules; no behavior or CSS changes.
