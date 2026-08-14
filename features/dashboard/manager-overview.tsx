@@ -8,7 +8,7 @@ import { dashboardStyles, executionStyles, overviewStyles } from "@/lib/ui-class
 import { WorkspaceHeader } from "@/components/ui/workspace-ui";
 
 function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; title: string; subtitle?: string; action?: React.ReactNode }) {
-  return <WorkspaceHeader eyebrow={eyebrow} title={title} subtitle={subtitle} action={action} />;
+  return <WorkspaceHeader eyebrow={eyebrow} title={title} description={subtitle} actions={action} />;
 }
 
 export function DashboardWorkspace({ shifts, products, employees, timeEntries, tasks, shiftNotes, devMode, onNavigate }: { shifts: Shift[]; products: Product[]; employees: Employee[]; timeEntries: TimeEntry[]; tasks: OpsTask[]; shiftNotes:ShiftNote[]; devMode: boolean; onNavigate: (id: NavKey) => void }) {

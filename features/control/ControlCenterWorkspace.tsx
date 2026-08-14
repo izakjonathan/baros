@@ -1,6 +1,6 @@
 "use client";
 import { WorkspaceHeader } from "@/components/ui/workspace-ui";
-function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; title: string; subtitle?: string; action?: React.ReactNode }) { return <WorkspaceHeader eyebrow={eyebrow} title={title} subtitle={subtitle} action={action} />; }
+function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; title: string; subtitle?: string; action?: React.ReactNode }) { return <WorkspaceHeader eyebrow={eyebrow} title={title} description={subtitle} actions={action} />; }
 import { CalendarDays, Check, Database, DownloadCloud, KeyRound, ReceiptText, RotateCcw, ShieldCheck, Upload } from "lucide-react";
 function PanelTitle({ title, subtitle, action }: { title: string; subtitle: string; action?: React.ReactNode }) { return <div className="panel-title"><div><h2>{title}</h2>{subtitle&&<p>{subtitle}</p>}</div>{action}</div>; }
 export function ControlCenterWorkspace({devMode,databaseStatus,notify}:{devMode:boolean;databaseStatus:string;notify:(s:string)=>void}) {

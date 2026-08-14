@@ -1,6 +1,6 @@
 "use client";
 import { WorkspaceHeader } from "@/components/ui/workspace-ui";
-function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; title: string; subtitle?: string; action?: React.ReactNode }) { return <WorkspaceHeader eyebrow={eyebrow} title={title} subtitle={subtitle} action={action} />; }
+function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; title: string; subtitle?: string; action?: React.ReactNode }) { return <WorkspaceHeader eyebrow={eyebrow} title={title} description={subtitle} actions={action} />; }
 import { useState } from "react";
 import { UserRoundPlus } from "lucide-react";
 import type { Shift } from "@/lib/data";

@@ -1,15 +1,11 @@
-# v0.19.0-rc.47 — Team Workspace Decomposition Wiring Fix
+# v0.19.0-rc.48 — Workspace Header Contract Wiring Fix
 
 ## Fixed
-- Corrected the manager application orchestrator to render the feature-owned `TeamWorkspace` after the rc.45 source decomposition.
-- Removed the stale `<Team>` component reference that caused Vercel TypeScript to fail with `Cannot find name 'Team'`.
-- Added the stale-component check to the existing UI contract rather than creating another test file.
-- Scanned the remaining extracted manager workspace render paths; the other feature-owned workspaces already use their correct `*Workspace` symbols.
+- Corrected feature-owned workspace header adapters created during the rc.45 decomposition.
+- `WorkspaceHeader` accepts `description` and `actions`; extracted workspaces were still forwarding the old local adapter names as `subtitle` and `action`.
+- Updated Attendance, Inventory, Daily Operations, Settings, Control Centre, Team, Dashboard/Shift Execution, and Orders.
 
-## Unchanged
-- Three-file CSS architecture remains unchanged.
-- Shift Plan horizontal-scroll containment from rc.46 remains unchanged.
-- Shared fixed top navbar remains site-wide.
-- APIs, database schema, permissions, and business workflows are unchanged.
+## Scope
+No CSS, database, authorization, API, or business-behaviour changes.
 
-No migration required.
+Rollback checkpoint: **v0.19.0-rc.47**.

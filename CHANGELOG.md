@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.19.0-rc.48
+
+- Fixed `WorkspaceHeader` prop wiring in all feature-owned workspace adapters after the rc.45 decomposition.
+- Replaced stale `subtitle`/`action` props with the shared header contract `description`/`actions`.
+- Added a regression scan for stale `WorkspaceHeader` adapter props.
+
 ## v0.19.0-rc.47
 
 - Fixed the stale `<Team>` render reference left by the rc.45 source decomposition; the orchestrator now renders `TeamWorkspace`.

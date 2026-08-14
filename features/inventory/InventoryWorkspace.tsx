@@ -1,6 +1,6 @@
 "use client";
 import { WorkspaceHeader } from "@/components/ui/workspace-ui";
-function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; title: string; subtitle?: string; action?: React.ReactNode }) { return <WorkspaceHeader eyebrow={eyebrow} title={title} subtitle={subtitle} action={action} />; }
+function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; title: string; subtitle?: string; action?: React.ReactNode }) { return <WorkspaceHeader eyebrow={eyebrow} title={title} description={subtitle} actions={action} />; }
 import { useState } from "react";
 import { AlertTriangle, Check, ClipboardList, History, Pencil, Plus, Search } from "lucide-react";
 import type { Product } from "@/lib/data";

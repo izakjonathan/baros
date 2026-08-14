@@ -1,16 +1,11 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.47**
+Version: **v0.19.0-rc.48**
 
 ## Current focus
-Source-decomposition wiring integrity after the rc.45 feature split.
+Source-decomposition shared-component contract integrity.
 
-## rc.47
-- Replaced the stale `<Team>` render path in `components/bar-ops-app.tsx` with the already-imported feature-owned `<TeamWorkspace>`.
-- Added the regression assertion to the existing semantic UI contract.
-- Scanned the remaining extracted manager workspace render paths for stale pre-decomposition component names.
-- No CSS, database, API, permission, or business-behavior changes.
-
-## Previous checkpoints
-- rc.46: Shift Plan mobile horizontal-scroll containment.
-- rc.45: manager workspace feature/domain decomposition.
+## rc.48
+- Corrected all extracted workspace `WorkspaceHeader` adapters to the shared `description` / `actions` API.
+- No CSS or functionality changes.
+- Rollback checkpoint: v0.19.0-rc.47.

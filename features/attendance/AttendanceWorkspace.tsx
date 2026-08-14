@@ -8,7 +8,7 @@ import { hoursBetween } from "@/features/workspace/schedule-utils";
 import { WorkspaceHeader } from "@/components/ui/workspace-ui";
 
 function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; title: string; subtitle?: string; action?: React.ReactNode }) {
-  return <WorkspaceHeader eyebrow={eyebrow} title={title} subtitle={subtitle} action={action} />;
+  return <WorkspaceHeader eyebrow={eyebrow} title={title} description={subtitle} actions={action} />;
 }
 
 function workedHours(entry: TimeEntry) { return entry.clockOut ? Math.max(0, hoursBetween(entry.clockIn, entry.clockOut) - entry.breakMinutes/60) : 0; }
