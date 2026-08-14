@@ -65,9 +65,9 @@ export function RequestsWorkspace({devMode,notify}:{devMode:boolean;notify:(mess
   return <section className={surfaceStyles.workspace}>
     <WorkspaceHeader eyebrow="Employee self-service" title="Requests" description="Review time off, open shifts and employee-approved shift changes." actions={<button className={`${surfaceStyles.control} ${surfaceStyles.outline} ${styles.refresh}`} type="button" disabled={loading} onClick={()=>void load()}><RefreshCw className={loading?styles.loadingIcon:undefined} size={16}/>Refresh</button>}/>
     <section className={`${surfaceStyles.metrics} ${styles.summary}`} aria-label="Request summary">
-      <article><span>Awaiting review</span><strong>{items.length}</strong></article>
-      <article><span>Open shifts</span><strong>{claimCount}</strong></article>
-      <article><span>Changes</span><strong>{transferCount+requestCount}</strong></article>
+      <article className="card card-compact"><span>Awaiting review</span><strong>{items.length}</strong></article>
+      <article className="card card-compact"><span>Open shifts</span><strong>{claimCount}</strong></article>
+      <article className="card card-compact"><span>Changes</span><strong>{transferCount+requestCount}</strong></article>
     </section>
     <section className={styles.queue}>
       <header className={`${surfaceStyles.sectionHeader} ${styles.queueHeader}`}><div><h2>Review queue</h2><p>Oldest requests appear first.</p></div><span className={styles.liveStatus}>Live queue</span></header>

@@ -1,39 +1,31 @@
-# v0.19.0-rc.41 Validation
+# v0.19.0-rc.42 Validation
 
 ## Passed
 
+- `npm run test:rc42`
 - `npm run test:current`
-- `npm run test:rc41`
-- structural CSS parsing with `tinycss2`: 3 CSS files, 0 parse errors
-- static runtime class-to-CSS contract scan: 0 unresolved class names
-- `ui-classes.ts` mapped class-to-CSS contract scan: 0 unresolved class names
-- TypeScript syntax transpilation across 99 TS/TSX files: 0 syntax failures
+- rc.38 CSS architecture gate
+- rc.41 CSS contract-integrity gate
 
-## rc.41 focused assertions
+## rc.42 focused assertions
 
-- exactly three CSS files remain;
-- `.page-wrap` solely owns page/safe-area gutters;
-- Employee does not own outer page padding/margin;
-- top bar and page content use the same mobile gutter token;
-- headings/paragraphs have fully reset margins;
-- bold typography uses a loaded font weight;
-- native controls on light surfaces use a light native color scheme;
-- the nonfunctional theme toggle is removed;
-- shared loading/error/empty-state components are styled;
-- shared Dialog renders a real body wrapper;
-- all `ui-classes.ts` mappings resolve to CSS;
-- Shift Plan editor styling is module-owned;
-- Employee transfer actions use shared form/control primitives;
-- Schedule acknowledgement uses a real global button primitive;
-- manager PageHeader uses the shared WorkspaceHeader primitive;
-- root global-error inline styling is explicitly documented as an intentional exception.
+- one standard base card exists;
+- compact cards only change density;
+- flush cards only remove internal spacing;
+- obsolete panel/card variants are gone;
+- shared states compose the base card;
+- manager loading and employee request-success surfaces reuse shared state/card contracts;
+- Attendance preview uses the global card;
+- Request cards use the compact card contract;
+- feature card hooks do not redefine base radius/padding;
+- React Card primitive exposes only default/compact/flush density;
+- Shift Plan retains the sole custom shift-card exception.
 
-## Dependency-backed validation attempts
+## CSS inventory
 
-The constitution-required commands were attempted in the extracted release workspace:
+- `styles/tokens.css`: 47 declarations
+- `app/globals.css`: 1,405 declarations
+- `features/scheduling/ScheduleWorkspace.module.css`: 278 declarations
+- Total: **1,730 declarations across 3 CSS files**
 
-- `npm run lint` — could not execute because `eslint` is not installed (`node_modules` is absent).
-- `npm run typecheck` — the available TypeScript executable ran, but cannot resolve React, Next.js, Postgres, Node, or their type declarations because project dependencies are not installed; this is not an authoritative application typecheck.
-- `npm run build` — could not execute because `next` is not installed (`node_modules` is absent).
-
-Vercel remains the production dependency-backed TypeScript/build gate. No pass is claimed for these three commands.
+Dependency-backed lint/typecheck/build still require the installed dependency environment. Vercel remains the authoritative dependency-backed TypeScript/build gate.

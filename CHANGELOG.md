@@ -1,4 +1,18 @@
 # Changelog
+## v0.19.0-rc.42
+
+- Reduced the global card architecture to one base card plus compact/flush density modifiers.
+- Removed the legacy panel surface and obsolete card variants.
+- Migrated feature and employee surfaces to the shared card contract without adding CSS files.
+- Added an existing-code-first rule for future CSS/functionality changes.
+
+## v0.19.0-rc.42
+
+- Reduced the global card system to standard, compact, and flush fundamentals only.
+- Removed obsolete card state/muted/elevated/panel fundamentals and duplicated feature card geometry.
+- Kept Shift Plan as the sole custom card-layout exception.
+- Added governance requiring existing code to be changed/replaced/consolidated before new primitives are introduced where possible.
+
 ## v0.19.0-rc.41
 
 - Repaired CSS/source ownership mismatches found by the full rc.40 audit.

@@ -10,7 +10,7 @@ export const surfaceStyles = {
 
 export const overviewStyles = {
   amber: "tone-amber", attentionIcon: "attention-icon", attentionItem: "attention-item", blue: "tone-blue",
-  metric: "metric", metricLabel: "metric-label", metricTrend: "metric-trend", panelTitle: "panel-title",
+  metric: "card card-compact metric", metricLabel: "metric-label", metricTrend: "metric-trend", panelTitle: "panel-title",
   quickAction: "quick-action", quickGrid: "quick-grid", quickIcon: "quick-icon", statusDot: "status-dot",
   violet: "tone-violet", warning: "warning",
 } as const;
@@ -24,7 +24,7 @@ export const dashboardStyles = {
 } as const;
 
 export const teamStyles = {
-  actions:"team-actions", activeStatus:"status-active", addButton:"control-solid", avatar:"team-avatar", card:"team-card",
+  actions:"team-actions", activeStatus:"status-active", addButton:"control-solid", avatar:"team-avatar", card:"card team-card",
   cardHeader:"card-header", clearButton:"control-outline", details:"team-details", empty:"empty-state", filledButton:"control-solid",
   grid:"team-grid", identity:"team-identity", inactive:"team-inactive", inactiveStatus:"status-inactive", indicator:"team-indicator",
   note:"team-note", outlineButton:"control-outline", portalRow:"team-portal-row", resultCount:"result-count", role:"team-role",
@@ -34,9 +34,9 @@ export const teamStyles = {
 export const attendanceStyles = {
   actions:"attendance-actions", alertText:"alert-text", approveAll:"control-solid", avatar:"avatar", dateControl:"date-control",
   edited:"is-edited", empty:"attendance-empty", exceptions:"attendance-exceptions", export:"control-solid", filterFields:"filter-fields",
-  filterFooter:"filter-footer", filters:"attendance-filters", hero:"attendance-hero", history:"attendance-history", locked:"control-solid",
-  needsAction:"needs-action", outline:"control-outline", periodFields:"period-fields", preview:"attendance-preview",
-  previewList:"attendance-preview-list", primaryAction:"control-solid", record:"attendance-record", recordActions:"record-actions",
+  filterFooter:"filter-footer", filters:"card attendance-filters", hero:"card attendance-hero", history:"attendance-history", locked:"control-solid",
+  needsAction:"needs-action", outline:"control-outline", periodFields:"period-fields", preview:"card",
+  previewList:"attendance-preview-list", primaryAction:"control-solid", record:"card card-compact attendance-record", recordActions:"record-actions",
   recordException:"record-exception", recordList:"record-list", recordStats:"record-stats", records:"attendance-records",
   sectionHeader:"section-header", status:"status", statusRunning:"status-running", statusPending:"status-pending",
   statusApproved:"status-approved", statusRejected:"status-rejected", summary:"attendance-summary", timeLine:"time-line", workspace:"attendance-workspace",
@@ -50,30 +50,30 @@ export const executionStyles = {
 export const inventoryStyles = {
   clear:"control-outline", editButton:"control-outline", empty:"empty-state", history:"inventory-history", low:"is-low",
   lowFilter:"control-outline", negative:"negative", ok:"ok", positive:"positive", productCard:"product-card", productList:"product-list",
-  productsPanel:"panel", resultCount:"result-count", selected:"selected", stockControl:"stock-control", stockRow:"stock-row",
+  productsPanel:"card card-flush", resultCount:"result-count", selected:"selected", stockControl:"stock-control", stockRow:"stock-row",
   suggestion:"suggestion", summary:"inventory-summary", toolbar:"toolbar",
 } as const;
 
 export const orderStyles = {
   addButton:"control-solid", clear:"control-outline", delivery:"delivery", empty:"empty-state", filter:"control-outline", orderCard:"order-card",
-  orderList:"order-list", ordersPanel:"panel", receiveButton:"control-solid", resultCount:"result-count", suggestion:"suggestion", toolbar:"toolbar",
+  orderList:"order-list", ordersPanel:"card card-flush", receiveButton:"control-solid", resultCount:"result-count", suggestion:"suggestion", toolbar:"toolbar",
 } as const;
 
 export const operationsStyles = {
-  checklist:"panel", compose:"ops-compose", create:"ops-create", dateInput:"ops-date-input", header:"ops-header",
-  headerActions:"ops-header-actions", layout:"ops-layout", logEntry:"ops-log-entry", logList:"ops-log-list", logbook:"panel",
+  checklist:"card card-flush", compose:"ops-compose", create:"ops-create", dateInput:"ops-date-input", header:"ops-header",
+  headerActions:"ops-header-actions", layout:"ops-layout", logEntry:"ops-log-entry", logList:"ops-log-list", logbook:"card card-flush",
   panel:"ops-panel", presets:"ops-presets", progress:"ops-progress", rowActions:"ops-row-actions", summary:"ops-summary",
   task:"ops-task", taskList:"ops-task-list", workspace:"ops-workspace",
 } as const;
 
 export const settingsStyles = {
   actions:"settings-actions", fields:"settings-fields", form:"settings-form", help:"settings-help",
-  layout:"settings-layout", loading:"settings-loading", nav:"settings-nav", panel:"settings-panel", summary:"settings-summary",
+  layout:"settings-layout", loading:"settings-loading", nav:"settings-nav", panel:"card card-flush settings-panel", summary:"settings-summary",
   toggle:"settings-toggle", workspace:"settings-workspace",
 } as const;
 
 export const requestStyles = {
-  actions:"request-actions", approve:"request-approve", card:"request-card", cardHeader:"request-card-header", empty:"empty-state",
+  actions:"request-actions", approve:"request-approve", card:"card card-compact", cardHeader:"request-card-header", empty:"empty-state",
   kind:"request-kind", list:"request-list",
   liveStatus:"request-live-status", loadingIcon:"request-loading-icon", meta:"request-meta", queue:"request-queue",
   queueHeader:"request-queue-header", refresh:"control-outline", reject:"request-reject", status:"request-status",

@@ -173,7 +173,7 @@ export default function HoursPage() {
 
       {loading && <div className="employee-loading-inline" role="status">Loading your current clock…</div>}
 
-      <section className={`clock-card ${active ? "clock-running" : ""}`}>
+      <section className={`card clock-card ${active ? "clock-running" : ""}`}>
         <div>
           <small>{active ? breakActive ? "Break in progress" : "Shift in progress" : "Ready to start"}</small>
           <strong>{active ? `Started ${started}` : "Clock in for your next published shift"}</strong>
@@ -201,14 +201,14 @@ export default function HoursPage() {
       </div>
 
       <section className="employee-hour-cards">
-        <article><CalendarDays /><span>Scheduled<strong>{(scheduledMinutes / 60).toFixed(1)}h</strong></span></article>
-        <article><Clock3 /><span>Approved worked<strong>{(approvedMinutes / 60).toFixed(1)}h</strong></span></article>
+        <article className="card card-compact"><CalendarDays /><span>Scheduled<strong>{(scheduledMinutes / 60).toFixed(1)}h</strong></span></article>
+        <article className="card card-compact"><Clock3 /><span>Approved worked<strong>{(approvedMinutes / 60).toFixed(1)}h</strong></span></article>
       </section>
 
       <h2>Timesheets</h2>
       <section className="hours-history">
         {timesheets.map((item) => (
-          <article key={item.id}>
+          <article className="card card-compact" key={item.id}>
             <div><strong>{dateLabel(item.work_date)}</strong><span>{(Number(item.scheduled_minutes || 0) / 60).toFixed(1)}h scheduled</span></div>
             <div>
               <b>{(Number(item.worked_minutes || 0) / 60).toFixed(2)}h</b>

@@ -20,7 +20,7 @@ const checks=[
  ['only Shift Plan uses CSS module',app.includes('ScheduleWorkspace.module.css')],
  ['global CSS owns shell',global.includes('.sidebar{')&&global.includes('.topbar{')&&global.includes('.main-shell{')],
  ['global CSS owns controls',global.includes('.button,.primary,.secondary')&&global.includes('input,select,textarea')],
- ['global CSS owns cards and metrics',global.includes('.panel,.card{')&&global.includes('.metrics{')],
+ ['global CSS owns cards and metrics',global.includes('.card{')&&global.includes('.card-compact{')&&global.includes('.metrics{')],
  ['global CSS owns employee portal',global.includes('.employee-page{')&&global.includes('.shift-action-row{')],
  ['shift CSS owns schedule grid',schedule.includes('.calendarGrid{')&&schedule.includes('.shiftCard{')&&schedule.includes('.dayColumn{')],
  ['no release patch comments in CSS',css.every(p=>!/(v0\.\d|rc\.\d)/i.test(fs.readFileSync(p,'utf8')))],

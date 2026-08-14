@@ -22,7 +22,7 @@ for(const m of schedule.matchAll(/\.([A-Za-z_][\w-]*)/g)) classSelectors.add(m[1
 const mappedClasses=[...uiClasses.matchAll(/:\s*"([^"]+)"/g)].flatMap(m=>m[1].split(/\s+/)).filter(Boolean);
 const missingMapped=[...new Set(mappedClasses.filter(name=>!classSelectors.has(name)))];
 const checks=[
- ['version is rc.41',pkg.version==='0.19.0-rc.41'],
+ ['version is rc.41 or later',/^0\.19\.0-rc\.(?:4[1-9]|[5-9]\d|\d{3,})$/.test(pkg.version)],
  ['only three CSS files remain',JSON.stringify(rel)===JSON.stringify(['app/globals.css','features/scheduling/ScheduleWorkspace.module.css','styles/tokens.css'])],
  ['page wrap owns safe area and mobile gutter',global.includes('--mobile-gutter')&&global.includes('padding-left:max(var(--mobile-gutter),env(safe-area-inset-left))')&&global.includes('padding-bottom:calc(5.5rem + env(safe-area-inset-bottom))')],
  ['employee page does not own outer padding',!/\.employee-page\{[^}]*padding/i.test(global)&&!/\.employee-page\{[^}]*margin/i.test(global)],
@@ -32,7 +32,7 @@ const checks=[
  ['bold token matches loaded font',tokens.includes('--weight-bold:700;')],
  ['native light-surface controls request light scheme',global.includes('input,select,textarea{color-scheme:light}')],
  ['theme toggle removed until a real light theme exists',!chrome.includes('onToggleTheme')&&!managerApp.includes('bar-ops-theme')&&!employeeShell.includes('bar-ops-theme')&&!layout.includes('data-theme')],
- ['shared state components are styled',global.includes('.shared-empty-state,.shared-state-card')&&global.includes('.shared-spinner{')&&global.includes('.shared-error-state{')],
+ ['shared state components are styled',global.includes('.shared-empty-state{')&&global.includes('.shared-state-card{')&&global.includes('.shared-spinner{')&&global.includes('.shared-error-state{')],
  ['Dialog renders a shared modal body',dialog.includes('<div className="modal-body">{children}</div>')&&global.includes('.modal-body{')],
  ['all ui class map contracts resolve to CSS',missingMapped.length===0],
  ['Shift Plan editor styling is module-owned',schedule.includes('.assignmentToggle{')&&schedule.includes('.shiftDialogFields{')&&schedule.includes('.repeatPanel{')&&schedule.includes('.editShiftActions{')&&!managerApp.includes('className="assignment-toggle"')],

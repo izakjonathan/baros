@@ -1,26 +1,26 @@
-# v0.19.0-rc.41 — CSS Contract Integrity
+# v0.19.0-rc.42 — Card Fundamentals Consolidation
 
-Baseline: **v0.19.0-rc.40** with **v0.19.0-rc.36** retained as the technical/functionality rollback checkpoint.
+Baseline: **v0.19.0-rc.41**. **v0.19.0-rc.36** remains the technical/functionality rollback checkpoint.
 
-## What was fixed
+## What changed
 
-- Made `.page-wrap` the single owner of horizontal, bottom, and safe-area page spacing across all workspaces.
-- Removed the remaining Employee-specific mobile bottom gutter and normalized Employee page flow to the shared `--gap` token.
-- Added one shared `--mobile-gutter` token used by both the top bar and page content on mobile.
-- Preserved left/right safe-area handling at the smallest breakpoint instead of overwriting it with shorthand padding.
-- Fully reset heading and paragraph margins so layout gaps own vertical rhythm.
-- Corrected `--weight-bold` from `750` to the actually loaded Space Grotesk `700` weight.
-- Removed the nonfunctional light/dark theme toggle; Bar Ops remains dark-only until a real global light theme exists.
-- Forced native form controls on light surfaces to use a light native control color scheme.
-- Restored shared loading, empty, error, and spinner visual contracts.
-- Added a real `.modal-body` structure to the shared Dialog component so dialog content has one padding/layout owner.
-- Moved Shift Plan editor-only controls and repeat/edit composition into `ScheduleWorkspace.module.css`.
-- Repaired Employee handover/swap form ownership with shared segmented/form-stack primitives.
-- Replaced legacy `portal-action` acknowledgement/request classes with real global button primitives.
-- Migrated manager PageHeader and the main Employee page headers onto the shared `WorkspaceHeader` React primitive.
-- Reconciled `lib/ui-classes.ts` so every active mapped class resolves to real CSS or a real shared primitive.
-- Added missing live global contracts for attendance date controls/preview, shift notes, timeline, developer access, stock-count toolbar, request success, and other runtime hooks uncovered by the rc.40 audit.
-- Documented `app/global-error.tsx` as the sole intentional inline-style exception because a root error boundary cannot safely depend on the root layout stylesheet.
+- Reduced the global card system to three fundamentals only:
+  1. `.card` — the one standard padded surface.
+  2. `.card-compact` — density modifier only.
+  3. `.card-flush` — removes internal spacing for structured panels whose children own their padding.
+- Loading/error/success alignment is now composition on the base card (`shared-state-card`), not a separate card type.
+- Removed the obsolete `.panel` surface contract.
+- Removed obsolete `card-state`, `card-muted`, and `card-elevated` fundamentals.
+- Team, Requests, Attendance, Inventory, Orders, Operations, Settings, Dashboard/Execution and Employee surfaces now compose the same base card.
+- Feature hooks such as `team-card`, `clock-card`, `attendance-hero`, and product/order cycling now control only feature layout/tone; they do not own global card padding or radius.
+- Employee hero, home tiles, schedule cards, request/history rows, availability rows, hour/timesheet cards, forms, notifications and authentication surfaces now use the shared card fundamentals.
+- Metrics now use the compact card fundamental rather than having a second card geometry embedded in `.metrics`.
+- The internal React `Card` primitive was simplified to the same `default | compact | flush` density contract.
+- Shift Plan remains the sole custom card exception via `ScheduleWorkspace.module.css .shiftCard`.
+
+## Development rule reinforced
+
+Existing code is now the default modification point. New CSS selectors, components, or parallel implementations should only be introduced when the existing owner cannot represent the required behavior. Prefer changing/replacing/merging existing code over adding another layer.
 
 ## CSS architecture
 
@@ -30,8 +30,4 @@ Still exactly three CSS files:
 2. `app/globals.css`
 3. `features/scheduling/ScheduleWorkspace.module.css`
 
-No old CSS files or compatibility layers were restored.
-
-## Database
-
-No migration required.
+No database migration required.
