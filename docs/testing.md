@@ -1,21 +1,14 @@
 # Testing
 
-## Required release gates
+`npm run test:current` runs the current business/security/integrity regression set plus the rc.38 CSS architecture contract.
 
-Run in this order from a clean Node 24 checkout:
+The rc.38 CSS test verifies:
+- exactly three CSS files;
+- only Shift Plan uses a CSS Module;
+- global ownership of shell, controls, cards, metrics, and employee presentation;
+- no release-patch comments in CSS;
+- reduced-motion is the only accepted use of `!important`.
 
-```bash
-npm install --no-audit --no-fund
-npm run audit:preflight
-npm run validate:release
-npm run test:all
-npm run lint
-npm run typecheck
-npm run build
-```
+Historical tests remain available through `npm run test:historical`, but old tests that assert superseded CSS implementations are not part of the current release gate.
 
-Regression tests protect behavior and architectural invariants. They must be forward-compatible with later versions and should test shared contracts rather than obsolete source locations.
-
-## Phase D requirement
-
-Every redesign release must continue to run `test:v0170-redesign-readiness` so domain contracts, pure schedule logic, design tokens, service-worker expectations and redesign documentation remain intact.
+Vercel is the dependency-backed production build gate when local `node_modules` are unavailable.

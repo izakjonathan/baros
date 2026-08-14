@@ -1,3 +1,3 @@
-import type { ReactNode } from "react"; import styles from "./Card.module.css";
+import type { ReactNode } from "react";
 type CardProps={children:ReactNode;padding?:"sm"|"md"|"lg";tone?:"default"|"muted";elevated?:boolean;className?:string};
-export function Card({children,padding="md",tone="default",elevated=false,className=""}:CardProps){return <div className={[styles.card,styles[padding],tone==="muted"?styles.muted:"",elevated?styles.elevated:"",className].filter(Boolean).join(" ")}>{children}</div>}
+export function Card({children,padding="md",tone="default",elevated=false,className=""}:CardProps){return <div className={["card",`card-${padding}`,tone==="muted"?"card-muted":"",elevated?"card-elevated":"",className].filter(Boolean).join(" ")}>{children}</div>}

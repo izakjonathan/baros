@@ -1,11 +1,21 @@
-# Bar Ops — v0.19.0-rc.36
+# Bar Ops
 
-Current release: **v0.19.0-rc.36**.
+Current release: **v0.19.0-rc.38**
 
-Release: **Visual Regression Recovery**.
+Bar Ops is a Next.js operations application for bar scheduling, attendance, team operations, inventory, ordering, requests, and employee self-service.
 
-This release supersedes rc.35. The sub-4000 CSS purge removed declarations that appeared superseded structurally but remained necessary in live responsive/stateful UI contexts. rc.36 restores the affected CSS surfaces to the validated rc.34 state while preserving all non-CSS work from rc.35.
+## CSS architecture
 
-No database migration is required.
+The stylesheet system was rebuilt from scratch in rc.38. There are only three CSS files:
 
-Rollback checkpoint: **v0.19.0-rc.34**.
+- `styles/tokens.css`
+- `app/globals.css`
+- `features/scheduling/ScheduleWorkspace.module.css`
+
+All visual rules are global except Shift Plan-specific layout/composition.
+
+## Rollback checkpoint
+
+Rollback checkpoint: **v0.19.0-rc.36**.
+
+rc.36 is not an approved visual baseline; it is the functionality/recovery checkpoint used for the CSS rebuild.

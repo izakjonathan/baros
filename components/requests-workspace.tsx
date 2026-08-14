@@ -1,8 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { CalendarClock, Check, CheckCircle2, RefreshCw, Shuffle, Umbrella, X } from "lucide-react";
-import styles from "@/features/requests/RequestsWorkspace.module.css";
-import surfaceStyles from "@/features/workspace/FeatureSurface.module.css";
+import { requestStyles as styles, surfaceStyles } from "@/lib/ui-classes";
 import type { RequestQueueRecord, ShiftClaimQueueRecord, ShiftTransferQueueRecord } from "@/features/requests/types";
 
 type QueueItem={id:string;kind:"REQUEST"|"CLAIM"|"TRANSFER";title:string;subtitle:string;status:string;createdAt:string};

@@ -14,18 +14,9 @@ import { parseEmployeeInvitationMutationResponse, parseInvitationRecords, parseM
 import { BASE_MONDAY, canonicalShiftDate, conflictIds, dateFromSerial, dateFromShift, dateSerial, hoursBetween, isOvernight, mapDatabaseShift, shiftPositionFromDate, toIsoDate, type DatabaseShiftRecord } from "@/features/workspace/schedule-utils";
 import { RequestsWorkspace } from "@/components/requests-workspace";
 import { WorkspaceSidebar, WorkspaceTopbar } from "@/components/shell/workspace-chrome";
-import dashboardStyles from "@/features/dashboard/Dashboard.module.css";
 import scheduleStyles from "@/features/scheduling/ScheduleWorkspace.module.css";
-import teamStyles from "@/features/employees/TeamWorkspace.module.css";
-import attendanceStyles from "@/features/attendance/AttendanceWorkspace.module.css";
-import executionStyles from "@/features/execution/ShiftExecution.module.css";
-import inventoryStyles from "@/features/inventory/InventoryWorkspace.module.css";
-import orderStyles from "@/features/orders/OrdersWorkspace.module.css";
-import operationsStyles from "@/features/operations/DailyOperations.module.css";
 import { parseOperationChecklistRecords } from "@/features/operations/types";
-import settingsStyles from "@/features/settings/SettingsWorkspace.module.css";
-import surfaceStyles from "@/features/workspace/FeatureSurface.module.css";
-import overviewStyles from "@/components/ui/OverviewPrimitives.module.css";
+import { attendanceStyles, dashboardStyles, executionStyles, inventoryStyles, operationsStyles, orderStyles, overviewStyles, settingsStyles, surfaceStyles, teamStyles } from "@/lib/ui-classes";
 import { hasCapability, type Capability } from "@/lib/auth/capabilities";
 import type { AppRole } from "@/lib/auth/session";
 

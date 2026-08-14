@@ -1,3 +1,3 @@
-import type { ButtonHTMLAttributes } from "react"; import styles from "./Button.module.css";
+import type { ButtonHTMLAttributes } from "react";
 type Props=ButtonHTMLAttributes<HTMLButtonElement>&{variant?:"primary"|"secondary"|"ghost"|"danger"};
-export function Button({variant="primary",className="",...props}:Props){return <button className={[styles.button,styles[variant],className].filter(Boolean).join(" ")} {...props}/>}
+export function Button({variant="primary",className="",...props}:Props){return <button className={["button",`button-${variant}`,className].filter(Boolean).join(" ")} {...props}/>}

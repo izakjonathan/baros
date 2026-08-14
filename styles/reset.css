@@ -1,3 +1,0 @@
-@layer reset {
-*,*::before,*::after{box-sizing:border-box} html{font-size:100%;text-size-adjust:100%} body{margin:0} button,input,select,textarea{font:inherit} img,svg{display:block;max-width:100%}
-}
