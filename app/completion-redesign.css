@@ -2,7 +2,7 @@
    This is the final shared presentation owner for employee surfaces, authentication,
    transient UI and cross-workspace states. Feature workspace modules remain authoritative. */
 
-
+:where(.employee-app,.login-page,.modal-layer,.top-popover){--remaining-gap:.75rem;--remaining-radius:1.25rem}
 
 /* Employee portal presentation moved to app/employee/EmployeeWorkspace.css in v0.19.0-rc.4. */
 

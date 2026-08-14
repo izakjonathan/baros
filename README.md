@@ -1,13 +1,11 @@
-# Bar Ops — v0.19.0-rc.35
+# Bar Ops — v0.19.0-rc.36
 
-Bar Ops release candidate focused on aggressive CSS consolidation and deterministic style ownership.
+Current release: **v0.19.0-rc.36**.
 
-Current release: **v0.19.0-rc.35**
+Release: **Visual Regression Recovery**.
 
-## v0.19.0-rc.35
+This release supersedes rc.35. The sub-4000 CSS purge removed declarations that appeared superseded structurally but remained necessary in live responsive/stateful UI contexts. rc.36 restores the affected CSS surfaces to the validated rc.34 state while preserving all non-CSS work from rc.35.
 
-This release takes the live stylesheet below 4,000 structurally parsed declarations by removing unused design tokens and declarations that are provably superseded later in the same cascade context. It preserves the existing visual direction and behavior while reducing styling ambiguity and maintenance cost.
-
-No business logic, API, database, permission, or workflow changes are included.
+No database migration is required.
 
 Rollback checkpoint: **v0.19.0-rc.34**.

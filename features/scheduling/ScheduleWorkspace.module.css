@@ -1,8 +1,8 @@
-.workspace{display:grid;}.header{justify-content:space-between;}.headerActions{justify-content:flex-end;flex-wrap:wrap;}.headerActions :global(select){color:#f47add}
+.workspace{--schedule-foundation-surface:var(--surface-card);display:grid;}.header{justify-content:space-between;}.headerActions{justify-content:flex-end;flex-wrap:wrap;}.headerActions :global(select){color:#f47add}
 .toolbar{box-shadow:none}.periodControls strong{min-width:0;text-align:center;white-space:nowrap}.summaryText{color:#000;font-size:var(--text-sm);white-space:nowrap}.calendarPanel{min-width:0;}.calendarScroll{min-width:0;}.dayHeader{top:0;align-items:center;backdrop-filter:none}.shiftCard{text-align:start;background:#f47add;transition:transform var(--duration-fast) var(--ease-standard);}.shiftCard:hover{transform:translateY(-1px)}.shiftCard:focus-visible{outline:3px solid #000;outline-offset:2px}.shiftCard[data-draft="true"]{outline:2px dashed #000;outline-offset:-5px}.shiftCard[data-conflict="true"]{outline:3px solid #000;outline-offset:-3px}
 .periodControls button{border:0;box-shadow:none}.summary :global(button){background:#000;color:#eb6746;border:0}.shiftCard strong,.shiftCard small{color:#000}
 @media(max-width:70rem){.toolbar{grid-template-columns:1fr auto}.toolbar>:nth-child(2){grid-column:1/-1;grid-row:2}}
-@media(max-width:48rem){.header{flex-direction:column;}.toolbar{align-items:stretch;}.toolbar>:nth-child(2){grid-column:auto;grid-row:auto}.summaryText{flex-basis:100%;}.periodControls button{padding:0}}
+@media(max-width:48rem){.header{align-items:stretch;flex-direction:column;}.toolbar{align-items:stretch;}.toolbar>:nth-child(2){grid-column:auto;grid-row:auto}.summaryText{flex-basis:100%;}.periodControls button{padding:0}}
 @media(prefers-reduced-motion:reduce){.shiftCard{transition:none}.shiftCard:hover{transform:none}}
 
 /* v0.18.4.5 top chrome refinement */
@@ -51,7 +51,7 @@
 .workspace{min-width:0;overflow-x:clip;}
 .header,.toolbar{min-width:0;max-width:100%;}
 .headerActions>*{min-width:0;}
-.periodControls,.summary{}
+.periodControls,.summary{min-width:0;}
 .periodControls button{display:grid;place-items:center;}
 .periodControls button svg{display:block;}
 .summary button svg{display:block;stroke:currentColor;}
@@ -69,7 +69,7 @@
   
   .toolbar{display:grid;width:100%;}
   .periodControls{width:100%;}
-  .periodControls button{color:#eb6746}
+  .periodControls button{border-radius:.8rem;color:#eb6746}
   
   .summary{grid-template-columns:repeat(3,auto);justify-content:start;align-items:center;}
   .summaryText{grid-column:1/-1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.75rem}
@@ -125,7 +125,7 @@
 .shiftCard strong{
 
 
-  
+  overflow-wrap:normal;
   word-break:normal;
 
 
@@ -141,16 +141,16 @@
   
   
   .toolbar{
-    
+    grid-template-columns:minmax(0,1fr) auto;
 
-    
+    gap:.45rem;
 
   }
   
   .periodControls button{
-    
-    
-    
+    width:2.3rem;
+    height:2.3rem;
+    min-width:2.3rem;
   }
   
   .summary{
@@ -184,7 +184,7 @@
 
 .calendarPanel{
 
-  
+  outline:none;
 }
 
 
@@ -216,9 +216,9 @@
 .shiftCard strong{
 
 
-  
-  
-  
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
 
 }
 
@@ -256,11 +256,11 @@
   
   
   .periodControls button{
-    
-    
-    
-    
-    
+    width:2rem;
+    min-width:2rem;
+    height:2rem;
+    min-height:2rem;
+    border-radius:.55rem;
   }
   
   
@@ -270,7 +270,7 @@
   
   .dayBody{
 
-    
+    padding:.38rem;
 
   }
   
@@ -286,13 +286,13 @@
 /* v0.18.4.17 header-only schedule columns */
 .calendarPanel{
 
-  
+  border:0;
 
-  
+  box-shadow:none;
 
 }
 .calendarScroll{
-  
+  background:transparent;
   padding-block-end:.2rem;
 }
 
@@ -488,25 +488,25 @@
 
 @media(max-width:48rem){
   .calendarGrid{
-    
-    
-    
+    min-width:36.8rem;
+    grid-template-columns:repeat(7,minmax(6.45rem,1fr));
+    gap:.36rem;
   }
   .dayColumn{
-    
+    gap:.3rem;
   }
   
   
   
   
   .dayBody{
-    
-    
+    min-height:12.5rem;
+    gap:.26rem;
   }
   
   
   .shiftCard small{
-    
+    font-size:.5rem;
   }
   
 }
@@ -581,8 +581,8 @@
 
   }
   .dayColumn{
-    
-    
+    width:var(--schedule-column-width);
+    min-width:var(--schedule-column-width);
     min-height:0;
   }
   
@@ -628,8 +628,8 @@
   
   
   .shiftCard{
-    
-    
+    width:100% ;
+    max-width:100% ;
 
 
   }
@@ -683,7 +683,7 @@
   isolation:isolate;
   contain:layout paint;
   background:#000 ;
-  
+  border:0 ;
 }
 .dayHeader{
   flex:0 0 auto;
@@ -778,8 +778,8 @@
   
   
   .shiftCard{
-    
-    
+    padding:.3rem .34rem ;
+    border-radius:.52rem ;
   }
 }
 
@@ -837,10 +837,10 @@
 @media(max-width:48rem){
   
   .header{
-    
-    
-    
-    
+    grid-template-columns:minmax(0,1fr) auto ;
+    padding:.62rem .68rem ;
+    gap:.38rem ;
+    border-radius:.85rem ;
   }
   
   
@@ -849,8 +849,8 @@
   
   
   .toolbar{
-    
-    
+    padding:.28rem .34rem ;
+    border-radius:.68rem ;
   }
   
   
@@ -1313,12 +1313,12 @@
 
 }
 .calendarPanel,.calendarScroll,.calendarGrid{
-  
-  
+  border-block:0 ;
+  box-shadow:none ;
 }
 .calendarPanel::before,.calendarPanel::after,.calendarScroll::before,.calendarScroll::after,.calendarGrid::before,.calendarGrid::after{
-  
-  
+  display:none ;
+  content:none ;
 }
 
 @media(max-width:48rem){
@@ -1399,26 +1399,26 @@
   }
   
   .dayHeader{
-    
+    min-height:2.1rem ;
     display:flex ;
     flex-direction:row ;
     align-items:center ;
     justify-content:center ;
-    
-    
-    
+    gap:.32rem ;
+    padding:.28rem .4rem ;
+    border-radius:.68rem ;
     white-space:nowrap ;
   }
   .dayHeader span{
-    
-    
-    
+    font-size:.53rem ;
+    line-height:1 ;
+    letter-spacing:.08em ;
     font-weight:400 ;
   }
   .dayHeader strong{
     margin:0 ;
-    
-    
+    font-size:.78rem ;
+    line-height:1 ;
     font-weight:800 ;
   }
   .today .dayHeader{
@@ -1428,8 +1428,8 @@
     display:inline ;
     inline-size:auto ;
     block-size:auto ;
-    
-    
+    padding:.14rem .28rem ;
+    font-size:.78rem ;
     line-height:1 ;
   }
   

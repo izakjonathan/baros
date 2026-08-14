@@ -1,19 +1,11 @@
-# Release notes — v0.19.0-rc.35
+# Release notes — v0.19.0-rc.36
 
-## Sub-4000 CSS Consolidation
+## Visual Regression Recovery
 
-Baseline: v0.19.0-rc.34.
+- Marks rc.35's aggressive declaration-removal pass as visually unsafe.
+- Restores the 11 CSS files changed by rc.35 to their rc.34 validated contents.
+- Fixes regressions visible in employee schedule note controls, manager payroll/time & attendance controls, daily operations metric content, shift execution cards/actions, and other surfaces sharing those styles/tokens.
+- Removes the rc.35 sub-4000 declaration budget from the inherited release gate.
+- Adds an rc.36 recovery test that locks the restored CSS files and aggregate CSS metrics.
 
-This release continues the CSS consolidation without adding another override layer. It removes unused design-token declarations and superseded declarations whose property is redefined later for every selector branch under the exact same cascade context. The winning computed declarations are preserved while historical/live duplication is reduced.
-
-### CSS result
-
-- 25 CSS files
-- 3,948 structurally parsed declarations
-- 1,396 parsed rules
-- 137,224 bytes of CSS
-- 9 `!important` declarations
-- 52 unused custom-property declarations removed
-- 135 provably superseded declarations removed across Employee, Attendance, Daily Operations, Inventory, Dashboard, Requests, Orders, Schedule and ManagerShell
-
-No API, database, authorization, permission, workflow, or feature changes are included. No migration is required.
+CSS baseline after recovery: 25 files, 4,135 declarations, 1,397 rules, 141,171 bytes, 9 `!important` declarations.

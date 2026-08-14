@@ -1,10 +1,5 @@
-# Implementation Status — v0.19.0-rc.35
+# Implementation Status — v0.19.0-rc.36
 
-Current focus: CSS ownership and declaration consolidation.
+rc.36 is a corrective visual-regression release based on rc.35 with the rc.35 CSS purge reverted to the validated rc.34 CSS baseline. The application architecture, components, data model, and feature behavior are otherwise unchanged.
 
-- CSS reduced to 3,948 structurally parsed declarations across 25 files.
-- 52 unused custom-property declarations removed after runtime/source usage tracing.
-- 135 superseded declarations removed only where every selector branch receives the same property later in the exact same cascade context.
-- Schedule remains module-owned; Employee, Attendance, Inventory, Orders, Requests, Daily Operations, Dashboard and ManagerShell retain their scoped owners.
-- CSS `!important` usage remains at 9 declarations.
-- No application behavior changes.
+The next CSS reduction pass must use rendered/state-aware verification; declaration-level cascade equivalence alone is no longer accepted as sufficient evidence for deletion.
