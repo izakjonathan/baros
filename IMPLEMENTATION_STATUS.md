@@ -1,6 +1,6 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.38**
+Version: **v0.19.0-rc.39**
 
 CSS architecture reset complete at source level.
 

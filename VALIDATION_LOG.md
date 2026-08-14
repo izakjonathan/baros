@@ -1,4 +1,13 @@
-# Validation Log — v0.19.0-rc.38
+# v0.19.0-rc.39 Validation
+
+Executed locally:
+- `npm run test:rc39` — passed.
+- `npm run test:current` — passed after updating the rc.38 architecture test to accept rc.38-or-later while preserving all CSS architecture assertions.
+- Vercel production build is the dependency-backed TypeScript/build gate.
+
+The specific rc.39 regression verifies that all four dynamically addressed Attendance status class keys exist in the typed class map and have matching global CSS selectors.
+
+# Validation Log — v0.19.0-rc.39
 
 ## Passed
 

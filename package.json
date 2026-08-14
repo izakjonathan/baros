@@ -1,6 +1,6 @@
 {
   "name": "bar-ops",
-  "version": "0.19.0-rc.38",
+  "version": "0.19.0-rc.39",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -206,7 +206,8 @@
     "test:rc34": "node scripts/test-v0190-rc34-shared-component-css-consolidation.mjs",
     "test:rc35": "node scripts/test-v0190-rc35-sub-4000-css-consolidation.mjs",
     "test:rc36": "node scripts/test-v0190-rc36-visual-regression-recovery.mjs",
-    "test:rc38": "node scripts/test-v0190-rc38-css-reset.mjs"
+    "test:rc38": "node scripts/test-v0190-rc38-css-reset.mjs",
+    "test:rc39": "node scripts/test-v0190-rc39-attendance-status-contract.mjs"
   },
   "dependencies": {
     "lucide-react": "0.468.0",

@@ -38,7 +38,8 @@ export const attendanceStyles = {
   needsAction:"needs-action", outline:"control-outline", periodFields:"period-fields", preview:"attendance-preview",
   previewList:"attendance-preview-list", primaryAction:"primary-action", record:"attendance-record", recordActions:"record-actions",
   recordException:"record-exception", recordList:"record-list", recordStats:"record-stats", records:"attendance-records",
-  sectionHeader:"section-header", status:"status", summary:"attendance-summary", timeLine:"time-line", workspace:"attendance-workspace",
+  sectionHeader:"section-header", status:"status", statusRunning:"status-running", statusPending:"status-pending",
+  statusApproved:"status-approved", statusRejected:"status-rejected", summary:"attendance-summary", timeLine:"time-line", workspace:"attendance-workspace",
 } as const;
 
 export const executionStyles = {

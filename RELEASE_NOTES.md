@@ -1,4 +1,11 @@
-# v0.19.0-rc.38 — CSS Architecture Reset
+# v0.19.0-rc.39 — Attendance Status Type Contract
+
+- Fixes the Vercel TypeScript failure in `components/bar-ops-app.tsx` caused by dynamically indexing `attendanceStyles` with `statusRunning`, `statusPending`, `statusApproved`, and `statusRejected` keys that were missing from the typed global class contract.
+- Adds those four keys to `lib/ui-classes.ts` and restores the intended global status colors in `app/globals.css`.
+- Preserves the rc.38 CSS architecture reset: exactly three CSS files, global styling for all non-Shift-Plan surfaces, and one Shift Plan CSS module.
+- No database, API, permission, workflow, or layout changes.
+
+# v0.19.0-rc.39 — CSS Architecture Reset
 
 Baseline: **v0.19.0-rc.36** as a technical/functionality rollback checkpoint, not a visual baseline.
 

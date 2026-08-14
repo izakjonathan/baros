@@ -13,7 +13,7 @@ const global=read('app/globals.css');
 const schedule=read('features/scheduling/ScheduleWorkspace.module.css');
 const app=read('components/bar-ops-app.tsx');
 const checks=[
- ['version is rc.38',pkg.version==='0.19.0-rc.38'],
+ ['version is rc.38 or later',/^0\.19\.0-rc\.(?:3[8-9]|[4-9]\d|\d{3,})$/.test(pkg.version)],
  ['only three CSS files exist',JSON.stringify(rel)===JSON.stringify(['app/globals.css','features/scheduling/ScheduleWorkspace.module.css','styles/tokens.css'])],
  ['root imports only global CSS',layout.includes('import "./globals.css";')&&!layout.includes('completion-redesign.css')&&!layout.includes('system-contracts.css')&&!layout.includes('design-system.css')],
  ['employee has no route CSS import',!employeeLayout.includes('.css')],
