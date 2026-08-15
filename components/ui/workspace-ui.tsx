@@ -8,6 +8,11 @@ export function WorkspaceHeader({ eyebrow, title, description, actions }: { eyeb
   return <header className="workspace-header"><div>{eyebrow && <p className="eyebrow">{eyebrow}</p>}<h1>{title}</h1>{description && <p className="workspace-description">{description}</p>}</div>{actions && <div className="workspace-actions">{actions}</div>}</header>;
 }
 
+
+export function PanelTitle({ title, description, actions }: { title: string; description?: string; actions?: ReactNode }) {
+  return <div className="panel-title"><div><h2>{title}</h2>{description && <p>{description}</p>}</div>{actions}</div>;
+}
+
 export function EmptyState({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
   return <div className="shared-empty-state"><strong>{title}</strong>{description && <p>{description}</p>}{action && <div>{action}</div>}</div>;
 }

@@ -1,11 +1,15 @@
-# v0.19.0-rc.48 — Workspace Header Contract Wiring Fix
+# v0.19.0-rc.49 — Decomposition Dependency & Shared UI Cleanup
 
 ## Fixed
-- Corrected feature-owned workspace header adapters created during the rc.45 decomposition.
-- `WorkspaceHeader` accepts `description` and `actions`; extracted workspaces were still forwarding the old local adapter names as `subtitle` and `action`.
-- Updated Attendance, Inventory, Daily Operations, Settings, Control Centre, Team, Dashboard/Shift Execution, and Orders.
+- Attendance now imports the existing `canonicalShiftDate` helper from `features/workspace/schedule-utils`.
+- Restored all other imports omitted during the workspace decomposition: shared surface class maps, schedule conflict helper, existing order data, and required Lucide icons.
+- Moved the default time-clock settings constant out of Team and into Settings, its actual owner.
+
+## Cleanup
+- Removed eight duplicate `PageHeader` adapters; feature workspaces render the shared `WorkspaceHeader` directly.
+- Consolidated four duplicate `PanelTitle` implementations into `components/ui/workspace-ui.tsx`.
 
 ## Scope
-No CSS, database, authorization, API, or business-behaviour changes.
+No CSS, database, API, authorization, permission, or business-behaviour changes.
 
-Rollback checkpoint: **v0.19.0-rc.47**.
+Rollback checkpoint: **v0.19.0-rc.48**.

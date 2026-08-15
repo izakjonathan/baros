@@ -1,15 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
-import { ArrowRight, Boxes, CalendarDays, CheckCircle2, ChevronRight, ClipboardList, Clock3, Coffee, NotebookPen, Play, Plus, Timer, Truck, Users } from "lucide-react";
+import { AlertTriangle, ArrowRight, Boxes, CalendarDays, CheckCircle2, ChevronRight, ClipboardList, Clock3, Coffee, NotebookPen, Play, Plus, Timer, Truck, Users } from "lucide-react";
 import type { Product, Shift, NavKey } from "@/lib/data";
 import type { Employee, OpsTask, ShiftNote, TimeEntry } from "@/features/workspace/types";
-import { canonicalShiftDate, hoursBetween, toIsoDate } from "@/features/workspace/schedule-utils";
+import { canonicalShiftDate, conflictIds, hoursBetween, toIsoDate } from "@/features/workspace/schedule-utils";
 import { dashboardStyles, executionStyles, overviewStyles } from "@/lib/ui-classes";
-import { WorkspaceHeader } from "@/components/ui/workspace-ui";
+import { PanelTitle, WorkspaceHeader } from "@/components/ui/workspace-ui";
 
-function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; title: string; subtitle?: string; action?: React.ReactNode }) {
-  return <WorkspaceHeader eyebrow={eyebrow} title={title} description={subtitle} actions={action} />;
-}
 
 export function DashboardWorkspace({ shifts, products, employees, timeEntries, tasks, shiftNotes, devMode, onNavigate }: { shifts: Shift[]; products: Product[]; employees: Employee[]; timeEntries: TimeEntry[]; tasks: OpsTask[]; shiftNotes:ShiftNote[]; devMode: boolean; onNavigate: (id: NavKey) => void }) {
   const [pendingRequests, setPendingRequests] = useState(0);
@@ -90,14 +87,14 @@ export function DashboardWorkspace({ shifts, products, employees, timeEntries, t
   const completedTasks = tasks.filter((task) => task.done).length;
   const operationalExceptions = late.length + openToday.length + conflicts.size + availabilityConflicts + incompleteTasks.length;
   return <div className={`${dashboardStyles.dashboard} page-flow`}>
-    <PageHeader eyebrow={new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})} title="Today’s operations" subtitle={`Live overview for the current location · updated ${lastUpdated.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}`} />
+    <WorkspaceHeader eyebrow={new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})} title="Today’s operations" description={`Live overview for the current location · updated ${lastUpdated.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}`} />
     <section className={`${dashboardStyles.metrics}`}>
       <Metric icon={Users} label="Clocked in" value={`${runningEntries.length}`} detail={`${assignedToday.length} assigned today`} trend={runningEntries.length ? "Live now" : "No active clocks"} />
       <Metric icon={Clock3} label="Expected next" value={upcoming[0]?.start || "—"} detail={upcoming[0]?.employee || "No more arrivals"} trend={`${upcoming.length} upcoming`} />
       <Metric icon={ClipboardList} label="Pending requests" value={`${pendingRequests}`} detail="Leave, claims and transfers" trend={pendingRequests ? "Review queue" : "All clear"} warning={pendingRequests > 0} />
       <Metric icon={AlertTriangle} label="Needs attention" value={`${attentionTotal}`} detail={`${late.length} late · ${openToday.length} open · ${lowStock.length} low stock`} trend={attentionTotal ? "Review now" : "All clear"} warning={attentionTotal > 0} />
     </section>
-    <section className={`card card-flush ${dashboardStyles.heroPanel}`}><PanelTitle title="Live shift board" subtitle={`${runningEntries.length} clocked in · ${late.length} late · ${upcoming.length} expected`} action={<button type="button" className="text-button" onClick={() => onNavigate("attendance")}>Open attendance <ArrowRight size={15} /></button>} />
+    <section className={`card card-flush ${dashboardStyles.heroPanel}`}><PanelTitle title="Live shift board" description={`${runningEntries.length} clocked in · ${late.length} late · ${upcoming.length} expected`} actions={<button type="button" className="text-button" onClick={() => onNavigate("attendance")}>Open attendance <ArrowRight size={15} /></button>} />
       <div className={dashboardStyles.liveList}>
         {liveBoard.length === 0 && <div className={dashboardStyles.empty}>No employees are assigned today.</div>}
         {liveBoard.map(({ shift, status, tone, detail }) => <button type="button" className={dashboardStyles.liveRow} key={shift.id} onClick={() => onNavigate("attendance")}>
@@ -106,13 +103,13 @@ export function DashboardWorkspace({ shifts, products, employees, timeEntries, t
       </div>
     </section>
     <div className={`${dashboardStyles.contentGrid}`}>
-      <section className={`card card-flush today-panel ${dashboardStyles.panel}`}><PanelTitle title="Today’s timeline" subtitle={`${assignedToday.length} assigned · ${openToday.length} open`} action={<button className="text-button" onClick={() => onNavigate("schedule")}>Open shift plan <ArrowRight size={15} /></button>} />
+      <section className={`card card-flush today-panel ${dashboardStyles.panel}`}><PanelTitle title="Today’s timeline" description={`${assignedToday.length} assigned · ${openToday.length} open`} actions={<button className="text-button" onClick={() => onNavigate("schedule")}>Open shift plan <ArrowRight size={15} /></button>} />
         <div className="timeline">
           {timeline.length === 0 && <div className={dashboardStyles.empty}>No shifts scheduled today.</div>}
           {timeline.map((shift) => <button type="button" className={`timeline-row ${dashboardStyles.timelineAction}`} key={shift.id} onClick={() => onNavigate("schedule")}><time>{shift.start}</time><div className={`avatar ${shift.isOpen ? "sand" : ""}`}>{shift.isOpen ? "+" : shift.initials}</div><div className="grow"><strong>{shift.employee}</strong><span>{shift.role}{shift.availabilityConflict ? " · availability conflict" : ""}</span></div><span className="shift-time">{shift.start}–{shift.end}</span><ChevronRight size={18}/></button>)}
         </div>
       </section>
-      <section className={`card card-flush attention-panel ${dashboardStyles.panel} ${dashboardStyles.attention}`}><PanelTitle title="Attention needed" subtitle="Prioritised operational actions" />
+      <section className={`card card-flush attention-panel ${dashboardStyles.panel} ${dashboardStyles.attention}`}><PanelTitle title="Attention needed" description="Prioritised operational actions" />
         <button className={overviewStyles.attentionItem} onClick={() => onNavigate("attendance")}><span className={`${overviewStyles.attentionIcon} ${overviewStyles.amber}`}><Timer size={19} /></span><div><strong>{late.length} employees late</strong><small>{runningEntries.length} currently clocked in</small></div><ChevronRight size={18} /></button>
         <button className={overviewStyles.attentionItem} onClick={() => onNavigate("requests")}><span className={`${overviewStyles.attentionIcon} ${overviewStyles.violet}`}><ClipboardList size={19} /></span><div><strong>{pendingRequests} pending requests</strong><small>Leave, open shifts and transfers</small></div><ChevronRight size={18} /></button>
         <button className={overviewStyles.attentionItem} onClick={() => onNavigate("schedule")}><span className={`${overviewStyles.attentionIcon} ${overviewStyles.violet}`}><CalendarDays size={19} /></span><div><strong>{openToday.length + conflicts.size + availabilityConflicts} schedule issues</strong><small>{openToday.length} open shifts · {conflicts.size + availabilityConflicts} conflicts</small></div><ChevronRight size={18} /></button>
@@ -120,7 +117,7 @@ export function DashboardWorkspace({ shifts, products, employees, timeEntries, t
         <button className={overviewStyles.attentionItem} onClick={() => onNavigate("operations")}><span className={`${overviewStyles.attentionIcon} ${overviewStyles.blue}`}><CheckCircle2 size={19} /></span><div><strong>{incompleteTasks.length} operations tasks open</strong><small>Opening, closing and maintenance</small></div><ChevronRight size={18} /></button>
       </section>
     </div>
-    <section className={`card card-flush ${dashboardStyles.summary}`}><PanelTitle title="Operational summary" subtitle="Current progress and outstanding work for today" />
+    <section className={`card card-flush ${dashboardStyles.summary}`}><PanelTitle title="Operational summary" description="Current progress and outstanding work for today" />
       <div className={dashboardStyles.summaryGrid}>
         <div><span>Completed shifts</span><strong>{completedToday.length}</strong><small>{assignedToday.length} assigned today</small></div>
         <div><span>Worked hours</span><strong>{(workedMinutesToday/60).toFixed(1)}</strong><small>Recorded after breaks</small></div>
@@ -128,8 +125,8 @@ export function DashboardWorkspace({ shifts, products, employees, timeEntries, t
         <div><span>Open exceptions</span><strong>{operationalExceptions}</strong><small>Staffing, schedule and operations</small></div>
       </div>
     </section>
-    {shiftNotes.length>0&&<section className={`card card-flush shift-notes-panel ${dashboardStyles.panel}`}><PanelTitle title="Latest shift notes" subtitle="Incidents, equipment, stock and handover notes from the team" action={<button type="button" className="text-button" onClick={()=>onNavigate("schedule")}>Open schedule <ArrowRight size={15}/></button>}/><div className={dashboardStyles.notesList}>{shiftNotes.slice(0,6).map(note=><article key={note.id}><span className={dashboardStyles.noteCategory}>{note.category}</span><div><strong>{note.author} · {note.role}</strong><p>{note.note}</p><small>{new Date(note.createdAt).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</small></div></article>)}</div></section>}
-    <section className={`card card-flush quick-panel ${dashboardStyles.quickPanel}`}><PanelTitle title="Quick actions" subtitle="Jump directly into today’s work" /><div className={overviewStyles.quickGrid}>
+    {shiftNotes.length>0&&<section className={`card card-flush shift-notes-panel ${dashboardStyles.panel}`}><PanelTitle title="Latest shift notes" description="Incidents, equipment, stock and handover notes from the team" actions={<button type="button" className="text-button" onClick={()=>onNavigate("schedule")}>Open schedule <ArrowRight size={15}/></button>}/><div className={dashboardStyles.notesList}>{shiftNotes.slice(0,6).map(note=><article key={note.id}><span className={dashboardStyles.noteCategory}>{note.category}</span><div><strong>{note.author} · {note.role}</strong><p>{note.note}</p><small>{new Date(note.createdAt).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</small></div></article>)}</div></section>}
+    <section className={`card card-flush quick-panel ${dashboardStyles.quickPanel}`}><PanelTitle title="Quick actions" description="Jump directly into today’s work" /><div className={overviewStyles.quickGrid}>
       <Quick icon={Plus} label="Create shift" detail="Add or assign today’s coverage" onClick={() => onNavigate("schedule")} />
       <Quick icon={ClipboardList} label="Review requests" detail="Approve employee requests" onClick={() => onNavigate("requests")} />
       <Quick icon={Timer} label="Time & attendance" detail="Review clocks and exceptions" onClick={() => onNavigate("attendance")} />
@@ -145,23 +142,22 @@ export function ShiftExecutionWorkspace({ shifts, entries, notes, onNavigate }: 
   const todayShifts = shifts.filter((shift) => canonicalShiftDate(shift) === today && !shift.isOpen).sort((a,b)=>a.start.localeCompare(b.start));
   const activeEntries = entries.filter((entry) => entry.date === today && entry.status === "Running");
   return <div className={`${executionStyles.workspace} page-flow`}>
-    <PageHeader eyebrow="Live operations" title="Shift execution" subtitle="Run the current shift from one operational view" action={<button type="button" className="primary" onClick={()=>onNavigate("attendance")}><Timer size={16}/>Open attendance</button>} />
+    <WorkspaceHeader eyebrow="Live operations" title="Shift execution" description="Run the current shift from one operational view" actions={<button type="button" className="primary" onClick={()=>onNavigate("attendance")}><Timer size={16}/>Open attendance</button>} />
     <section className={`${executionStyles.metrics}`}>
       <Metric icon={Users} label="Assigned today" value={`${todayShifts.length}`} detail="Published employee shifts" trend="Current location" />
       <Metric icon={Play} label="Clocked in" value={`${activeEntries.length}`} detail={`${activeEntries.filter(entry=>entry.onBreak).length} currently on break`} trend="Live attendance" />
       <Metric icon={NotebookPen} label="Shift notes" value={`${notes.length}`} detail="Latest operational notes" trend="Handover context" />
       <Metric icon={AlertTriangle} label="Exceptions" value={`${todayShifts.filter(shift=>shift.availabilityConflict).length}`} detail="Availability conflicts today" trend="Review before service" warning={todayShifts.some(shift=>shift.availabilityConflict)} />
     </section>
-    <section className={`card card-flush ${executionStyles.board}`}><PanelTitle title="Current shift board" subtitle="Attendance, breaks and shift context" />
+    <section className={`card card-flush ${executionStyles.board}`}><PanelTitle title="Current shift board" description="Attendance, breaks and shift context" />
       <div className={executionStyles.list}>{todayShifts.length===0&&<div className={dashboardStyles.empty}>No assigned shifts today.</div>}{todayShifts.map(shift=>{const entry=activeEntries.find(item=>item.employee===shift.employee); const shiftNotes=notes.filter(note=>note.shiftId===shift.id); return <article key={shift.id}><div className="avatar">{shift.initials}</div><div><strong>{shift.employee}</strong><small>{shift.role} · {shift.start}–{shift.end}</small></div><span className={executionStyles.state} data-state={entry?.onBreak?"break":entry?"live":"expected"}>{entry?.onBreak?"On break":entry?"Clocked in":"Expected"}</span><small>{shiftNotes.length} notes</small><button type="button" className="text-button" onClick={()=>onNavigate(entry?"attendance":"schedule")}>{entry?"Manage":"Open shift"}<ArrowRight size={14}/></button></article>})}</div>
     </section>
-    <section className={`card card-flush ${executionStyles.actionsPanel}`}><PanelTitle title="Execution actions" subtitle="Existing operational tools"/><div className={executionStyles.actionGrid}><Quick icon={Coffee} label="Manage breaks" detail="Start or end an employee break" onClick={()=>onNavigate("attendance")}/><Quick icon={NotebookPen} label="Review notes" detail="See incidents and handover notes" onClick={()=>onNavigate("dashboard")}/><Quick icon={CalendarDays} label="Adjust coverage" detail="Reassign or open a shift" onClick={()=>onNavigate("schedule")}/><Quick icon={CheckCircle2} label="Operations tasks" detail="Opening, closing and maintenance" onClick={()=>onNavigate("operations")}/></div></section>
+    <section className={`card card-flush ${executionStyles.actionsPanel}`}><PanelTitle title="Execution actions" description="Existing operational tools"/><div className={executionStyles.actionGrid}><Quick icon={Coffee} label="Manage breaks" detail="Start or end an employee break" onClick={()=>onNavigate("attendance")}/><Quick icon={NotebookPen} label="Review notes" detail="See incidents and handover notes" onClick={()=>onNavigate("dashboard")}/><Quick icon={CalendarDays} label="Adjust coverage" detail="Reassign or open a shift" onClick={()=>onNavigate("schedule")}/><Quick icon={CheckCircle2} label="Operations tasks" detail="Opening, closing and maintenance" onClick={()=>onNavigate("operations")}/></div></section>
   </div>
 }
 
 function Metric({ icon: Icon, label, value, detail, trend, warning }: { icon: typeof Users; label: string; value: string; detail: string; trend: string; warning?: boolean }) {
   return <div className={overviewStyles.metric}><span className={overviewStyles.metricLabel}>{label}</span><strong>{value}</strong><small>{detail}</small><div className={`${overviewStyles.metricTrend} ${warning ? overviewStyles.warning : ""}`}>{warning ? <AlertTriangle size={13} /> : <span aria-hidden="true" className={overviewStyles.statusDot} />}{trend}</div></div>
 }
-function PanelTitle({ title, subtitle, action }: { title: string; subtitle: string; action?: React.ReactNode }) { return <div className={overviewStyles.panelTitle}><div><h2>{title}</h2>{subtitle&&<p>{subtitle}</p>}</div>{action}</div> }
 function Quick({ icon: Icon, label, detail, onClick }: { icon: typeof CalendarDays; label: string; detail: string; onClick: () => void }) { return <button className={overviewStyles.quickAction} onClick={onClick}><span className={overviewStyles.quickIcon}><Icon size={19} /></span><div><strong>{label}</strong><small>{detail}</small></div><ArrowRight size={17} /></button> }
 

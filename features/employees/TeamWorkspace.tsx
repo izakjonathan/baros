@@ -1,8 +1,7 @@
 "use client";
 import { WorkspaceHeader } from "@/components/ui/workspace-ui";
-function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; title: string; subtitle?: string; action?: React.ReactNode }) { return <WorkspaceHeader eyebrow={eyebrow} title={title} description={subtitle} actions={action} />; }
 import { useState } from "react";
-import { UserRoundPlus } from "lucide-react";
+import { ClockSettings, Search, UserRoundPlus } from "lucide-react";
 import type { Shift } from "@/lib/data";
 import type { Employee } from "@/features/workspace/types";
 import { canonicalShiftDate, hoursBetween } from "@/features/workspace/schedule-utils";
@@ -24,7 +23,7 @@ export function TeamWorkspace({ employees, shifts, devMode, canManage, onAdd, on
   const activeCount=employees.filter(person=>person.active).length;
   const portalCount=employees.filter(person=>person.portalStatus==="ACTIVE").length;
   return <div className={`${surfaceStyles.workspace} page-flow`}>
-    <PageHeader eyebrow="People operations" title="Team" subtitle="People, access and upcoming hours." action={canManage ? <button className={`team-add-button ${surfaceStyles.control} ${surfaceStyles.solid} ${teamStyles.addButton}`} onClick={onAdd}><UserRoundPlus size={17}/>Add employee</button> : <span className="connection-pill">Read only</span>}/>
+    <WorkspaceHeader eyebrow="People operations" title="Team" description="People, access and upcoming hours." actions={canManage ? <button className={`team-add-button ${surfaceStyles.control} ${surfaceStyles.solid} ${teamStyles.addButton}`} onClick={onAdd}><UserRoundPlus size={17}/>Add employee</button> : <span className="connection-pill">Read only</span>}/>
     <section className={`${surfaceStyles.metrics} ${teamStyles.summary}`} aria-label="Team summary">
       <article className="card card-compact"><span>Total team</span><strong>{employees.length}</strong></article>
       <article className="card card-compact"><span>Active</span><strong>{activeCount}</strong></article>
@@ -66,5 +65,3 @@ export function TeamWorkspace({ employees, shifts, devMode, canManage, onAdd, on
   </div>
 }
 
-
-const defaultClockSettings: ClockSettings = { allowMobileClock:true, allowKioskClock:true, allowUnscheduledClock:false, requireLocationCheck:false, earlyClockInMinutes:15, lateClockOutMinutes:60, roundingMinutes:0, autoApproveWithinMinutes:"" };

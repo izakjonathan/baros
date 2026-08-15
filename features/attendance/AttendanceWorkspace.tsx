@@ -1,15 +1,11 @@
 "use client";
 import { useState } from "react";
-import { CheckCheck, DownloadCloud, FileDown, LockKeyhole, RotateCcw, UnlockKeyhole } from "lucide-react";
+import { Ban, CheckCheck, DownloadCloud, FileDown, LockKeyhole, Pencil, RotateCcw, UnlockKeyhole } from "lucide-react";
 import type { Shift } from "@/lib/data";
 import type { Employee, TimeEntry } from "@/features/workspace/types";
-import { attendanceStyles } from "@/lib/ui-classes";
-import { hoursBetween } from "@/features/workspace/schedule-utils";
-import { WorkspaceHeader } from "@/components/ui/workspace-ui";
+import { attendanceStyles, surfaceStyles } from "@/lib/ui-classes";
+import { canonicalShiftDate, hoursBetween } from "@/features/workspace/schedule-utils";
 
-function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; title: string; subtitle?: string; action?: React.ReactNode }) {
-  return <WorkspaceHeader eyebrow={eyebrow} title={title} description={subtitle} actions={action} />;
-}
 
 function workedHours(entry: TimeEntry) { return entry.clockOut ? Math.max(0, hoursBetween(entry.clockIn, entry.clockOut) - entry.breakMinutes/60) : 0; }
 function formatAttendanceDate(value: string) {

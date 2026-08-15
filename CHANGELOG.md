@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.49
+
+- Repaired all unresolved feature dependencies left by the rc.45 source decomposition by importing existing shared helpers, class contracts, data constants, and icons into their feature owners.
+- Removed eight redundant local `PageHeader` adapters and now use the shared `WorkspaceHeader` directly.
+- Consolidated four duplicate `PanelTitle` implementations into `components/ui/workspace-ui.tsx`.
+- Removed the stray `defaultClockSettings` declaration from Team and placed the settings default with the Settings feature that owns it.
+- No CSS, database, API, authorization, or business-behaviour changes.
+
 ## v0.19.0-rc.48
 
 - Fixed `WorkspaceHeader` prop wiring in all feature-owned workspace adapters after the rc.45 decomposition.

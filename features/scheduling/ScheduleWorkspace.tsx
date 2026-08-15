@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, CheckCheck, ChevronLeft, ChevronRight, Copy, Plus, Send } from "lucide-react";
+import { AlertTriangle, CheckCheck, ChevronLeft, ChevronRight, Copy, Plus, Send, X } from "lucide-react";
 import { days, type Shift } from "@/lib/data";
 import type { Employee, ScheduleAcknowledgementSummary, TimeEntry } from "@/features/workspace/types";
 import { BASE_MONDAY, canonicalShiftDate, conflictIds, dateFromSerial, dateSerial, hoursBetween, isOvernight, mapDatabaseShift, shiftPositionFromDate, toIsoDate } from "@/features/workspace/schedule-utils";

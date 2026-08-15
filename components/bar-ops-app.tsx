@@ -1,6 +1,5 @@
 "use client";
 import { Dialog, DialogActions } from "./ui/interaction-ui";
-import { WorkspaceHeader } from "./ui/workspace-ui";
 
 import { useEffect, useRef, useState } from "react";
 import {
@@ -282,9 +281,6 @@ function Topbar({ items, active: _active, onMenu, locations, selectedLocationId,
   />;
 }
 
-function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow?: string; title: string; subtitle?: string; action?: React.ReactNode }) {
-  return <WorkspaceHeader eyebrow={eyebrow} title={title} description={subtitle} actions={action}/>;
-}
 
 function ShiftDialog({ onClose, onSave, currentWeekOffset, initialDate, employees, locations, selectedLocationId }: { onClose: () => void; onSave: (shifts: Shift[]) => void; currentWeekOffset: number; initialDate?: string; employees: Employee[]; locations: Location[]; selectedLocationId: string }) {
   const [assignment, setAssignment] = useState<"employee" | "open">("employee");

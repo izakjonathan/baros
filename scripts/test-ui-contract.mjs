@@ -53,7 +53,7 @@ const architectureModules = [
 const architectureOwned = architectureModules.every(([file, symbol]) => fs.existsSync(path.join(root, file)) && read(file).includes(`export function ${symbol}`) && managerApp.includes(symbol));
 
 const checks = [
-  ["release is rc.48", pkg.version === "0.19.0-rc.48"],
+  ["release is rc.49", pkg.version === "0.19.0-rc.49"],
   ["only three CSS files exist", JSON.stringify(cssRelative) === JSON.stringify(["app/globals.css", "features/scheduling/ScheduleWorkspace.module.css", "styles/tokens.css"])],
   ["root imports only global CSS", layout.includes('import "./globals.css";') && !layout.includes("completion-redesign.css") && !layout.includes("system-contracts.css") && !layout.includes("design-system.css")],
   ["employee has no route CSS import", !employeeLayout.includes(".css")],
@@ -79,7 +79,9 @@ const checks = [
   ["only day scroller owns horizontal Shift Plan scrolling", schedule.includes(':global(.page-wrap[data-workspace="schedule"]){overflow-x:hidden}') && /\.workspace\{[^}]*overflow-x:hidden[^}]*contain:inline-size/.test(schedule) && /\.calendarPanel\{[^}]*overflow:hidden[^}]*contain:inline-size/.test(schedule) && /\.calendarScroll\{[^}]*overflow-x:auto[^}]*contain:inline-size/.test(schedule)],
   ["manager workspaces are feature-owned", architectureOwned && Buffer.byteLength(managerApp) < 60000],
   ["orchestrator has no stale Team component reference", !managerApp.includes("<Team\n") && managerApp.includes("<TeamWorkspace")],
-  ["feature workspace headers use shared description/actions contract", headerAdapterFiles.every((source) => !source.includes("title={title} subtitle={subtitle} action={action}") && source.includes("title={title} description={subtitle} actions={action}"))],
+  ["feature workspaces have no local PageHeader adapters", headerAdapterFiles.every((source) => !source.includes("function PageHeader")) && !managerApp.includes("function PageHeader")],
+  ["shared WorkspaceHeader is used directly where applicable", headerAdapterFiles.slice(1).every((source) => source.includes("<WorkspaceHeader"))],
+  ["shared PanelTitle replaces feature-local copies", workspace.includes("export function PanelTitle") && ["features/dashboard/manager-overview.tsx","features/operations/DailyOperationsWorkspace.tsx","features/settings/SettingsWorkspace.tsx","features/control/ControlCenterWorkspace.tsx"].every((file) => read(file).includes("PanelTitle") && !read(file).includes("function PanelTitle"))],
   ["active script surface remains compact", scriptFiles.length <= 20 && Object.keys(pkg.scripts).length <= 25],
   ["quality workflow runs current suite", quality.includes("npm run test:all")],
   ["root global-error exception remains documented", exceptionRegister.includes("global-error.tsx") && exceptionRegister.includes("root error boundary")],
