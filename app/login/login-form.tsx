@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Crown, Shield, UserCog, Wine } from "lucide-react";
 
 export function LoginForm({ devMode }: { devMode: boolean }) {
-  const router = useRouter();
   const [email, setEmail] = useState(devMode ? "dev@barops.local" : "");
   const [password, setPassword] = useState(devMode ? "dev" : "");
   const [error, setError] = useState("");

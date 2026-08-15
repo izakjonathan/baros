@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, ArrowRight, Boxes, CalendarDays, CheckCircle2, ChevronRight, ClipboardList, Clock3, Coffee, NotebookPen, Play, Plus, Timer, Truck, Users } from "lucide-react";
 import type { Product, Shift, NavKey } from "@/lib/data";
 import type { Employee, OpsTask, ShiftNote, TimeEntry } from "@/features/workspace/types";
-import { canonicalShiftDate, conflictIds, hoursBetween, toIsoDate } from "@/features/workspace/schedule-utils";
+import { canonicalShiftDate, conflictIds, toIsoDate } from "@/features/workspace/schedule-utils";
 import { dashboardStyles, executionStyles, overviewStyles } from "@/lib/ui-classes";
 import { PanelTitle, WorkspaceHeader } from "@/components/ui/workspace-ui";
 
@@ -160,4 +160,3 @@ function Metric({ icon: Icon, label, value, detail, trend, warning }: { icon: ty
   return <div className={overviewStyles.metric}><span className={overviewStyles.metricLabel}>{label}</span><strong>{value}</strong><small>{detail}</small><div className={`${overviewStyles.metricTrend} ${warning ? overviewStyles.warning : ""}`}>{warning ? <AlertTriangle size={13} /> : <span aria-hidden="true" className={overviewStyles.statusDot} />}{trend}</div></div>
 }
 function Quick({ icon: Icon, label, detail, onClick }: { icon: typeof CalendarDays; label: string; detail: string; onClick: () => void }) { return <button className={overviewStyles.quickAction} onClick={onClick}><span className={overviewStyles.quickIcon}><Icon size={19} /></span><div><strong>{label}</strong><small>{detail}</small></div><ArrowRight size={17} /></button> }
-

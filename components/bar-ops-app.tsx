@@ -3,17 +3,29 @@ import { Dialog, DialogActions } from "./ui/interaction-ui";
 
 import { useEffect, useRef, useState } from "react";
 import {
-  ArrowRight, Bell, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight,
-  CircleDollarSign, ClipboardList, Clock3, Coffee, LayoutDashboard, Menu, Package, Plus,
-  Search, Settings, ShoppingCart, Sparkles, Users, X, AlertTriangle, Truck, MoreHorizontal,
-  Copy, Send, Boxes, Wine, UserRoundPlus, Timer, Play, Square, Activity, FileCheck2, FileDown, CheckCheck, RotateCcw, Ban, Pencil, ShieldAlert, History, DownloadCloud, LockKeyhole, UnlockKeyhole, Database, KeyRound, MapPin, FileArchive, ShieldCheck, ReceiptText, Trash2, ArrowLeftRight, TrendingUp, NotebookPen, Wrench, Save, Upload, Undo2, CheckCircle2, LogOut
+  Activity,
+  CalendarDays,
+  Check,
+  ChevronRight,
+  ClipboardList,
+  Clock3,
+  Database,
+  LayoutDashboard,
+  NotebookPen,
+  Package,
+  Settings,
+  ShoppingCart,
+  Timer,
+  Truck,
+  Users,
 } from "lucide-react";
-import { days, initialProducts, initialShifts, orders, team, type NavKey, type Product, type Shift, type ShiftRole } from "@/lib/data";
-import type { ClockSettings, Employee, Location, LogEntry, OpsTask, ScheduleAcknowledgementSummary, ShiftNote, StockAdjustment, TimeEntry } from "@/features/workspace/types";
+import { initialProducts, initialShifts, team, type NavKey, type Product, type Shift } from "@/lib/data";
+import type { Employee, Location, LogEntry, OpsTask, ShiftNote, StockAdjustment, TimeEntry } from "@/features/workspace/types";
 import { parseEmployeeInvitationMutationResponse, parseInvitationRecords, parseManagerBootstrapResponse } from "@/features/workspace/bootstrap-contract";
-import { BASE_MONDAY, canonicalShiftDate, conflictIds, dateFromSerial, dateFromShift, dateSerial, hoursBetween, isOvernight, mapDatabaseShift, shiftPositionFromDate, toIsoDate, type DatabaseShiftRecord } from "@/features/workspace/schedule-utils";
+import { canonicalShiftDate, dateFromSerial, dateSerial, isOvernight, mapDatabaseShift, shiftPositionFromDate, type DatabaseShiftRecord } from "@/features/workspace/schedule-utils";
 import { RequestsWorkspace } from "@/components/requests-workspace";
 import { DashboardWorkspace, ShiftExecutionWorkspace } from "@/features/dashboard/manager-overview";
+import { EditShiftDialog, ShiftDialog } from "@/features/scheduling/ScheduleDialogs";
 import { ScheduleWorkspace } from "@/features/scheduling/ScheduleWorkspace";
 import { AttendanceWorkspace } from "@/features/attendance/AttendanceWorkspace";
 import { InventoryWorkspace } from "@/features/inventory/InventoryWorkspace";
@@ -23,9 +35,7 @@ import { TeamWorkspace } from "@/features/employees/TeamWorkspace";
 import { SettingsWorkspace } from "@/features/settings/SettingsWorkspace";
 import { ControlCenterWorkspace } from "@/features/control/ControlCenterWorkspace";
 import { WorkspaceSidebar, WorkspaceTopbar } from "@/components/shell/workspace-chrome";
-import scheduleStyles from "@/features/scheduling/ScheduleWorkspace.module.css";
-import { parseOperationChecklistRecords } from "@/features/operations/types";
-import { attendanceStyles, dashboardStyles, executionStyles, inventoryStyles, operationsStyles, orderStyles, overviewStyles, settingsStyles, surfaceStyles, teamStyles } from "@/lib/ui-classes";
+import { overviewStyles } from "@/lib/ui-classes";
 import { hasCapability, type Capability } from "@/lib/auth/capabilities";
 import type { AppRole } from "@/lib/auth/session";
 
@@ -147,9 +157,37 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
   return (
     <div className="app-frame">
       <a className="skip-link" href="#main-content">Skip to main content</a>
-      <Sidebar items={availableNavItems} active={active} onChange={(value) => { setActive(value); setMobileNav(false); }} open={mobileNav} onClose={() => setMobileNav(false)} userName={userName} userRole={userRole} devMode={devMode} />
+      <WorkspaceSidebar
+        items={availableNavItems.map((item) => ({ ...item, badge: item.id === "inventory" ? 5 : undefined }))}
+        active={active}
+        onNavigate={(id) => { setActive(id as NavKey); setMobileNav(false); }}
+        open={mobileNav}
+        onClose={() => setMobileNav(false)}
+        userName={userName}
+        userRole={userRole}
+        devMode={devMode}
+        settingsItem={hasCapability(userRole, "settings.read") ? { id: "settings", label: "Settings", icon: Settings } : undefined}
+        locationLabel="Temple Bar"
+        onSignOut={async () => {
+          await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
+          window.location.assign("/login");
+        }}
+      />
       <main id="main-content" className="main-shell" tabIndex={-1}>
-        <Topbar items={availableNavItems} active={active} onMenu={() => setMobileNav(true)} locations={locations} selectedLocationId={selectedLocationId} onLocationChange={setSelectedLocationId} onNavigate={setActive} />
+        <WorkspaceTopbar
+          items={availableNavItems}
+          onMenu={() => setMobileNav(true)}
+          locations={locations}
+          selectedLocationId={selectedLocationId}
+          onLocationChange={setSelectedLocationId}
+          onNavigate={(id) => setActive(id as NavKey)}
+          notificationItems={[
+            { id: "schedule", label: "Draft schedule", detail: "Review and publish upcoming shifts", icon: CalendarDays },
+            { id: "attendance", label: "Timesheet review", detail: "Open time and attendance", icon: Clock3 },
+            { id: "requests", label: "Employee requests", detail: "Review leave, open shifts and shift changes", icon: ClipboardList },
+            { id: "inventory", label: "Stock attention", detail: "Review products below par", icon: Package },
+          ]}
+        />
         <div className="page-wrap" data-workspace={active}>
           <div className="workspace-flow">
           {active === "dashboard" && <DashboardWorkspace shifts={shifts} products={products} employees={employees} timeEntries={timeEntries} tasks={opsTasks} shiftNotes={shiftNotes} devMode={devMode} onNavigate={setActive} />}
@@ -245,126 +283,9 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
 }
 
 
-function Sidebar({ items, active, onChange, open, onClose, userName, userRole, devMode }: { items: ManagerNavItem[]; active: NavKey; onChange: (id: NavKey) => void; open: boolean; onClose: () => void; userName: string; userRole: AppRole; devMode: boolean }) {
-  return <WorkspaceSidebar
-    items={items.map(item => ({ ...item, badge: item.id === "inventory" ? 5 : undefined }))}
-    active={active}
-    onNavigate={(id) => onChange(id as NavKey)}
-    open={open}
-    onClose={onClose}
-    userName={userName}
-    userRole={userRole}
-    devMode={devMode}
-    settingsItem={hasCapability(userRole, "settings.read") ? { id: "settings", label: "Settings", icon: Settings } : undefined}
-    locationLabel="Temple Bar"
-    onSignOut={async () => {
-      await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
-      window.location.assign("/login");
-    }}
-  />;
-}
-
-function Topbar({ items, active: _active, onMenu, locations, selectedLocationId, onLocationChange, onNavigate }: { items: ManagerNavItem[]; active: NavKey; onMenu: () => void; locations: Location[]; selectedLocationId: string; onLocationChange: (id: string) => void; onNavigate: (id: NavKey) => void }) {
-  return <WorkspaceTopbar
-    items={items}
-    onMenu={onMenu}
-    locations={locations}
-    selectedLocationId={selectedLocationId}
-    onLocationChange={onLocationChange}
-    onNavigate={(id) => onNavigate(id as NavKey)}
-    notificationItems={[
-      { id: "schedule", label: "Draft schedule", detail: "Review and publish upcoming shifts", icon: CalendarDays },
-      { id: "attendance", label: "Timesheet review", detail: "Open time and attendance", icon: Clock3 },
-      { id: "requests", label: "Employee requests", detail: "Review leave, open shifts and shift changes", icon: ClipboardList },
-      { id: "inventory", label: "Stock attention", detail: "Review products below par", icon: Package },
-    ]}
-  />;
-}
-
-
-function ShiftDialog({ onClose, onSave, currentWeekOffset, initialDate, employees, locations, selectedLocationId }: { onClose: () => void; onSave: (shifts: Shift[]) => void; currentWeekOffset: number; initialDate?: string; employees: Employee[]; locations: Location[]; selectedLocationId: string }) {
-  const [assignment, setAssignment] = useState<"employee" | "open">("employee");
-  const [locationId, setLocationId] = useState(selectedLocationId);
-  const activeEmployees = employees.filter((person) => person.active);
-  const [employee, setEmployee] = useState(activeEmployees[0]?.name ?? ""); const [shiftDate, setShiftDate] = useState(initialDate || dateFromShift(currentWeekOffset, 0)); const [role, setRole] = useState<ShiftRole>("Bartender"); const [start, setStart] = useState("17:00"); const [end, setEnd] = useState("01:00");
-  const [repeat, setRepeat] = useState(false); const [frequency, setFrequency] = useState<"daily" | "weekly">("weekly"); const [count, setCount] = useState(4); const [weekdays, setWeekdays] = useState<number[]>([shiftPositionFromDate(initialDate || dateFromShift(currentWeekOffset, 0)).day]);
-  const weekdayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  function save() {
-    if (!locationId) { alert("No active location is configured. Add or activate a location before creating shifts."); return; }
-    const safeCount = Math.max(1, Math.min(count || 1, frequency === "daily" ? 31 : 52));
-    let occurrences: { day: number; weekOffset: number }[];
-    const startPosition = shiftPositionFromDate(shiftDate);
-    if (!repeat) occurrences = [startPosition];
-    else if (frequency === "daily") occurrences = Array.from({ length: safeCount }, (_, index) => { const date = new Date(`${shiftDate}T12:00:00`); date.setDate(date.getDate() + index); return shiftPositionFromDate(toIsoDate(date)); });
-    else {
-      const selected = weekdays.length ? weekdays : [startPosition.day];
-      const weekStart = new Date(`${shiftDate}T12:00:00`); weekStart.setDate(weekStart.getDate() - startPosition.day);
-      occurrences = Array.from({ length: safeCount }, (_, week) => selected.map((selectedDay) => { const date = new Date(weekStart); date.setDate(weekStart.getDate() + week * 7 + selectedDay); return shiftPositionFromDate(toIsoDate(date)); })).flat().filter((occurrence) => occurrence.weekOffset > startPosition.weekOffset || occurrence.day >= startPosition.day);
-    }
-    const uniqueOccurrences = Array.from(new Map(occurrences.map((occurrence) => [`${occurrence.weekOffset}-${occurrence.day}`, occurrence])).values());
-    const label = repeat ? (frequency === "daily" ? `Daily · ${uniqueOccurrences.length} times` : `Weekly · ${(weekdays.length ? weekdays : [shiftPositionFromDate(shiftDate).day]).map((d) => weekdayNames[d]).join(", ")}`) : undefined;
-    const name = assignment === "open" ? "Available shift" : employee;
-    const recurrenceGroupId = repeat ? crypto.randomUUID() : undefined;
-    const initials = assignment === "open" ? "+" : employee.split(" ").map((word) => word[0]).join("");
-    onSave(uniqueOccurrences.map((occurrence, index) => ({ id: crypto.randomUUID(), date: dateFromShift(occurrence.weekOffset, occurrence.day), day: occurrence.day, weekOffset: occurrence.weekOffset, employee: name, initials, start, end, role, status: "Draft", isOpen: assignment === "open", recurrenceLabel: label, recurrenceGroupId, locationId })));
-  }
-  return <Modal title="Add shift" subtitle="Create one shift or a repeating series." className={scheduleStyles.shiftEditorDialog} onClose={onClose}>
-    <div className={scheduleStyles.shiftEditorBody}>
-      {locations.length > 1 && <label className="location-field">Location<select value={locationId} onChange={event=>setLocationId(event.target.value)}>{locations.map(location=><option key={location.id} value={location.id}>{location.name}</option>)}</select></label>}
-      <div className={scheduleStyles.assignmentToggle}><button type="button" aria-pressed={assignment === "employee"} className={assignment === "employee" ? "selected" : ""} onClick={() => setAssignment("employee")}>Assign employee</button><button type="button" aria-pressed={assignment === "open"} className={assignment === "open" ? "selected" : ""} onClick={() => setAssignment("open")}>Available shift</button></div>
-      <div className={`${scheduleStyles.shiftDialogFields}`}>
-        {assignment === "employee" && <label className="full-field">Employee<select value={employee} onChange={(e) => setEmployee(e.target.value)}>{activeEmployees.map((p) => <option key={p.name}>{p.name}</option>)}</select></label>}
-        {assignment === "open" && <div className={scheduleStyles.openShiftNote}><Users size={18}/><div><strong>Employees can request this shift</strong><span>A manager approves the employee who receives it.</span></div></div>}
-        <label className={scheduleStyles.shiftDateField}>Shift date<input type="date" value={shiftDate} onChange={(e) => { setShiftDate(e.target.value); setWeekdays([shiftPositionFromDate(e.target.value).day]); }} /></label>
-        <label>Role<select value={role} onChange={(e) => setRole(e.target.value as ShiftRole)}><option>Manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label>
-        <label className={scheduleStyles.shiftTimeField}>Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} /></label><label className={scheduleStyles.shiftTimeField}>Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /><small className="field-help">{isOvernight(start, end) ? "Ends the following day" : "Ends the same day"}</small></label>
-      </div>
-      <label className={scheduleStyles.repeatSwitch}><input type="checkbox" checked={repeat} onChange={(e) => setRepeat(e.target.checked)}/><span><strong>Repeat shift</strong><small>Create a daily or weekly series</small></span></label>
-      {repeat && <div className={scheduleStyles.repeatPanel}><div className={scheduleStyles.frequencyToggle}><button type="button" aria-pressed={frequency === "daily"} className={frequency === "daily" ? "selected" : ""} onClick={() => setFrequency("daily")}>Daily</button><button type="button" aria-pressed={frequency === "weekly"} className={frequency === "weekly" ? "selected" : ""} onClick={() => setFrequency("weekly")}>Weekly</button></div>
-        {frequency === "weekly" && <div className={scheduleStyles.weekdayPicker}>{weekdayNames.map((name, index) => <button type="button" key={name} aria-pressed={weekdays.includes(index)} className={weekdays.includes(index) ? "selected" : ""} onClick={() => setWeekdays((current) => current.includes(index) ? current.filter((d) => d !== index) : [...current, index].sort())}>{name}</button>)}</div>}
-        <label className={scheduleStyles.repeatCount}>Repeat for <input type="number" min="1" max={frequency === "daily" ? 31 : 52} value={count} onChange={(e) => setCount(Number(e.target.value))}/><span>{frequency === "daily" ? "days" : "weeks"}</span></label>
-      </div>}
-    </div>
-    <ModalActions onClose={onClose} onSave={save} label={repeat ? "Add repeating shifts" : "Add shift"} />
-  </Modal>
-}
-function EditShiftDialog({ shift, employees, onClose, onSave, onDelete }: { shift: Shift; employees: Employee[]; onClose: () => void; onSave: (shift: Shift, scope: "occurrence" | "future" | "series") => void; onDelete: () => void }) {
-  const [assignment, setAssignment] = useState<"employee" | "open">(shift.isOpen ? "open" : "employee");
-  const activeEmployees = employees.filter((person) => person.active);
-  const [employee, setEmployee] = useState(shift.isOpen ? activeEmployees[0]?.name ?? "" : shift.employee);
-  const [shiftDate, setShiftDate] = useState(canonicalShiftDate(shift));
-  const [role, setRole] = useState<ShiftRole>(shift.role);
-  const [start, setStart] = useState(shift.start);
-  const [end, setEnd] = useState(shift.end);
-  const [status, setStatus] = useState<"Draft" | "Published">(shift.status);
-  const [scope, setScope] = useState<"occurrence" | "future" | "series">("occurrence");
-  function save() {
-    const selectedEmployee = assignment === "open" ? "Available shift" : employee;
-    const position = shiftPositionFromDate(shiftDate);
-    onSave({ ...shift, date: shiftDate, day: position.day, weekOffset: position.weekOffset, employee: selectedEmployee, initials: assignment === "open" ? "+" : employee.split(" ").map((word) => word[0]).join(""), role, start, end, status, isOpen: assignment === "open" }, scope);
-  }
-  const conflictLabel = shift.availabilityConflict === "APPROVED_TIME_OFF" ? "This employee has approved time off during the shift." : shift.availabilityConflict === "OUTSIDE_AVAILABILITY" ? "This shift is outside the employee’s saved availability." : null;
-  return <Modal title="Edit shift" subtitle="Update this shift occurrence, its assignment or availability." className={scheduleStyles.shiftEditorDialog} onClose={onClose}>
-    <div className={scheduleStyles.shiftEditorBody}>
-      {conflictLabel ? <div className={scheduleStyles.openShiftNote}><AlertTriangle size={18}/><div><strong>Availability conflict</strong><span>{conflictLabel} Reassign the shift, adjust the time, or make it available.</span></div></div> : null}
-      <div className={scheduleStyles.assignmentToggle}><button type="button" aria-pressed={assignment === "employee"} className={assignment === "employee" ? "selected" : ""} onClick={() => setAssignment("employee")}>Assign employee</button><button type="button" aria-pressed={assignment === "open"} className={assignment === "open" ? "selected" : ""} onClick={() => setAssignment("open")}>{shift.availabilityConflict ? "Make available" : "Available shift"}</button></div>
-      <div className={`${scheduleStyles.shiftDialogFields}`}>
-        {assignment === "employee" && <label className="full-field">Employee<select value={employee} onChange={(e) => setEmployee(e.target.value)}>{activeEmployees.map((person) => <option key={person.name}>{person.name}</option>)}</select></label>}
-        {assignment === "open" && <div className={scheduleStyles.openShiftNote}><Users size={18}/><div><strong>Employees can request this shift</strong><span>The current employee is removed. A manager approves the employee who receives it.</span></div></div>}
-        <label className={scheduleStyles.shiftDateField}>Shift date<input type="date" value={shiftDate} onChange={(e) => setShiftDate(e.target.value)} /></label>
-        <label>Role<select value={role} onChange={(e) => setRole(e.target.value as ShiftRole)}><option>Manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label>
-        <label className={scheduleStyles.shiftTimeField}>Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} /></label><label className={scheduleStyles.shiftTimeField}>Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /><small className="field-help">{isOvernight(start, end) ? "Ends the following day" : "Ends the same day"}</small></label>
-        <label className="full-field">Schedule status<select value={status} onChange={(e) => setStatus(e.target.value as "Draft" | "Published")}><option>Draft</option><option>Published</option></select></label>
-      </div>
-      {shift.recurrenceGroupId && <div className={scheduleStyles.seriesEditNote}><CalendarDays size={17}/><div><strong>Apply changes to</strong><span>Choose whether this edit affects one occurrence or the wider repeating series.</span><select value={scope} onChange={(e)=>setScope(e.target.value as "occurrence"|"future"|"series")}><option value="occurrence">This shift only</option><option value="future">This and future shifts</option><option value="series">Entire series</option></select></div></div>}
-    </div>
-    <div className={scheduleStyles.editShiftActions}><button type="button" className="danger-button" onClick={onDelete}>Delete shift</button><div><button type="button" className="secondary" onClick={onClose}>Cancel</button><button type="button" className="primary" onClick={save}>Save changes</button></div></div>
-  </Modal>
-}
-
 function TimesheetDialog({ entry, onClose, onSave }: { entry: TimeEntry; onClose:()=>void; onSave:(entry:TimeEntry)=>void }) {
   const [clockIn,setClockIn]=useState(entry.clockIn); const [clockOut,setClockOut]=useState(entry.clockOut||""); const [breakMinutes,setBreakMinutes]=useState(entry.breakMinutes); const [note,setNote]=useState(entry.note||"");
-  return <Modal title="Correct timesheet" subtitle="All manager corrections return the record to pending review. Add a reason for the audit trail." onClose={onClose}><div className="form-grid"><label>Clock in<input type="time" value={clockIn} onChange={e=>setClockIn(e.target.value)}/></label><label>Clock out<input type="time" value={clockOut} onChange={e=>setClockOut(e.target.value)}/></label><label>Break minutes<input type="number" min="0" step="5" value={breakMinutes} onChange={e=>setBreakMinutes(Number(e.target.value))}/></label><label className="full-field">Correction reason<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Required, e.g. employee forgot to clock out"/></label></div><ModalActions onClose={onClose} onSave={()=>{if(!note.trim()){alert("Add a correction reason");return;}onSave({...entry,clockIn,clockOut:clockOut||undefined,breakMinutes,status:"Pending",note:note.trim(),edited:true})}} label="Save correction"/></Modal>
+  return <Dialog title="Correct timesheet" description="All manager corrections return the record to pending review. Add a reason for the audit trail." onClose={onClose}><div className="form-grid"><label>Clock in<input type="time" value={clockIn} onChange={e=>setClockIn(e.target.value)}/></label><label>Clock out<input type="time" value={clockOut} onChange={e=>setClockOut(e.target.value)}/></label><label>Break minutes<input type="number" min="0" step="5" value={breakMinutes} onChange={e=>setBreakMinutes(Number(e.target.value))}/></label><label className="full-field">Correction reason<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Required, e.g. employee forgot to clock out"/></label></div><DialogActions onClose={onClose} onConfirm={()=>{if(!note.trim()){alert("Add a correction reason");return;}onSave({...entry,clockIn,clockOut:clockOut||undefined,breakMinutes,status:"Pending",note:note.trim(),edited:true})}} confirmLabel="Save correction"/></Dialog>
 }
 
 function EmployeeDialog({ employee, locations, defaultLocationId, onClose, onSave }: { employee?: Employee; locations: Location[]; defaultLocationId?: string; onClose: () => void; onSave: (employee: Employee) => void | Promise<void> }) {
@@ -375,21 +296,16 @@ function EmployeeDialog({ employee, locations, defaultLocationId, onClose, onSav
   const [locationId, setLocationId] = useState(employee?.locationId ?? defaultLocationId ?? locations[0]?.id ?? "");
   const [active, setActive] = useState(employee?.active ?? true); const [hourlyRate,setHourlyRate]=useState(employee?.hourlyRate??0); const [payrollId,setPayrollId]=useState(employee?.payrollId??""); const [salaryCode,setSalaryCode]=useState(employee?.salaryCode??""); const [costCentre,setCostCentre]=useState(employee?.costCentre??"");
   function save() { const cleanName = name.trim() || "New employee"; if (!locationId && employee?.portalStatus === "ACTIVE") { alert("Portal-enabled employees must have an assigned location."); return; } onSave({ name: cleanName, initials: cleanName.split(" ").map((part) => part[0]).join("").slice(0,2).toUpperCase(), role, email, phone, locationId, active, hours: employee?.hours ?? 0, status: active ? "No shifts scheduled" : "Inactive", hourlyRate, payrollId, salaryCode, costCentre, portalStatus: employee?.portalStatus }); }
-  return <Modal title={employee ? "Edit employee" : "Add employee"} onClose={onClose}><div className="form-grid"><label className="full-field">Full name<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Employee name" /></label><label>Role<select value={role} onChange={(e) => setRole(e.target.value)}><option>General manager</option><option>Bar manager</option><option>Shift manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label><label>Status<select value={active ? "active" : "inactive"} onChange={(e) => setActive(e.target.value === "active")}><option value="active">Active</option><option value="inactive">Inactive</option></select></label><label className="full-field">Primary location<select value={locationId} onChange={(e) => setLocationId(e.target.value)}><option value="">No location assigned</option>{locations.map((location)=><option key={location.id} value={location.id}>{location.name}</option>)}</select>{!locations.length&&<small className="muted-note">Add an active location before enabling employee clock-in.</small>}</label><label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" /></label><label>Phone<input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+45 ..." /></label><label>Hourly pay (DKK)<input type="number" min="0" step="0.01" inputMode="decimal" value={hourlyRate} onChange={e=>setHourlyRate(Number(e.target.value))} /></label><label>Payroll ID<input value={payrollId} onChange={e=>setPayrollId(e.target.value)} /></label><label>Salary code<input value={salaryCode} onChange={e=>setSalaryCode(e.target.value)} /></label><label className="full-field">Cost centre<input value={costCentre} onChange={e=>setCostCentre(e.target.value)} /></label></div><ModalActions onClose={onClose} onSave={save} label={employee ? "Save employee" : "Add employee"} /></Modal>
+  return <Dialog title={employee ? "Edit employee" : "Add employee"} onClose={onClose}><div className="form-grid"><label className="full-field">Full name<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Employee name" /></label><label>Role<select value={role} onChange={(e) => setRole(e.target.value)}><option>General manager</option><option>Bar manager</option><option>Shift manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label><label>Status<select value={active ? "active" : "inactive"} onChange={(e) => setActive(e.target.value === "active")}><option value="active">Active</option><option value="inactive">Inactive</option></select></label><label className="full-field">Primary location<select value={locationId} onChange={(e) => setLocationId(e.target.value)}><option value="">No location assigned</option>{locations.map((location)=><option key={location.id} value={location.id}>{location.name}</option>)}</select>{!locations.length&&<small className="muted-note">Add an active location before enabling employee clock-in.</small>}</label><label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" /></label><label>Phone<input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+45 ..." /></label><label>Hourly pay (DKK)<input type="number" min="0" step="0.01" inputMode="decimal" value={hourlyRate} onChange={e=>setHourlyRate(Number(e.target.value))} /></label><label>Payroll ID<input value={payrollId} onChange={e=>setPayrollId(e.target.value)} /></label><label>Salary code<input value={salaryCode} onChange={e=>setSalaryCode(e.target.value)} /></label><label className="full-field">Cost centre<input value={costCentre} onChange={e=>setCostCentre(e.target.value)} /></label></div><DialogActions onClose={onClose} onConfirm={save} confirmLabel={employee ? "Save employee" : "Add employee"} /></Dialog>
 }
 
 function ProductDialog({ product, onClose, onSave }: { product?:Product; onClose: () => void; onSave: (product: Product) => void }) {
  const [name,setName]=useState(product?.name??""); const [supplier,setSupplier]=useState(product?.supplier??"Nordic Drinks"); const [category,setCategory]=useState(product?.category??"Draught beer"); const [stock,setStock]=useState(product?.stock??0); const [par,setPar]=useState(product?.par??6); const [reorderLevel,setReorderLevel]=useState(product?.reorderLevel??4); const [unit,setUnit]=useState(product?.unit??"units"); const [price,setPrice]=useState(product?.price??0); const [sellingPrice,setSellingPrice]=useState(product?.sellingPrice??0); const [sku,setSku]=useState(product?.sku??""); const [packSize,setPackSize]=useState(product?.packSize??1); const [notes,setNotes]=useState(product?.notes??""); const [active,setActive]=useState(product?.active!==false);
  function save(){if(!name.trim()){alert("Add a product name");return;}onSave({id:product?.id??crypto.randomUUID(),name:name.trim(),supplier,category,stock:Math.max(0,stock),par:Math.max(0,par),reorderLevel:Math.max(0,reorderLevel),unit,price:Math.max(0,price),sellingPrice:Math.max(0,sellingPrice),sku:sku.trim(),packSize:Math.max(1,packSize),notes:notes.trim(),active});}
- return <Modal title={product?"Edit product":"Add product"} subtitle="Maintain purchasing, pricing and location stock settings." onClose={onClose}><div className="form-grid"><label className="full-field">Product name<input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Lager 30L"/></label><label>Supplier<select value={supplier} onChange={e=>setSupplier(e.target.value)}><option>Nordic Drinks</option><option>Vin & Co.</option><option>Bar Supply DK</option><option>City Produce</option></select></label><label>Category<select value={category} onChange={e=>setCategory(e.target.value)}><option>Draught beer</option><option>Wine</option><option>Spirits</option><option>Soft drinks</option><option>Fresh</option><option>Consumables</option></select></label><label>Supplier SKU<input value={sku} onChange={e=>setSku(e.target.value)} placeholder="Optional"/></label><label>Unit<select value={unit} onChange={e=>setUnit(e.target.value)}><option>units</option><option>kegs</option><option>bottles</option><option>cases</option><option>pieces</option><option>kg</option><option>litres</option></select></label><label>Pack size<input type="number" min="1" value={packSize} onChange={e=>setPackSize(Number(e.target.value))}/></label><label>Current stock<input type="number" min="0" value={stock} onChange={e=>setStock(Number(e.target.value))}/></label><label>Par level<input type="number" min="0" value={par} onChange={e=>setPar(Number(e.target.value))}/></label><label>Reorder level<input type="number" min="0" value={reorderLevel} onChange={e=>setReorderLevel(Number(e.target.value))}/></label><label>Purchase price (DKK)<input type="number" min="0" step="0.01" value={price} onChange={e=>setPrice(Number(e.target.value))}/></label><label>Selling price (DKK)<input type="number" min="0" step="0.01" value={sellingPrice} onChange={e=>setSellingPrice(Number(e.target.value))}/></label><label>Status<select value={active?"active":"inactive"} onChange={e=>setActive(e.target.value==="active")}><option value="active">Active</option><option value="inactive">Inactive</option></select></label><label className="full-field">Notes<textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Storage, ordering or handling notes"/></label></div><ModalActions onClose={onClose} onSave={save} label={product?"Save product":"Add product"}/></Modal>
+ return <Dialog title={product?"Edit product":"Add product"} description="Maintain purchasing, pricing and location stock settings." onClose={onClose}><div className="form-grid"><label className="full-field">Product name<input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Lager 30L"/></label><label>Supplier<select value={supplier} onChange={e=>setSupplier(e.target.value)}><option>Nordic Drinks</option><option>Vin & Co.</option><option>Bar Supply DK</option><option>City Produce</option></select></label><label>Category<select value={category} onChange={e=>setCategory(e.target.value)}><option>Draught beer</option><option>Wine</option><option>Spirits</option><option>Soft drinks</option><option>Fresh</option><option>Consumables</option></select></label><label>Supplier SKU<input value={sku} onChange={e=>setSku(e.target.value)} placeholder="Optional"/></label><label>Unit<select value={unit} onChange={e=>setUnit(e.target.value)}><option>units</option><option>kegs</option><option>bottles</option><option>cases</option><option>pieces</option><option>kg</option><option>litres</option></select></label><label>Pack size<input type="number" min="1" value={packSize} onChange={e=>setPackSize(Number(e.target.value))}/></label><label>Current stock<input type="number" min="0" value={stock} onChange={e=>setStock(Number(e.target.value))}/></label><label>Par level<input type="number" min="0" value={par} onChange={e=>setPar(Number(e.target.value))}/></label><label>Reorder level<input type="number" min="0" value={reorderLevel} onChange={e=>setReorderLevel(Number(e.target.value))}/></label><label>Purchase price (DKK)<input type="number" min="0" step="0.01" value={price} onChange={e=>setPrice(Number(e.target.value))}/></label><label>Selling price (DKK)<input type="number" min="0" step="0.01" value={sellingPrice} onChange={e=>setSellingPrice(Number(e.target.value))}/></label><label>Status<select value={active?"active":"inactive"} onChange={e=>setActive(e.target.value==="active")}><option value="active">Active</option><option value="inactive">Inactive</option></select></label><label className="full-field">Notes<textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Storage, ordering or handling notes"/></label></div><DialogActions onClose={onClose} onConfirm={save} confirmLabel={product?"Save product":"Add product"}/></Dialog>
 }
 function StockCountDialog({products,onClose,onSave}:{products:Product[];onClose:()=>void;onSave:(counts:Record<string,number>)=>void}){
  const [counts,setCounts]=useState<Record<string,number>>(()=>Object.fromEntries(products.filter(p=>p.active!==false).map(p=>[p.id,p.stock]))); const [showExpected,setShowExpected]=useState(false); const variances=products.filter(p=>p.active!==false).map(p=>({p,variance:(counts[p.id]??0)-p.stock}));
- return <Modal title="Stock count" subtitle="Enter actual quantities, review variance, then approve the count." onClose={onClose}><div className="count-toolbar"><label><input type="checkbox" checked={showExpected} onChange={e=>setShowExpected(e.target.checked)}/> Show expected stock</label><strong>{variances.filter(x=>x.variance!==0).length} variances</strong></div><div className="stock-count-list">{variances.map(({p,variance})=><label key={p.id}><span><b>{p.name}</b><small>{p.category} · {p.unit}{showExpected?` · expected ${p.stock}`:""}</small></span><input type="number" min="0" value={counts[p.id]??0} onChange={e=>setCounts(cur=>({...cur,[p.id]:Number(e.target.value)}))}/><i className={variance===0?"count-ok":variance>0?"count-over":"count-short"}>{variance===0?"Match":`${variance>0?"+":""}${variance}`}</i></label>)}</div><ModalActions onClose={onClose} onSave={()=>onSave(counts)} label="Approve stock count"/></Modal>
+ return <Dialog title="Stock count" description="Enter actual quantities, review variance, then approve the count." onClose={onClose}><div className="count-toolbar"><label><input type="checkbox" checked={showExpected} onChange={e=>setShowExpected(e.target.checked)}/> Show expected stock</label><strong>{variances.filter(x=>x.variance!==0).length} variances</strong></div><div className="stock-count-list">{variances.map(({p,variance})=><label key={p.id}><span><b>{p.name}</b><small>{p.category} · {p.unit}{showExpected?` · expected ${p.stock}`:""}</small></span><input type="number" min="0" value={counts[p.id]??0} onChange={e=>setCounts(cur=>({...cur,[p.id]:Number(e.target.value)}))}/><i className={variance===0?"count-ok":variance>0?"count-over":"count-short"}>{variance===0?"Match":`${variance>0?"+":""}${variance}`}</i></label>)}</div><DialogActions onClose={onClose} onConfirm={()=>onSave(counts)} confirmLabel="Approve stock count"/></Dialog>
 }
-function OrderDialog({ onClose, onSave }: { onClose: () => void; onSave: () => void }) { return <Modal title="Create purchase order" subtitle="Choose a supplier to begin an order." onClose={onClose}><div className="supplier-options">{["Nordic Drinks", "Vin & Co.", "Bar Supply DK", "City Produce"].map((supplier, i) => <label key={supplier}><input type="radio" name="supplier" defaultChecked={i === 0} /><span className={`${overviewStyles.attentionIcon} ${overviewStyles.blue}`}><Truck size={18} /></span><b>{supplier}</b><ChevronRight size={17} /></label>)}</div><ModalActions onClose={onClose} onSave={onSave} label="Continue" /></Modal> }
-function Modal({ title, subtitle, onClose, children, className = "" }: { title: string; subtitle?: string; onClose: () => void; children: React.ReactNode; className?: string }) {
-  return <Dialog title={title} description={subtitle} className={className} onClose={onClose}>{children}</Dialog>;
-}
-function ModalActions({ onClose, onSave, label }: { onClose: () => void; onSave: () => void; label: string }) { return <DialogActions onClose={onClose} onConfirm={onSave} confirmLabel={label}/> }
-function money(value: number) { return new Intl.NumberFormat("da-DK", { style: "currency", currency: "DKK", maximumFractionDigits: 0 }).format(value); }
+function OrderDialog({ onClose, onSave }: { onClose: () => void; onSave: () => void }) { return <Dialog title="Create purchase order" description="Choose a supplier to begin an order." onClose={onClose}><div className="supplier-options">{["Nordic Drinks", "Vin & Co.", "Bar Supply DK", "City Produce"].map((supplier, i) => <label key={supplier}><input type="radio" name="supplier" defaultChecked={i === 0} /><span className={`${overviewStyles.attentionIcon} ${overviewStyles.blue}`}><Truck size={18} /></span><b>{supplier}</b><ChevronRight size={17} /></label>)}</div><DialogActions onClose={onClose} onConfirm={onSave} confirmLabel="Continue" /></Dialog> }

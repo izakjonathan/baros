@@ -1,7 +1,7 @@
 "use client";
 import { WorkspaceHeader } from "@/components/ui/workspace-ui";
 import { useState } from "react";
-import { ClockSettings, Search, UserRoundPlus } from "lucide-react";
+import { Search, UserRoundPlus } from "lucide-react";
 import type { Shift } from "@/lib/data";
 import type { Employee } from "@/features/workspace/types";
 import { canonicalShiftDate, hoursBetween } from "@/features/workspace/schedule-utils";
@@ -64,4 +64,3 @@ export function TeamWorkspace({ employees, shifts, devMode, canManage, onAdd, on
     </section>
   </div>
 }
-

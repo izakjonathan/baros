@@ -2,8 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, CheckCheck, ChevronLeft, ChevronRight, Copy, Plus, Send, X } from "lucide-react";
 import { days, type Shift } from "@/lib/data";
-import type { Employee, ScheduleAcknowledgementSummary, TimeEntry } from "@/features/workspace/types";
-import { BASE_MONDAY, canonicalShiftDate, conflictIds, dateFromSerial, dateSerial, hoursBetween, isOvernight, mapDatabaseShift, shiftPositionFromDate, toIsoDate } from "@/features/workspace/schedule-utils";
+import type { Employee, ScheduleAcknowledgementSummary } from "@/features/workspace/types";
+import { BASE_MONDAY, canonicalShiftDate, conflictIds, dateFromSerial, dateSerial, isOvernight, mapDatabaseShift, shiftPositionFromDate, toIsoDate } from "@/features/workspace/schedule-utils";
 import scheduleStyles from "./ScheduleWorkspace.module.css";
 
 export function ScheduleWorkspace({ shifts, setShifts, employees, onNewShift, onEditShift, notify, currentWeekOffset, setCurrentWeekOffset, devMode, selectedLocationId, persist }: { shifts: Shift[]; setShifts: React.Dispatch<React.SetStateAction<Shift[]>>; employees: Employee[]; onNewShift: (date?: string) => void; onEditShift: (shift: Shift) => void; notify: (s: string) => void; currentWeekOffset: number; setCurrentWeekOffset: React.Dispatch<React.SetStateAction<number>>; devMode: boolean; selectedLocationId: string; persist: (path:string, options:RequestInit) => Promise<any> }) {
@@ -147,11 +147,3 @@ function ShiftCard({ shift, conflict, onOpen, onDragStart }: { shift: Shift; con
     {shift.isOpen && <em>Open</em>}{shift.availabilityConflict && <em className={scheduleStyles.conflictBadge}>{shift.availabilityConflict === "APPROVED_TIME_OFF" ? "Time off" : "Unavailable"}</em>}{conflict && !shift.availabilityConflict && <em className={scheduleStyles.conflictBadge}>Conflict</em>}
   </button>;
 }
-
-function workedHours(entry: TimeEntry) { return entry.clockOut ? Math.max(0, hoursBetween(entry.clockIn, entry.clockOut) - entry.breakMinutes/60) : 0; }
-function formatAttendanceDate(value: string) {
-  const [year, month, day] = value.split("-").map(Number);
-  if (!year || !month || !day) return value;
-  return new Date(year, month - 1, day).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-}
-

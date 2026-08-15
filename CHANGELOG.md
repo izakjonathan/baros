@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.19.0-rc.50
+
+- Fixed the Vercel TypeScript failure by restoring the missing Lucide `History` runtime import in `AttendanceWorkspace`.
+- Extended the existing UI contract to detect capitalized JSX components that are rendered without a runtime import or local binding.
+- Moved add/edit Shift Plan dialogs from the manager orchestrator into scheduling feature ownership.
+- Removed local Sidebar, Topbar, Modal, and ModalActions forwarding adapters in favour of the existing shared components.
+- Removed decomposition-era dead imports, two orphaned Attendance helpers from Shift Plan, an unused login router, and one dead orchestrator formatter.
+- No CSS, database, API, authorization, permission, or business-behaviour changes.
+
 ## v0.19.0-rc.49
 
 - Repaired all unresolved feature dependencies left by the rc.45 source decomposition by importing existing shared helpers, class contracts, data constants, and icons into their feature owners.

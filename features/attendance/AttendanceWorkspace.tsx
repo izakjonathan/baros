@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Ban, CheckCheck, DownloadCloud, FileDown, LockKeyhole, Pencil, RotateCcw, UnlockKeyhole } from "lucide-react";
+import { Ban, CheckCheck, DownloadCloud, FileDown, History, LockKeyhole, Pencil, RotateCcw, UnlockKeyhole } from "lucide-react";
 import type { Shift } from "@/lib/data";
 import type { Employee, TimeEntry } from "@/features/workspace/types";
 import { attendanceStyles, surfaceStyles } from "@/lib/ui-classes";
@@ -101,4 +101,3 @@ export function AttendanceWorkspace({ employees, shifts, entries, setEntries, no
     </section>
   </div>
 }
-

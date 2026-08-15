@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db/client";
-import { createDevSessionToken, getDevSessionUser, isDevAuthEnabled, verifyDevSessionToken } from "@/lib/auth/dev-auth";
+import { createDevSessionToken, isDevAuthEnabled, verifyDevSessionToken } from "@/lib/auth/dev-auth";
 import { expiredSessionCookieOptions, sessionCookieName, sessionCookieOptions, sessionExpiry } from "@/lib/auth/session-cookie";
 import { hashSessionToken, persistSessionRecord } from "@/lib/auth/session-store";
 import { rolesWithCapability, type Capability } from "@/lib/auth/capabilities";

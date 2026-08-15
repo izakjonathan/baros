@@ -1,12 +1,13 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.49**
+Version: **v0.19.0-rc.50**
 
 ## Current focus
-Source-decomposition dependency integrity and shared UI cleanup.
+Dependency-backed build repair and source-ownership cleanup.
 
-## rc.49
-- Fixed all unresolved feature/component names detected after the rc.45 decomposition.
-- Feature workspaces now use `WorkspaceHeader` directly instead of local adapters.
-- Shared panel headings now use one `PanelTitle` owner.
-- Rollback checkpoint: v0.19.0-rc.48.
+## rc.50
+- Fixed the rc.49 Attendance `History` runtime-import failure reported by Vercel TypeScript validation.
+- Added same-class regression coverage for unbound capitalized JSX components.
+- Shift Plan editor dialogs are now owned by the scheduling feature.
+- The orchestrator renders shared chrome and dialog primitives directly instead of through local forwarding adapters.
+- Rollback checkpoint: v0.19.0-rc.49.

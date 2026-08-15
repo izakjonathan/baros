@@ -1,8 +1,8 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.49**
+Current release: **v0.19.0-rc.50**
 
-Rollback checkpoint: **v0.19.0-rc.48**.
+Rollback checkpoint: **v0.19.0-rc.49**.
 
 Bar Ops is a Next.js operations workspace for hospitality teams. The current architecture uses a global UI system with Shift Plan as the sole custom CSS exception, and manager workspaces are now split by feature/domain rather than implemented inside one monolithic client component.
 
@@ -12,9 +12,9 @@ Use the latest approved ZIP as the baseline. Prefer changing/replacing existing 
 
 ## Current source structure
 
-- `components/bar-ops-app.tsx` — application orchestration/state only
+- `components/bar-ops-app.tsx` — application orchestration/state and remaining dialog integration
 - `features/dashboard/` — Today’s operations / Shift execution overview
-- `features/scheduling/` — Shift Plan
+- `features/scheduling/` — Shift Plan workspace and editor dialogs
 - `features/attendance/` — Time & attendance
 - `features/inventory/` — Inventory
 - `features/orders/` — Orders

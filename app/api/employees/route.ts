@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
 import { hasCapability } from "@/lib/auth/capabilities";
 import { db } from "@/lib/db/client";
-import { writeAudit } from "@/lib/services/audit";
 import { hashKioskPin } from "@/lib/security/kiosk-pin";
 import { ApiError, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
 
