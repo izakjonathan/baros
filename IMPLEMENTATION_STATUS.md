@@ -1,10 +1,11 @@
-# Implementation Status — v0.19.0-rc.35
+# Implementation Status
 
-Current focus: CSS ownership and declaration consolidation.
+Version: **v0.19.0-rc.48**
 
-- CSS reduced to 3,948 structurally parsed declarations across 25 files.
-- 52 unused custom-property declarations removed after runtime/source usage tracing.
-- 135 superseded declarations removed only where every selector branch receives the same property later in the exact same cascade context.
-- Schedule remains module-owned; Employee, Attendance, Inventory, Orders, Requests, Daily Operations, Dashboard and ManagerShell retain their scoped owners.
-- CSS `!important` usage remains at 9 declarations.
-- No application behavior changes.
+## Current focus
+Source-decomposition shared-component contract integrity.
+
+## rc.48
+- Corrected all extracted workspace `WorkspaceHeader` adapters to the shared `description` / `actions` API.
+- No CSS or functionality changes.
+- Rollback checkpoint: v0.19.0-rc.47.

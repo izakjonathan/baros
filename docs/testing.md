@@ -1,21 +1,23 @@
 # Testing
 
-## Required release gates
+`npm run test:current` is the active regression gate. It covers current business logic, payroll, integrity, production foundations, inventory/operations, security remediation, authentication, tenant isolation, transaction/API boundaries, type-safety contracts, release contracts and the current CSS/UI architecture.
 
-Run in this order from a clean Node 24 checkout:
+The active command groups are intentionally small:
 
-```bash
-npm install --no-audit --no-fund
-npm run audit:preflight
-npm run validate:release
-npm run test:all
-npm run lint
-npm run typecheck
-npm run build
-```
+- `test:logic`
+- `test:payroll`
+- `test:integrity`
+- `test:production`
+- `test:inventory`
+- `test:remediation`
+- `test:auth`
+- `test:boundaries`
+- `test:release-contract`
+- `test:ui`
+- `test:current`
 
-Regression tests protect behavior and architectural invariants. They must be forward-compatible with later versions and should test shared contracts rather than obsolete source locations.
+Historical release-specific test scripts are no longer shipped in the active repository. Previous ZIP releases and Git history remain the historical record. A superseded source-text test must not force obsolete implementation code to remain in production.
 
-## Phase D requirement
+The rc.38 CSS gate protects the three-file CSS architecture. The rc.41 gate protects CSS/source ownership, shared page/dialog/state/header contracts and Shift Plan-only custom CSS. The rc.42 gate protects the three global card fundamentals. The rc.43 gate protects the compact repository/test surface, fixed shared topbar, and Shift Plan scroll containment.
 
-Every redesign release must continue to run `test:v0170-redesign-readiness` so domain contracts, pure schedule logic, design tokens, service-worker expectations and redesign documentation remain intact.
+Vercel/GitHub Actions are the dependency-backed production gates for lint, TypeScript and Next.js build validation when local `node_modules` are unavailable.

@@ -1,15 +1,9 @@
 # Development Workflow
 
-1. Start from the latest approved ZIP or repository commit.
-2. Audit the affected domain and identify current owners before editing.
-3. Preserve API, authorization, tenant, database and workflow contracts unless a breaking change is explicitly approved.
-4. Prefer shared primitives and domain-owned helpers over duplicated screen-specific implementations.
-5. Keep visual work separate from business-logic refactoring during Phase D.
-6. Run the release preflight, regressions, lint, typecheck and production build.
-7. Review the final diff for unrelated changes, dead code, duplicated logic and accessibility regressions.
-8. Package only the approved release documentation and source files.
-
-
-## Phase D design-system principle
-
-The visual redesign uses a layered design-system architecture consisting of primitive tokens, semantic tokens, foundation styles, shared UI primitives and feature-specific product components. Design decisions are globalised through tokens, while component implementation remains locally scoped through CSS Modules. Components control their internal presentation, while parent layouts control external spacing and placement.
+1. Start from the latest approved technical ZIP.
+2. Inspect the implementation and identify the true owner of the change. Replace/merge/extend that existing owner first; add a new selector/component only when the existing owner cannot represent the required behavior.
+3. Keep business behavior unchanged unless the release explicitly changes it.
+4. For visual changes, prefer tokens/global primitives. Do not create feature CSS except for Shift Plan without explicit approval.
+5. Run the focused test, current regression suite, release validation, and artifact audit when available.
+6. Attempt lint, typecheck, and build when dependencies are installed; record limitations honestly when they are not.
+7. Review the final diff for unrelated changes and package a recoverable ZIP.

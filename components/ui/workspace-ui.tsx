@@ -13,9 +13,9 @@ export function EmptyState({ title, description, action }: { title: string; desc
 }
 
 export function LoadingState({ title = "Loading workspace", description = "Preparing the latest information…" }: { title?: string; description?: string }) {
-  return <div className="shared-state-card" role="status" aria-live="polite" aria-busy="true"><span className="shared-spinner" aria-hidden="true"/><strong>{title}</strong><p>{description}</p></div>;
+  return <div className="card card-compact shared-state-card" role="status" aria-live="polite" aria-busy="true"><span className="shared-spinner" aria-hidden="true"/><strong>{title}</strong><p>{description}</p></div>;
 }
 
 export function ErrorState({ title, description, action }: { title: string; description: string; action?: ReactNode }) {
-  return <div className="shared-state-card shared-error-state" role="alert"><strong>{title}</strong><p>{description}</p>{action && <div>{action}</div>}</div>;
+  return <div className="card card-compact shared-state-card shared-error-state" role="alert"><strong>{title}</strong><p>{description}</p>{action && <div>{action}</div>}</div>;
 }

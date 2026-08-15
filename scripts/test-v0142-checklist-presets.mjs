@@ -1,1 +1,0 @@
-import fs from "node:fs";const ui=fs.readFileSync("components/bar-ops-app.tsx","utf8");for(const token of ["addPreset","Opening checklist","Closing checklist","Check tills and floats","Set alarm and record handover notes"])if(!ui.includes(token))throw new Error(`Missing ${token}`);console.log("v0.14.2 checklist preset checks passed");
