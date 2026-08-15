@@ -1,12 +1,9 @@
 "use client";
-import { Dialog, DialogActions } from "./ui/interaction-ui";
-
 import { useEffect, useRef, useState } from "react";
 import {
   Activity,
   CalendarDays,
   Check,
-  ChevronRight,
   ClipboardList,
   Clock3,
   Database,
@@ -16,7 +13,6 @@ import {
   Settings,
   ShoppingCart,
   Timer,
-  Truck,
   Users,
 } from "lucide-react";
 import { initialProducts, initialShifts, team, type NavKey, type Product, type Shift } from "@/lib/data";
@@ -27,15 +23,14 @@ import { RequestsWorkspace } from "@/components/requests-workspace";
 import { DashboardWorkspace, ShiftExecutionWorkspace } from "@/features/dashboard/manager-overview";
 import { EditShiftDialog, ShiftDialog } from "@/features/scheduling/ScheduleDialogs";
 import { ScheduleWorkspace } from "@/features/scheduling/ScheduleWorkspace";
-import { AttendanceWorkspace } from "@/features/attendance/AttendanceWorkspace";
-import { InventoryWorkspace } from "@/features/inventory/InventoryWorkspace";
-import { OrdersWorkspace } from "@/features/orders/OrdersWorkspace";
+import { AttendanceWorkspace, TimesheetDialog } from "@/features/attendance/AttendanceWorkspace";
+import { InventoryWorkspace, ProductDialog, StockCountDialog } from "@/features/inventory/InventoryWorkspace";
+import { OrderDialog, OrdersWorkspace } from "@/features/orders/OrdersWorkspace";
 import { DailyOperationsWorkspace } from "@/features/operations/DailyOperationsWorkspace";
-import { TeamWorkspace } from "@/features/employees/TeamWorkspace";
+import { EmployeeDialog, TeamWorkspace } from "@/features/employees/TeamWorkspace";
 import { SettingsWorkspace } from "@/features/settings/SettingsWorkspace";
 import { ControlCenterWorkspace } from "@/features/control/ControlCenterWorkspace";
 import { WorkspaceSidebar, WorkspaceTopbar } from "@/components/shell/workspace-chrome";
-import { overviewStyles } from "@/lib/ui-classes";
 import { hasCapability, type Capability } from "@/lib/auth/capabilities";
 import type { AppRole } from "@/lib/auth/session";
 
@@ -281,31 +276,3 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
     </div>
   );
 }
-
-
-function TimesheetDialog({ entry, onClose, onSave }: { entry: TimeEntry; onClose:()=>void; onSave:(entry:TimeEntry)=>void }) {
-  const [clockIn,setClockIn]=useState(entry.clockIn); const [clockOut,setClockOut]=useState(entry.clockOut||""); const [breakMinutes,setBreakMinutes]=useState(entry.breakMinutes); const [note,setNote]=useState(entry.note||"");
-  return <Dialog title="Correct timesheet" description="All manager corrections return the record to pending review. Add a reason for the audit trail." onClose={onClose}><div className="form-grid"><label>Clock in<input type="time" value={clockIn} onChange={e=>setClockIn(e.target.value)}/></label><label>Clock out<input type="time" value={clockOut} onChange={e=>setClockOut(e.target.value)}/></label><label>Break minutes<input type="number" min="0" step="5" value={breakMinutes} onChange={e=>setBreakMinutes(Number(e.target.value))}/></label><label className="full-field">Correction reason<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Required, e.g. employee forgot to clock out"/></label></div><DialogActions onClose={onClose} onConfirm={()=>{if(!note.trim()){alert("Add a correction reason");return;}onSave({...entry,clockIn,clockOut:clockOut||undefined,breakMinutes,status:"Pending",note:note.trim(),edited:true})}} confirmLabel="Save correction"/></Dialog>
-}
-
-function EmployeeDialog({ employee, locations, defaultLocationId, onClose, onSave }: { employee?: Employee; locations: Location[]; defaultLocationId?: string; onClose: () => void; onSave: (employee: Employee) => void | Promise<void> }) {
-  const [name, setName] = useState(employee?.name ?? "");
-  const [role, setRole] = useState(employee?.role ?? "Bartender");
-  const [email, setEmail] = useState(employee?.email ?? "");
-  const [phone, setPhone] = useState(employee?.phone ?? "");
-  const [locationId, setLocationId] = useState(employee?.locationId ?? defaultLocationId ?? locations[0]?.id ?? "");
-  const [active, setActive] = useState(employee?.active ?? true); const [hourlyRate,setHourlyRate]=useState(employee?.hourlyRate??0); const [payrollId,setPayrollId]=useState(employee?.payrollId??""); const [salaryCode,setSalaryCode]=useState(employee?.salaryCode??""); const [costCentre,setCostCentre]=useState(employee?.costCentre??"");
-  function save() { const cleanName = name.trim() || "New employee"; if (!locationId && employee?.portalStatus === "ACTIVE") { alert("Portal-enabled employees must have an assigned location."); return; } onSave({ name: cleanName, initials: cleanName.split(" ").map((part) => part[0]).join("").slice(0,2).toUpperCase(), role, email, phone, locationId, active, hours: employee?.hours ?? 0, status: active ? "No shifts scheduled" : "Inactive", hourlyRate, payrollId, salaryCode, costCentre, portalStatus: employee?.portalStatus }); }
-  return <Dialog title={employee ? "Edit employee" : "Add employee"} onClose={onClose}><div className="form-grid"><label className="full-field">Full name<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Employee name" /></label><label>Role<select value={role} onChange={(e) => setRole(e.target.value)}><option>General manager</option><option>Bar manager</option><option>Shift manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label><label>Status<select value={active ? "active" : "inactive"} onChange={(e) => setActive(e.target.value === "active")}><option value="active">Active</option><option value="inactive">Inactive</option></select></label><label className="full-field">Primary location<select value={locationId} onChange={(e) => setLocationId(e.target.value)}><option value="">No location assigned</option>{locations.map((location)=><option key={location.id} value={location.id}>{location.name}</option>)}</select>{!locations.length&&<small className="muted-note">Add an active location before enabling employee clock-in.</small>}</label><label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" /></label><label>Phone<input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+45 ..." /></label><label>Hourly pay (DKK)<input type="number" min="0" step="0.01" inputMode="decimal" value={hourlyRate} onChange={e=>setHourlyRate(Number(e.target.value))} /></label><label>Payroll ID<input value={payrollId} onChange={e=>setPayrollId(e.target.value)} /></label><label>Salary code<input value={salaryCode} onChange={e=>setSalaryCode(e.target.value)} /></label><label className="full-field">Cost centre<input value={costCentre} onChange={e=>setCostCentre(e.target.value)} /></label></div><DialogActions onClose={onClose} onConfirm={save} confirmLabel={employee ? "Save employee" : "Add employee"} /></Dialog>
-}
-
-function ProductDialog({ product, onClose, onSave }: { product?:Product; onClose: () => void; onSave: (product: Product) => void }) {
- const [name,setName]=useState(product?.name??""); const [supplier,setSupplier]=useState(product?.supplier??"Nordic Drinks"); const [category,setCategory]=useState(product?.category??"Draught beer"); const [stock,setStock]=useState(product?.stock??0); const [par,setPar]=useState(product?.par??6); const [reorderLevel,setReorderLevel]=useState(product?.reorderLevel??4); const [unit,setUnit]=useState(product?.unit??"units"); const [price,setPrice]=useState(product?.price??0); const [sellingPrice,setSellingPrice]=useState(product?.sellingPrice??0); const [sku,setSku]=useState(product?.sku??""); const [packSize,setPackSize]=useState(product?.packSize??1); const [notes,setNotes]=useState(product?.notes??""); const [active,setActive]=useState(product?.active!==false);
- function save(){if(!name.trim()){alert("Add a product name");return;}onSave({id:product?.id??crypto.randomUUID(),name:name.trim(),supplier,category,stock:Math.max(0,stock),par:Math.max(0,par),reorderLevel:Math.max(0,reorderLevel),unit,price:Math.max(0,price),sellingPrice:Math.max(0,sellingPrice),sku:sku.trim(),packSize:Math.max(1,packSize),notes:notes.trim(),active});}
- return <Dialog title={product?"Edit product":"Add product"} description="Maintain purchasing, pricing and location stock settings." onClose={onClose}><div className="form-grid"><label className="full-field">Product name<input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Lager 30L"/></label><label>Supplier<select value={supplier} onChange={e=>setSupplier(e.target.value)}><option>Nordic Drinks</option><option>Vin & Co.</option><option>Bar Supply DK</option><option>City Produce</option></select></label><label>Category<select value={category} onChange={e=>setCategory(e.target.value)}><option>Draught beer</option><option>Wine</option><option>Spirits</option><option>Soft drinks</option><option>Fresh</option><option>Consumables</option></select></label><label>Supplier SKU<input value={sku} onChange={e=>setSku(e.target.value)} placeholder="Optional"/></label><label>Unit<select value={unit} onChange={e=>setUnit(e.target.value)}><option>units</option><option>kegs</option><option>bottles</option><option>cases</option><option>pieces</option><option>kg</option><option>litres</option></select></label><label>Pack size<input type="number" min="1" value={packSize} onChange={e=>setPackSize(Number(e.target.value))}/></label><label>Current stock<input type="number" min="0" value={stock} onChange={e=>setStock(Number(e.target.value))}/></label><label>Par level<input type="number" min="0" value={par} onChange={e=>setPar(Number(e.target.value))}/></label><label>Reorder level<input type="number" min="0" value={reorderLevel} onChange={e=>setReorderLevel(Number(e.target.value))}/></label><label>Purchase price (DKK)<input type="number" min="0" step="0.01" value={price} onChange={e=>setPrice(Number(e.target.value))}/></label><label>Selling price (DKK)<input type="number" min="0" step="0.01" value={sellingPrice} onChange={e=>setSellingPrice(Number(e.target.value))}/></label><label>Status<select value={active?"active":"inactive"} onChange={e=>setActive(e.target.value==="active")}><option value="active">Active</option><option value="inactive">Inactive</option></select></label><label className="full-field">Notes<textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Storage, ordering or handling notes"/></label></div><DialogActions onClose={onClose} onConfirm={save} confirmLabel={product?"Save product":"Add product"}/></Dialog>
-}
-function StockCountDialog({products,onClose,onSave}:{products:Product[];onClose:()=>void;onSave:(counts:Record<string,number>)=>void}){
- const [counts,setCounts]=useState<Record<string,number>>(()=>Object.fromEntries(products.filter(p=>p.active!==false).map(p=>[p.id,p.stock]))); const [showExpected,setShowExpected]=useState(false); const variances=products.filter(p=>p.active!==false).map(p=>({p,variance:(counts[p.id]??0)-p.stock}));
- return <Dialog title="Stock count" description="Enter actual quantities, review variance, then approve the count." onClose={onClose}><div className="count-toolbar"><label><input type="checkbox" checked={showExpected} onChange={e=>setShowExpected(e.target.checked)}/> Show expected stock</label><strong>{variances.filter(x=>x.variance!==0).length} variances</strong></div><div className="stock-count-list">{variances.map(({p,variance})=><label key={p.id}><span><b>{p.name}</b><small>{p.category} · {p.unit}{showExpected?` · expected ${p.stock}`:""}</small></span><input type="number" min="0" value={counts[p.id]??0} onChange={e=>setCounts(cur=>({...cur,[p.id]:Number(e.target.value)}))}/><i className={variance===0?"count-ok":variance>0?"count-over":"count-short"}>{variance===0?"Match":`${variance>0?"+":""}${variance}`}</i></label>)}</div><DialogActions onClose={onClose} onConfirm={()=>onSave(counts)} confirmLabel="Approve stock count"/></Dialog>
-}
-function OrderDialog({ onClose, onSave }: { onClose: () => void; onSave: () => void }) { return <Dialog title="Create purchase order" description="Choose a supplier to begin an order." onClose={onClose}><div className="supplier-options">{["Nordic Drinks", "Vin & Co.", "Bar Supply DK", "City Produce"].map((supplier, i) => <label key={supplier}><input type="radio" name="supplier" defaultChecked={i === 0} /><span className={`${overviewStyles.attentionIcon} ${overviewStyles.blue}`}><Truck size={18} /></span><b>{supplier}</b><ChevronRight size={17} /></label>)}</div><DialogActions onClose={onClose} onConfirm={onSave} confirmLabel="Continue" /></Dialog> }

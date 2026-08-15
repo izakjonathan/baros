@@ -1,4 +1,5 @@
 "use client";
+import { Dialog, DialogActions } from "@/components/ui/interaction-ui";
 import { useState } from "react";
 import { Ban, CheckCheck, DownloadCloud, FileDown, History, LockKeyhole, Pencil, RotateCcw, UnlockKeyhole } from "lucide-react";
 import type { Shift } from "@/lib/data";
@@ -100,4 +101,9 @@ export function AttendanceWorkspace({ employees, shifts, entries, setEntries, no
       {exportHistory.length?<div>{exportHistory.map(x=><article key={x.id}><DownloadCloud size={17}/><span><b>{x.period}</b><small>{x.created}</small></span><span>{x.employees} employees</span><strong>{x.hours.toFixed(2)}h</strong></article>)}</div>:<p>No payroll exports generated in this session.</p>}
     </section>
   </div>
+}
+
+export function TimesheetDialog({ entry, onClose, onSave }: { entry: TimeEntry; onClose:()=>void; onSave:(entry:TimeEntry)=>void }) {
+  const [clockIn,setClockIn]=useState(entry.clockIn); const [clockOut,setClockOut]=useState(entry.clockOut||""); const [breakMinutes,setBreakMinutes]=useState(entry.breakMinutes); const [note,setNote]=useState(entry.note||"");
+  return <Dialog title="Correct timesheet" description="All manager corrections return the record to pending review. Add a reason for the audit trail." onClose={onClose}><div className="form-grid"><label>Clock in<input type="time" value={clockIn} onChange={e=>setClockIn(e.target.value)}/></label><label>Clock out<input type="time" value={clockOut} onChange={e=>setClockOut(e.target.value)}/></label><label>Break minutes<input type="number" min="0" step="5" value={breakMinutes} onChange={e=>setBreakMinutes(Number(e.target.value))}/></label><label className="full-field">Correction reason<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Required, e.g. employee forgot to clock out"/></label></div><DialogActions onClose={onClose} onConfirm={()=>{if(!note.trim()){alert("Add a correction reason");return;}onSave({...entry,clockIn,clockOut:clockOut||undefined,breakMinutes,status:"Pending",note:note.trim(),edited:true})}} confirmLabel="Save correction"/></Dialog>
 }

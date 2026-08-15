@@ -1,9 +1,10 @@
 "use client";
+import { Dialog, DialogActions } from "@/components/ui/interaction-ui";
 import { WorkspaceHeader } from "@/components/ui/workspace-ui";
 import { useState } from "react";
-import { Check, CheckCircle2, ChevronDown, Plus, Search, Sparkles, Truck } from "lucide-react";
+import { Check, CheckCircle2, ChevronDown, ChevronRight, Plus, Search, Sparkles, Truck } from "lucide-react";
 import { orders, type Product } from "@/lib/data";
-import { orderStyles, surfaceStyles } from "@/lib/ui-classes";
+import { orderStyles, overviewStyles, surfaceStyles } from "@/lib/ui-classes";
 function money(value: number) { return new Intl.NumberFormat("da-DK", { style: "currency", currency: "DKK", maximumFractionDigits: 0 }).format(value); }
 export function OrdersWorkspace({ products, setProducts, onNewOrder, notify }: { products:Product[]; setProducts:React.Dispatch<React.SetStateAction<Product[]>>; onNewOrder: () => void; notify: (s: string) => void }) {
   const [received,setReceived]=useState<string[]>([]);
@@ -19,3 +20,4 @@ export function OrdersWorkspace({ products, setProducts, onNewOrder, notify }: {
   </div>
 }
 
+export function OrderDialog({ onClose, onSave }: { onClose: () => void; onSave: () => void }) { return <Dialog title="Create purchase order" description="Choose a supplier to begin an order." onClose={onClose}><div className="supplier-options">{["Nordic Drinks", "Vin & Co.", "Bar Supply DK", "City Produce"].map((supplier, i) => <label key={supplier}><input type="radio" name="supplier" defaultChecked={i === 0} /><span className={`${overviewStyles.attentionIcon} ${overviewStyles.blue}`}><Truck size={18} /></span><b>{supplier}</b><ChevronRight size={17} /></label>)}</div><DialogActions onClose={onClose} onConfirm={onSave} confirmLabel="Continue" /></Dialog> }

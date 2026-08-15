@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.51
+
+- Moved the remaining Attendance, Team, Inventory, and Orders dialog implementations from the manager orchestrator into their existing feature owners.
+- Kept dialog state, persistence, notifications, and cross-feature coordination in the orchestrator while removing its direct shared-dialog, icon, and dialog-style dependencies.
+- Generalized the existing UI contract to protect feature ownership for all seven extracted dialogs.
+- Reduced `components/bar-ops-app.tsx` from 37,330 bytes to 26,765 bytes without adding files or changing CSS.
+- No database, API, authorization, permission, visual, or business-behaviour changes.
+
 ## v0.19.0-rc.50
 
 - Fixed the Vercel TypeScript failure by restoring the missing Lucide `History` runtime import in `AttendanceWorkspace`.

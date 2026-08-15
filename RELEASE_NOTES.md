@@ -1,16 +1,16 @@
-# v0.19.0-rc.50 — Attendance Build Repair & Orchestrator Cleanup
+# v0.19.0-rc.51 — Feature Dialog Ownership Cleanup
 
-## Fixed
-- Restored the missing Lucide `History` import used by the Attendance export-history heading. Vercel had compiled rc.49 successfully before TypeScript resolved `<History />` to the DOM `History` class and rejected its JSX attributes.
-- Added a current UI-contract scan for capitalized JSX components without runtime bindings so this extraction error class is caught locally.
+## Baseline
+- Continued from v0.19.0-rc.50 after its Commit-app ZIP workflow and Vercel build were confirmed working.
 
 ## Cleanup
-- Moved Shift Plan add/edit dialogs and their schedule-specific CSS-module ownership from `components/bar-ops-app.tsx` to `features/scheduling/ScheduleDialogs.tsx`.
-- Removed local Sidebar, Topbar, Modal, and ModalActions adapters; the orchestrator now uses the existing shared components directly.
-- Removed stale imports, two orphaned Attendance helpers from Shift Plan, an unused login router, and one unused formatter left behind by earlier extraction.
-- Reduced `components/bar-ops-app.tsx` from 51,613 bytes to approximately 37 KB.
+- Moved `TimesheetDialog`, `EmployeeDialog`, `ProductDialog`, `StockCountDialog`, and `OrderDialog` into the existing Attendance, Team, Inventory, and Orders feature modules.
+- Preserved dialog state and all save/invite/persistence callbacks in `components/bar-ops-app.tsx`, so this release changes ownership without changing workflow behaviour.
+- Removed the orchestrator's direct dependency on shared dialog primitives plus dialog-only icons and class maps.
+- Extended the existing feature-ownership contract to cover all seven extracted feature dialogs.
+- Reduced `components/bar-ops-app.tsx` from 37,330 bytes to 26,765 bytes with no new files.
 
 ## Scope
-No CSS, database, API, authorization, permission, or business-behaviour changes.
+No CSS, database, API, authorization, permission, visual, or business-behaviour changes.
 
-Rollback checkpoint: **v0.19.0-rc.49**.
+Rollback checkpoint: **v0.19.0-rc.50**.

@@ -1,13 +1,13 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.50**
+Version: **v0.19.0-rc.51**
 
 ## Current focus
-Dependency-backed build repair and source-ownership cleanup.
+Source-ownership cleanup after dependency-backed build recovery.
 
-## rc.50
-- Fixed the rc.49 Attendance `History` runtime-import failure reported by Vercel TypeScript validation.
-- Added same-class regression coverage for unbound capitalized JSX components.
-- Shift Plan editor dialogs are now owned by the scheduling feature.
-- The orchestrator renders shared chrome and dialog primitives directly instead of through local forwarding adapters.
-- Rollback checkpoint: v0.19.0-rc.49.
+## rc.51
+- Attendance, Team, Inventory, and Orders now own their remaining dialog implementations.
+- The manager orchestrator retains shared state, persistence, notifications, and feature integration callbacks.
+- The orchestrator no longer imports or implements shared dialog primitives directly.
+- No files or CSS declarations were added.
+- Rollback checkpoint: v0.19.0-rc.50.

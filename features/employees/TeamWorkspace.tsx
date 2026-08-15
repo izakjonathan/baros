@@ -1,9 +1,10 @@
 "use client";
+import { Dialog, DialogActions } from "@/components/ui/interaction-ui";
 import { WorkspaceHeader } from "@/components/ui/workspace-ui";
 import { useState } from "react";
 import { Search, UserRoundPlus } from "lucide-react";
 import type { Shift } from "@/lib/data";
-import type { Employee } from "@/features/workspace/types";
+import type { Employee, Location } from "@/features/workspace/types";
 import { canonicalShiftDate, hoursBetween } from "@/features/workspace/schedule-utils";
 import { surfaceStyles, teamStyles } from "@/lib/ui-classes";
 export function TeamWorkspace({ employees, shifts, devMode, canManage, onAdd, onEdit, onInvite, onRevoke }: { employees: Employee[]; shifts: Shift[]; devMode:boolean; canManage:boolean; onAdd: () => void; onEdit: (employee: Employee) => void; onInvite:(employee:Employee)=>void; onRevoke:(employee:Employee)=>void }) {
@@ -63,4 +64,15 @@ export function TeamWorkspace({ employees, shifts, devMode, canManage, onAdd, on
       {!visibleEmployees.length&&<div className={`${surfaceStyles.empty} ${teamStyles.empty}`}>No employees match the current search and filters.</div>}
     </section>
   </div>
+}
+
+export function EmployeeDialog({ employee, locations, defaultLocationId, onClose, onSave }: { employee?: Employee; locations: Location[]; defaultLocationId?: string; onClose: () => void; onSave: (employee: Employee) => void | Promise<void> }) {
+  const [name, setName] = useState(employee?.name ?? "");
+  const [role, setRole] = useState(employee?.role ?? "Bartender");
+  const [email, setEmail] = useState(employee?.email ?? "");
+  const [phone, setPhone] = useState(employee?.phone ?? "");
+  const [locationId, setLocationId] = useState(employee?.locationId ?? defaultLocationId ?? locations[0]?.id ?? "");
+  const [active, setActive] = useState(employee?.active ?? true); const [hourlyRate,setHourlyRate]=useState(employee?.hourlyRate??0); const [payrollId,setPayrollId]=useState(employee?.payrollId??""); const [salaryCode,setSalaryCode]=useState(employee?.salaryCode??""); const [costCentre,setCostCentre]=useState(employee?.costCentre??"");
+  function save() { const cleanName = name.trim() || "New employee"; if (!locationId && employee?.portalStatus === "ACTIVE") { alert("Portal-enabled employees must have an assigned location."); return; } onSave({ name: cleanName, initials: cleanName.split(" ").map((part) => part[0]).join("").slice(0,2).toUpperCase(), role, email, phone, locationId, active, hours: employee?.hours ?? 0, status: active ? "No shifts scheduled" : "Inactive", hourlyRate, payrollId, salaryCode, costCentre, portalStatus: employee?.portalStatus }); }
+  return <Dialog title={employee ? "Edit employee" : "Add employee"} onClose={onClose}><div className="form-grid"><label className="full-field">Full name<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Employee name" /></label><label>Role<select value={role} onChange={(e) => setRole(e.target.value)}><option>General manager</option><option>Bar manager</option><option>Shift manager</option><option>Bartender</option><option>Floor</option><option>Kitchen</option></select></label><label>Status<select value={active ? "active" : "inactive"} onChange={(e) => setActive(e.target.value === "active")}><option value="active">Active</option><option value="inactive">Inactive</option></select></label><label className="full-field">Primary location<select value={locationId} onChange={(e) => setLocationId(e.target.value)}><option value="">No location assigned</option>{locations.map((location)=><option key={location.id} value={location.id}>{location.name}</option>)}</select>{!locations.length&&<small className="muted-note">Add an active location before enabling employee clock-in.</small>}</label><label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" /></label><label>Phone<input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+45 ..." /></label><label>Hourly pay (DKK)<input type="number" min="0" step="0.01" inputMode="decimal" value={hourlyRate} onChange={e=>setHourlyRate(Number(e.target.value))} /></label><label>Payroll ID<input value={payrollId} onChange={e=>setPayrollId(e.target.value)} /></label><label>Salary code<input value={salaryCode} onChange={e=>setSalaryCode(e.target.value)} /></label><label className="full-field">Cost centre<input value={costCentre} onChange={e=>setCostCentre(e.target.value)} /></label></div><DialogActions onClose={onClose} onConfirm={save} confirmLabel={employee ? "Save employee" : "Add employee"} /></Dialog>
 }

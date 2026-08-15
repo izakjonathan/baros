@@ -1,11 +1,12 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
 const migration=read('db/migrations/005_production_operations.sql');
-const component=read('components/bar-ops-app.tsx');
+const orchestrator=read('components/bar-ops-app.tsx');
 const schedule=read('features/scheduling/ScheduleWorkspace.tsx');
-const uiSource=`${component}\n${schedule}`;
+const team=read('features/employees/TeamWorkspace.tsx');
+const control=read('features/control/ControlCenterWorkspace.tsx');
 const required=['payroll_exports','schedule_templates','schedule_acknowledgements','attendance_alerts','labour_forecasts','goods_receipts','stock_transactions','stock_transfers','waste_logs','mfa_factors','password_reset_tokens','gdpr_requests'];
 for(const name of required) if(!migration.includes(name)) throw new Error(`Missing ${name}`);
-for(const phrase of ['draggable','Control centre','Payroll ID','salaryCode','costCentre','/api/manager/bootstrap']) if(!uiSource.includes(phrase)) throw new Error(`Missing UI integration: ${phrase}`);
+for(const [phrase,owner] of [['draggable',schedule],['Control centre',control],['Payroll ID',team],['salaryCode',team],['costCentre',team],['/api/manager/bootstrap',orchestrator]]) if(!owner.includes(phrase)) throw new Error(`Missing UI integration: ${phrase}`);
 for(const route of ['manager/bootstrap','payroll-periods','payroll-exports','kiosk','attendance-alerts','schedule-templates','schedule-publish','operations','security']) if(!fs.existsSync(new URL(`../app/api/${route}/route.ts`,import.meta.url))) throw new Error(`Missing route ${route}`);
 console.log('Production foundation assertions passed.');

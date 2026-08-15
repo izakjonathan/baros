@@ -16,7 +16,6 @@ const employeeShell = read("app/employee/employee-shell.tsx");
 const managerApp = read("components/bar-ops-app.tsx");
 const dialog = read("components/ui/interaction-ui.tsx");
 const chrome = read("components/shell/workspace-chrome.tsx");
-const scheduleDialogs = read("features/scheduling/ScheduleDialogs.tsx");
 const uiClasses = read("lib/ui-classes.ts");
 const exceptionRegister = read("docs/constitution/INTENTIONAL_EXCEPTION_REGISTER.md");
 const workspace = read("components/ui/workspace-ui.tsx");
@@ -55,6 +54,17 @@ const architectureModules = [
   ["features/control/ControlCenterWorkspace.tsx", "ControlCenterWorkspace"],
 ];
 const architectureOwned = architectureModules.every(([file, symbol]) => fs.existsSync(path.join(root, file)) && read(file).includes(`export function ${symbol}`) && managerApp.includes(symbol));
+const featureDialogModules = [
+  ["features/scheduling/ScheduleDialogs.tsx", ["ShiftDialog", "EditShiftDialog"]],
+  ["features/attendance/AttendanceWorkspace.tsx", ["TimesheetDialog"]],
+  ["features/employees/TeamWorkspace.tsx", ["EmployeeDialog"]],
+  ["features/inventory/InventoryWorkspace.tsx", ["ProductDialog", "StockCountDialog"]],
+  ["features/orders/OrdersWorkspace.tsx", ["OrderDialog"]],
+];
+const featureDialogsOwned = featureDialogModules.every(([file, symbols]) => {
+  const source = read(file);
+  return source.includes('from "@/components/ui/interaction-ui"') && symbols.every((symbol) => source.includes(`export function ${symbol}`) && managerApp.includes(symbol) && !managerApp.includes(`function ${symbol}`));
+}) && !managerApp.includes('from "./ui/interaction-ui"');
 
 function runtimeBindings(source) {
   const bindings = new Set();
@@ -107,9 +117,9 @@ const checks = [
   ["main shell reserves fixed topbar", /\.main-shell\{[^}]*padding-top:calc\(var\(--topbar-h\) \+ env\(safe-area-inset-top\)\)/.test(global)],
   ["only day scroller owns horizontal Shift Plan scrolling", schedule.includes(':global(.page-wrap[data-workspace="schedule"]){overflow-x:hidden}') && /\.workspace\{[^}]*overflow-x:hidden[^}]*contain:inline-size/.test(schedule) && /\.calendarPanel\{[^}]*overflow:hidden[^}]*contain:inline-size/.test(schedule) && /\.calendarScroll\{[^}]*overflow-x:auto[^}]*contain:inline-size/.test(schedule)],
   ["manager workspaces are feature-owned", architectureOwned && Buffer.byteLength(managerApp) < 60000],
-  ["Shift Plan dialogs are feature-owned", scheduleDialogs.includes("export function ShiftDialog") && scheduleDialogs.includes("export function EditShiftDialog") && managerApp.includes('from "@/features/scheduling/ScheduleDialogs"') && !managerApp.includes("function ShiftDialog") && !managerApp.includes("function EditShiftDialog")],
+  ["feature dialogs are feature-owned", featureDialogsOwned],
   ["shared chrome has no local forwarding adapters", managerApp.includes("<WorkspaceSidebar") && managerApp.includes("<WorkspaceTopbar") && !managerApp.includes("function Sidebar") && !managerApp.includes("function Topbar")],
-  ["shared dialogs have no local prop adapters", managerApp.includes("<Dialog") && managerApp.includes("<DialogActions") && !managerApp.includes("function Modal") && !managerApp.includes("function ModalActions")],
+  ["orchestrator has no shared-dialog implementation dependency", !managerApp.includes("<Dialog") && !managerApp.includes("<DialogActions") && !managerApp.includes("function Modal") && !managerApp.includes("function ModalActions")],
   ["orchestrator has no stale Team component reference", !managerApp.includes("<Team\n") && managerApp.includes("<TeamWorkspace")],
   ["capitalized JSX components are runtime-bound", unboundJsxComponents.length === 0],
   ["feature workspaces have no local PageHeader adapters", headerAdapterFiles.every((source) => !source.includes("function PageHeader")) && !managerApp.includes("function PageHeader")],
