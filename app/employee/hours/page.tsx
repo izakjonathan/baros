@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarDays, CheckCircle2, Clock3, MessageSquareWarning, Pause, Play, Square } from "lucide-react";
-import { Dialog, DialogActions } from "@/components/ui/interaction-ui";
-import { WorkspaceHeader } from "@/components/ui/workspace-ui";
 
 type ActiveClock = {
   id: string;
@@ -167,13 +165,15 @@ export default function HoursPage() {
 
   return (
     <div className="employee-page">
-      <WorkspaceHeader eyebrow="Time & attendance" title="My hours" description="Clock in and out, then review your scheduled and approved worked hours."/>
+      <p className="eyebrow">Time &amp; attendance</p>
+      <h1>My hours</h1>
+      <p className="employee-lead">Clock in and out, then review your scheduled and approved worked hours.</p>
 
       {error && <div className="employee-error" role="alert">{error}</div>}
 
       {loading && <div className="employee-loading-inline" role="status">Loading your current clock…</div>}
 
-      <section className={`card clock-card ${active ? "clock-running" : ""}`}>
+      <section className={`clock-card ${active ? "clock-running" : ""}`}>
         <div>
           <small>{active ? breakActive ? "Break in progress" : "Shift in progress" : "Ready to start"}</small>
           <strong>{active ? `Started ${started}` : "Clock in for your next published shift"}</strong>
@@ -201,14 +201,14 @@ export default function HoursPage() {
       </div>
 
       <section className="employee-hour-cards">
-        <article className="card card-compact"><CalendarDays /><span>Scheduled<strong>{(scheduledMinutes / 60).toFixed(1)}h</strong></span></article>
-        <article className="card card-compact"><Clock3 /><span>Approved worked<strong>{(approvedMinutes / 60).toFixed(1)}h</strong></span></article>
+        <article><CalendarDays /><span>Scheduled<strong>{(scheduledMinutes / 60).toFixed(1)}h</strong></span></article>
+        <article><Clock3 /><span>Approved worked<strong>{(approvedMinutes / 60).toFixed(1)}h</strong></span></article>
       </section>
 
       <h2>Timesheets</h2>
       <section className="hours-history">
         {timesheets.map((item) => (
-          <article className="card card-compact" key={item.id}>
+          <article key={item.id}>
             <div><strong>{dateLabel(item.work_date)}</strong><span>{(Number(item.scheduled_minutes || 0) / 60).toFixed(1)}h scheduled</span></div>
             <div>
               <b>{(Number(item.worked_minutes || 0) / 60).toFixed(2)}h</b>
@@ -226,7 +226,7 @@ export default function HoursPage() {
       </section>
 
       <p className="hours-note">Worked hours become payroll-ready only after manager approval.</p>
-      {correction && <Dialog title="Request a correction" description={`${dateLabel(correction.work_date)} · ${time(correction.clocked_in_at)}–${time(correction.clocked_out_at)}`} onClose={()=>setCorrection(null)}><label className="correction-field">What needs correcting?<textarea rows={5} value={correctionReason} onChange={e=>setCorrectionReason(e.target.value)} placeholder="Describe the correct clock-in, clock-out or break time"/></label><DialogActions onClose={()=>setCorrection(null)} onConfirm={requestCorrection} confirmLabel={busy?'Sending…':'Send request'} busy={busy} disabled={!correctionReason.trim()}/></Dialog>}
+      {correction && <div className="modal-layer"><button type="button" className="modal-scrim" aria-label="Close" onClick={()=>setCorrection(null)}/><section className="modal" role="dialog" aria-modal="true" aria-labelledby="correction-title"><div className="modal-head"><div><h2 id="correction-title">Request a correction</h2><p>{dateLabel(correction.work_date)} · {time(correction.clocked_in_at)}–{time(correction.clocked_out_at)}</p></div></div><label className="correction-field">What needs correcting?<textarea rows={5} value={correctionReason} onChange={e=>setCorrectionReason(e.target.value)} placeholder="Describe the correct clock-in, clock-out or break time"/></label><div className="modal-actions"><button type="button" className="secondary" onClick={()=>setCorrection(null)}>Cancel</button><button type="button" className="primary" disabled={busy||!correctionReason.trim()} onClick={requestCorrection}>{busy?'Sending…':'Send request'}</button></div></section></div>}
     </div>
   );
 }

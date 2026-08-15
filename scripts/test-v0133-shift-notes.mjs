@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const migration=fs.readFileSync('db/migrations/012_shift_notes.sql','utf8');
+const route=fs.readFileSync('app/api/shift-notes/route.ts','utf8');
+const page=fs.readFileSync('app/employee/shifts/page.tsx','utf8');
+const app=fs.readFileSync('components/bar-ops-app.tsx','utf8');
+if(!migration.includes('create table if not exists shift_notes')) throw new Error('shift_notes migration missing');
+for(const text of ['You can only add notes to your own shifts','INCIDENT','EQUIPMENT','STOCK']) if(!route.includes(text)) throw new Error(`Missing ${text}`);
+if(!page.includes('ShiftNoteForm')) throw new Error('Employee shift note form missing');
+if(!app.includes('Latest shift notes')||!app.includes('data.shiftNotes')) throw new Error('Manager shift notes feed missing');
+console.log('v0.13.3 shift notes checks passed');

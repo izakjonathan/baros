@@ -1,0 +1,11 @@
+import fs from "node:fs";
+import { isVersionAtLeast } from "./version-utils.mjs";
+const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+const readme = fs.readFileSync("README.md", "utf8");
+if (!isVersionAtLeast(pkg.version, "0.16.21")) throw new Error("package version must be v0.16.21 or newer");
+const declarations = [...readme.matchAll(/^Current release:\s*\*\*v([^*]+)\*\*/gm)];
+if (declarations.length !== 1) throw new Error("README contains duplicate current-release declarations");
+if (declarations[0][1] !== pkg.version) throw new Error("README current release does not match package version");
+if (!/^Rollback checkpoint: \*\*v\d+\.\d+\.\d+(?:\.\d+)?(?:-rc\.\d+)?\*\*\.$/m.test(readme)) throw new Error("rollback checkpoint is not consolidated");
+if (readme.includes("**Current release: v0.16.17")) throw new Error("stale v0.16.17 current-release content remains");
+console.log("v0.16.20 release metadata consolidation checks passed");

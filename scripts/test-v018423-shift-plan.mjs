@@ -1,0 +1,12 @@
+import fs from "node:fs";
+const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
+const css=fs.readFileSync("features/scheduling/ScheduleWorkspace.module.css","utf8");
+const fail=(m)=>{console.error(`v0.18.4.23 regression: ${m}`);process.exit(1)};
+if(pkg.version!=="0.18.4.23") fail("package version mismatch");
+if(!css.includes("v0.18.4.23 independent day-column repair")) fail("repair block missing");
+if(!css.includes("display:flex !important;")) fail("independent flex columns missing");
+if(!css.includes("contain:layout paint")) fail("column containment missing");
+if(!css.includes("scrollbar-width:none")) fail("scrollbar hiding missing");
+if(!css.includes('shiftCard[data-role="Bartender"]')) fail("role color ownership missing");
+if(!css.includes("overflow:hidden !important")) fail("column overflow containment missing");
+console.log("v0.18.4.23 independent day-column regression passed");

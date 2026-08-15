@@ -1,26 +1,13 @@
-# Bar Ops
+# Bar Ops — v0.19.0-rc.35
 
-Current release: **v0.19.0-rc.46**
+Bar Ops release candidate focused on aggressive CSS consolidation and deterministic style ownership.
 
-Rollback checkpoint: **v0.19.0-rc.45**.
+Current release: **v0.19.0-rc.35**
 
-Bar Ops is a Next.js operations workspace for hospitality teams. The current architecture uses a global UI system with Shift Plan as the sole custom CSS exception, and manager workspaces are now split by feature/domain rather than implemented inside one monolithic client component.
+## v0.19.0-rc.35
 
-## Development
+This release takes the live stylesheet below 4,000 structurally parsed declarations by removing unused design tokens and declarations that are provably superseded later in the same cascade context. It preserves the existing visual direction and behavior while reducing styling ambiguity and maintenance cost.
 
-Use the latest approved ZIP as the baseline. Prefer changing/replacing existing owners before adding new code. See `AGENTS.md` and `docs/development-workflow.md`.
+No business logic, API, database, permission, or workflow changes are included.
 
-## Current source structure
-
-- `components/bar-ops-app.tsx` — application orchestration/state only
-- `features/dashboard/` — Today’s operations / Shift execution overview
-- `features/scheduling/` — Shift Plan
-- `features/attendance/` — Time & attendance
-- `features/inventory/` — Inventory
-- `features/orders/` — Orders
-- `features/operations/` — Daily Operations
-- `features/employees/` — Team
-- `features/settings/` — Settings
-- `features/control/` — Control Centre
-
-CSS remains exactly three files: `styles/tokens.css`, `app/globals.css`, and `features/scheduling/ScheduleWorkspace.module.css`.
+Rollback checkpoint: **v0.19.0-rc.34**.

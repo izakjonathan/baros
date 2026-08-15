@@ -39,7 +39,13 @@ jobs:
       - name: Validate release contract
         run: npm run validate:release
 
-      - name: Run current regression suites
+      - name: Validate release-candidate authorization and integrity contract
+        run: npm run test:v0190rc3
+
+      - name: Validate production acceptance contract
+        run: npm run test:v01816-acceptance
+
+      - name: Run regression suites
         run: npm run test:all
 
       - name: Lint

@@ -39,5 +39,3 @@ Thumbs.db
 
 # Deployment metadata
 .vercel/
-
-tsconfig.tsbuildinfo

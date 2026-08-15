@@ -19,7 +19,6 @@ This register protects product-specific decisions from being “corrected” int
 | EX-13 | Compact controls and summaries | Large card-based mobile layouts | More operational context should fit above the fold | Maintain 44px touch targets where applicable |
 | EX-14 | Shared manager access to live operational modules | Strictly narrow role dashboards | Multiple management roles need situational awareness | Action authority must still be capability-filtered |
 | EX-15 | Reporting is a later phase | Analytics delivered alongside transactions | Data integrity and workflow adoption take priority | Record implemented/deferred status explicitly |
-| EX-16 | `app/global-error.tsx` keeps minimal inline emergency styles | All visual styling normally comes from global CSS except Shift Plan | A Next.js root error boundary can replace the root layout, so the normal global stylesheet is not guaranteed to be available when this boundary renders | Keep the inline style minimal, static, non-theme-specific, and limited to the root error boundary |
 
 ## Browser-specific exception: native date controls
 
@@ -48,7 +47,3 @@ A browser workaround may use a narrowly scoped override when:
 6. physical-device verification is recorded.
 
 Historical corrective overrides are not automatically intentional exceptions.
-
-## Root error boundary styling exception
-
-`app/global-error.tsx` is the only intentional styling exception to the global-CSS/Shift-Plan rule. The root error boundary replaces the root layout during a catastrophic render failure, so the normal global stylesheet cannot be treated as a reliable dependency. Its inline styles must remain minimal and must not evolve into a parallel design system.

@@ -1,0 +1,10 @@
+import fs from "node:fs";
+const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
+const app=fs.readFileSync("components/bar-ops-app.tsx","utf8");
+const css=fs.readFileSync("app/spacing-system.css","utf8");
+const fail=(m)=>{console.error(`v0.18.4.14.1 regression: ${m}`);process.exit(1)};
+if(pkg.version.localeCompare("0.18.4.14.1", undefined, {numeric:true})<0) fail("package version mismatch");
+if(!app.includes('className="workspace-flow"')) fail("workspace-flow wrapper missing");
+for(const token of ['page-flow`}>','workspace-flow > *','page-flow > *','margin-block: 0 !important','gap: var(--layout-gap)']) if(!(app+css).includes(token)) fail(`missing ${token}`);
+if(!css.includes('.main-shell > .page-wrap {')||!css.includes('gap: 0;')) fail("page-wrap still owns competing section gap");
+console.log("v0.18.4.14.1 single-owner page-flow regression passed");

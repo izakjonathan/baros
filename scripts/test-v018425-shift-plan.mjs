@@ -1,0 +1,10 @@
+import fs from "node:fs";
+const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
+const css=fs.readFileSync("features/scheduling/ScheduleWorkspace.module.css","utf8");
+const fail=(m)=>{console.error(`v0.18.4.25 regression: ${m}`);process.exit(1)};
+if(pkg.version!=="0.18.4.25") fail("package version mismatch");
+if(!css.includes("v0.18.4.25 Shift Plan vertical compression")) fail("compression CSS missing");
+if(!css.includes("height:max-content !important")) fail("content-driven schedule height missing");
+if(!css.includes("padding:.42rem .5rem !important")) fail("mobile header compression missing");
+if(!css.includes("margin:.18rem 0 0 !important")) fail("legend placement missing");
+console.log("v0.18.4.25 Shift Plan vertical compression regression passed");

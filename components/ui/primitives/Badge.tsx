@@ -1,2 +1,2 @@
 import type { ReactNode } from "react";
-export function Badge({children,tone="neutral"}:{children:ReactNode;tone?:"neutral"|"success"|"warning"|"danger"}){return <span className={["badge",tone!=="neutral"?`badge-${tone}`:""].filter(Boolean).join(" ")}>{children}</span>}
+export function Badge({children,tone="neutral"}:{children:ReactNode;tone?:"neutral"|"success"|"warning"|"danger"}){return <span className={["badge",tone!=="neutral"?tone:""].filter(Boolean).join(" ")}>{children}</span>}

@@ -1,8 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { CalendarClock, Check, CheckCircle2, RefreshCw, Shuffle, Umbrella, X } from "lucide-react";
-import { requestStyles as styles, surfaceStyles } from "@/lib/ui-classes";
-import { WorkspaceHeader } from "@/components/ui/workspace-ui";
 import type { RequestQueueRecord, ShiftClaimQueueRecord, ShiftTransferQueueRecord } from "@/features/requests/types";
 
 type QueueItem={id:string;kind:"REQUEST"|"CLAIM"|"TRANSFER";title:string;subtitle:string;status:string;createdAt:string};
@@ -62,23 +60,26 @@ export function RequestsWorkspace({devMode,notify}:{devMode:boolean;notify:(mess
   const requestCount=items.filter(item=>item.kind==="REQUEST").length;
   const claimCount=items.filter(item=>item.kind==="CLAIM").length;
   const transferCount=items.filter(item=>item.kind==="TRANSFER").length;
-  return <section className={surfaceStyles.workspace}>
-    <WorkspaceHeader eyebrow="Employee self-service" title="Requests" description="Review time off, open shifts and employee-approved shift changes." actions={<button className={`${surfaceStyles.control} ${surfaceStyles.outline} ${styles.refresh}`} type="button" disabled={loading} onClick={()=>void load()}><RefreshCw className={loading?styles.loadingIcon:undefined} size={16}/>Refresh</button>}/>
-    <section className={`${surfaceStyles.metrics} ${styles.summary}`} aria-label="Request summary">
-      <article className="card card-compact"><span>Awaiting review</span><strong>{items.length}</strong></article>
-      <article className="card card-compact"><span>Open shifts</span><strong>{claimCount}</strong></article>
-      <article className="card card-compact"><span>Changes</span><strong>{transferCount+requestCount}</strong></article>
+  return <section className={"workspace"}>
+    <header className={"requests-header"}>
+      <div className={"headerCopy"}><p className={"eyebrow"}>Employee self-service</p><h1>Requests</h1><p className={"page-subtitle"}>Review time off, open shifts and employee-approved shift changes.</p></div>
+      <button className={`${"control"} ${"outline"} ${""}`} type="button" disabled={loading} onClick={()=>void load()}><RefreshCw className={loading?"loadingIcon":undefined} size={16}/>Refresh</button>
+    </header>
+    <section className={`${"metrics"} ${"summary"}`} aria-label="Request summary">
+      <article><span>Awaiting review</span><strong>{items.length}</strong></article>
+      <article><span>Open shifts</span><strong>{claimCount}</strong></article>
+      <article><span>Changes</span><strong>{transferCount+requestCount}</strong></article>
     </section>
-    <section className={styles.queue}>
-      <header className={`${surfaceStyles.sectionHeader} ${styles.queueHeader}`}><div><h2>Review queue</h2><p>Oldest requests appear first.</p></div><span className={styles.liveStatus}>Live queue</span></header>
-      {loading?<div className={`${surfaceStyles.empty} ${styles.empty}`}><RefreshCw className={styles.loadingIcon}/><strong>Loading requests</strong><span>Checking the latest employee requests and shift actions.</span></div>:items.length?<div className={styles.list}>{items.map(item=>{
+    <section className={"requests-queue"}>
+      <header className={`${"section-header"} ${""}`}><div><h2>Review queue</h2><p>Oldest requests appear first.</p></div><span className={"live-status-pill"}>Live queue</span></header>
+      {loading?<div className={`${"empty"} ${"empty"}`}><RefreshCw className={"loadingIcon"}/><strong>Loading requests</strong><span>Checking the latest employee requests and shift actions.</span></div>:items.length?<div className={"requests-list"}>{items.map(item=>{
         const Icon=item.kind==="REQUEST"?Umbrella:item.kind==="CLAIM"?CalendarClock:Shuffle;
-        return <article className={styles.card} data-kind={item.kind} key={`${item.kind}-${item.id}`}>
-          <header className={`${surfaceStyles.cardHeader} ${styles.cardHeader}`}><span className={styles.kind}>{item.kind}</span><span className={styles.status}>{item.status.replaceAll('_',' ').toLowerCase()}</span></header>
+        return <article className={"card"} data-kind={item.kind} key={`${item.kind}-${item.id}`}>
+          <header className={`${"card-header"} ${"card-header"}`}><span className={"kind"}>{item.kind}</span><span className={"status"}>{item.status.replaceAll('_',' ').toLowerCase()}</span></header>
           <h3>{item.title}</h3>
-          <div className={styles.meta}><span><Icon size={16}/><p>{item.subtitle}</p></span></div>
-          <div className={styles.actions}><button className={`${surfaceStyles.control} ${surfaceStyles.outline} ${styles.reject}`} type="button" disabled={busy===item.id} onClick={()=>void review(item,'REJECTED')}><X size={15}/>Reject</button><button className={`${surfaceStyles.control} ${surfaceStyles.solid} ${styles.approve}`} type="button" disabled={busy===item.id} onClick={()=>void review(item,'APPROVED')}><Check size={15}/>Approve</button></div>
-        </article>})}</div>:<div className={`${surfaceStyles.empty} ${styles.empty}`}><CheckCircle2/><strong>Queue is clear</strong><span>No employee requests are awaiting a manager decision.</span></div>}
+          <div className={"meta"}><span><Icon size={16}/><p>{item.subtitle}</p></span></div>
+          <div className={"actions"}><button className={`${"control"} ${"outline"} ${""}`} type="button" disabled={busy===item.id} onClick={()=>void review(item,'REJECTED')}><X size={15}/>Reject</button><button className={`${"control"} ${"solid"} ${""}`} type="button" disabled={busy===item.id} onClick={()=>void review(item,'APPROVED')}><Check size={15}/>Approve</button></div>
+        </article>})}</div>:<div className={`${"empty"} ${"empty"}`}><CheckCircle2/><strong>Queue is clear</strong><span>No employee requests are awaiting a manager decision.</span></div>}
     </section>
   </section>
 }

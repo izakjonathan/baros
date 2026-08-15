@@ -1,0 +1,16 @@
+import fs from "node:fs";
+const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
+const shell=fs.readFileSync("components/shell/ManagerShell.module.css","utf8");
+const globals=fs.readFileSync("app/globals.css","utf8");
+const app=fs.readFileSync("components/bar-ops-app.tsx","utf8");
+const fail=(m)=>{console.error(`v0.18.4.6 regression: ${m}`);process.exit(1)};
+if(pkg.version.localeCompare("0.18.4.6",undefined,{numeric:true})<0) fail("package version mismatch");
+if(shell.includes("linear-gradient")) fail("topbar location gradient returned");
+if(!shell.includes("background:#f47add")) fail("solid pink location missing");
+if(!(shell.includes("width:2.75rem")||shell.includes("width:2.5rem"))||!(shell.includes("min-height:3.75rem")||shell.includes("min-height:3.35rem"))) fail("compact topbar dimensions missing");
+if(!globals.includes("mobile density + responsive structure")) fail("responsive density layer missing");
+if(!globals.includes('content:attr(data-label)')) fail("mobile timesheet labels missing");
+if(!globals.includes('grid-template-columns:1fr 1fr')) fail("mobile attendance card grid missing");
+if(!app.includes('data-label="Employee"')||!app.includes('data-label="Status"')) fail("timesheet row labels not wired");
+if(!globals.includes('data-workspace="team"] .page-header')) fail("Team editorial header not restored");
+console.log("v0.18.4.6 mobile density regression passed");

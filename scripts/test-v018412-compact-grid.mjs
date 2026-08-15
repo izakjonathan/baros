@@ -1,0 +1,14 @@
+import fs from "node:fs";
+const pkg=JSON.parse(fs.readFileSync("package.json","utf8"));
+const tokens=fs.readFileSync("styles/tokens.css","utf8");
+const mono=fs.readFileSync("app/mono-tokens.css","utf8");
+const globals=fs.readFileSync("app/globals.css","utf8");
+const fail=(message)=>{console.error(`v0.18.4.12 regression: ${message}`);process.exit(1)};
+if(pkg.version.localeCompare("0.18.4.12",undefined,{numeric:true})<0) fail("package version is older than v0.18.4.12");
+if(!tokens.includes("--layout-gap:.5rem")) fail("8px external grid token missing");
+if(!tokens.includes("--page-gutter:var(--layout-gap)")) fail("page gutter is not linked to external grid");
+if(!mono.includes("--layout-gap: 8px")) fail("legacy layout gap is not 8px");
+for(const alias of ["--workspace-inline: var(--layout-gap)","--workspace-block: var(--layout-gap)","--workspace-section-gap: var(--layout-gap)"]) if(!mono.includes(alias)) fail(`missing centralized alias ${alias}`);
+if(!globals.includes("v0.18.4.12 compact external grid spacing")) fail("compact external-grid ownership layer missing");
+if(tokens.includes("--workspace-card-padding:.5rem")||mono.includes("--workspace-card-padding: 8px")) fail("internal card padding was incorrectly collapsed into the external grid");
+console.log("v0.18.4.12 compact external grid regression passed");

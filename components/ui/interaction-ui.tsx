@@ -37,11 +37,11 @@ export function Dialog({ title, description, onClose, children, className = "" }
     };
   }, [onClose]);
 
-  return <div className="modal-layer" role="presentation"><button type="button" className="modal-scrim" onClick={onClose} aria-label="Close dialog"/><section ref={dialogRef} className={`modal interaction-dialog ${className}`.trim()} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined}><div className="modal-head"><div><h2 id={titleId}>{title}</h2>{description && <p id={descriptionId}>{description}</p>}</div><button ref={closeRef} type="button" className="icon-button" onClick={onClose} aria-label="Close"><X size={19}/></button></div><div className="modal-body">{children}</div></section></div>;
+  return <div className="modal-layer" role="presentation"><button type="button" className="modal-scrim" onClick={onClose} aria-label="Close dialog"/><section ref={dialogRef} className={`modal interaction-dialog ${className}`.trim()} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined}><div className="modal-head"><div><h2 id={titleId}>{title}</h2>{description && <p id={descriptionId}>{description}</p>}</div><button ref={closeRef} type="button" className="icon-button dialog-close" onClick={onClose} aria-label="Close"><X size={19}/></button></div>{children}</section></div>;
 }
 
 export function DialogActions({ onClose, onConfirm, confirmLabel, busy = false, disabled = false, cancelLabel = "Cancel" }: { onClose: () => void; onConfirm: () => void; confirmLabel: string; busy?: boolean; disabled?: boolean; cancelLabel?: string }) {
-  return <div className="modal-actions"><button type="button" className="secondary" disabled={busy} onClick={onClose}>{cancelLabel}</button><button type="button" className="primary" disabled={busy || disabled} aria-busy={busy || undefined} onClick={onConfirm}>{confirmLabel}</button></div>;
+  return <div className="modal-actions interaction-actions"><button type="button" className="secondary" disabled={busy} onClick={onClose}>{cancelLabel}</button><button type="button" className="primary" disabled={busy || disabled} aria-busy={busy || undefined} onClick={onConfirm}>{confirmLabel}</button></div>;
 }
 
 export function FormMessage({ children, tone = "error" }: { children: ReactNode; tone?: "error" | "success" | "info" }) {

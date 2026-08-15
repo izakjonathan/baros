@@ -32,12 +32,12 @@ export function LoginForm({ devMode }: { devMode: boolean }) {
 
   return (
     <main className="login-page">
-      <section className="card login-card">
+      <section className="login-card">
         <div className="login-brand"><span><Wine size={22} /></span><strong>Bar Ops</strong></div>
         <div><p className="eyebrow">Hospitality operating system</p><h1>Welcome back</h1><p>Sign in to manage today’s operation.</p></div>
 
         {devMode && (
-          <section className="card card-compact dev-access-panel" aria-labelledby="dev-access-title">
+          <section className="dev-access-panel" aria-labelledby="dev-access-title">
             <div>
               <span className="dev-badge">Developer mode</span>
               <h2 id="dev-access-title">Continue without PostgreSQL</h2>

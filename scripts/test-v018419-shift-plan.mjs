@@ -1,0 +1,18 @@
+import fs from "node:fs";
+const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+const app = fs.readFileSync("components/bar-ops-app.tsx", "utf8");
+const css = fs.readFileSync("features/scheduling/ScheduleWorkspace.module.css", "utf8");
+const modalCss = fs.readFileSync("app/mono-components.css", "utf8");
+const fail = (message) => { console.error(`v0.18.4.19 regression: ${message}`); process.exit(1); };
+if (pkg.version !== "0.18.4.19") fail("package version mismatch");
+if (!app.includes("function firstName(name: string)")) fail("first-name helper missing");
+if (!app.includes('const displayName = shift.isOpen ? "Available shift" : firstName(shift.employee)')) fail("shift cards do not use first names");
+if (!css.includes("v0.18.4.19 neon header fill polish")) fail("v0.18.4.19 CSS block missing");
+if (!css.includes("background:var(--color-neon);")) fail("neon header fill missing");
+if (!css.includes("width:80%")) fail("desktop compact shift width missing");
+if (!css.includes("width:78%")) fail("mobile compact shift width missing");
+if (!css.includes("min-width:36.8rem")) fail("compact mobile calendar width missing");
+if (!css.includes("box-shadow:inset 0 0 0 2px #000")) fail("today header emphasis missing");
+if (!app.includes('className="shift-editor-dialog"')) fail("shift editor dialog class missing");
+if (!modalCss.includes("v0.18.4.17 shift dialog repair")) fail("shift dialog repair baseline missing");
+console.log("v0.18.4.19 shift-plan neon header regression passed");
