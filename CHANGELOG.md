@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.52
+
+- Corrected the Shift Plan document-width leak by giving shared page/workspace grids explicit zero-minimum tracks.
+- Replaced page-level horizontal overflow containers with non-scrollable clipping while preserving touch scrolling on the calendar scroller.
+- Replaced Schedule's responsive bare `1fr` tracks with `minmax(0, 1fr)` tracks so controls cannot contribute intrinsic width to the page.
+- Strengthened the existing UI contract around the complete overflow ownership chain instead of adding a release-specific test.
+- No database, API, authorization, permission, visual-direction, or business-behaviour changes.
+
 ## v0.19.0-rc.51
 
 - Moved the remaining Attendance, Team, Inventory, and Orders dialog implementations from the manager orchestrator into their existing feature owners.

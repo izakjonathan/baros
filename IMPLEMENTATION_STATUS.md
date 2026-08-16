@@ -1,13 +1,13 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.51**
+Version: **v0.19.0-rc.52**
 
 ## Current focus
-Source-ownership cleanup after dependency-backed build recovery.
+Shift Plan document-width containment on iPhone Safari.
 
-## rc.51
-- Attendance, Team, Inventory, and Orders now own their remaining dialog implementations.
-- The manager orchestrator retains shared state, persistence, notifications, and feature integration callbacks.
-- The orchestrator no longer imports or implements shared dialog primitives directly.
-- No files or CSS declarations were added.
-- Rollback checkpoint: v0.19.0-rc.50.
+## rc.52
+- Shared single-column page/workspace grids now use explicit zero-minimum tracks so feature min-content cannot widen the document.
+- Shift Plan page boundaries use non-scrollable inline clipping while the existing calendar scroller retains horizontal touch scrolling.
+- Schedule responsive tracks no longer use bare `1fr` auto minimums.
+- No database, API, authorization, permission, or business-workflow changes.
+- Rollback checkpoint: v0.19.0-rc.51.

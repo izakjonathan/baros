@@ -1,25 +1,23 @@
-# v0.19.0-rc.51 Validation
+# v0.19.0-rc.52 Validation
 
 ## Confirmed baseline
-The user confirmed that the root-level v0.19.0-rc.50 ZIP worked through the Commit app. That release is the rollback checkpoint for rc.51 and its Vercel build recovery is treated as the dependency-backed baseline.
+The complete v0.19.0-rc.51 ZIP was extracted into a new working directory and verified as version `0.19.0-rc.51` before modification. That release remains the rollback checkpoint.
 
-## Source-ownership cleanup
-- Moved five remaining feature dialogs from `components/bar-ops-app.tsx` into the existing Attendance, Team, Inventory, and Orders feature modules.
-- Preserved the existing component bodies and left dialog state, persistence, notifications, and integration callbacks in the orchestrator.
-- Removed direct shared-dialog, dialog-icon, and dialog-style imports from the orchestrator.
-- Generalized the existing UI contract to verify ownership of all seven extracted feature dialogs.
-- Added no files and changed no CSS declarations.
+## Root cause and correction
+- The Shift Plan calendar deliberately has a wide minimum inline size inside its horizontal scroller.
+- Ancestor single-column grids still used implicit `auto` tracks, allowing wide min-content to influence document width in Safari despite local `min-width: 0` and containment.
+- Page-level `overflow-x: hidden` declarations created overflow containers instead of making the sizing chain explicitly shrink-safe.
+- Shared page/workspace grids now use `minmax(0, 1fr)` tracks. Document and Shift Plan page/workspace boundaries use non-scrollable horizontal clipping.
+- The existing calendar scroller remains the sole horizontal scroll owner and retains touch momentum plus physical-axis overscroll containment.
+- Schedule responsive grids no longer use bare `1fr` tracks, and mobile header actions can shrink below their intrinsic content width.
 
 ## Source integrity
-- 109 TypeScript source files passed local import-resolution scanning.
-- Changed TSX files passed unused-import and async-client-component scans.
-- Capitalized JSX runtime-binding scan: 0 findings.
 - CSS files: 3.
-- CSS structural parse errors: 0.
 - Active `scripts/*.mjs`: 17.
 - Repository files: 179 before packaging.
-- `components/bar-ops-app.tsx`: 37,330 bytes in rc.50; 26,765 bytes in rc.51.
-- No database schema, migrations, APIs, authorization, permissions, visual rules, or business workflows changed.
+- Existing CSS owners changed: 2; CSS files and selector systems added: 0.
+- Net CSS declarations: +3, all used to establish shrink-safe shared tracks or shrink-safe mobile action sizing.
+- No TypeScript/TSX, database schema, migration, API, authorization, permission, visual direction, or business workflow changed.
 
 ## Regression and release gates
 Passed:
@@ -28,13 +26,12 @@ Passed:
 - `node scripts/check-release-artifacts.mjs`;
 - `node scripts/preflight-stabilization.mjs`;
 - `node --check` for `eslint.config.mjs` and all 17 active `scripts/*.mjs`;
-- local import-resolution, changed-file unused-import, JSX runtime-binding, and client-boundary scans;
 - CSS structural parse.
 
-The production-foundation contract initially reported its obsolete assumption that employee dialog fields remained in `components/bar-ops-app.tsx`. The assertion was redirected to the existing Team and Control Centre feature owners without removing or weakening any required phrase; the complete current suite then passed.
+The existing UI contract now verifies the full horizontal-overflow ownership chain: document clipping, zero-minimum shell tracks, non-scrollable Schedule boundaries, the calendar scroller's `overflow-x: auto`, and removal of Schedule's bare responsive `1fr` tracks.
 
-## Dependency-backed limitations
-- The extracted ZIP contains no `node_modules` or lockfile, and local ESLint, TypeScript, and Next.js executables are unavailable.
-- `npm run` was intercepted by the execution environment before repository script startup, so the exact underlying dependency-free Node scripts were executed directly instead.
+## Dependency-backed and device limitations
+- The extracted release contains no `node_modules` or lockfile, so local ESLint, TypeScript, and Next.js executables are unavailable.
 - No local lint, dependency-backed TypeScript, or Next.js production-build pass is claimed.
-- Vercel remains the authoritative dependency-backed build/type gate for rc.51.
+- Vercel remains the authoritative dependency-backed build/type gate.
+- Static contracts cannot substitute for a physical iPhone Safari interaction check; final document-versus-calendar scroll behaviour remains a device acceptance check.

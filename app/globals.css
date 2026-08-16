@@ -3,7 +3,7 @@
 /* ===== Reset / document ===== */
 *,*::before,*::after{box-sizing:border-box}
 html{background:var(--canvas);color-scheme:dark;-webkit-text-size-adjust:100%;text-size-adjust:100%}
-html,body{width:100%;min-width:320px;min-height:100%;margin:0;overflow-x:hidden;background:var(--canvas)}
+html,body{width:100%;min-width:320px;min-height:100%;margin:0;overflow-x:clip;background:var(--canvas)}
 body{font-family:var(--font-body);font-size:var(--text-md);font-weight:var(--weight-normal);line-height:1.4;color:var(--text);text-rendering:optimizeLegibility}
 button,input,select,textarea{font:inherit}input,select,textarea{color-scheme:light}
 button{cursor:pointer}
@@ -24,9 +24,9 @@ button:disabled,[aria-disabled="true"]{opacity:.48;cursor:not-allowed}
 /* ===== App shell ===== */
 .app-frame,.employee-app{min-height:100dvh;background:var(--canvas);color:var(--text)}
 .main-shell{min-width:0;min-height:100dvh;margin-left:var(--sidebar-w);padding-top:calc(var(--topbar-h) + env(safe-area-inset-top));background:var(--canvas)}
-.page-wrap{width:min(100%,var(--content-max));margin-inline:auto;padding-top:var(--page-y);padding-left:max(var(--page-x),env(safe-area-inset-left));padding-right:max(var(--page-x),env(safe-area-inset-right));padding-bottom:calc(4rem + env(safe-area-inset-bottom));display:grid;gap:var(--gap);min-width:0}
+.page-wrap{width:min(100%,var(--content-max));margin-inline:auto;padding-top:var(--page-y);padding-left:max(var(--page-x),env(safe-area-inset-left));padding-right:max(var(--page-x),env(safe-area-inset-right));padding-bottom:calc(4rem + env(safe-area-inset-bottom));display:grid;grid-template-columns:minmax(0,1fr);gap:var(--gap);min-width:0}
 .page-wrap>*{min-width:0}
-.page-flow,.workspace-flow,.workspace,.workspace-page,.attendance-workspace,.execution-workspace,.ops-workspace,.settings-workspace{display:grid;gap:var(--gap);min-width:0}
+.page-flow,.workspace-flow,.workspace,.workspace-page,.attendance-workspace,.execution-workspace,.ops-workspace,.settings-workspace{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--gap);min-width:0}
 
 .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);z-index:var(--z-sidebar);display:flex;flex-direction:column;padding:1rem;background:#111;color:var(--cream);transition:transform .18s ease}
 .brand{display:flex;align-items:center;gap:.75rem;padding:.35rem .45rem 1rem}

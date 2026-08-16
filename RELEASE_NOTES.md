@@ -1,16 +1,16 @@
-# v0.19.0-rc.51 — Feature Dialog Ownership Cleanup
+# v0.19.0-rc.52 — Shift Plan Document-Width Containment
 
 ## Baseline
-- Continued from v0.19.0-rc.50 after its Commit-app ZIP workflow and Vercel build were confirmed working.
+- Continued from the complete v0.19.0-rc.51 release ZIP, which remains the rollback checkpoint.
 
-## Cleanup
-- Moved `TimesheetDialog`, `EmployeeDialog`, `ProductDialog`, `StockCountDialog`, and `OrderDialog` into the existing Attendance, Team, Inventory, and Orders feature modules.
-- Preserved dialog state and all save/invite/persistence callbacks in `components/bar-ops-app.tsx`, so this release changes ownership without changing workflow behaviour.
-- Removed the orchestrator's direct dependency on shared dialog primitives plus dialog-only icons and class maps.
-- Extended the existing feature-ownership contract to cover all seven extracted feature dialogs.
-- Reduced `components/bar-ops-app.tsx` from 37,330 bytes to 26,765 bytes with no new files.
+## Root cause and fix
+- The wide seven-day calendar was correctly placed inside `.calendarScroll`, but implicit `auto` tracks in the ancestor page/workspace grids could still accept its min-content contribution on Safari.
+- Schedule also used page-level `overflow-x: hidden`, which creates overflow containers rather than correcting the sizing chain.
+- Shared single-column shell grids now use `minmax(0, 1fr)`, and Shift Plan page/workspace boundaries use `overflow-x: clip`.
+- The existing calendar scroller keeps `overflow-x: auto`, inline-size containment, momentum touch scrolling, and horizontal overscroll containment.
+- Responsive Schedule grids now use zero-minimum tracks so native controls and action groups cannot widen their parent.
 
 ## Scope
-No CSS, database, API, authorization, permission, visual, or business-behaviour changes.
+Two existing CSS owners were changed. No stylesheet, selector system, component, database migration, API, authorization rule, permission, visual direction, or business workflow was added or changed.
 
-Rollback checkpoint: **v0.19.0-rc.50**.
+Rollback checkpoint: **v0.19.0-rc.51**.
