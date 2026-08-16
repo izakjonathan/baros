@@ -1,13 +1,14 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.52**
+Version: **v0.19.0-rc.53**
 
 ## Current focus
-Shift Plan document-width containment on iPhone Safari.
+Dependency-independent production font compilation.
 
-## rc.52
-- Shared single-column page/workspace grids now use explicit zero-minimum tracks so feature min-content cannot widen the document.
-- Shift Plan page boundaries use non-scrollable inline clipping while the existing calendar scroller retains horizontal touch scrolling.
-- Schedule responsive tracks no longer use bare `1fr` auto minimums.
-- No database, API, authorization, permission, or business-workflow changes.
-- Rollback checkpoint: v0.19.0-rc.51.
+## rc.53
+- Inter and Space Grotesk are now repository-owned variable webfont assets loaded through `next/font/local`.
+- The established typography variables and 500/600/700 design weights remain unchanged.
+- The production build no longer requests Google font files.
+- The current UI contract protects the local font assets, license notices, and absence of `next/font/google` imports.
+- No CSS, package dependency, database, API, authorization, permission, layout, or business-workflow changes.
+- Rollback checkpoint: v0.19.0-rc.52.

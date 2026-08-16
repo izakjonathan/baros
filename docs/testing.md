@@ -18,7 +18,7 @@ The active command groups are intentionally small:
 
 Historical release-specific test scripts are no longer shipped in the active repository. Previous ZIP releases and Git history remain the historical record. A superseded source-text test must not force obsolete implementation code to remain in production.
 
-The rc.38 CSS gate protects the three-file CSS architecture. The rc.41 gate protects CSS/source ownership, shared page/dialog/state/header contracts and Shift Plan-only custom CSS. The rc.42 gate protects the three global card fundamentals. The current UI gate protects the compact repository/test surface, fixed shared topbar, zero-minimum page/workspace tracks, and Shift Plan scroll ownership.
+The rc.38 CSS gate protects the three-file CSS architecture. The rc.41 gate protects CSS/source ownership, shared page/dialog/state/header contracts and Shift Plan-only custom CSS. The rc.42 gate protects the three global card fundamentals. The current UI gate protects the compact repository/test surface, fixed shared topbar, zero-minimum page/workspace tracks, Shift Plan scroll ownership, and repository-owned root fonts without `next/font/google` build dependencies.
 
 The UI contract also scans capitalized JSX component references that receive props and requires each to have a runtime import or local binding. This catches omitted component/icon imports that can otherwise be mistaken for DOM type globals during dependency-backed TypeScript validation.
 

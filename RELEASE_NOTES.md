@@ -1,16 +1,19 @@
-# v0.19.0-rc.52 — Shift Plan Document-Width Containment
+# v0.19.0-rc.53 — Local Font Build Reliability
 
 ## Baseline
-- Continued from the complete v0.19.0-rc.51 release ZIP, which remains the rollback checkpoint.
+- Continued from the complete v0.19.0-rc.52 release ZIP, which remains the rollback checkpoint.
 
 ## Root cause and fix
-- The wide seven-day calendar was correctly placed inside `.calendarScroll`, but implicit `auto` tracks in the ancestor page/workspace grids could still accept its min-content contribution on Safari.
-- Schedule also used page-level `overflow-x: hidden`, which creates overflow containers rather than correcting the sizing chain.
-- Shared single-column shell grids now use `minmax(0, 1fr)`, and Shift Plan page/workspace boundaries use `overflow-x: clip`.
-- The existing calendar scroller keeps `overflow-x: auto`, inline-size containment, momentum touch scrolling, and horizontal overscroll containment.
-- Responsive Schedule grids now use zero-minimum tracks so native controls and action groups cannot widen their parent.
+- Vercel reached the Next.js production compilation stage, then Google returned HTTP 404 for all requested Space Grotesk 500, 600, and 700 font resources.
+- Turbopack's repeated `@vercel/turbopack-next/internal/font/google/font` module errors were downstream consequences of those failed build-time downloads.
+- The root layout now loads repository-owned variable Inter and Space Grotesk webfonts through `next/font/local`, removing Google font requests from the production build.
+- The existing font families, CSS variables, design weights, extended-Latin coverage, display strategy, and fallback stack are preserved.
+- The bundled upstream font license notices are included beside the assets.
+
+## Regression protection
+- The existing UI contract now rejects `next/font/google` imports and verifies both local font assets and their license notices.
 
 ## Scope
-Two existing CSS owners were changed. No stylesheet, selector system, component, database migration, API, authorization rule, permission, visual direction, or business workflow was added or changed.
+No CSS, dependency, database migration, API, authorization rule, permission, layout, visual direction, or business workflow changed.
 
-Rollback checkpoint: **v0.19.0-rc.51**.
+Rollback checkpoint: **v0.19.0-rc.52**.

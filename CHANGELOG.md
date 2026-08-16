@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.53
+
+- Replaced build-time Google font downloads with repository-owned local variable Inter and Space Grotesk assets through `next/font/local`.
+- Preserved the existing font families, CSS variables, design weights, and extended-Latin character coverage without changing CSS.
+- Added the upstream SIL Open Font License notices beside the bundled font assets.
+- Strengthened the existing UI contract so Google font imports cannot silently restore a network-dependent production build.
+- No database, API, authorization, permission, layout, or business-behaviour changes.
+
 ## v0.19.0-rc.52
 
 - Corrected the Shift Plan document-width leak by giving shared page/workspace grids explicit zero-minimum tracks.

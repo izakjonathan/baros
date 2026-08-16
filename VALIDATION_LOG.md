@@ -1,37 +1,41 @@
-# v0.19.0-rc.52 Validation
+# v0.19.0-rc.53 Validation
 
 ## Confirmed baseline
-The complete v0.19.0-rc.51 ZIP was extracted into a new working directory and verified as version `0.19.0-rc.51` before modification. That release remains the rollback checkpoint.
+The complete v0.19.0-rc.52 ZIP was integrity-tested, extracted into a new working directory, and verified as version `0.19.0-rc.52` before modification. That release remains the rollback checkpoint.
 
-## Root cause and correction
-- The Shift Plan calendar deliberately has a wide minimum inline size inside its horizontal scroller.
-- Ancestor single-column grids still used implicit `auto` tracks, allowing wide min-content to influence document width in Safari despite local `min-width: 0` and containment.
-- Page-level `overflow-x: hidden` declarations created overflow containers instead of making the sizing chain explicitly shrink-safe.
-- Shared page/workspace grids now use `minmax(0, 1fr)` tracks. Document and Shift Plan page/workspace boundaries use non-scrollable horizontal clipping.
-- The existing calendar scroller remains the sole horizontal scroll owner and retains touch momentum plus physical-axis overscroll containment.
-- Schedule responsive grids no longer use bare `1fr` tracks, and mobile header actions can shrink below their intrinsic content width.
+## Vercel evidence and correction
+- Vercel built commit `283e6b1` as `bar-ops@0.19.0-rc.52`.
+- The failure occurred during optimized production compilation, before TypeScript validation.
+- Google returned HTTP 404 for Space Grotesk weights 500, 600, and 700. The subsequent Turbopack internal-font module failures were downstream errors.
+- Both configured Google font loaders were audited. Inter and Space Grotesk now use repository-owned local variable webfonts so the full error class is removed from the build path.
+- The existing CSS variables, font families, extended-Latin coverage, and weight ranges are preserved.
 
-## Source integrity
-- CSS files: 3.
-- Active `scripts/*.mjs`: 17.
-- Repository files: 179 before packaging.
-- Existing CSS owners changed: 2; CSS files and selector systems added: 0.
-- Net CSS declarations: +3, all used to establish shrink-safe shared tracks or shrink-safe mobile action sizing.
-- No TypeScript/TSX, database schema, migration, API, authorization, permission, visual direction, or business workflow changed.
+## Asset integrity
+- Inter axes: optical size 14–32 and weight 100–900.
+- Space Grotesk axis: weight 300–700.
+- Required English, Danish, punctuation, and currency glyph coverage was verified in both bundled assets.
+- SIL Open Font License notices are packaged beside both fonts.
 
-## Regression and release gates
-Passed:
-- all ten Node scripts underlying `test:current`, run directly;
-- `node scripts/validate-release.mjs`;
-- `node scripts/check-release-artifacts.mjs`;
-- `node scripts/preflight-stabilization.mjs`;
-- `node --check` for `eslint.config.mjs` and all 17 active `scripts/*.mjs`;
-- CSS structural parse.
+## Validation status
+- PASS `node scripts/test-shift-logic.mjs`
+- PASS `node scripts/test-payroll-export.mjs`
+- PASS `node scripts/test-integrity.mjs`
+- PASS `node scripts/test-production-foundation.mjs`
+- PASS `node scripts/test-inventory-operations.mjs`
+- PASS `node scripts/test-remediation.mjs`
+- PASS `node scripts/test-auth-contract.mjs`
+- PASS `node scripts/test-api-integrity.mjs`
+- PASS `node scripts/test-release-contract.mjs`
+- PASS `node scripts/test-ui-contract.mjs` (3 CSS owners, 17 active scripts, local-font contract)
+- PASS `node scripts/validate-release.mjs`
+- PASS `node scripts/check-release-artifacts.mjs`
+- PASS `node scripts/preflight-stabilization.mjs`
+- PASS JavaScript/MJS syntax checks across the repository
+- PASS balanced-block checks for all three CSS owners
+- PASS WOFF format, variable-axis, Unicode coverage, and required-glyph checks for both font assets
+- PASS source audit: no TypeScript or TSX file imports `next/font/google`
 
-The existing UI contract now verifies the full horizontal-overflow ownership chain: document clipping, zero-minimum shell tracks, non-scrollable Schedule boundaries, the calendar scroller's `overflow-x: auto`, and removal of Schedule's bare responsive `1fr` tracks.
+The candidate contains 183 files. Relative to rc.52, the scoped change is limited to the root font loader, four bundled font/license files, the UI contract, release metadata, and canonical documentation. No CSS owner or database migration changed.
 
-## Dependency-backed and device limitations
-- The extracted release contains no `node_modules` or lockfile, so local ESLint, TypeScript, and Next.js executables are unavailable.
-- No local lint, dependency-backed TypeScript, or Next.js production-build pass is claimed.
-- Vercel remains the authoritative dependency-backed build/type gate.
-- Static contracts cannot substitute for a physical iPhone Safari interaction check; final document-versus-calendar scroll behaviour remains a device acceptance check.
+## Dependency-backed limitation
+The extracted release contains no `node_modules` or lockfile, and the local ESLint, TypeScript, and Next.js executables are unavailable. Those dependency-backed commands were therefore not claimed as local passes. The Vercel deployment remains the production Next.js build gate; unlike rc.52, that build no longer requires Google-hosted font resources.

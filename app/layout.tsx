@@ -1,19 +1,22 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { PwaRegister } from "./pwa-register";
 
-const inter = Inter({
-  subsets: ["latin"],
+const inter = localFont({
+  src: "./fonts/inter-latin-variable.woff",
   variable: "--font-inter",
   display: "swap",
+  weight: "100 900",
+  style: "normal",
 });
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
+const spaceGrotesk = localFont({
+  src: "./fonts/space-grotesk-latin-variable.woff",
   variable: "--font-space-grotesk",
   display: "swap",
+  weight: "300 700",
+  style: "normal",
 });
 
 export const metadata: Metadata = {

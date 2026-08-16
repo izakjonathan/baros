@@ -36,6 +36,7 @@ const headerAdapterFiles = [
 const cssFiles = walk(root).filter((file) => file.endsWith(".css") && !file.includes("/node_modules/") && !file.includes("/.next/"));
 const cssRelative = cssFiles.map((file) => path.relative(root, file)).sort();
 const sourceFiles = walk(root).filter((file) => /\.(?:ts|tsx)$/.test(file));
+const remoteGoogleFontImports = sourceFiles.filter((file) => fs.readFileSync(file, "utf8").includes("next/font/google")).map((file) => path.relative(root, file));
 const cssModuleImporters = sourceFiles.filter((file) => /from\s+["'][^"']+\.module\.css["']/.test(fs.readFileSync(file, "utf8"))).map((file) => path.relative(root, file));
 const classSelectors = new Set([...global.matchAll(/\.([A-Za-z_][\w-]*)/g)].map((match) => match[1]));
 for (const match of schedule.matchAll(/\.([A-Za-z_][\w-]*)/g)) classSelectors.add(match[1]);
@@ -95,6 +96,7 @@ const checks = [
   ["package remains a v0.19 release candidate", /^0\.19\.0-rc\.\d+$/.test(pkg.version)],
   ["only three CSS files exist", JSON.stringify(cssRelative) === JSON.stringify(["app/globals.css", "features/scheduling/ScheduleWorkspace.module.css", "styles/tokens.css"])],
   ["root imports only global CSS", layout.includes('import "./globals.css";') && !layout.includes("completion-redesign.css") && !layout.includes("system-contracts.css") && !layout.includes("design-system.css")],
+  ["root fonts are repository-owned build assets", layout.includes('import localFont from "next/font/local";') && remoteGoogleFontImports.length === 0 && layout.includes('src: "./fonts/inter-latin-variable.woff"') && layout.includes('src: "./fonts/space-grotesk-latin-variable.woff"') && ["app/fonts/inter-latin-variable.woff","app/fonts/space-grotesk-latin-variable.woff","app/fonts/Inter-OFL.txt","app/fonts/Space-Grotesk-OFL.txt"].every((file) => fs.existsSync(path.join(root, file)))],
   ["employee has no route CSS import", !employeeLayout.includes(".css")],
   ["only Shift Plan uses a CSS module", cssModuleImporters.length > 0 && cssModuleImporters.every((file) => file.startsWith("features/scheduling/"))],
   ["global CSS owns shell and controls", global.includes(".sidebar{") && global.includes(".topbar{") && global.includes(".main-shell{") && global.includes(".button,.primary,.secondary") && global.includes("input,select,textarea")],
