@@ -1,9 +1,9 @@
 # Bar Ops — Master Development Brief
 
-**Current confirmed baseline:** `v0.19.0-rc.53`  
-**Baseline archive:** `bar-ops-v0.19.0-rc.53-local-font-build-reliability.zip`  
-**SHA-256:** `4b1e1c5851a9f60e6f83587ee28387cf111be228d82f30645fb84d539392aec9`  
-**Document date:** 2026-08-16  
+**Current confirmed baseline:** `v0.19.0-rc.54`  
+**Baseline archive:** `bar-ops-v0.19.0-rc.54-deterministic-dependencies-and-lint-cleanup.zip`  
+**SHA-256:** `037051a7c274c4dac75bf2478a866342c981b68a79506539ad16f1904abf5815`  
+**Document date:** 2026-08-17  
 **Status:** Current source of truth for agreed product scope and development direction
 
 ---
@@ -30,7 +30,7 @@ Intentional operational density is not a defect. Bar Ops must not be redesigned 
 
 ## 2. Current release status
 
-`v0.19.0-rc.53` is the user-confirmed deployed technical baseline. It remains a **release candidate**, not a production-approved final release.
+`v0.19.0-rc.54` is the user-confirmed deployed technical baseline. It remains a **release candidate**, not a production-approved final release.
 
 The baseline includes:
 
@@ -39,9 +39,9 @@ The baseline includes:
 - accessibility and interaction foundations from `v0.18.14`;
 - production-readiness documentation from `v0.18.15`;
 - acceptance and deployment-signoff foundations from `v0.18.16`;
-- controlled permission, integrity, CSS, workspace-ownership, release-contract, responsive-containment, and build-reliability remediation through `v0.19.0-rc.53`.
+- controlled permission, integrity, CSS, workspace-ownership, release-contract, responsive-containment, build-reliability, deterministic-installation, and lint remediation through `v0.19.0-rc.54`.
 
-The confirmed baseline has passed Vercel dependency installation, Next.js production compilation, and deployment. The rc.54 candidate adds the first verified deterministic lockfile and clean dependency-backed local gate; it must still pass exact-artifact CI and Vercel promotion before becoming the confirmed baseline.
+The confirmed baseline has passed Vercel dependency installation, TypeScript validation, Next.js production compilation, and deployment. The rc.55 candidate removes only proven unreachable code and narrows unsupported module exports; it must still pass exact-artifact CI and Vercel promotion before becoming the confirmed baseline.
 
 The following gates remain external and incomplete:
 
@@ -268,7 +268,7 @@ The following are current audit findings and should drive planned remediation:
 - API runtime validation is strong in some routes and inconsistent in others.
 - the regression suite contains many useful source contracts but too few runtime and browser tests.
 - release documentation still contains historical provenance documents that must not be mistaken for the current baseline.
-- rc.54 introduces deterministic installation, but exact-artifact CI and runtime acceptance remain required.
+- deterministic installation is established in rc.54, but exact-artifact CI and runtime acceptance remain required for every candidate.
 
 These findings do not justify a rewrite. They require controlled, phased remediation.
 

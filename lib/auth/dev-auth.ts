@@ -52,7 +52,7 @@ export function verifyDevSessionToken(token: string): SessionUser | null {
   return getDevSessionUser(role);
 }
 
-export function getDevSessionUser(role: AppRole = "OWNER"): SessionUser {
+function getDevSessionUser(role: AppRole = "OWNER"): SessionUser {
   const safeRole = normalizeDevRole(role);
   const names: Record<AppRole, string> = {
     OWNER: "Development Owner", ADMIN: "Development Admin", MANAGER: "Development Manager",

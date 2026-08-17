@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.19.0-rc.55
+
+- Removed four disconnected UI primitive files, the unused shared `EmptyState`, an obsolete static day fixture, an unused warning logger, and the corresponding unreferenced global selector.
+- Made 17 implementation-only types, constants, helpers, and error classes module-private instead of exposing them as unsupported cross-module contracts.
+- Added a general runtime reachability check to the existing UI contract so disconnected modules under `components`, `features`, or `lib` fail the active regression suite.
+- Preserved the three-file CSS architecture; no stylesheet owner, dependency, database schema, API contract, authorization rule, permission, rendered layout, or business workflow changed.
+
 ## v0.19.0-rc.54
 
 - Added the verified npm lockfile generated with Node 24.19.0 and npm 10.9.2 from the existing exact dependency declarations.

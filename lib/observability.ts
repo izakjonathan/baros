@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { releaseInfo } from "@/lib/release";
 
-export type LogContext = Record<string, unknown>;
+type LogContext = Record<string, unknown>;
 
 type LogLevel = "info" | "warn" | "error";
 
@@ -29,10 +29,6 @@ function writeLog(level: LogLevel, event: string, context: LogContext = {}) {
 
 export function logServerEvent(event: string, context: LogContext = {}) {
   writeLog("info", event, context);
-}
-
-export function logServerWarning(event: string, context: LogContext = {}) {
-  writeLog("warn", event, context);
 }
 
 export function logServerError(error: unknown, context: LogContext = {}) {

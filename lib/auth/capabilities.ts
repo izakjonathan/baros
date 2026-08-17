@@ -34,7 +34,7 @@ const ownerAdminCapabilities: readonly Capability[] = [
   "control.read", "employee.self_service",
 ];
 
-export const ROLE_CAPABILITIES: Readonly<Record<AppRole, readonly Capability[]>> = {
+const ROLE_CAPABILITIES: Readonly<Record<AppRole, readonly Capability[]>> = {
   OWNER: ownerAdminCapabilities,
   ADMIN: ownerAdminCapabilities,
   MANAGER: ownerAdminCapabilities.filter((capability) => capability !== "security.manage"),

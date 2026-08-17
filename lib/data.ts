@@ -1,6 +1,6 @@
 export type NavKey = "dashboard" | "execution" | "schedule" | "attendance" | "inventory" | "orders" | "operations" | "team" | "requests" | "control" | "settings";
 export type ShiftRole = "Manager" | "Bartender" | "Floor" | "Kitchen";
-export type ShiftStatus = "Published" | "Draft";
+type ShiftStatus = "Published" | "Draft";
 
 export type Shift = {
   id: string;
@@ -37,11 +37,6 @@ export type Product = {
   notes?: string;
   active?: boolean;
 };
-
-export const days = [
-  { short: "Mon", date: "27" }, { short: "Tue", date: "28" }, { short: "Wed", date: "29" },
-  { short: "Thu", date: "30" }, { short: "Fri", date: "31" }, { short: "Sat", date: "01" }, { short: "Sun", date: "02" },
-];
 
 export const initialShifts: Shift[] = [
   { id: "s1", day: 0, employee: "Alex Morgan", initials: "AM", start: "16:00", end: "00:00", role: "Manager", status: "Published" },

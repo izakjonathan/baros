@@ -49,7 +49,7 @@ function shiftInterval(shift: Shift) {
   return { start, end };
 }
 
-export function shiftsOverlap(a: Shift, b: Shift) {
+function shiftsOverlap(a: Shift, b: Shift) {
   const first = shiftInterval(a);
   const second = shiftInterval(b);
   return first.start < second.end && second.start < first.end;

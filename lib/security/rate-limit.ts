@@ -1,6 +1,6 @@
 import { db } from "@/lib/db/client";
 
-export class RateLimitError extends Error {
+class RateLimitError extends Error {
   readonly status = 429;
   constructor(public readonly retryAfterSeconds: number) {
     super("RATE_LIMITED");

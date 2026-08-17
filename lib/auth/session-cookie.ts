@@ -5,7 +5,7 @@ export function sessionCookieName() {
   return process.env.SESSION_COOKIE_NAME || DEFAULT_COOKIE_NAME;
 }
 
-export function sessionTtlDays() {
+function sessionTtlDays() {
   const configured = Number(process.env.SESSION_TTL_DAYS || DEFAULT_TTL_DAYS);
   return Number.isInteger(configured) && configured >= 1 && configured <= 365
     ? configured

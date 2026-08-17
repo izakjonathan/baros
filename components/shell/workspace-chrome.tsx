@@ -22,7 +22,7 @@ export type WorkspaceChromeItem = {
   badge?: string | number;
 };
 
-export type WorkspaceLocation = { id: string; name: string };
+type WorkspaceLocation = { id: string; name: string };
 
 export function WorkspaceSidebar({
   items,

@@ -2,10 +2,10 @@
 
 ## Current confirmed baseline
 
-- **Version:** `v0.19.0-rc.53`
-- **Archive:** `bar-ops-v0.19.0-rc.53-local-font-build-reliability.zip`
-- **SHA-256:** `4b1e1c5851a9f60e6f83587ee28387cf111be228d82f30645fb84d539392aec9`
-- **Package version:** `0.19.0-rc.53`
+- **Version:** `v0.19.0-rc.54`
+- **Archive:** `bar-ops-v0.19.0-rc.54-deterministic-dependencies-and-lint-cleanup.zip`
+- **SHA-256:** `037051a7c274c4dac75bf2478a866342c981b68a79506539ad16f1904abf5815`
+- **Package version:** `0.19.0-rc.54`
 - **Status:** User-confirmed deployed release candidate
 - **Production approved:** No
 
@@ -24,7 +24,7 @@ A version becomes the current confirmed baseline only when:
 
 ## Current known release blockers
 
-- the rc.54 lockfile and clean dependency-backed gates require exact-artifact CI and Vercel confirmation before rc.54 promotion;
+- the rc.55 cleanup requires exact-artifact CI and Vercel confirmation before rc.55 promotion;
 - PostgreSQL migration and runtime verification are incomplete;
 - physical iPhone Safari acceptance is incomplete;
 - VoiceOver acceptance is incomplete;

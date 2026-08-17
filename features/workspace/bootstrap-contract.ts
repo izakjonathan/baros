@@ -1,8 +1,8 @@
 import type { DatabaseShiftRecord } from "./schedule-utils";
 import type { Location } from "./types";
 
-export type EmployeeLocationRecord = { id: string; name: string; primary?: boolean };
-export type EmployeeBootstrapRecord = {
+type EmployeeLocationRecord = { id: string; name: string; primary?: boolean };
+type EmployeeBootstrapRecord = {
   id: string;
   first_name: string;
   last_name: string;
@@ -18,7 +18,7 @@ export type EmployeeBootstrapRecord = {
   locations?: EmployeeLocationRecord[];
   portal_status?: "NONE" | "INVITED" | "ACTIVE" | "EXPIRED";
 };
-export type ProductBootstrapRecord = {
+type ProductBootstrapRecord = {
   id: string;
   name: string;
   category: string;
@@ -28,7 +28,7 @@ export type ProductBootstrapRecord = {
   unit: string;
   purchase_price?: number | string | null;
 };
-export type TimesheetBootstrapRecord = {
+type TimesheetBootstrapRecord = {
   id: string;
   employee_name: string;
   work_date: string | Date;
@@ -41,7 +41,7 @@ export type TimesheetBootstrapRecord = {
   on_break?: boolean;
   open_break_started_at?: string | Date | null;
 };
-export type ShiftNoteBootstrapRecord = {
+type ShiftNoteBootstrapRecord = {
   id: string;
   shift_id: string;
   note: string;
@@ -51,20 +51,20 @@ export type ShiftNoteBootstrapRecord = {
   role: string;
   starts_at: string | Date;
 };
-export type InvitationBootstrapRecord = {
+type InvitationBootstrapRecord = {
   employee_id: string;
   portal_status: "NONE" | "INVITED" | "ACTIVE" | "EXPIRED";
 };
 
 
-export type EmployeeInvitationMutationResponse = {
+type EmployeeInvitationMutationResponse = {
   ok?: boolean;
   error?: string;
   activationUrl?: string;
   status?: string;
 };
 
-export type ManagerBootstrapResponse = {
+type ManagerBootstrapResponse = {
   locations: Location[];
   selectedLocationId: string | null;
   employees: EmployeeBootstrapRecord[];

@@ -13,10 +13,6 @@ export function PanelTitle({ title, description, actions }: { title: string; des
   return <div className="panel-title"><div><h2>{title}</h2>{description && <p>{description}</p>}</div>{actions}</div>;
 }
 
-export function EmptyState({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
-  return <div className="shared-empty-state"><strong>{title}</strong>{description && <p>{description}</p>}{action && <div>{action}</div>}</div>;
-}
-
 export function LoadingState({ title = "Loading workspace", description = "Preparing the latest information…" }: { title?: string; description?: string }) {
   return <div className="card card-compact shared-state-card" role="status" aria-live="polite" aria-busy="true"><span className="shared-spinner" aria-hidden="true"/><strong>{title}</strong><p>{description}</p></div>;
 }
