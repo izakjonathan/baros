@@ -1,12 +1,12 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertTriangle, CheckCheck, ChevronLeft, ChevronRight, Copy, Plus, Send, X } from "lucide-react";
-import { days, type Shift } from "@/lib/data";
-import type { Employee, ScheduleAcknowledgementSummary } from "@/features/workspace/types";
-import { BASE_MONDAY, canonicalShiftDate, conflictIds, dateFromSerial, dateSerial, isOvernight, mapDatabaseShift, shiftPositionFromDate, toIsoDate } from "@/features/workspace/schedule-utils";
+import type { Shift } from "@/lib/data";
+import type { Persist, ScheduleAcknowledgementSummary } from "@/features/workspace/types";
+import { BASE_MONDAY, canonicalShiftDate, conflictIds, dateFromSerial, dateSerial, isOvernight, mapDatabaseShift, shiftPositionFromDate, toIsoDate, type DatabaseShiftRecord } from "@/features/workspace/schedule-utils";
 import scheduleStyles from "./ScheduleWorkspace.module.css";
 
-export function ScheduleWorkspace({ shifts, setShifts, employees, onNewShift, onEditShift, notify, currentWeekOffset, setCurrentWeekOffset, devMode, selectedLocationId, persist }: { shifts: Shift[]; setShifts: React.Dispatch<React.SetStateAction<Shift[]>>; employees: Employee[]; onNewShift: (date?: string) => void; onEditShift: (shift: Shift) => void; notify: (s: string) => void; currentWeekOffset: number; setCurrentWeekOffset: React.Dispatch<React.SetStateAction<number>>; devMode: boolean; selectedLocationId: string; persist: (path:string, options:RequestInit) => Promise<any> }) {
+export function ScheduleWorkspace({ shifts, setShifts, onNewShift, onEditShift, notify, currentWeekOffset, setCurrentWeekOffset, devMode, selectedLocationId, persist }: { shifts: Shift[]; setShifts: React.Dispatch<React.SetStateAction<Shift[]>>; onNewShift: (date?: string) => void; onEditShift: (shift: Shift) => void; notify: (s: string) => void; currentWeekOffset: number; setCurrentWeekOffset: React.Dispatch<React.SetStateAction<number>>; devMode: boolean; selectedLocationId: string; persist: Persist }) {
   const calendarScrollRef = useRef<HTMLDivElement>(null);
   const [publishing, setPublishing] = useState(false);
   const [viewMode, setViewMode] = useState<"week" | "month" | "custom">("week");
@@ -42,7 +42,7 @@ export function ScheduleWorkspace({ shifts, setShifts, employees, onNewShift, on
   const weekLabel = currentWeekOffset === 0 ? "This week" : currentWeekOffset === -1 ? "Last week" : currentWeekOffset === 1 ? "Next week" : rangeLabel;
   const compactPeriodLabel = viewMode === "week" ? (currentWeekOffset === 0 ? "This week" : currentWeekOffset === -1 ? "Last week" : currentWeekOffset === 1 ? "Next week" : compactRangeLabel) : compactRangeLabel;
   const acknowledgedCount = acknowledgements.employees.filter((employee) => employee.acknowledgedAt).length;
-  async function loadAcknowledgements() {
+  const loadAcknowledgements = useCallback(async () => {
     if (devMode || viewMode !== "week" || !selectedLocationId || !startIso) { setAcknowledgements({ publication: null, employees: [] }); return; }
     try {
       const response = await fetch(`/api/schedule-acknowledgements?locationId=${encodeURIComponent(selectedLocationId)}&weekStart=${encodeURIComponent(startIso)}`, { cache: "no-store" });
@@ -50,8 +50,11 @@ export function ScheduleWorkspace({ shifts, setShifts, employees, onNewShift, on
       if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Could not load acknowledgements");
       setAcknowledgements({ publication: data.publication || null, employees: Array.isArray(data.employees) ? data.employees : [] });
     } catch { setAcknowledgements({ publication: null, employees: [] }); }
-  }
-  useEffect(() => { void loadAcknowledgements(); }, [viewMode, selectedLocationId, startIso, devMode]);
+  }, [devMode, selectedLocationId, startIso, viewMode]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => void loadAcknowledgements(), 0);
+    return () => window.clearTimeout(timer);
+  }, [loadAcknowledgements]);
   useEffect(() => {
     const scroller = calendarScrollRef.current;
     if (!scroller) return;
@@ -103,7 +106,7 @@ export function ScheduleWorkspace({ shifts, setShifts, employees, onNewShift, on
       else {
         const saved: Shift[] = [];
         for (const shift of copies) {
-          const result = await persist("/api/shifts", { method:"POST", body:JSON.stringify({ locationId:selectedLocationId, employeeId:shift.employeeId, isOpen:shift.isOpen, role:shift.role, startsAt:`${canonicalShiftDate(shift)}T${shift.start}:00`, endsAt:`${dateFromSerial(dateSerial(canonicalShiftDate(shift))+(isOvernight(shift.start,shift.end)?1:0))}T${shift.end}:00`, status:"DRAFT" }) });
+          const result = await persist<{ shifts?: DatabaseShiftRecord[] }>("/api/shifts", { method:"POST", body:JSON.stringify({ locationId:selectedLocationId, employeeId:shift.employeeId, isOpen:shift.isOpen, role:shift.role, startsAt:`${canonicalShiftDate(shift)}T${shift.start}:00`, endsAt:`${dateFromSerial(dateSerial(canonicalShiftDate(shift))+(isOvernight(shift.start,shift.end)?1:0))}T${shift.end}:00`, status:"DRAFT" }) });
           saved.push(...(result?.shifts || []).map(mapDatabaseShift));
         }
         setShifts((current) => [...current, ...saved]);
@@ -126,7 +129,7 @@ export function ScheduleWorkspace({ shifts, setShifts, employees, onNewShift, on
       {displayDays.map((day) => {
         const isToday = day.iso === toIsoDate(new Date());
         const dayShifts = displayedShifts.filter((shift) => canonicalShiftDate(shift) === day.iso);
-        return <div className={`${scheduleStyles.dayColumn} ${isToday ? scheduleStyles.today : ""}`} key={day.iso} onDragOver={(e)=>e.preventDefault()} onDrop={async (e)=>{e.preventDefault();const id=e.dataTransfer.getData("text/shift-id");const original=shifts.find(x=>x.id===id);if(!original||canonicalShiftDate(original)===day.iso)return;const moved={...original,date:day.iso,day:day.pos.day,weekOffset:day.pos.weekOffset,status:"Draft" as const};try{if(!devMode){const rows=await persist("/api/shifts",{method:"PATCH",body:JSON.stringify({id:original.id,scope:"occurrence",employeeId:original.employeeId,isOpen:original.isOpen,role:original.role,startsAt:`${day.iso}T${original.start}:00`,endsAt:`${dateFromSerial(dateSerial(day.iso)+(isOvernight(original.start,original.end)?1:0))}T${original.end}:00`,status:"DRAFT"})});const mapped=(rows||[]).map(mapDatabaseShift);setShifts(cur=>[...cur.filter(x=>x.id!==id),...mapped]);}else setShifts(cur=>cur.map(x=>x.id===id?moved:x));notify("Shift moved and returned to draft");}catch(error){notify(error instanceof Error?error.message:"Could not move shift");}}}>
+        return <div className={`${scheduleStyles.dayColumn} ${isToday ? scheduleStyles.today : ""}`} key={day.iso} onDragOver={(e)=>e.preventDefault()} onDrop={async (e)=>{e.preventDefault();const id=e.dataTransfer.getData("text/shift-id");const original=shifts.find(x=>x.id===id);if(!original||canonicalShiftDate(original)===day.iso)return;const moved={...original,date:day.iso,day:day.pos.day,weekOffset:day.pos.weekOffset,status:"Draft" as const};try{if(!devMode){const rows=await persist<DatabaseShiftRecord[]>("/api/shifts",{method:"PATCH",body:JSON.stringify({id:original.id,scope:"occurrence",employeeId:original.employeeId,isOpen:original.isOpen,role:original.role,startsAt:`${day.iso}T${original.start}:00`,endsAt:`${dateFromSerial(dateSerial(day.iso)+(isOvernight(original.start,original.end)?1:0))}T${original.end}:00`,status:"DRAFT"})});const mapped=(rows||[]).map(mapDatabaseShift);setShifts(cur=>[...cur.filter(x=>x.id!==id),...mapped]);}else setShifts(cur=>cur.map(x=>x.id===id?moved:x));notify("Shift moved and returned to draft");}catch(error){notify(error instanceof Error?error.message:"Could not move shift");}}}>
           <div className={scheduleStyles.dayHeader}><span>{day.short}</span><strong>{day.date}</strong></div>
           <div className={scheduleStyles.dayBody}>{dayShifts.map((shift) => <ShiftCard key={shift.id} shift={shift} conflict={conflicts.has(shift.id) || availabilityConflicts.has(shift.id)} onOpen={() => onEditShift(shift)} onDragStart={(e)=>e.dataTransfer.setData("text/shift-id",shift.id)} />)}<button className={scheduleStyles.addShift} onClick={() => onNewShift(day.iso)} aria-label={`Add shift on ${day.short} ${day.date}`} title="Add shift"><Plus size={15}/><span className="sr-only">Add shift</span></button></div>
         </div>;

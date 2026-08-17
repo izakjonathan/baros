@@ -1,5 +1,7 @@
 export type Location = { id: string; name: string; timezone?: string };
 
+export type Persist = <Result = unknown>(path: string, options: RequestInit) => Promise<Result | null>;
+
 export type Employee = {
   id?: string;
   name: string;

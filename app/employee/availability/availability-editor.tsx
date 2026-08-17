@@ -35,26 +35,28 @@ export function AvailabilityEditor() {
 
   useEffect(() => {
     let active = true;
-    setLoading(true); setMessage("");
-    fetch(`/api/availability?month=${month}`, { cache: "no-store" })
-      .then(readJson)
-      .then((data: { weekly: WeeklyRule[]; dates: ApiDateRule[] }) => {
-        if (!active) return;
-        const weeklyMap = new Map((data.weekly || []).map(rule => [rule.weekday, rule]));
-        const normalizedWeekly = defaults.map(rule => weeklyMap.get(rule.weekday) || rule);
-        setWeekly(normalizedWeekly);
-        const specific = new Map((data.dates || []).map(rule => [dateOnly(rule.valid_from), rule]));
-        setDates(datesInMonth(month).map(date => {
-          const exact = specific.get(date);
-          if (exact) return { date, available: exact.available, available_from: exact.available_from, available_to: exact.available_to };
-          const weekday = new Date(`${date}T12:00:00`).getDay();
-          const fallback = normalizedWeekly[weekday];
-          return { date, available: fallback.available, available_from: fallback.available_from, available_to: fallback.available_to };
-        }));
-      })
-      .catch(error => active && setMessage(error instanceof Error ? error.message : "Could not load availability."))
-      .finally(() => active && setLoading(false));
-    return () => { active = false; };
+    const timer = window.setTimeout(() => {
+      setLoading(true); setMessage("");
+      fetch(`/api/availability?month=${month}`, { cache: "no-store" })
+        .then(readJson)
+        .then((data: { weekly: WeeklyRule[]; dates: ApiDateRule[] }) => {
+          if (!active) return;
+          const weeklyMap = new Map((data.weekly || []).map(rule => [rule.weekday, rule]));
+          const normalizedWeekly = defaults.map(rule => weeklyMap.get(rule.weekday) || rule);
+          setWeekly(normalizedWeekly);
+          const specific = new Map((data.dates || []).map(rule => [dateOnly(rule.valid_from), rule]));
+          setDates(datesInMonth(month).map(date => {
+            const exact = specific.get(date);
+            if (exact) return { date, available: exact.available, available_from: exact.available_from, available_to: exact.available_to };
+            const weekday = new Date(`${date}T12:00:00`).getDay();
+            const fallback = normalizedWeekly[weekday];
+            return { date, available: fallback.available, available_from: fallback.available_from, available_to: fallback.available_to };
+          }));
+        })
+        .catch(error => active && setMessage(error instanceof Error ? error.message : "Could not load availability."))
+        .finally(() => active && setLoading(false));
+    }, 0);
+    return () => { active = false; window.clearTimeout(timer); };
   }, [month]);
 
   const allAvailable = useMemo(() => dates.length > 0 && dates.every(item => item.available), [dates]);

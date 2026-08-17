@@ -2,6 +2,10 @@
 
 Bar Ops is a Next.js App Router application with PostgreSQL-backed operational data.
 
+## Dependency architecture
+
+The repository targets Node 24 and npm 10.9.2. Production and development dependency versions are exact in `package.json`, and `package-lock.json` is the authoritative transitive dependency graph. Local and CI installation must use `npm ci`; changing dependency resolution requires an intentional package and lockfile update in the same release.
+
 ## Styling architecture
 
 The current CSS contract is intentionally small and single-owner:

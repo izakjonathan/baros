@@ -29,13 +29,13 @@ export function RequestsWorkspace({devMode,notify}:{devMode:boolean;notify:(mess
     finally{if(!silent)setLoading(false);}
   },[devMode,notify]);
   useEffect(()=>{
-    void load();
+    const initial=window.setTimeout(()=>void load(),0);
     const refresh=()=>void load({silent:true});
     const timer=window.setInterval(refresh,15000);
     const onVisibility=()=>{if(document.visibilityState==='visible')refresh()};
     window.addEventListener('focus',refresh);
     document.addEventListener('visibilitychange',onVisibility);
-    return()=>{window.clearInterval(timer);window.removeEventListener('focus',refresh);document.removeEventListener('visibilitychange',onVisibility)};
+    return()=>{window.clearTimeout(initial);window.clearInterval(timer);window.removeEventListener('focus',refresh);document.removeEventListener('visibilitychange',onVisibility)};
   },[load]);
   async function review(item:QueueItem,status:'APPROVED'|'REJECTED'){
     setBusy(item.id);

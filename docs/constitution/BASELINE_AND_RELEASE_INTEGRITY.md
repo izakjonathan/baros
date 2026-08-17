@@ -2,11 +2,11 @@
 
 ## Current confirmed baseline
 
-- **Version:** `v0.19.0-rc.1`
-- **Archive:** `bar-ops-v0.19.0-rc.1-production-release-candidate.zip`
-- **SHA-256:** `400d617764231bea3525294f7bf989c21797505f87c644e6dc8910ee3a3cffe6`
-- **Package version:** `0.19.0-rc.1`
-- **Status:** Release candidate
+- **Version:** `v0.19.0-rc.53`
+- **Archive:** `bar-ops-v0.19.0-rc.53-local-font-build-reliability.zip`
+- **SHA-256:** `4b1e1c5851a9f60e6f83587ee28387cf111be228d82f30645fb84d539392aec9`
+- **Package version:** `0.19.0-rc.53`
+- **Status:** User-confirmed deployed release candidate
 - **Production approved:** No
 
 ## Baseline rule
@@ -24,13 +24,7 @@ A version becomes the current confirmed baseline only when:
 
 ## Current known release blockers
 
-- no verified `package-lock.json`;
-- configured registry cannot resolve the pinned `@types/node@22.10.2`;
-- clean install is incomplete;
-- ESLint is incomplete;
-- full TypeScript validation is incomplete;
-- Next.js production build is incomplete;
-- Vercel preview is incomplete;
+- the rc.54 lockfile and clean dependency-backed gates require exact-artifact CI and Vercel confirmation before rc.54 promotion;
 - PostgreSQL migration and runtime verification are incomplete;
 - physical iPhone Safari acceptance is incomplete;
 - VoiceOver acceptance is incomplete;

@@ -14,18 +14,22 @@ export function SettingsWorkspace({ locations, selectedLocationId, userRole, dev
   const location = locations.find(item => item.id === selectedLocationId);
   useEffect(() => {
     if (devMode || !selectedLocationId || section !== "time") return;
-    setLoading(true);
-    fetch(`/api/settings/time-clock?locationId=${encodeURIComponent(selectedLocationId)}`, { cache:"no-store" })
-      .then(async response => { const data=await response.json(); if(!response.ok) throw new Error(data.error||"Could not load settings"); return data; })
-      .then(data => setClock({
-        allowMobileClock:Boolean(data.allow_mobile_clock), allowKioskClock:Boolean(data.allow_kiosk_clock),
-        allowUnscheduledClock:Boolean(data.allow_unscheduled_clock), requireLocationCheck:Boolean(data.require_location_check),
-        earlyClockInMinutes:Number(data.early_clock_in_minutes||0), lateClockOutMinutes:Number(data.late_clock_out_minutes||0),
-        roundingMinutes:Number(data.rounding_minutes||0), autoApproveWithinMinutes:data.auto_approve_within_minutes ?? ""
-      }))
-      .catch(error => notify(error.message || "Could not load settings"))
-      .finally(() => setLoading(false));
-  }, [devMode, selectedLocationId, section]);
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      setLoading(true);
+      fetch(`/api/settings/time-clock?locationId=${encodeURIComponent(selectedLocationId)}`, { cache:"no-store", signal:controller.signal })
+        .then(async response => { const data=await response.json(); if(!response.ok) throw new Error(data.error||"Could not load settings"); return data; })
+        .then(data => setClock({
+          allowMobileClock:Boolean(data.allow_mobile_clock), allowKioskClock:Boolean(data.allow_kiosk_clock),
+          allowUnscheduledClock:Boolean(data.allow_unscheduled_clock), requireLocationCheck:Boolean(data.require_location_check),
+          earlyClockInMinutes:Number(data.early_clock_in_minutes||0), lateClockOutMinutes:Number(data.late_clock_out_minutes||0),
+          roundingMinutes:Number(data.rounding_minutes||0), autoApproveWithinMinutes:data.auto_approve_within_minutes ?? ""
+        }))
+        .catch(error => { if (error?.name !== "AbortError") notify(error.message || "Could not load settings"); })
+        .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    }, 0);
+    return () => { window.clearTimeout(timer); controller.abort(); };
+  }, [devMode, selectedLocationId, section, notify]);
   async function saveClock() {
     if (devMode) { notify("Development settings saved for this session"); return; }
     if (!selectedLocationId) { notify("Select a location first"); return; }
@@ -61,4 +65,3 @@ export function SettingsWorkspace({ locations, selectedLocationId, userRole, dev
     </div>
   </div>;
 }
-

@@ -2,7 +2,7 @@ import type { Sql } from "postgres";
 import { ApiError } from "@/lib/http";
 
 export type SqlRow = Record<string, unknown>;
-export type SqlExecutor = Sql<{}>;
+export type SqlExecutor = Sql<Record<never, never>>;
 
 export async function requireOrganizationLocation(
   sql: SqlExecutor,

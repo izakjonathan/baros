@@ -3,13 +3,15 @@ import { requireCapability } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, jsonError, uuid } from "@/lib/http";
 
+type LocationRow = { id: string };
+
 export async function GET(request: Request) {
   try {
     const user = await requireCapability("manager.workspace");
     const requested = new URL(request.url).searchParams.get("locationId");
-    const locations = await db()`select * from locations where organization_id=${user.organizationId} and active order by name`;
-    let selectedLocationId: string | null = requested ? uuid(requested, "locationId") : user.locationId || locations[0]?.id || null;
-    if (selectedLocationId && !locations.some((location: any) => location.id === selectedLocationId)) throw new ApiError(400, "Location does not belong to this organization");
+    const locations = await db()<LocationRow[]>`select * from locations where organization_id=${user.organizationId} and active order by name`;
+    const selectedLocationId: string | null = requested ? uuid(requested, "locationId") : user.locationId || locations[0]?.id || null;
+    if (selectedLocationId && !locations.some((location) => location.id === selectedLocationId)) throw new ApiError(400, "Location does not belong to this organization");
 
     const [employees, shifts, products, orders, timesheets, alerts, exports, templates, forecasts, shiftNotes] = await Promise.all([
       db()`select e.*,coalesce(json_agg(json_build_object('id',l.id,'name',l.name,'primary',el.primary_location)) filter(where l.id is not null),'[]') locations,case when e.user_id is not null then 'ACTIVE' else 'NONE' end portal_status from employees e left join employee_locations el on el.employee_id=e.id left join locations l on l.id=el.location_id where e.organization_id=${user.organizationId} group by e.id order by e.first_name,e.last_name`,

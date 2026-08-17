@@ -80,7 +80,6 @@ export default function HoursPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [requireLocationCheck, setRequireLocationCheck] = useState(false);
-  const [timezone, setTimezone] = useState("Europe/Copenhagen");
   const [correction, setCorrection] = useState<Timesheet | null>(null);
   const [correctionReason, setCorrectionReason] = useState("");
 
@@ -100,7 +99,6 @@ export default function HoursPage() {
     setEligible(clockData.eligible !== false);
     setEligibilityReason(clockData.eligibilityReason || "");
     setRequireLocationCheck(Boolean(clockData.requireLocationCheck));
-    setTimezone(clockData.timezone || "Europe/Copenhagen");
     setTimesheets(Array.isArray(hoursData.timesheets) ? hoursData.timesheets : []);
     setScheduledMinutes(Number(hoursData.summary?.scheduled_minutes || 0));
     setApprovedMinutes(Number(hoursData.summary?.approved_minutes || 0));
@@ -109,15 +107,17 @@ export default function HoursPage() {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    load()
-      .catch((reason) => {
-        if (!cancelled) setError(reason instanceof Error ? reason.message : "Could not load hours");
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => { cancelled = true; };
+    const timer = window.setTimeout(() => {
+      setLoading(true);
+      load()
+        .catch((reason) => {
+          if (!cancelled) setError(reason instanceof Error ? reason.message : "Could not load hours");
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    }, 0);
+    return () => { cancelled = true; window.clearTimeout(timer); };
   }, [load]);
 
   async function clockAction(action: "CLOCK_IN" | "BREAK_START" | "BREAK_END" | "CLOCK_OUT") {

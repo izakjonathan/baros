@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Activity,
   CalendarDays,
@@ -55,7 +55,12 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
   const canManagePayroll = hasCapability(userRole, "payroll.manage");
   const canExportPayroll = hasCapability(userRole, "payroll.export");
   const [active, setActive] = useState<NavKey>("dashboard");
-  useEffect(() => { if (new URLSearchParams(window.location.search).get("workspace") === "requests") setActive("requests"); }, []);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (new URLSearchParams(window.location.search).get("workspace") === "requests") setActive("requests");
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
   const [locations, setLocations] = useState<Location[]>(devMode ? [{ id: "dev-temple", name: "Temple Bar" }] : []);
   const [selectedLocationId, setSelectedLocationId] = useState<string>(devMode ? "dev-temple" : "");
   const [mobileNav, setMobileNav] = useState(false);
@@ -75,7 +80,6 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
   ]);
   const [logEntries, setLogEntries] = useState<LogEntry[]>([{id:"log1",title:"Weekend handover",body:"House IPA is running low. Delivery expected tomorrow morning.",author:"Maya Chen",createdAt:"Today · 09:14"}]);
   const [dataReady, setDataReady] = useState(false);
-  const hasBootstrappedRef = useRef(false);
   const [editingShift, setEditingShift] = useState<Shift | null>(null);
   const [editingTimeEntry, setEditingTimeEntry] = useState<TimeEntry | null>(null);
   const [toast, setToast] = useState("");
@@ -90,20 +94,23 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
   const [databaseStatus, setDatabaseStatus] = useState(devMode ? "Development data · saved locally" : "Connecting…");
   useEffect(() => {
     if (!devMode) return;
-    try {
-      const raw = localStorage.getItem("barops-dev-v0101") || localStorage.getItem("barops-dev-v091") || localStorage.getItem("barops-dev-v070");
-      if (raw) {
-        const saved = JSON.parse(raw);
-        if (saved.products) setProducts(saved.products);
-        if (saved.shifts) setShifts(saved.shifts);
-        if (saved.employees) setEmployees(saved.employees);
-        if (saved.timeEntries) setTimeEntries(saved.timeEntries);
-        if (saved.stockAdjustments) setStockAdjustments(saved.stockAdjustments);
-        if (saved.opsTasks) setOpsTasks(saved.opsTasks);
-        if (saved.logEntries) setLogEntries(saved.logEntries);
-      }
-    } catch { localStorage.removeItem("barops-dev-v0101"); localStorage.removeItem("barops-dev-v091"); localStorage.removeItem("barops-dev-v070"); }
-    setDataReady(true);
+    const timer = window.setTimeout(() => {
+      try {
+        const raw = localStorage.getItem("barops-dev-v0101") || localStorage.getItem("barops-dev-v091") || localStorage.getItem("barops-dev-v070");
+        if (raw) {
+          const saved = JSON.parse(raw);
+          if (saved.products) setProducts(saved.products);
+          if (saved.shifts) setShifts(saved.shifts);
+          if (saved.employees) setEmployees(saved.employees);
+          if (saved.timeEntries) setTimeEntries(saved.timeEntries);
+          if (saved.stockAdjustments) setStockAdjustments(saved.stockAdjustments);
+          if (saved.opsTasks) setOpsTasks(saved.opsTasks);
+          if (saved.logEntries) setLogEntries(saved.logEntries);
+        }
+      } catch { localStorage.removeItem("barops-dev-v0101"); localStorage.removeItem("barops-dev-v091"); localStorage.removeItem("barops-dev-v070"); }
+      setDataReady(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [devMode]);
   useEffect(() => {
     if (!devMode || !dataReady) return;
@@ -113,7 +120,6 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
     if (devMode) return;
     const controller = new AbortController();
     const requestedLocation = selectedLocationId ? `?locationId=${encodeURIComponent(selectedLocationId)}` : "";
-    if (!hasBootstrappedRef.current) setDataReady(false);
     fetch(`/api/manager/bootstrap${requestedLocation}`, { cache: "no-store", signal: controller.signal }).then(async response => {
       if (!response.ok) throw new Error("Could not load workspace");
       const data = parseManagerBootstrapResponse(await response.json());
@@ -127,18 +133,17 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       setTimeEntries(data.timesheets.map((x)=>({id:x.id,employee:x.employee_name,date:String(x.work_date).slice(0,10),clockIn:String(x.clocked_in_at).slice(11,16),clockOut:x.clocked_out_at?String(x.clocked_out_at).slice(11,16):undefined,breakMinutes:x.break_minutes,status:(x.status==="OPEN"?"Running":x.status[0]+x.status.slice(1).toLowerCase()) as TimeEntry["status"],scheduledHours:Number(x.scheduled_minutes||0)/60,note:x.manager_note ?? undefined,onBreak:Boolean(x.on_break),breakStartedAt:x.open_break_started_at?String(x.open_break_started_at):null})));
       setShiftNotes(data.shiftNotes.map((n)=>({id:n.id,shiftId:n.shift_id,note:n.note,category:n.category,createdAt:String(n.created_at),author:n.author_name,role:n.role,startsAt:String(n.starts_at)})));
       setDatabaseStatus(resolvedLocationId ? "PostgreSQL connected" : "No active location configured");
-      hasBootstrappedRef.current = true;
       setDataReady(true);
       fetch("/api/employee-invitations",{cache:"no-store"}).then(async r=>r.ok?parseInvitationRecords(await r.json()):[]).then((rows)=>setEmployees(current=>current.map(item=>({...item,portalStatus:(rows.find(row=>row.employee_id===item.id)?.portal_status||item.portalStatus||"NONE")})))).catch(()=>{});
-    }).catch((error) => { if (error?.name !== "AbortError") { setDatabaseStatus("Database connection error"); hasBootstrappedRef.current = true; setDataReady(true); } });
+    }).catch((error) => { if (error?.name !== "AbortError") { setDatabaseStatus("Database connection error"); setDataReady(true); } });
     return () => controller.abort();
   }, [devMode, selectedLocationId]);
-  async function persist(path:string, options:RequestInit){ if(devMode) return null; const response=await fetch(path,{...options,headers:{"content-type":"application/json",...(options.headers||{})}}); if(!response.ok) throw new Error((await response.json().catch(()=>({}))).error||"Save failed"); return response.json(); }
+  async function persist<Result = unknown>(path:string, options:RequestInit): Promise<Result | null> { if(devMode) return null; const response=await fetch(path,{...options,headers:{"content-type":"application/json",...(options.headers||{})}}); if(!response.ok) { const failure: unknown = await response.json().catch(()=>null); const message = typeof failure === "object" && failure !== null && "error" in failure && typeof failure.error === "string" ? failure.error : "Save failed"; throw new Error(message); } return await response.json() as Result; }
 
-  function notify(message: string) {
+  const notify = useCallback((message: string) => {
     setToast(message);
     window.setTimeout(() => setToast(""), 2600);
-  }
+  }, []);
 
   function openShiftDialog(date?: string) {
     setSelectedShiftDate(date || null);
@@ -185,9 +190,9 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
         />
         <div className="page-wrap" data-workspace={active}>
           <div className="workspace-flow">
-          {active === "dashboard" && <DashboardWorkspace shifts={shifts} products={products} employees={employees} timeEntries={timeEntries} tasks={opsTasks} shiftNotes={shiftNotes} devMode={devMode} onNavigate={setActive} />}
+          {active === "dashboard" && <DashboardWorkspace shifts={shifts} products={products} timeEntries={timeEntries} tasks={opsTasks} shiftNotes={shiftNotes} devMode={devMode} onNavigate={setActive} />}
           {active === "execution" && <ShiftExecutionWorkspace shifts={shifts} entries={timeEntries} notes={shiftNotes} onNavigate={setActive} />}
-          {active === "schedule" && <ScheduleWorkspace shifts={shifts} setShifts={setShifts} employees={employees} onNewShift={openShiftDialog} onEditShift={setEditingShift} notify={notify} currentWeekOffset={currentWeekOffset} setCurrentWeekOffset={setCurrentWeekOffset} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
+          {active === "schedule" && <ScheduleWorkspace shifts={shifts} setShifts={setShifts} onNewShift={openShiftDialog} onEditShift={setEditingShift} notify={notify} currentWeekOffset={currentWeekOffset} setCurrentWeekOffset={setCurrentWeekOffset} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
           {active === "attendance" && <AttendanceWorkspace employees={employees} shifts={shifts} entries={timeEntries} setEntries={setTimeEntries} notify={notify} onEdit={setEditingTimeEntry} devMode={devMode} persist={persist} canManagePayroll={canManagePayroll} canExportPayroll={canExportPayroll} />}
           {active === "inventory" && <InventoryWorkspace products={products} setProducts={setProducts} onNewProduct={() => setDialog("product")} onEditProduct={setEditingProduct} onStockCount={() => setDialog("stockCount")} adjustments={stockAdjustments} setAdjustments={setStockAdjustments} notify={notify} devMode={devMode} selectedLocationId={selectedLocationId} persist={persist} />}
           {active === "orders" && <OrdersWorkspace products={products} setProducts={setProducts} onNewOrder={() => setDialog("order")} notify={notify} />}
@@ -243,7 +248,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
             setShifts((current) => current.map((item) => { if (scope === "occurrence") return item.id === updated.id ? updated : item; if (!updated.recurrenceGroupId || item.recurrenceGroupId !== updated.recurrenceGroupId) return item; if (scope === "future" && dateSerial(canonicalShiftDate(item)) < dateSerial(canonicalShiftDate(editingShift))) return item; const dayDelta = dateSerial(canonicalShiftDate(updated)) - dateSerial(canonicalShiftDate(editingShift)); const shiftedDate = dateFromSerial(dateSerial(canonicalShiftDate(item)) + dayDelta); const pos = shiftPositionFromDate(shiftedDate); return { ...item, employee: updated.employee, initials: updated.initials, role: updated.role, start: updated.start, end: updated.end, status: updated.status, isOpen: updated.isOpen, date: shiftedDate, day: pos.day, weekOffset: pos.weekOffset }; }));
           } else {
             const assigned=employees.find(e=>e.name===updated.employee);
-            const rows = await persist("/api/shifts",{method:"PATCH",body:JSON.stringify({id:updated.id,scope,employeeId:assigned?.id,isOpen:updated.isOpen,role:updated.role,startsAt:`${canonicalShiftDate(updated)}T${updated.start}:00`,endsAt:`${dateFromSerial(dateSerial(canonicalShiftDate(updated))+(isOvernight(updated.start,updated.end)?1:0))}T${updated.end}:00`,status:updated.status.toUpperCase()})});
+            const rows = await persist<DatabaseShiftRecord[]>("/api/shifts",{method:"PATCH",body:JSON.stringify({id:updated.id,scope,employeeId:assigned?.id,isOpen:updated.isOpen,role:updated.role,startsAt:`${canonicalShiftDate(updated)}T${updated.start}:00`,endsAt:`${dateFromSerial(dateSerial(canonicalShiftDate(updated))+(isOvernight(updated.start,updated.end)?1:0))}T${updated.end}:00`,status:updated.status.toUpperCase()})});
             const mapped = (rows || []).map(mapDatabaseShift);
             const changedIds = new Set(mapped.map((item: Shift) => item.id));
             setShifts(current => [...current.filter(item => !changedIds.has(item.id)), ...mapped].sort((a,b)=>canonicalShiftDate(a).localeCompare(canonicalShiftDate(b))));
@@ -258,7 +263,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
         try {
           if (devMode) setShifts((current) => [...current, ...newShifts]);
           else {
-            const savedGroups = await Promise.all(newShifts.map(async x => { const assigned=employees.find(e=>e.name===x.employee); return persist("/api/shifts",{method:"POST",body:JSON.stringify({locationId:x.locationId || selectedLocationId,employeeId:assigned?.id,isOpen:x.isOpen,role:x.role,startsAt:`${canonicalShiftDate(x)}T${x.start}:00`,endsAt:`${dateFromSerial(dateSerial(canonicalShiftDate(x))+(isOvernight(x.start,x.end)?1:0))}T${x.end}:00`,status:"DRAFT"})}); }));
+            const savedGroups = await Promise.all(newShifts.map(async x => { const assigned=employees.find(e=>e.name===x.employee); return persist<{ shifts?: DatabaseShiftRecord[] }>("/api/shifts",{method:"POST",body:JSON.stringify({locationId:x.locationId || selectedLocationId,employeeId:assigned?.id,isOpen:x.isOpen,role:x.role,startsAt:`${canonicalShiftDate(x)}T${x.start}:00`,endsAt:`${dateFromSerial(dateSerial(canonicalShiftDate(x))+(isOvernight(x.start,x.end)?1:0))}T${x.end}:00`,status:"DRAFT"})}); }));
             const saved = savedGroups.flatMap(result => (result?.shifts || []).map(mapDatabaseShift));
             setShifts(current => [...current, ...saved].sort((a,b)=>canonicalShiftDate(a).localeCompare(canonicalShiftDate(b))));
           }
@@ -266,10 +271,10 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
         } catch (error) { notify(error instanceof Error ? error.message : "Could not add shift"); }
       }} />}
       {editingTimeEntry && <TimesheetDialog entry={editingTimeEntry} onClose={() => setEditingTimeEntry(null)} onSave={async (updated) => { try { if (!devMode) await persist("/api/timesheets", { method:"PATCH", body:JSON.stringify({ id:updated.id, status:"PENDING", clockIn:updated.clockIn, clockOut:updated.clockOut || null, breakMinutes:updated.breakMinutes, managerNote:updated.note }) }); setTimeEntries((current) => current.map((item) => item.id === updated.id ? updated : item)); setEditingTimeEntry(null); notify("Timesheet corrected and returned to pending review"); } catch(error) { notify(error instanceof Error ? error.message : "Could not correct timesheet"); } }} />}
-      {canManageTeam && editingEmployee && <EmployeeDialog employee={editingEmployee} locations={locations} onClose={() => setEditingEmployee(null)} onSave={async (updated) => { try { const saved=await persist("/api/employees",{method:"PATCH",body:JSON.stringify({...updated,id:editingEmployee.id})}); setEmployees((current) => current.map((item) => item.id === editingEmployee.id ? {...updated,...saved,id:editingEmployee.id} : item)); setEditingEmployee(null); notify("Employee updated"); } catch(error) { notify(error instanceof Error?error.message:"Could not update employee"); } }} />}
-      {canManageTeam && dialog === "employee" && <EmployeeDialog locations={locations} defaultLocationId={selectedLocationId} onClose={() => setDialog(null)} onSave={async (employee) => { try { const saved=await persist("/api/employees",{method:"POST",body:JSON.stringify({...employee,locationId:employee.locationId||selectedLocationId})}); setEmployees((current) => [...current, {...employee,id:saved?.id,portalStatus:"NONE"}]); setDialog(null); notify(devMode?"Employee added":"Employee added — you can now invite them to the portal"); } catch(e) { notify(e instanceof Error?e.message:"Could not add employee"); } }} />}
-      {dialog === "product" && <ProductDialog onClose={() => setDialog(null)} onSave={async (product) => { try { const saved=await persist("/api/products",{method:"POST",body:JSON.stringify({...product,locationId:selectedLocationId})}); setProducts((current) => [...current, {...product,...saved}]); setDialog(null); notify("Product added to inventory"); } catch(error) { notify(error instanceof Error?error.message:"Could not add product"); } }} />}
-      {editingProduct && <ProductDialog product={editingProduct} onClose={() => setEditingProduct(null)} onSave={async (product) => { try { const saved=await persist("/api/products",{method:"PATCH",body:JSON.stringify({...product,locationId:selectedLocationId})}); setProducts(current => current.map(p => p.id === product.id ? {...product,...saved} : p)); setEditingProduct(null); notify("Product updated"); } catch(error) { notify(error instanceof Error?error.message:"Could not update product"); } }} />}
+      {canManageTeam && editingEmployee && <EmployeeDialog employee={editingEmployee} locations={locations} onClose={() => setEditingEmployee(null)} onSave={async (updated) => { try { const saved=await persist<Partial<Employee>>("/api/employees",{method:"PATCH",body:JSON.stringify({...updated,id:editingEmployee.id})}); setEmployees((current) => current.map((item) => item.id === editingEmployee.id ? {...updated,...(saved || {}),id:editingEmployee.id} : item)); setEditingEmployee(null); notify("Employee updated"); } catch(error) { notify(error instanceof Error?error.message:"Could not update employee"); } }} />}
+      {canManageTeam && dialog === "employee" && <EmployeeDialog locations={locations} defaultLocationId={selectedLocationId} onClose={() => setDialog(null)} onSave={async (employee) => { try { const saved=await persist<{ id?: string }>("/api/employees",{method:"POST",body:JSON.stringify({...employee,locationId:employee.locationId||selectedLocationId})}); setEmployees((current) => [...current, {...employee,id:saved?.id,portalStatus:"NONE"}]); setDialog(null); notify(devMode?"Employee added":"Employee added — you can now invite them to the portal"); } catch(e) { notify(e instanceof Error?e.message:"Could not add employee"); } }} />}
+      {dialog === "product" && <ProductDialog onClose={() => setDialog(null)} onSave={async (product) => { try { const saved=await persist<Partial<Product>>("/api/products",{method:"POST",body:JSON.stringify({...product,locationId:selectedLocationId})}); setProducts((current) => [...current, {...product,...(saved || {})}]); setDialog(null); notify("Product added to inventory"); } catch(error) { notify(error instanceof Error?error.message:"Could not add product"); } }} />}
+      {editingProduct && <ProductDialog product={editingProduct} onClose={() => setEditingProduct(null)} onSave={async (product) => { try { const saved=await persist<Partial<Product>>("/api/products",{method:"PATCH",body:JSON.stringify({...product,locationId:selectedLocationId})}); setProducts(current => current.map(p => p.id === product.id ? {...product,...(saved || {})} : p)); setEditingProduct(null); notify("Product updated"); } catch(error) { notify(error instanceof Error?error.message:"Could not update product"); } }} />}
       {dialog === "stockCount" && <StockCountDialog products={products} onClose={() => setDialog(null)} onSave={async (counts) => { try { if (!devMode) { for (const product of products) if (counts[product.id] !== undefined && counts[product.id] !== product.stock) await persist("/api/products", { method:"PATCH", body:JSON.stringify({...product, stock:counts[product.id], locationId:selectedLocationId}) }); } setProducts(current => current.map(p => ({...p,stock:counts[p.id] ?? p.stock}))); setDialog(null); notify("Stock count approved and inventory updated"); } catch(error) { notify(error instanceof Error ? error.message : "Could not save stock count"); } }} />}
       {dialog === "order" && <OrderDialog onClose={() => setDialog(null)} onSave={() => { setDialog(null); notify("Purchase order created"); }} />}
       {toast && <div className="toast" role="status" aria-live="polite" aria-atomic="true"><span aria-hidden="true"><Check size={16} /></span>{toast}</div>}

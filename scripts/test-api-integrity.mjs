@@ -29,7 +29,7 @@ for (const token of ["SECURITY_ACTIONS", "GDPR_REQUEST_TYPES", "enumValue", "uui
 const scope = read("lib/auth/scope.ts");
 if (!scope.includes("export type SqlRow = Record<string, unknown>")) throw new Error("scope query rows are not typed");
 if (!scope.includes('import type { Sql } from "postgres"')) throw new Error("scope executor does not use the postgres Sql contract");
-if (!scope.includes("export type SqlExecutor = Sql<{}>")) throw new Error("scope executor is not compatible with postgres transactions");
+if (!scope.includes("export type SqlExecutor = Sql<Record<never, never>>")) throw new Error("scope executor is not compatible with postgres transactions");
 for (const file of ["app/api/orders/route.ts", "app/api/payroll-periods/route.ts"]) {
   const source = read(file);
   if (source.includes("tx as any")) throw new Error(`${file} still casts the transaction to any`);

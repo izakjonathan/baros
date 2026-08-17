@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.19.0-rc.54
+
+- Added the verified npm lockfile generated with Node 24.19.0 and npm 10.9.2 from the existing exact dependency declarations.
+- Changed the quality workflow from mutable `npm install` resolution to cached, lockfile-backed `npm ci` after activating the declared npm version through Corepack.
+- Repaired the existing ESLint flat-config compatibility with the pinned ESLint version and accepted Next.js's current generated-type include contract.
+- Cleared every repository ESLint error and warning at source: database results and persistence boundaries are explicitly typed, unknown failures are narrowed safely, effect-driven external loads are cancellable, and unused state/props are removed.
+- Completed the condensed React/Next quality review after the TSX repairs without adding components, styles, or alternate behavior owners.
+- Strengthened the existing artifact, preflight, release, and release-contract checks around the package manager and lockfile contract.
+- Updated the current baseline documentation from the historical rc.1 reference to the user-confirmed rc.53 deployment.
+- No CSS, dependency-version, database-schema, API-contract, authorization, permission, layout, visual, or business-behaviour changes.
+
 ## v0.19.0-rc.53
 
 - Replaced build-time Google font downloads with repository-owned local variable Inter and Space Grotesk assets through `next/font/local`.

@@ -8,6 +8,10 @@ function forbidden(user: Awaited<ReturnType<typeof getSessionUser>>) {
   return !user || user.role === "EMPLOYEE";
 }
 
+function isUniqueViolation(error: unknown) {
+  return typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "23505";
+}
+
 export async function GET(req: Request) {
   try {
     const user = await getSessionUser();
@@ -62,8 +66,8 @@ export async function POST(req: Request) {
       return product;
     });
     return NextResponse.json(result, { status: 201 });
-  } catch (error: any) {
-    if (error?.code === "23505") return NextResponse.json({ error: "A product with this name already exists" }, { status: 409 });
+  } catch (error) {
+    if (isUniqueViolation(error)) return NextResponse.json({ error: "A product with this name already exists" }, { status: 409 });
     return jsonError(error);
   }
 }
@@ -118,8 +122,8 @@ export async function PATCH(req: Request) {
       return product;
     });
     return NextResponse.json(result);
-  } catch (error: any) {
-    if (error?.code === "23505") return NextResponse.json({ error: "A product with this name already exists" }, { status: 409 });
+  } catch (error) {
+    if (isUniqueViolation(error)) return NextResponse.json({ error: "A product with this name already exists" }, { status: 409 });
     return jsonError(error);
   }
 }

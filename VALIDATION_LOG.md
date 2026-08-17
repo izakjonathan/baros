@@ -1,41 +1,30 @@
-# v0.19.0-rc.53 Validation
+# v0.19.0-rc.54 Validation
 
 ## Confirmed baseline
-The complete v0.19.0-rc.52 ZIP was integrity-tested, extracted into a new working directory, and verified as version `0.19.0-rc.52` before modification. That release remains the rollback checkpoint.
+The exact user-confirmed v0.19.0-rc.53 release ZIP was checksum-verified, archive-tested, extracted into a new working directory, and confirmed as package version `0.19.0-rc.53` before modification.
 
-## Vercel evidence and correction
-- Vercel built commit `283e6b1` as `bar-ops@0.19.0-rc.52`.
-- The failure occurred during optimized production compilation, before TypeScript validation.
-- Google returned HTTP 404 for Space Grotesk weights 500, 600, and 700. The subsequent Turbopack internal-font module failures were downstream errors.
-- Both configured Google font loaders were audited. Inter and Space Grotesk now use repository-owned local variable webfonts so the full error class is removed from the build path.
-- The existing CSS variables, font families, extended-Latin coverage, and weight ranges are preserved.
+- Archive: `bar-ops-v0.19.0-rc.53-local-font-build-reliability.zip`
+- SHA-256: `4b1e1c5851a9f60e6f83587ee28387cf111be228d82f30645fb84d539392aec9`
+- Rollback checkpoint: v0.19.0-rc.53
 
-## Asset integrity
-- Inter axes: optical size 14–32 and weight 100–900.
-- Space Grotesk axis: weight 300–700.
-- Required English, Danish, punctuation, and currency glyph coverage was verified in both bundled assets.
-- SIL Open Font License notices are packaged beside both fonts.
+## Deterministic dependency graph
+- Runtime used for lockfile generation: Node 24.19.0 and npm 10.9.2.
+- `package-lock.json` uses lockfile version 3 and resolves 401 package entries.
+- All existing direct production and development dependency versions remain unchanged and exact.
+- Every non-link registry entry records a version, resolved source, and integrity hash.
+- Lockfile SHA-256: `9dd61cd0b8d35acaf63844d2933787ea9982ba438e43e6393f28906fa02dbc37`.
+- A clean `npm ci --no-audit --no-fund` installed 350 packages successfully without changing the lockfile checksum.
 
 ## Validation status
-- PASS `node scripts/test-shift-logic.mjs`
-- PASS `node scripts/test-payroll-export.mjs`
-- PASS `node scripts/test-integrity.mjs`
-- PASS `node scripts/test-production-foundation.mjs`
-- PASS `node scripts/test-inventory-operations.mjs`
-- PASS `node scripts/test-remediation.mjs`
-- PASS `node scripts/test-auth-contract.mjs`
-- PASS `node scripts/test-api-integrity.mjs`
-- PASS `node scripts/test-release-contract.mjs`
-- PASS `node scripts/test-ui-contract.mjs` (3 CSS owners, 17 active scripts, local-font contract)
-- PASS `node scripts/validate-release.mjs`
-- PASS `node scripts/check-release-artifacts.mjs`
-- PASS `node scripts/preflight-stabilization.mjs`
-- PASS JavaScript/MJS syntax checks across the repository
-- PASS balanced-block checks for all three CSS owners
-- PASS WOFF format, variable-axis, Unicode coverage, and required-glyph checks for both font assets
-- PASS source audit: no TypeScript or TSX file imports `next/font/google`
+- ESLint: passed with zero errors and zero warnings.
+- TypeScript (`tsc --noEmit`): passed.
+- Current regression suite: all 10 suites passed.
+- Release validation and final stabilization preflight: passed.
+- Environment contract: passed; `DATABASE_URL` was intentionally absent from the build environment and reported as a warning.
+- UI contract: passed with exactly 3 CSS files and 17 active scripts.
+- Condensed React/Next review: passed for component structure, effects/dependencies, hydration, accessibility, rendering, and feature ownership.
+- Next.js 16.2.12 Turbopack production build: passed; all 45 pages were generated or registered successfully.
+- No lint rule, TypeScript gate, or release check was disabled, downgraded, or bypassed.
 
-The candidate contains 183 files. Relative to rc.52, the scoped change is limited to the root font loader, four bundled font/license files, the UI contract, release metadata, and canonical documentation. No CSS owner or database migration changed.
-
-## Dependency-backed limitation
-The extracted release contains no `node_modules` or lockfile, and the local ESLint, TypeScript, and Next.js executables are unavailable. Those dependency-backed commands were therefore not claimed as local passes. The Vercel deployment remains the production Next.js build gate; unlike rc.52, that build no longer requires Google-hosted font resources.
+## Scope
+Application-source edits are limited to lint, lifecycle, and type-safety repairs. No CSS owner/content, dependency version, database migration/schema, API contract, authorization rule, permission, layout, visual direction, or business workflow changed.

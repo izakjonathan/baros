@@ -1,9 +1,9 @@
 # Bar Ops — Master Development Brief
 
-**Current confirmed baseline:** `v0.19.0-rc.1`  
-**Baseline archive:** `bar-ops-v0.19.0-rc.1-production-release-candidate.zip`  
-**SHA-256:** `400d617764231bea3525294f7bf989c21797505f87c644e6dc8910ee3a3cffe6`  
-**Document date:** 2026-08-06  
+**Current confirmed baseline:** `v0.19.0-rc.53`  
+**Baseline archive:** `bar-ops-v0.19.0-rc.53-local-font-build-reliability.zip`  
+**SHA-256:** `4b1e1c5851a9f60e6f83587ee28387cf111be228d82f30645fb84d539392aec9`  
+**Document date:** 2026-08-16  
 **Status:** Current source of truth for agreed product scope and development direction
 
 ---
@@ -30,7 +30,7 @@ Intentional operational density is not a defect. Bar Ops must not be redesigned 
 
 ## 2. Current release status
 
-`v0.19.0-rc.1` is a **release candidate**, not a production-approved final release.
+`v0.19.0-rc.53` is the user-confirmed deployed technical baseline. It remains a **release candidate**, not a production-approved final release.
 
 The baseline includes:
 
@@ -39,16 +39,12 @@ The baseline includes:
 - accessibility and interaction foundations from `v0.18.14`;
 - production-readiness documentation from `v0.18.15`;
 - acceptance and deployment-signoff foundations from `v0.18.16`;
-- the release-candidate contract from `v0.19.0-rc.1`.
+- controlled permission, integrity, CSS, workspace-ownership, release-contract, responsive-containment, and build-reliability remediation through `v0.19.0-rc.53`.
+
+The confirmed baseline has passed Vercel dependency installation, Next.js production compilation, and deployment. The rc.54 candidate adds the first verified deterministic lockfile and clean dependency-backed local gate; it must still pass exact-artifact CI and Vercel promotion before becoming the confirmed baseline.
 
 The following gates remain external and incomplete:
 
-- reproducible dependency installation;
-- verified package lock;
-- ESLint;
-- complete TypeScript validation;
-- Next.js production build;
-- Vercel preview deployment;
 - live PostgreSQL migration and connectivity verification;
 - multi-role acceptance;
 - physical iPhone Safari verification;
@@ -263,17 +259,16 @@ Every remediation or feature task must:
 
 ## 8. Current architectural findings
 
-The following are accepted audit findings and should drive planned remediation:
+The following are current audit findings and should drive planned remediation:
 
-- `components/bar-ops-app.tsx` owns too many unrelated domains.
-- Shift Plan CSS has multiple historical owners and extensive specificity escalation.
-- global CSS is imported through multiple historical correction layers.
+- `components/bar-ops-app.tsx` remains the state and coordination owner, while manager workspace rendering and dialogs are now feature-owned.
+- CSS is consolidated to global tokens, one global stylesheet, and the Shift Plan module; this three-owner contract must remain protected.
 - server authorization is generally stronger than UI capability filtering.
 - role arrays and operational status strings are duplicated.
 - API runtime validation is strong in some routes and inconsistent in others.
 - the regression suite contains many useful source contracts but too few runtime and browser tests.
-- release documentation is extensive but historically fragmented.
-- the release package has no verified lockfile.
+- release documentation still contains historical provenance documents that must not be mistaken for the current baseline.
+- rc.54 introduces deterministic installation, but exact-artifact CI and runtime acceptance remain required.
 
 These findings do not justify a rewrite. They require controlled, phased remediation.
 
@@ -314,7 +309,7 @@ The following are not assumed complete merely because foundations exist:
 
 ### Phase A — Documentation and baseline integrity
 
-Current phase. No application-code changes.
+Completed as the documentation foundation. Current work must use the later confirmed baseline named at the top of this brief.
 
 ### Phase B — Permissions, security, and data integrity
 

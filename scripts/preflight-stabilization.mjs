@@ -16,6 +16,8 @@ for (const secret of [".env", ".env.local", ".env.production", ".env.development
 }
 if (!exists("public/sw.js")) failures.push("public/sw.js must be present");
 if (pkg.engines?.node !== "24.x") failures.push("Node runtime must remain pinned to 24.x");
+if (pkg.packageManager !== "npm@10.9.2") failures.push("Package manager must remain pinned to npm@10.9.2");
+if (!exists("package-lock.json")) failures.push("package-lock.json must be present");
 
 for (const section of ["dependencies", "devDependencies"]) {
   for (const [name, version] of Object.entries(pkg[section] ?? {})) {

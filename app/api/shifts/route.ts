@@ -2,8 +2,23 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, isoDate, jsonError, readJsonObject, requiredString, uuid } from "@/lib/http";
+import type { SqlExecutor, SqlRow } from "@/lib/auth/scope";
 
 type Recurrence = { frequency: "DAILY" | "WEEKLY"; count?: number; until?: string; weekdays?: number[] };
+type AvailabilityRow = { available: boolean; available_from: string | null; available_to: string | null };
+type ShiftRow = SqlRow & {
+  id: string;
+  location_id: string;
+  employee_id: string | null;
+  role: string;
+  starts_at: string | Date;
+  ends_at: string | Date;
+  status: string;
+  notes: string | null;
+  recurrence_group_id: string | null;
+  is_open: boolean;
+};
+type WorkspaceShiftRow = ShiftRow & { employee_name: string | null; location_timezone: string };
 const management = (role?: string) => Boolean(role && role !== "EMPLOYEE");
 const dateTime = (value: unknown, key: string) => {
   const text = requiredString({ [key]: value }, key, 40);
@@ -44,11 +59,11 @@ export async function GET(request: Request) {
   } catch (error) { return jsonError(error); }
 }
 
-async function assertEmployeeAvailability(tx: any, organizationId: string, employeeId: string, start: Date, end: Date, override = false) {
+async function assertEmployeeAvailability(tx: SqlExecutor, organizationId: string, employeeId: string, start: Date, end: Date, override = false) {
   if (override) return;
   const timeOff = await tx`select id from requests where organization_id=${organizationId} and employee_id=${employeeId} and type='TIME_OFF' and status='APPROVED' and starts_at<${end.toISOString()} and ends_at>${start.toISOString()} limit 1`;
   if (timeOff.length) throw new ApiError(409, "Employee has approved time off during this shift", { code: "APPROVED_TIME_OFF" });
-  const availability = await tx`select available,available_from,available_to from availability_rules where organization_id=${organizationId} and employee_id=${employeeId} and ((valid_from=${start.toISOString().slice(0,10)}::date and valid_until=${start.toISOString().slice(0,10)}::date) or (valid_from is null and valid_until is null and weekday=${start.getUTCDay()})) order by (valid_from is not null) desc limit 1`;
+  const availability = await tx<AvailabilityRow[]>`select available,available_from,available_to from availability_rules where organization_id=${organizationId} and employee_id=${employeeId} and ((valid_from=${start.toISOString().slice(0,10)}::date and valid_until=${start.toISOString().slice(0,10)}::date) or (valid_from is null and valid_until is null and weekday=${start.getUTCDay()})) order by (valid_from is not null) desc limit 1`;
   const rule = availability[0];
   if (!rule) return;
   const startTime = start.toISOString().slice(11,16);
@@ -75,25 +90,25 @@ export async function POST(request: Request) {
     const starts = expandStarts(firstStart, recurrence);
 
     const result = await db().begin(async (tx) => {
-      const location = await tx`select id,timezone from locations where id=${locationId} and organization_id=${user.organizationId}`;
+      const location = await tx<Array<{ id: string; timezone: string }>>`select id,timezone from locations where id=${locationId} and organization_id=${user.organizationId}`;
       if (!location.length) throw new ApiError(400, "Location does not belong to this organization");
       let employeeName: string | null = null;
       if (employeeId) {
-        const employee = await tx`select id, first_name||' '||last_name as employee_name from employees where id=${employeeId} and organization_id=${user.organizationId} and active`;
+        const employee = await tx<Array<{ id: string; employee_name: string }>>`select id, first_name||' '||last_name as employee_name from employees where id=${employeeId} and organization_id=${user.organizationId} and active`;
         if (!employee.length) throw new ApiError(400, "Employee is unavailable or belongs to another organization");
         employeeName = employee[0].employee_name;
       }
       let recurrenceId: string | null = null;
       if (recurrence) {
-        const rules = await tx`insert into shift_recurrence_rules(organization_id,location_id,frequency,weekdays,starts_on,ends_on,occurrence_count,created_by)
+        const rules = await tx<Array<{ id: string }>>`insert into shift_recurrence_rules(organization_id,location_id,frequency,weekdays,starts_on,ends_on,occurrence_count,created_by)
           values(${user.organizationId},${locationId},${recurrence.frequency},${recurrence.weekdays || []},${firstStart.toISOString().slice(0,10)},${recurrence.until || null},${recurrence.count || null},${user.userId}) returning id`;
         recurrenceId = rules[0].id;
       }
-      const created: any[] = [];
+      const created: WorkspaceShiftRow[] = [];
       for (const start of starts) {
         const end = new Date(start.getTime() + duration);
         if (employeeId) await assertEmployeeAvailability(tx, user.organizationId, employeeId, start, end, Boolean(body.overrideAvailability));
-        const rows = await tx`insert into shifts(organization_id,location_id,employee_id,role,starts_at,ends_at,break_minutes,status,notes,created_by,recurrence_group_id,is_open)
+        const rows = await tx<ShiftRow[]>`insert into shifts(organization_id,location_id,employee_id,role,starts_at,ends_at,break_minutes,status,notes,created_by,recurrence_group_id,is_open)
           values(${user.organizationId},${locationId},${employeeId},${role},${start.toISOString()},${end.toISOString()},${Number(body.breakMinutes || 0)},${String(body.status || "DRAFT")},${body.notes ? String(body.notes).slice(0,2000) : null},${user.userId},${recurrenceId},${isOpen}) returning *`;
         created.push({ ...rows[0], employee_name: employeeName, location_timezone: location[0].timezone });
       }
@@ -131,13 +146,13 @@ export async function PATCH(request: Request) {
     if (!['occurrence','future','series'].includes(scope)) throw new ApiError(400, "scope is invalid");
 
     const rows = await db().begin(async (tx) => {
-      const currentRows = await tx`select * from shifts where id=${id} and organization_id=${user.organizationId} for update`;
+      const currentRows = await tx<ShiftRow[]>`select * from shifts where id=${id} and organization_id=${user.organizationId} for update`;
       const current = currentRows[0];
       if (!current) throw new ApiError(404, "Shift not found");
-      const [location] = await tx`select timezone from locations where id=${current.location_id} and organization_id=${user.organizationId}`;
+      const [location] = await tx<Array<{ timezone: string }>>`select timezone from locations where id=${current.location_id} and organization_id=${user.organizationId}`;
       const targetRows = scope === 'occurrence' || !current.recurrence_group_id
         ? currentRows
-        : await tx`select * from shifts where organization_id=${user.organizationId} and recurrence_group_id=${current.recurrence_group_id} ${scope === 'future' ? tx`and starts_at>=${current.starts_at}` : tx``} order by starts_at for update`;
+        : await tx<ShiftRow[]>`select * from shifts where organization_id=${user.organizationId} and recurrence_group_id=${current.recurrence_group_id} ${scope === 'future' ? tx`and starts_at>=${current.starts_at}` : tx``} order by starts_at for update`;
       const requestedStart = body.startsAt ? dateTime(body.startsAt, "startsAt") : new Date(current.starts_at);
       const requestedEnd = body.endsAt ? dateTime(body.endsAt, "endsAt") : new Date(current.ends_at);
       const newDuration = requestedEnd.getTime() - requestedStart.getTime();
@@ -147,11 +162,11 @@ export async function PATCH(request: Request) {
       const employeeId = isOpen ? null : (body.employeeId === undefined ? current.employee_id : uuid(body.employeeId, "employeeId"));
       let employeeName: string | null = null;
       if (employeeId) {
-        const employee = await tx`select id, first_name||' '||last_name as employee_name from employees where id=${employeeId} and organization_id=${user.organizationId} and active`;
+        const employee = await tx<Array<{ id: string; employee_name: string }>>`select id, first_name||' '||last_name as employee_name from employees where id=${employeeId} and organization_id=${user.organizationId} and active`;
         if (!employee.length) throw new ApiError(400, "Employee is unavailable or belongs to another organization");
         employeeName = employee[0].employee_name;
       }
-      const updated: any[] = [];
+      const updated: WorkspaceShiftRow[] = [];
       for (const item of targetRows) {
         const start = scope === 'occurrence' ? requestedStart : new Date(new Date(item.starts_at).getTime() + dateDelta);
         const end = new Date(start.getTime() + newDuration);
@@ -160,7 +175,7 @@ export async function PATCH(request: Request) {
           if (conflicts.length && !body.overrideConflicts) throw new ApiError(409, "Employee has scheduling conflicts", conflicts);
           await assertEmployeeAvailability(tx, user.organizationId, employeeId, start, end, Boolean(body.overrideAvailability));
         }
-        const changed = await tx`update shifts set employee_id=${employeeId},is_open=${isOpen},role=${body.role ? String(body.role).slice(0,100) : item.role},starts_at=${start.toISOString()},ends_at=${end.toISOString()},status=${body.status ? String(body.status) : item.status},notes=${body.notes===undefined?item.notes:String(body.notes).slice(0,2000)},updated_at=now() where id=${item.id} and organization_id=${user.organizationId} returning *`;
+        const changed = await tx<ShiftRow[]>`update shifts set employee_id=${employeeId},is_open=${isOpen},role=${body.role ? String(body.role).slice(0,100) : item.role},starts_at=${start.toISOString()},ends_at=${end.toISOString()},status=${body.status ? String(body.status) : item.status},notes=${body.notes===undefined?item.notes:String(body.notes).slice(0,2000)},updated_at=now() where id=${item.id} and organization_id=${user.organizationId} returning *`;
         updated.push({ ...changed[0], employee_name: employeeName, location_timezone: location?.timezone || 'Europe/Copenhagen' });
       }
       await tx`insert into audit_logs(organization_id,location_id,actor_user_id,action,entity_type,entity_id,before_data,after_data) values(${user.organizationId},${current.location_id},${user.userId},'SHIFT_UPDATED','shift',${id},${JSON.stringify(current)}::jsonb,${JSON.stringify({ scope, count: updated.length, changes: body })}::jsonb)`;

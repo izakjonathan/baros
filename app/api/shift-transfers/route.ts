@@ -4,6 +4,8 @@ import { db } from "@/lib/db/client";
 import { ApiError, enumValue, jsonError, optionalString, readJsonObject, uuid } from "@/lib/http";
 import { notifyEmployee, notifyManagers } from "@/lib/services/notifications";
 
+type ShiftAssignmentRow = { id: string; employee_id: string | null };
+
 export async function GET() {
   try {
     const user = await getSessionUser();
@@ -69,16 +71,16 @@ export async function PATCH(req: Request) {
       if (transfer.status !== "PENDING_MANAGER") throw new ApiError(409, "This transfer is not ready for manager review");
       const ids = transfer.swap_shift_id ? [transfer.shift_id, transfer.swap_shift_id].sort() : [transfer.shift_id];
       const locked = ids.length === 2
-        ? await tx`select * from shifts where id in (${ids[0]},${ids[1]}) and organization_id=${user.organizationId} order by id for update`
-        : await tx`select * from shifts where id=${ids[0]} and organization_id=${user.organizationId} for update`;
+        ? await tx<ShiftAssignmentRow[]>`select * from shifts where id in (${ids[0]},${ids[1]}) and organization_id=${user.organizationId} order by id for update`
+        : await tx<ShiftAssignmentRow[]>`select * from shifts where id=${ids[0]} and organization_id=${user.organizationId} for update`;
       if (locked.length !== ids.length) throw new ApiError(409, "One of the shifts no longer exists");
       if (status === "APPROVED") {
-        const original = locked.find((shift: any) => shift.id === transfer.shift_id);
+        const original = locked.find((shift) => shift.id === transfer.shift_id);
         if (!original || original.employee_id !== transfer.requested_by_employee_id) throw new ApiError(409, "The original shift assignment has changed");
         if (transfer.type === "HANDOVER") {
           await tx`update shifts set employee_id=${transfer.target_employee_id},updated_at=now() where id=${transfer.shift_id}`;
         } else {
-          const swap = locked.find((shift: any) => shift.id === transfer.swap_shift_id);
+          const swap = locked.find((shift) => shift.id === transfer.swap_shift_id);
           if (!swap || swap.employee_id !== transfer.target_employee_id) throw new ApiError(409, "The swap shift assignment has changed");
           await tx`update shifts set employee_id=${swap.employee_id},updated_at=now() where id=${original.id}`;
           await tx`update shifts set employee_id=${original.employee_id},updated_at=now() where id=${swap.id}`;

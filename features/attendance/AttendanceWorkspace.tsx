@@ -3,7 +3,7 @@ import { Dialog, DialogActions } from "@/components/ui/interaction-ui";
 import { useState } from "react";
 import { Ban, CheckCheck, DownloadCloud, FileDown, History, LockKeyhole, Pencil, RotateCcw, UnlockKeyhole } from "lucide-react";
 import type { Shift } from "@/lib/data";
-import type { Employee, TimeEntry } from "@/features/workspace/types";
+import type { Employee, Persist, TimeEntry } from "@/features/workspace/types";
 import { attendanceStyles, surfaceStyles } from "@/lib/ui-classes";
 import { canonicalShiftDate, hoursBetween } from "@/features/workspace/schedule-utils";
 
@@ -14,7 +14,7 @@ function formatAttendanceDate(value: string) {
   return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short" }).format(date);
 }
 
-export function AttendanceWorkspace({ employees, shifts, entries, setEntries, notify, onEdit, devMode, persist, canManagePayroll, canExportPayroll }: { employees: Employee[]; shifts: Shift[]; entries: TimeEntry[]; setEntries: React.Dispatch<React.SetStateAction<TimeEntry[]>>; notify:(s:string)=>void; onEdit:(entry:TimeEntry)=>void; devMode:boolean; persist:(path:string,options:RequestInit)=>Promise<any>; canManagePayroll:boolean; canExportPayroll:boolean }) {
+export function AttendanceWorkspace({ employees, shifts, entries, setEntries, notify, onEdit, devMode, persist, canManagePayroll, canExportPayroll }: { employees: Employee[]; shifts: Shift[]; entries: TimeEntry[]; setEntries: React.Dispatch<React.SetStateAction<TimeEntry[]>>; notify:(s:string)=>void; onEdit:(entry:TimeEntry)=>void; devMode:boolean; persist:Persist; canManagePayroll:boolean; canExportPayroll:boolean }) {
   const [fromDate, setFromDate] = useState("2026-07-27");
   const [toDate, setToDate] = useState("2026-08-02");
   const [employeeFilter,setEmployeeFilter]=useState("All employees");

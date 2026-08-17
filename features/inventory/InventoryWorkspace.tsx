@@ -4,10 +4,10 @@ import { WorkspaceHeader } from "@/components/ui/workspace-ui";
 import { useState } from "react";
 import { AlertTriangle, Check, ClipboardList, History, Pencil, Plus, Search } from "lucide-react";
 import type { Product } from "@/lib/data";
-import type { StockAdjustment } from "@/features/workspace/types";
+import type { Persist, StockAdjustment } from "@/features/workspace/types";
 import { inventoryStyles, surfaceStyles } from "@/lib/ui-classes";
 function money(value: number) { return new Intl.NumberFormat("da-DK", { style: "currency", currency: "DKK", maximumFractionDigits: 0 }).format(value); }
-export function InventoryWorkspace({ products, setProducts, onNewProduct, onEditProduct, onStockCount, adjustments, setAdjustments, notify, devMode, selectedLocationId, persist }: { products: Product[]; setProducts: React.Dispatch<React.SetStateAction<Product[]>>; onNewProduct: () => void; onEditProduct: (product:Product)=>void; onStockCount:()=>void; adjustments:StockAdjustment[]; setAdjustments:React.Dispatch<React.SetStateAction<StockAdjustment[]>>; notify: (s: string) => void; devMode:boolean; selectedLocationId:string; persist:(path:string,options:RequestInit)=>Promise<any> }) {
+export function InventoryWorkspace({ products, setProducts, onNewProduct, onEditProduct, onStockCount, adjustments, setAdjustments, notify, devMode, selectedLocationId, persist }: { products: Product[]; setProducts: React.Dispatch<React.SetStateAction<Product[]>>; onNewProduct: () => void; onEditProduct: (product:Product)=>void; onStockCount:()=>void; adjustments:StockAdjustment[]; setAdjustments:React.Dispatch<React.SetStateAction<StockAdjustment[]>>; notify: (s: string) => void; devMode:boolean; selectedLocationId:string; persist:Persist }) {
   const [query, setQuery] = useState(""); const [onlyLow, setOnlyLow] = useState(false); const [category,setCategory]=useState("All categories");
   const filtered = products.filter((p) => p.active !== false && p.name.toLowerCase().includes(query.toLowerCase()) && (category==="All categories"||p.category===category) && (!onlyLow || p.stock < p.par));
   const value = products.reduce((sum, product) => sum + product.stock * product.price, 0);
