@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { hasCapability } from "@/lib/auth/capabilities";
 import { requireCapability, requireUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, jsonError, optionalString, readJsonObject, uuid } from "@/lib/http";
 const statuses=['PENDING','APPROVED','REJECTED'] as const;
-export async function GET(req:Request){const u=await requireUser();const url=new URL(req.url);const from=url.searchParams.get('from');const to=url.searchParams.get('to');const manager=['OWNER','ADMIN','MANAGER','SHIFT_MANAGER'].includes(u.role);const rows=await db()`select t.*,e.first_name||' '||e.last_name employee_name from timesheets t join employees e on e.id=t.employee_id and e.organization_id=t.organization_id where t.organization_id=${u.organizationId} and (${manager} or t.employee_id=${u.employeeId}) and (${from}::date is null or t.work_date>=${from}::date) and (${to}::date is null or t.work_date<=${to}::date) order by t.work_date desc,t.clocked_in_at desc`;return NextResponse.json(rows)}
+export async function GET(req:Request){const u=await requireUser();const url=new URL(req.url);const from=url.searchParams.get('from');const to=url.searchParams.get('to');const canReadAll=hasCapability(u.role,"attendance.read");const canReadOwn=hasCapability(u.role,"employee.self_service")&&Boolean(u.employeeId);if(!canReadAll&&!canReadOwn)return NextResponse.json({error:'Forbidden'},{status:403});const rows=await db()`select t.*,e.first_name||' '||e.last_name employee_name from timesheets t join employees e on e.id=t.employee_id and e.organization_id=t.organization_id where t.organization_id=${u.organizationId} and (${canReadAll} or t.employee_id=${u.employeeId}) and (${from}::date is null or t.work_date>=${from}::date) and (${to}::date is null or t.work_date<=${to}::date) order by t.work_date desc,t.clocked_in_at desc`;return NextResponse.json(rows)}
 export async function PATCH(req:Request){
  try{
   const u=await requireCapability("attendance.manage");const b=await readJsonObject(req);const id=uuid(b.id);const status=String(b.status||'APPROVED').toUpperCase();

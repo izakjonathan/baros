@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { hasCapability } from "@/lib/auth/capabilities";
 import { getSessionUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, enumValue, jsonError, optionalString, readJsonObject, uuid } from "@/lib/http";
@@ -8,9 +9,11 @@ export async function GET() {
   try {
     const user = await getSessionUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const rows = user.role === "EMPLOYEE"
-      ? await db()`select c.*,s.starts_at,s.ends_at,s.role,l.name location_name from shift_claims c join shifts s on s.id=c.shift_id join locations l on l.id=s.location_id where c.organization_id=${user.organizationId} and c.employee_id=${user.employeeId} order by c.created_at desc`
-      : await db()`select c.*,s.starts_at,s.ends_at,s.role,e.first_name||' '||e.last_name employee_name from shift_claims c join shifts s on s.id=c.shift_id join employees e on e.id=c.employee_id where c.organization_id=${user.organizationId} and c.status='PENDING' and s.is_open=true and s.employee_id is null order by c.created_at asc`;
+    const canReview = hasCapability(user.role, "requests.review");
+    if (!canReview && !hasCapability(user.role, "employee.self_service")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const rows = canReview
+      ? await db()`select c.*,s.starts_at,s.ends_at,s.role,e.first_name||' '||e.last_name employee_name from shift_claims c join shifts s on s.id=c.shift_id join employees e on e.id=c.employee_id where c.organization_id=${user.organizationId} and c.status='PENDING' and s.is_open=true and s.employee_id is null order by c.created_at asc`
+      : await db()`select c.*,s.starts_at,s.ends_at,s.role,l.name location_name from shift_claims c join shifts s on s.id=c.shift_id join locations l on l.id=s.location_id where c.organization_id=${user.organizationId} and c.employee_id=${user.employeeId} order by c.created_at desc`;
     return NextResponse.json(rows);
   } catch (error) { return jsonError(error); }
 }
@@ -18,7 +21,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || !user.employeeId) return NextResponse.json({ error: "Employee profile required" }, { status: 403 });
+    if (!user || !hasCapability(user.role, "employee.self_service") || !user.employeeId) return NextResponse.json({ error: "Employee profile required" }, { status: 403 });
     const body = await readJsonObject(req);
     const shiftId = uuid(body.shiftId, "shiftId");
     const row = await db().begin(async tx => {
@@ -36,7 +39,7 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || user.role === "EMPLOYEE") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!user || !hasCapability(user.role, "requests.review")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const body = await readJsonObject(req);
     const claimId = uuid(body.claimId, "claimId");
     const status = enumValue(body.status, "status", ["APPROVED","REJECTED","CANCELLED"] as const);

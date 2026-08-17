@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.56
+
+- Replaced authorization-specific management-role arrays and employee exclusions across orders, products, requests, shift claims/transfers/notes, shifts, timesheets, audit access, and Settings actions with the centralized capability model.
+- Preserved employee-owned data scoping and made shift-transfer responses operation-aware so every linked role with `employee.self_service` can respond as the target employee without gaining manager-review access.
+- Added an executable 120-cell role/capability regression matrix covering all five account roles and every declared capability, plus source contracts for the migrated authorization surfaces.
+- Updated the role-capability constitution from its historical rc.1 audit state to the current implemented policy.
+- No dependency, CSS, database schema, visual layout, or unrelated business-workflow change.
+
 ## v0.19.0-rc.55
 
 - Removed four disconnected UI primitive files, the unused shared `EmptyState`, an obsolete static day fixture, an unused warning logger, and the corresponding unreferenced global selector.

@@ -3,14 +3,16 @@ import { PanelTitle, WorkspaceHeader } from "@/components/ui/workspace-ui";
 import { useEffect, useState } from "react";
 import { Clock3, Save } from "lucide-react";
 import type { ClockSettings, Location } from "@/features/workspace/types";
+import { hasCapability } from "@/lib/auth/capabilities";
+import type { AppRole } from "@/lib/auth/session";
 import { settingsStyles, surfaceStyles } from "@/lib/ui-classes";
 const defaultClockSettings: ClockSettings = { allowMobileClock:true, allowKioskClock:true, allowUnscheduledClock:false, requireLocationCheck:false, earlyClockInMinutes:15, lateClockOutMinutes:60, roundingMinutes:0, autoApproveWithinMinutes:"" };
-export function SettingsWorkspace({ locations, selectedLocationId, userRole, devMode, notify }: { locations: Location[]; selectedLocationId: string; userRole: string; devMode: boolean; notify: (message:string)=>void }) {
+export function SettingsWorkspace({ locations, selectedLocationId, userRole, devMode, notify }: { locations: Location[]; selectedLocationId: string; userRole: AppRole; devMode: boolean; notify: (message:string)=>void }) {
   const [section, setSection] = useState<"general"|"time"|"security">("time");
   const [clock, setClock] = useState<ClockSettings>(defaultClockSettings);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const canManage = ["OWNER","ADMIN","MANAGER"].includes(userRole);
+  const canManage = hasCapability(userRole, "settings.manage");
   const location = locations.find(item => item.id === selectedLocationId);
   useEffect(() => {
     if (devMode || !selectedLocationId || section !== "time") return;

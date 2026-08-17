@@ -1,8 +1,8 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.54**
+Current release: **v0.19.0-rc.56**
 
-Rollback checkpoint: **v0.19.0-rc.53**.
+Rollback checkpoint: **v0.19.0-rc.55**.
 
 Bar Ops is a Next.js operations workspace for hospitality teams. The current architecture uses a global UI system with Shift Plan as the sole custom CSS exception, and manager workspaces are now split by feature/domain rather than implemented inside one monolithic client component.
 
@@ -24,3 +24,5 @@ Use the latest approved ZIP as the baseline. Prefer changing/replacing existing 
 - `features/control/` — Control Centre
 
 CSS remains exactly three files: `styles/tokens.css`, `app/globals.css`, and `features/scheduling/ScheduleWorkspace.module.css`.
+
+Authorization is centralized in `lib/auth/capabilities.ts`. Route handlers enforce named capabilities for manager reads and mutations while employee self-service remains scoped to the authenticated user's linked employee record.

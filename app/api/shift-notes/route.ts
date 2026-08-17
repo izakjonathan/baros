@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { hasCapability } from "@/lib/auth/capabilities";
 import { requireUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, jsonError, readJsonObject, uuid } from "@/lib/http";
@@ -17,8 +18,9 @@ export async function POST(request: Request) {
 
     const [shift] = await db()`select id,location_id,employee_id from shifts where id=${shiftId} and organization_id=${user.organizationId} limit 1`;
     if (!shift) throw new ApiError(404, 'Shift not found');
-    const manager = ['OWNER','ADMIN','MANAGER','SHIFT_MANAGER'].includes(user.role);
-    if (!manager && (!user.employeeId || shift.employee_id !== user.employeeId)) throw new ApiError(403, 'You can only add notes to your own shifts');
+    const canManage = hasCapability(user.role, "schedule.edit");
+    const canWriteOwn = hasCapability(user.role, "employee.self_service") && user.employeeId && shift.employee_id === user.employeeId;
+    if (!canManage && !canWriteOwn) throw new ApiError(403, 'You can only add notes to your own shifts');
 
     const [created] = await db()`insert into shift_notes(organization_id,location_id,shift_id,employee_id,author_user_id,note,category) values(${user.organizationId},${shift.location_id},${shiftId},${user.employeeId || shift.employee_id || null},${user.userId},${note},${category}) returning id,note,category,created_at`;
     return NextResponse.json(created, { status: 201 });

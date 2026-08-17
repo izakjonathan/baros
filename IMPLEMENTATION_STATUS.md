@@ -1,17 +1,18 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.55**
+Version: **v0.19.0-rc.56**
 
 ## Current focus
 
-Remove proven unreachable code and narrow the supported module surface without changing runtime behavior.
+Complete centralized capability enforcement across the remaining manager and employee-shared authorization surfaces.
 
-## rc.55
+## rc.56
 
-- Four disconnected primitive files and their empty directory are removed.
-- The unused `EmptyState`, static day fixture, warning logger, and matching dead global selector are removed.
-- Seventeen declarations used only by their defining module are now private to that module.
-- The active UI contract now calculates runtime reachability from App Router and proxy entry surfaces and rejects disconnected `components`, `features`, or `lib` modules.
+- Orders, products, requests, shift claims, shift transfers, shift notes, shifts, timesheets, audit access, Settings write controls, and manager-review notification audiences now use named capabilities.
+- Employee-owned operations continue to require `employee.self_service` plus a linked employee record and tenant-scoped ownership checks.
+- Shift-transfer response dispatch is operation-aware, allowing linked management accounts to use approved employee self-service without widening manager review.
+- The authentication contract now executes a 120-cell matrix covering all five roles and all 24 capabilities, and checks every migrated surface for capability ownership.
+- The role-capability matrix and current baseline documentation reflect the implemented source.
 - CSS remains exactly three files, with Shift Plan as the only CSS Module.
-- The user-confirmed v0.19.0-rc.54 archive is the rollback checkpoint and documented source baseline.
-- No dependency, database schema, API contract, authorization, permission, rendered layout, visual direction, or business workflow changed.
+- The user-confirmed v0.19.0-rc.55 archive is the rollback checkpoint and documented source baseline.
+- No dependency, CSS, database schema, visual layout, or unrelated business workflow changed.

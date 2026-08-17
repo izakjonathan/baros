@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
+import { hasCapability, rolesWithCapability } from "@/lib/auth/capabilities";
 import { requireUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, jsonError, readJsonObject, requiredString, uuid } from "@/lib/http";
 
+const attendanceReviewerRoles = rolesWithCapability("attendance.manage");
+
 export async function POST(request: Request) {
   try {
     const user = await requireUser();
-    if (!user.employeeId) throw new ApiError(403, "A linked employee profile is required");
+    if (!hasCapability(user.role, "employee.self_service") || !user.employeeId) throw new ApiError(403, "A linked employee profile is required");
     const body = await readJsonObject(request);
     const timesheetId = uuid(body.timesheetId, "timesheetId");
     const reason = requiredString(body, "reason", 1000);
@@ -30,7 +33,7 @@ export async function POST(request: Request) {
       await sql`
         insert into notifications(organization_id,user_id,type,title,body,href)
         select ${user.organizationId},m.user_id,'TIMESHEET_CORRECTION','Timesheet correction requested',${reason},'/manager?section=attendance'
-        from memberships m where m.organization_id=${user.organizationId} and m.role in ('OWNER','ADMIN','MANAGER','SHIFT_MANAGER')
+        from memberships m where m.organization_id=${user.organizationId} and m.role in ${sql(attendanceReviewerRoles)}
       `;
       return result;
     });
