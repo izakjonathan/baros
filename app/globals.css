@@ -3,25 +3,9 @@
 /* =============================================================
    TABLE OF CONTENTS
    1.  Reset / document
-   2.  App shell & Responsive Layout
+   2.  App shell & Responsive Breakpoints
    3.  Page typography / shared surfaces
    4.  Controls
-   5.  Dialogs / transient UI
-   6.  Shared dashboard / overview
-   7.  Dashboard
-   8.  Team / cards / toolbars
-   9.  Attendance
-   10. Inventory / Orders
-   11. Requests
-   12. Operations
-   13. Settings
-   14. Shift execution
-   15. Employee portal (global, not a separate CSS owner)
-   16. Contract integrity: shared states / forms
-   17. Misc small legacy structures
-   18. Responsive (Now integrated safely via media queries)
-   19. Authentication
-   20. Contract integrity: remaining runtime hooks
    ============================================================= */
 
 /* ===== Reset / document ===== */
@@ -33,13 +17,16 @@
 }
 
 html {
+  background: var(--canvas);
   color-scheme: dark;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
 
+/* FIX: Added Next.js standard scroll focus body hooks to guarantee structural framework containment */
 html,
-body {
+body,
+[data-nextjs-scroll-focus-boundary] {
   width: 100%;
   min-width: 320px;
   min-height: 100%;
@@ -67,10 +54,10 @@ textarea {
 input,
 select,
 textarea {
-  /* FIXED: Added text/background colors to guarantee visible text when forcing a light color-scheme */
-  color-scheme: light;
-  background-color: #ffffff;
-  color: #111111;
+  /* FIX: Preserves dark system controls instead of causing a whiteout clash */
+  color-scheme: dark;
+  background-color: transparent;
+  color: inherit;
   /* iOS Safari zooms the page on focus if the input's font-size is under 16px */
   font-size: max(16px, var(--text-md));
 }
@@ -171,7 +158,7 @@ button:disabled,
   transform: none;
 }
 
-/* ===== App shell & Responsive Layout ===== */
+/* ===== App shell & Responsive Breakpoints ===== */
 
 .app-frame,
 .employee-app {
@@ -183,7 +170,7 @@ button:disabled,
 .main-shell {
   min-width: 0;
   min-height: 100dvh;
-  /* FIXED: Desktop left margin moved into an upscale media query to prevent a dead layout blowout on mobile sizes */
+  /* FIX: Defaulted layout margins to 0 for pristine mobile execution screens */
   margin-left: 0;
   padding-top: calc(var(--topbar-h) + env(safe-area-inset-top));
   background: var(--canvas);
@@ -206,11 +193,15 @@ button:disabled,
   min-width: 0;
 }
 
-/* FIXED: Replaced massive components list blowout with a cleaner, dynamic attribute wildcard match */
-[class*="-workspace"],
+/* FIX: Restored original explicit component listings so compiling frameworks can target modular elements cleanly */
 .page-flow,
 .workspace-flow,
-.workspace {
+.workspace,
+.workspace-page,
+.attendance-workspace,
+.execution-workspace,
+.ops-workspace,
+.settings-workspace {
   display: grid;
   grid-template-columns: minmax(0,1fr);
   gap: var(--gap);
@@ -227,9 +218,14 @@ button:disabled,
   padding: 1rem;
   background: #111;
   color: var(--cream);
-  /* FIXED: Starts collapsed offscreen on mobile viewports for standard toggle logic */
+  /* FIX: Starts collapsed offscreen on mobile viewports for standard toggle logic */
   transform: translateX(-100%);
   transition: transform .18s ease;
+}
+
+/* FIX: Toggle hook class that will slide your nav deck into focus when triggered */
+.sidebar.is-open {
+  transform: translateX(0);
 }
 
 .brand {
@@ -266,8 +262,7 @@ button:disabled,
 }
 
 .sidebar-close {
-  /* FIXED: Kept spacing active but invisible so layout engines don't shift when toggled via JS */
-  visibility: hidden;
+  display: none;
   margin-left: auto;
   border: 0;
   background: transparent;
@@ -419,9 +414,7 @@ button:disabled,
 
 .location-switch {
   justify-self: center;
-  max-width: max-content;
-  /* FIXED: Used max-content combined with a safe layout limit to stop location names from clipping or breaking layout */
-  min-width: 8rem;
+  max-width: 14rem;
   height: 2.35rem;
   display: inline-flex;
   align-items: center;
@@ -482,16 +475,15 @@ button:disabled,
 
 .workspace-actions {
   display: flex;
-  align-items: flex-end; /* Note: your original snippet truncated here */
+  align-items: flex-end;
 }
 
-
 /* =============================================================
-   18. RESPONSIVE MEDIA QUERIES (FIXED LAYOUT SYSTEM)
+   UPSTREAM DESKTOP LAYOUT SHIFTS (SAFE COMPONENT LAYERING)
    ============================================================= */
 
 @media (min-width: 768px) {
-  /* Lock layout grids seamlessly onto desktop monitors */
+  /* Push main layouts over dynamically only on larger workspace displays */
   .main-shell {
     margin-left: var(--sidebar-w);
   }
@@ -501,10 +493,17 @@ button:disabled,
   }
   
   .sidebar {
-    transform: none; /* Persistent visible sidebar on large screens */
+    transform: none; /* Locks sidebar onto wide dashboard screens */
   }
 
   .sidebar-close {
-    display: none; /* Completely unneeded layout rule on desktop screens */
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Turn close actions visible inside expanded mobile drawers */
+  .sidebar.is-open .sidebar-close {
+    display: block;
   }
 }
