@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, jsonError, readJsonObject } from "@/lib/http";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const user = await requireUser();
     if (!user.employeeId || !user.locationId) return NextResponse.json({ active: null, breakActive: false, eligible: false, eligibilityReason: !user.employeeId ? "A linked employee profile is required" : "No location is assigned to this employee" });
@@ -25,7 +25,7 @@ export async function GET() {
     const [settings] = await db()`select coalesce(s.require_location_check,false) require_location_check,l.timezone from locations l left join time_clock_settings s on s.location_id=l.id and s.organization_id=l.organization_id where l.id=${user.locationId} and l.organization_id=${user.organizationId} limit 1`;
     return NextResponse.json({ active: active || null, breakActive, eligible: true, requireLocationCheck:Boolean(settings?.require_location_check), timezone:settings?.timezone || 'Europe/Copenhagen' });
   } catch (error) {
-    return jsonError(error);
+    return jsonError(error, request);
   }
 }
 
@@ -119,6 +119,6 @@ export async function POST(request: Request) {
     });
     return NextResponse.json(result.body, { status: result.status });
   } catch (error) {
-    return jsonError(error);
+    return jsonError(error, request);
   }
 }

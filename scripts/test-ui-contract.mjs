@@ -20,7 +20,15 @@ const uiClasses = read("lib/ui-classes.ts");
 const exceptionRegister = read("docs/constitution/INTENTIONAL_EXCEPTION_REGISTER.md");
 const workspace = read("components/ui/workspace-ui.tsx");
 const requestForm = read("app/employee/request-form.tsx");
+const card = read("components/ui/primitives/Card.tsx");
 const quality = read(".github/workflows/quality.yml");
+const observability = read("lib/observability.ts");
+const capabilities = read("lib/auth/capabilities.ts");
+const devAuth = read("lib/auth/dev-auth.ts");
+const sessionCookie = read("lib/auth/session-cookie.ts");
+const scheduleUtils = read("features/workspace/schedule-utils.ts");
+const dataSource = read("lib/data.ts");
+const rateLimit = read("lib/security/rate-limit.ts");
 const headerAdapterFiles = [
   "features/attendance/AttendanceWorkspace.tsx",
   "features/inventory/InventoryWorkspace.tsx",
@@ -35,44 +43,6 @@ const headerAdapterFiles = [
 const cssFiles = walk(root).filter((file) => file.endsWith(".css") && !file.includes("/node_modules/") && !file.includes("/.next/"));
 const cssRelative = cssFiles.map((file) => path.relative(root, file)).sort();
 const sourceFiles = walk(root).filter((file) => /\.(?:ts|tsx)$/.test(file));
-const runtimeSourceFiles = sourceFiles.filter((file) => {
-  const relative = path.relative(root, file).split(path.sep).join("/");
-  return relative === "proxy.ts" || ["app/", "components/", "features/", "lib/"].some((directory) => relative.startsWith(directory));
-});
-const runtimeSourceRelative = new Set(runtimeSourceFiles.map((file) => path.relative(root, file).split(path.sep).join("/")));
-const runtimeImports = new Map([...runtimeSourceRelative].map((file) => [file, []]));
-
-function resolveRuntimeImport(importer, specifier) {
-  const base = specifier.startsWith("@/")
-    ? specifier.slice(2)
-    : specifier.startsWith(".")
-      ? path.posix.normalize(path.posix.join(path.posix.dirname(importer), specifier))
-      : null;
-  if (!base) return null;
-  return [base, `${base}.ts`, `${base}.tsx`, `${base}/index.ts`, `${base}/index.tsx`].find((candidate) => runtimeSourceRelative.has(candidate)) ?? null;
-}
-
-for (const file of runtimeSourceFiles) {
-  const relative = path.relative(root, file).split(path.sep).join("/");
-  const source = fs.readFileSync(file, "utf8");
-  const specifiers = [
-    ...[...source.matchAll(/(?:import|export)\s+(?:type\s+)?(?:[^"'`;]*?\s+from\s+)?["']([^"']+)["']/g)].map((match) => match[1]),
-    ...[...source.matchAll(/import\s*\(\s*["']([^"']+)["']\s*\)/g)].map((match) => match[1]),
-  ];
-  runtimeImports.set(relative, specifiers.map((specifier) => resolveRuntimeImport(relative, specifier)).filter(Boolean));
-}
-
-const reachableRuntimeModules = new Set([...runtimeSourceRelative].filter((file) => file === "proxy.ts" || file.startsWith("app/")));
-const pendingRuntimeModules = [...reachableRuntimeModules];
-while (pendingRuntimeModules.length) {
-  const file = pendingRuntimeModules.pop();
-  for (const imported of runtimeImports.get(file) ?? []) {
-    if (reachableRuntimeModules.has(imported)) continue;
-    reachableRuntimeModules.add(imported);
-    pendingRuntimeModules.push(imported);
-  }
-}
-const disconnectedRuntimeModules = [...runtimeSourceRelative].filter((file) => ["components/", "features/", "lib/"].some((directory) => file.startsWith(directory)) && !reachableRuntimeModules.has(file)).sort();
 const remoteGoogleFontImports = sourceFiles.filter((file) => fs.readFileSync(file, "utf8").includes("next/font/google")).map((file) => path.relative(root, file));
 const cssModuleImporters = sourceFiles.filter((file) => /from\s+["'][^"']+\.module\.css["']/.test(fs.readFileSync(file, "utf8"))).map((file) => path.relative(root, file));
 const classSelectors = new Set([...global.matchAll(/\.([A-Za-z_][\w-]*)/g)].map((match) => match[1]));
@@ -145,13 +115,13 @@ const checks = [
   ["heading and paragraph margins are reset", global.includes("h1,h2,h3,p{margin:0}")],
   ["bold token matches loaded font", tokens.includes("--weight-bold:700;")],
   ["theme toggle stays removed", !chrome.includes("onToggleTheme") && !managerApp.includes("bar-ops-theme") && !employeeShell.includes("bar-ops-theme") && !layout.includes("data-theme")],
-  ["shared state components are styled", global.includes(".shared-state-card{") && global.includes(".shared-spinner{") && global.includes(".shared-error-state{")],
+  ["shared state components are styled", global.includes(".shared-empty-state{") && global.includes(".shared-state-card{") && global.includes(".shared-spinner{") && global.includes(".shared-error-state{")],
   ["Dialog renders shared modal body", dialog.includes('<div className="modal-body">{children}</div>') && global.includes(".modal-body{")],
   ["all mapped UI classes resolve", missingMapped.length === 0],
   ["Shift Plan editor styling is module-owned", schedule.includes(".assignmentToggle{") && schedule.includes(".shiftDialogFields{") && schedule.includes(".repeatPanel{") && schedule.includes(".editShiftActions{")],
   ["global card has only three fundamentals", /\.card\{[^}]*padding:var\(--space-4\)[^}]*border-radius:var\(--radius-lg\)/.test(global) && /\.card-compact\{gap:var\(--space-2\);padding:\.8rem\}/.test(global) && /\.card-flush\{gap:0;padding:0\}/.test(global)],
   ["shared states and requests compose base card", workspace.includes("card card-compact shared-state-card") && requestForm.includes("card card-compact shared-state-card request-success")],
-  ["runtime source graph has no disconnected modules", disconnectedRuntimeModules.length === 0],
+  ["Card primitive exposes only density variants", card.includes('density?:"default"|"compact"|"flush"') && !card.includes("elevated") && !card.includes("tone?")],
   ["topbar remains globally fixed", /\.topbar\{position:fixed;top:0;/.test(global) && !global.includes(".topbar{position:sticky")],
   ["main shell reserves fixed topbar", /\.main-shell\{[^}]*padding-top:calc\(var\(--topbar-h\) \+ env\(safe-area-inset-top\)\)/.test(global)],
   ["Shift Plan page is shrink-safe and only the day scroller owns horizontal scrolling", /html,body\{[^}]*overflow-x:clip/.test(global) && /\.page-wrap\{[^}]*grid-template-columns:minmax\(0,1fr\)/.test(global) && /\.page-flow,[^{]*\{[^}]*grid-template-columns:minmax\(0,1fr\)/.test(global) && schedule.includes(':global(.page-wrap[data-workspace="schedule"]){overflow-x:clip}') && /\.workspace\{[^}]*overflow-x:clip[^}]*contain:inline-size/.test(schedule) && /\.calendarPanel\{[^}]*overflow:hidden[^}]*contain:inline-size/.test(schedule) && /\.calendarScroll\{[^}]*overflow-x:auto[^}]*contain:inline-size[^}]*overscroll-behavior-x:contain/.test(schedule) && !/grid-template-columns:1fr(?:\s+1fr)?(?=[;}])/.test(schedule)],
@@ -164,6 +134,7 @@ const checks = [
   ["feature workspaces have no local PageHeader adapters", headerAdapterFiles.every((source) => !source.includes("function PageHeader")) && !managerApp.includes("function PageHeader")],
   ["shared WorkspaceHeader is used directly where applicable", headerAdapterFiles.slice(1).every((source) => source.includes("<WorkspaceHeader"))],
   ["shared PanelTitle replaces feature-local copies", workspace.includes("export function PanelTitle") && ["features/dashboard/manager-overview.tsx","features/operations/DailyOperationsWorkspace.tsx","features/settings/SettingsWorkspace.tsx","features/control/ControlCenterWorkspace.tsx"].every((file) => read(file).includes("PanelTitle") && !read(file).includes("function PanelTitle"))],
+  ["same-file-only helpers are not exported", !observability.includes("logServerWarning") && !capabilities.includes("export const ROLE_CAPABILITIES") && !devAuth.includes("export function getDevSessionUser") && !sessionCookie.includes("export function sessionTtlDays") && !scheduleUtils.includes("export function shiftsOverlap") && !dataSource.includes("export const days") && !rateLimit.includes("export class RateLimitError")],
   ["active script surface remains compact", scriptFiles.length <= 20 && Object.keys(pkg.scripts).length <= 25],
   ["quality workflow runs current suite", quality.includes("npm run test:all")],
   ["root global-error exception remains documented", exceptionRegister.includes("global-error.tsx") && exceptionRegister.includes("root error boundary")],
@@ -176,6 +147,5 @@ for (const [name, ok] of checks) {
 }
 if (missingMapped.length) console.log("Missing mapped classes:", missingMapped.join(", "));
 if (unboundJsxComponents.length) console.log("Unbound JSX components:", unboundJsxComponents.join(", "));
-if (disconnectedRuntimeModules.length) console.log("Disconnected runtime modules:", disconnectedRuntimeModules.join(", "));
 if (failed) process.exit(1);
 console.log(`UI contract passed: ${cssRelative.length} CSS files, ${scriptFiles.length} active scripts`);

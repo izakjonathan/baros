@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { hasCapability } from "@/lib/auth/capabilities";
 import { getSessionUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, enumValue, jsonError, optionalString, readJsonObject, uuid } from "@/lib/http";
@@ -7,23 +6,21 @@ import { notifyEmployee, notifyManagers } from "@/lib/services/notifications";
 
 type ShiftAssignmentRow = { id: string; employee_id: string | null };
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const user = await getSessionUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const canReview = hasCapability(user.role, "requests.review");
-    if (!canReview && !hasCapability(user.role, "employee.self_service")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    const rows = canReview
-      ? await db()`select t.*,s.starts_at,s.ends_at,s.role,te.first_name||' '||te.last_name target_name,re.first_name||' '||re.last_name requested_by_name from shift_transfers t join shifts s on s.id=t.shift_id join employees re on re.id=t.requested_by_employee_id left join employees te on te.id=t.target_employee_id left join shifts ss on ss.id=t.swap_shift_id where t.organization_id=${user.organizationId} and t.status='PENDING_MANAGER' and s.employee_id=t.requested_by_employee_id and (t.type='HANDOVER' or (ss.id is not null and ss.employee_id=t.target_employee_id)) order by t.created_at asc`
-      : await db()`select t.*,s.starts_at,s.ends_at,s.role,te.first_name||' '||te.last_name target_name,re.first_name||' '||re.last_name requested_by_name from shift_transfers t join shifts s on s.id=t.shift_id join employees re on re.id=t.requested_by_employee_id left join employees te on te.id=t.target_employee_id where t.organization_id=${user.organizationId} and (t.requested_by_employee_id=${user.employeeId} or t.target_employee_id=${user.employeeId}) order by t.created_at desc`;
+    const rows = user.role === "EMPLOYEE"
+      ? await db()`select t.*,s.starts_at,s.ends_at,s.role,te.first_name||' '||te.last_name target_name,re.first_name||' '||re.last_name requested_by_name from shift_transfers t join shifts s on s.id=t.shift_id join employees re on re.id=t.requested_by_employee_id left join employees te on te.id=t.target_employee_id where t.organization_id=${user.organizationId} and (t.requested_by_employee_id=${user.employeeId} or t.target_employee_id=${user.employeeId}) order by t.created_at desc`
+      : await db()`select t.*,s.starts_at,s.ends_at,s.role,te.first_name||' '||te.last_name target_name,re.first_name||' '||re.last_name requested_by_name from shift_transfers t join shifts s on s.id=t.shift_id join employees re on re.id=t.requested_by_employee_id left join employees te on te.id=t.target_employee_id left join shifts ss on ss.id=t.swap_shift_id where t.organization_id=${user.organizationId} and t.status='PENDING_MANAGER' and s.employee_id=t.requested_by_employee_id and (t.type='HANDOVER' or (ss.id is not null and ss.employee_id=t.target_employee_id)) order by t.created_at asc`;
     return NextResponse.json(rows);
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, request); }
 }
 
 export async function POST(req: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || !hasCapability(user.role, "employee.self_service") || !user.employeeId) return NextResponse.json({ error: "Employee profile required" }, { status: 403 });
+    if (!user || !user.employeeId) return NextResponse.json({ error: "Employee profile required" }, { status: 403 });
     const body = await readJsonObject(req);
     const shiftId = uuid(body.shiftId, "shiftId");
     const type = enumValue(body.type, "type", ["HANDOVER","SWAP"] as const);
@@ -46,7 +43,7 @@ export async function POST(req: Request) {
       return transfer;
     });
     return NextResponse.json(row, { status: 201 });
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, req); }
 }
 
 export async function PATCH(req: Request) {
@@ -55,8 +52,7 @@ export async function PATCH(req: Request) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const body = await readJsonObject(req);
     const transferId = uuid(body.transferId, "transferId");
-    if (typeof body.accept === "boolean") {
-      if (!hasCapability(user.role, "employee.self_service") || !user.employeeId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (user.role === "EMPLOYEE") {
       const accept = body.accept === true;
       const result = await db().begin(async tx => {
         const [transfer] = await tx`select * from shift_transfers where id=${transferId} and organization_id=${user.organizationId} for update`;
@@ -68,7 +64,6 @@ export async function PATCH(req: Request) {
       });
       return NextResponse.json(result);
     }
-    if (!hasCapability(user.role, "requests.review")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const status = enumValue(body.status, "status", ["APPROVED","REJECTED","CANCELLED"] as const);
     const result = await db().begin(async tx => {
       const [transfer] = await tx`select * from shift_transfers where id=${transferId} and organization_id=${user.organizationId} for update`;
@@ -98,5 +93,5 @@ export async function PATCH(req: Request) {
       return updated;
     });
     return NextResponse.json(result);
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, req); }
 }

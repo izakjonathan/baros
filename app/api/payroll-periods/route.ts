@@ -46,5 +46,5 @@ export async function POST(request: Request) {
       return result;
     });
     return NextResponse.json(row);
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, request); }
 }

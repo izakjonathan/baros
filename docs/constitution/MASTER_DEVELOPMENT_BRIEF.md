@@ -1,13 +1,9 @@
 # Bar Ops — Master Development Brief
 
-**Current confirmed baseline:** `v0.19.0-rc.55`
-
-**Baseline archive:** `bar-ops-v0.19.0-rc.55-runtime-source-surface-cleanup.zip`
-
-**SHA-256:** `97d06c614bd4ac2bc29c24c7903c3cdefceda7a7f584e7a07696d06e398e7114`
-
-**Document date:** 2026-08-17
-
+**Current confirmed baseline:** `v0.19.0-rc.55`  
+**Baseline archive:** `bar-ops-v0.19.0-rc.55-export-surface-dead-code-cleanup.zip`  
+**SHA-256:** `70bc487946d929fa04abcb9588697c5b2c6e879d14b974ab2ed52406e686d974`  
+**Document date:** 2026-08-16  
 **Status:** Current source of truth for agreed product scope and development direction
 
 ---
@@ -34,7 +30,7 @@ Intentional operational density is not a defect. Bar Ops must not be redesigned 
 
 ## 2. Current release status
 
-`v0.19.0-rc.55` is the user-confirmed working technical baseline. It remains a **release candidate**, not a production-approved final release.
+`v0.19.0-rc.55` is the current technical baseline. It remains a **release candidate**, not a production-approved final release.
 
 The baseline includes:
 
@@ -43,9 +39,9 @@ The baseline includes:
 - accessibility and interaction foundations from `v0.18.14`;
 - production-readiness documentation from `v0.18.15`;
 - acceptance and deployment-signoff foundations from `v0.18.16`;
-- controlled permission, integrity, CSS, workspace-ownership, release-contract, responsive-containment, build-reliability, deterministic-installation, lint remediation, and runtime-source cleanup through `v0.19.0-rc.55`.
+- controlled permission, integrity, CSS, workspace-ownership, release-contract, responsive-containment, build-reliability, deterministic-dependency, lint remediation, and export-surface cleanup through `v0.19.0-rc.55`.
 
-The confirmed baseline is the exact user-approved rc.55 archive named above. The rc.56 candidate aligns the remaining planned authorization surfaces to the centralized capability policy; it must still pass exact-artifact CI and Vercel promotion before becoming the confirmed baseline.
+The rc.55 baseline includes the verified deterministic lockfile, clean dependency-backed local gate, and public export-surface reduction. The rc.56 candidate preserves request context in API error responses and must pass exact-artifact CI and Vercel promotion before becoming the confirmed baseline.
 
 The following gates remain external and incomplete:
 
@@ -77,7 +73,7 @@ The current manager application exposes:
 - Settings;
 - Control Centre.
 
-The manager shell keeps shared state and coordination in one client orchestrator while workspace rendering and dialogs are feature-owned. This remains an audited architectural risk, not permission to rewrite it broadly.
+The manager shell is currently implemented as one large client application. This is an audited architectural risk, not permission to rewrite it broadly.
 
 ### Employee portal
 
@@ -267,12 +263,12 @@ The following are current audit findings and should drive planned remediation:
 
 - `components/bar-ops-app.tsx` remains the state and coordination owner, while manager workspace rendering and dialogs are now feature-owned.
 - CSS is consolidated to global tokens, one global stylesheet, and the Shift Plan module; this three-owner contract must remain protected.
-- manager navigation, action visibility, and the planned direct API surfaces use the centralized capability policy; identity and account-lifecycle decisions still use explicit roles where role semantics are the subject of the decision.
-- operational status strings remain duplicated in places.
+- server authorization is generally stronger than UI capability filtering.
+- role arrays and operational status strings are duplicated.
 - API runtime validation is strong in some routes and inconsistent in others.
 - the regression suite contains many useful source contracts but too few runtime and browser tests.
 - release documentation still contains historical provenance documents that must not be mistaken for the current baseline.
-- deterministic installation is established, but exact-artifact CI and runtime acceptance remain required for every candidate.
+- rc.56 preserves request context in API error responses, but exact-artifact CI and runtime acceptance remain required.
 
 These findings do not justify a rewrite. They require controlled, phased remediation.
 
@@ -317,13 +313,14 @@ Completed as the documentation foundation. Current work must use the later confi
 
 ### Phase B — Permissions, security, and data integrity
 
-In progress:
+After explicit approval:
 
-- central capability model and planned UI/server authorization parity implemented through rc.56;
-- tenant-negative runtime tests still required;
-- concurrency tests still required;
-- migration and recovery verification still required;
-- minimum production authentication scope still requires acceptance.
+- central capability model;
+- UI/server parity;
+- tenant-negative tests;
+- concurrency tests;
+- migration and recovery verification;
+- minimum production authentication scope.
 
 ### Phase C — Low-risk code and CSS hygiene
 

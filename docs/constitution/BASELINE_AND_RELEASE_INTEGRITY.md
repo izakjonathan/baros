@@ -3,10 +3,10 @@
 ## Current confirmed baseline
 
 - **Version:** `v0.19.0-rc.55`
-- **Archive:** `bar-ops-v0.19.0-rc.55-runtime-source-surface-cleanup.zip`
-- **SHA-256:** `97d06c614bd4ac2bc29c24c7903c3cdefceda7a7f584e7a07696d06e398e7114`
+- **Archive:** `bar-ops-v0.19.0-rc.55-export-surface-dead-code-cleanup.zip`
+- **SHA-256:** `70bc487946d929fa04abcb9588697c5b2c6e879d14b974ab2ed52406e686d974`
 - **Package version:** `0.19.0-rc.55`
-- **Status:** User-confirmed working release candidate
+- **Status:** User-continued verified release candidate
 - **Production approved:** No
 
 ## Baseline rule
@@ -24,7 +24,7 @@ A version becomes the current confirmed baseline only when:
 
 ## Current known release blockers
 
-- the rc.56 capability-parity candidate requires exact-artifact CI and Vercel confirmation before rc.56 promotion;
+- the rc.56 request-aware API error cleanup requires exact-artifact CI and Vercel confirmation before rc.56 promotion;
 - PostgreSQL migration and runtime verification are incomplete;
 - physical iPhone Safari acceptance is incomplete;
 - VoiceOver acceptance is incomplete;

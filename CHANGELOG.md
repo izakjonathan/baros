@@ -2,18 +2,18 @@
 
 ## v0.19.0-rc.56
 
-- Replaced authorization-specific management-role arrays and employee exclusions across orders, products, requests, shift claims/transfers/notes, shifts, timesheets, audit access, and Settings actions with the centralized capability model.
-- Preserved employee-owned data scoping and made shift-transfer responses operation-aware so every linked role with `employee.self_service` can respond as the target employee without gaining manager-review access.
-- Added an executable 120-cell role/capability regression matrix covering all five account roles and every declared capability, plus source contracts for the migrated authorization surfaces.
-- Updated the role-capability constitution from its historical rc.1 audit state to the current implemented policy.
-- No dependency, CSS, database schema, visual layout, or unrelated business-workflow change.
+- Preserved request context in API error responses by passing the incoming `Request` to `jsonError` across API route catch paths.
+- Extended the API-integrity contract to reject route handlers that drop request context with bare `jsonError(error)` calls.
+- Updated release metadata and documentation to identify v0.19.0-rc.55 as the rollback checkpoint.
+- No CSS, dependency-version, database-schema, route shape, authorization, permission, layout, visual, or business-behaviour changes.
 
 ## v0.19.0-rc.55
 
-- Removed four disconnected UI primitive files, the unused shared `EmptyState`, an obsolete static day fixture, an unused warning logger, and the corresponding unreferenced global selector.
-- Made 17 implementation-only types, constants, helpers, and error classes module-private instead of exposing them as unsupported cross-module contracts.
-- Added a general runtime reachability check to the existing UI contract so disconnected modules under `components`, `features`, or `lib` fail the active regression suite.
-- Preserved the three-file CSS architecture; no stylesheet owner, dependency, database schema, API contract, authorization rule, permission, rendered layout, or business workflow changed.
+- Removed the unused server warning logger and stopped exporting helpers that are only consumed within their defining modules.
+- Removed the unused schedule-day fixture constant from the shared demo data module.
+- Added UI-contract coverage to keep same-file-only helpers from returning to the public module surface.
+- Updated release metadata and documentation to identify v0.19.0-rc.54 as the rollback checkpoint.
+- No CSS, dependency-version, database-schema, API-contract, authorization, permission, layout, visual, or business-behaviour changes.
 
 ## v0.19.0-rc.54
 

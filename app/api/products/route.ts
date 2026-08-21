@@ -1,9 +1,12 @@
 // Location inheritance compatibility: b.locationId?uuid(b.locationId,'locationId'):u.locationId
 import { NextResponse } from "next/server";
-import { hasCapability } from "@/lib/auth/capabilities";
 import { getSessionUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, finiteNumber, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
+
+function forbidden(user: Awaited<ReturnType<typeof getSessionUser>>) {
+  return !user || user.role === "EMPLOYEE";
+}
 
 function isUniqueViolation(error: unknown) {
   return typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "23505";
@@ -13,7 +16,6 @@ export async function GET(req: Request) {
   try {
     const user = await getSessionUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!hasCapability(user.role, "inventory.read")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const requested = new URL(req.url).searchParams.get("locationId");
     const locationId = requested ? uuid(requested, "locationId") : user.locationId;
     if (!locationId) throw new ApiError(400, "No active location is configured");
@@ -25,13 +27,13 @@ export async function GET(req: Request) {
       where p.organization_id=${user.organizationId}
       order by p.active desc, p.name`;
     return NextResponse.json(rows);
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, req); }
 }
 
 export async function POST(req: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || !hasCapability(user.role, "inventory.adjust")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (forbidden(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const body = await readJsonObject(req);
     const locationId = body.locationId ? uuid(body.locationId, "locationId") : user!.locationId;
     if (!locationId) throw new ApiError(400, "No active location is configured");
@@ -66,14 +68,14 @@ export async function POST(req: Request) {
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     if (isUniqueViolation(error)) return NextResponse.json({ error: "A product with this name already exists" }, { status: 409 });
-    return jsonError(error);
+    return jsonError(error, req);
   }
 }
 
 export async function PATCH(req: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || !hasCapability(user.role, "inventory.adjust")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (forbidden(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const body = await readJsonObject(req);
     const id = uuid(body.id, "id");
     const locationId = body.locationId ? uuid(body.locationId, "locationId") : user!.locationId;
@@ -122,6 +124,6 @@ export async function PATCH(req: Request) {
     return NextResponse.json(result);
   } catch (error) {
     if (isUniqueViolation(error)) return NextResponse.json({ error: "A product with this name already exists" }, { status: 409 });
-    return jsonError(error);
+    return jsonError(error, req);
   }
 }

@@ -51,7 +51,7 @@ export async function GET(req: Request) {
     }
     return NextResponse.json(await db()`select * from availability_rules where organization_id=${user.organizationId} and employee_id=${user.employeeId} and valid_from is null and valid_until is null order by weekday`);
   } catch (error) {
-    return jsonError(error);
+    return jsonError(error, req);
   }
 }
 
@@ -114,6 +114,6 @@ export async function PUT(req: Request) {
     await writeAudit({ organizationId: user.organizationId, actorUserId: user.userId, action: "AVAILABILITY_UPDATED", entityType: "employee", entityId: user.employeeId, after: weeklyRules });
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return jsonError(error);
+    return jsonError(error, req);
   }
 }

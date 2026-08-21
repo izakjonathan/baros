@@ -24,5 +24,3 @@ Use the latest approved ZIP as the baseline. Prefer changing/replacing existing 
 - `features/control/` — Control Centre
 
 CSS remains exactly three files: `styles/tokens.css`, `app/globals.css`, and `features/scheduling/ScheduleWorkspace.module.css`.
-
-Authorization is centralized in `lib/auth/capabilities.ts`. Route handlers enforce named capabilities for manager reads and mutations while employee self-service remains scoped to the authenticated user's linked employee record.

@@ -1,8 +1,6 @@
 import type { TransactionSql } from "postgres";
-import { rolesWithCapability } from "@/lib/auth/capabilities";
 
 type DbExecutor = TransactionSql<Record<string, never>>;
-const requestReviewerRoles = rolesWithCapability("requests.review");
 
 export async function notifyEmployee(
   tx: DbExecutor,
@@ -25,7 +23,7 @@ export async function notifyManagers(
     select ${input.organizationId},m.user_id,${input.actorUserId || null},${input.type},${input.title},${input.body || null},${input.href || null}
     from memberships m
     where m.organization_id=${input.organizationId}
-      and m.role in ${tx(requestReviewerRoles)}
+      and m.role in ('OWNER','ADMIN','MANAGER','SHIFT_MANAGER')
       and m.user_id<>coalesce(${input.actorUserId || null}::uuid,'00000000-0000-0000-0000-000000000000'::uuid)
   `;
 }

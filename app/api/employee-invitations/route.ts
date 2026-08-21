@@ -6,13 +6,13 @@ import { jsonError, readJsonObject, requiredString, uuid } from "@/lib/http";
 
 const tokenHash = (token: string) => createHash("sha256").update(token).digest("hex");
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const user = await requireCapability("accounts.invite");
     await db()`update employee_invitations set status='EXPIRED',updated_at=now() where organization_id=${user.organizationId} and status='PENDING' and expires_at<=now()`;
     const rows = await db()`select e.id employee_id, case when e.user_id is not null then 'ACTIVE' when i.status='PENDING' and i.expires_at>now() then 'INVITED' when i.status='EXPIRED' then 'EXPIRED' else 'NONE' end portal_status, i.expires_at from employees e left join lateral (select status,expires_at from employee_invitations x where x.employee_id=e.id order by x.created_at desc limit 1) i on true where e.organization_id=${user.organizationId}`;
     return NextResponse.json(rows);
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, request); }
 }
 
 export async function POST(request: Request) {
@@ -59,6 +59,6 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof Error && error.message === "APP_URL_REQUIRED") return NextResponse.json({ error: "APP_URL must be configured before sending production invitations" }, { status: 500 });
     if (error instanceof Error && error.message === "APP_URL_INVALID") return NextResponse.json({ error: "APP_URL is invalid" }, { status: 500 });
-    return jsonError(error);
+    return jsonError(error, request);
   }
 }

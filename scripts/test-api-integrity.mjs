@@ -1,6 +1,9 @@
 import fs from "node:fs";
 
 const read = (file) => fs.readFileSync(file, "utf8");
+const apiRouteFiles = fs.readdirSync("app/api", { recursive: true, withFileTypes: true })
+  .filter((entry) => entry.isFile() && entry.name === "route.ts")
+  .map((entry) => `${entry.parentPath ? `${entry.parentPath}/` : ""}${entry.name}`);
 const orders = read("app/api/orders/route.ts");
 const payroll = read("app/api/payroll-periods/route.ts");
 for (const [name, source] of [["orders", orders], ["payroll", payroll]]) {
@@ -8,6 +11,9 @@ for (const [name, source] of [["orders", orders], ["payroll", payroll]]) {
   if (!source.includes("insert into audit_logs")) throw new Error(`${name} audit is not written in route transaction`);
 }
 if (orders.includes("writeAudit(") || payroll.includes("writeAudit(")) throw new Error("audit write remains outside transaction");
+for (const file of apiRouteFiles) {
+  if (read(file).includes("jsonError(error)")) throw new Error(`${file} drops request context in jsonError`);
+}
 
 for (const file of [
   "app/api/attendance-alerts/route.ts",

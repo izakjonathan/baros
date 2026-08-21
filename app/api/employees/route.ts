@@ -63,7 +63,7 @@ export async function POST(request: Request) {
         { status: 409 },
       );
     }
-    return jsonError(error);
+    return jsonError(error, request);
   }
 }
 
@@ -114,6 +114,6 @@ export async function PATCH(request: Request) {
         { status: 409 },
       );
     }
-    return jsonError(error);
+    return jsonError(error, request);
   }
 }

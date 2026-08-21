@@ -51,7 +51,7 @@ export async function GET(request: Request) {
       employees: rows.map((row) => ({ id: row.employee_id, name: row.employee_name, acknowledgedAt: row.acknowledged_at, changeTypes: row.change_types || [] })),
     });
   } catch (error) {
-    return jsonError(error);
+    return jsonError(error, request);
   }
 }
 
@@ -147,6 +147,6 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ ok: true, acknowledgedAt: result.acknowledged_at });
   } catch (error) {
-    return jsonError(error);
+    return jsonError(error, request);
   }
 }

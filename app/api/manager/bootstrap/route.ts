@@ -26,5 +26,5 @@ export async function GET(request: Request) {
       db()`select n.id,n.shift_id,n.note,n.category,n.created_at,coalesce(e.first_name||' '||e.last_name,u.email,'Unknown') author_name,s.role,s.starts_at from shift_notes n join shifts s on s.id=n.shift_id and s.organization_id=n.organization_id left join employees e on e.id=n.employee_id left join users u on u.id=n.author_user_id where n.organization_id=${user.organizationId} and (${selectedLocationId}::uuid is null or n.location_id=${selectedLocationId}) order by n.created_at desc limit 20`
     ]);
     return NextResponse.json({ locations, selectedLocationId, employees, shifts, products, orders, timesheets, alerts, exports, templates, forecasts, shiftNotes });
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, request); }
 }

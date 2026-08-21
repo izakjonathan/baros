@@ -1,10 +1,7 @@
 # Bar Ops — Approved Role Decisions
 
-**Date:** 2026-08-06
-
+**Date:** 2026-08-06  
 **Applies from:** Phase B permission and data-integrity remediation
-
-**Implementation status:** Central capability model, manager UI filtering, and planned direct-route parity implemented through `v0.19.0-rc.56`; live multi-role acceptance remains external.
 
 ## Approved decisions
 
@@ -14,10 +11,10 @@
 
 ## Phase B implications
 
-- Maintain one centralized capability model.
+- Introduce one centralized capability model.
 - Preserve server-side enforcement as authoritative.
-- Keep manager navigation and actions filtered by capability.
+- Filter manager navigation and actions by capability.
 - Keep the employee portal available to linked manager accounts.
-- Keep employee self-service APIs scoped to the linked employee identity.
+- Ensure employee self-service APIs remain scoped to the linked employee identity.
 - Treat Owner and Admin as the same capability tier.
-- Retain the executable all-role capability matrix and complete live direct-URL/API acceptance before final release.
+- Add direct URL, direct API, and multi-role regression tests.

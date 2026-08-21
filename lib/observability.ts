@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { releaseInfo } from "@/lib/release";
 
-type LogContext = Record<string, unknown>;
+export type LogContext = Record<string, unknown>;
 
 type LogLevel = "info" | "warn" | "error";
 

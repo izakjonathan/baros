@@ -28,7 +28,7 @@ export async function GET(request: Request) {
       auto_approve_within_minutes: null,
     });
   } catch (error) {
-    return jsonError(error);
+    return jsonError(error, request);
   }
 }
 
@@ -84,6 +84,6 @@ export async function PUT(request: Request) {
     });
     return NextResponse.json(rows[0]);
   } catch (error) {
-    return jsonError(error);
+    return jsonError(error, request);
   }
 }

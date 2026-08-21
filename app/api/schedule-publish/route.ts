@@ -38,5 +38,5 @@ export async function POST(req:Request){
    return p;
   });
   return NextResponse.json(pub);
- }catch(error){return jsonError(error)}
+ }catch(error){return jsonError(error, req)}
 }

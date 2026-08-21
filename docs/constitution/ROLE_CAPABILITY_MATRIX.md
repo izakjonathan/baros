@@ -1,88 +1,161 @@
 # Bar Ops — Role and Capability Matrix
 
-**Basis:** `v0.19.0-rc.56` candidate source
-
-**Policy owner:** `lib/auth/capabilities.ts`
-
-**Status:** Implemented and regression-tested
+**Basis:** Static inspection of `v0.19.0-rc.1`  
+**Important:** This matrix distinguishes **observed source behaviour** from **intended behaviour still requiring approval**.
 
 ## 1. Account roles
 
-| Role | Meaning |
+| Role | Current meaning |
 |---|---|
-| `OWNER` | Full organization governance and operations |
-| `ADMIN` | Same capability tier as Owner |
-| `MANAGER` | Full operational and administration access except security administration |
-| `SHIFT_MANAGER` | Operational shift lead without organization-level account, payroll, template, settings, or security administration |
-| `EMPLOYEE` | Employee self-service only |
+| `OWNER` | Highest organization-level management role |
+| `ADMIN` | Broad organization administration role |
+| `MANAGER` | Operational management role |
+| `SHIFT_MANAGER` | Operational shift-management role with partial manager API access |
+| `EMPLOYEE` | Employee self-service role |
 
-`BARTENDER` and similar labels are employment or shift-assignment roles, not authenticated account roles.
+`BARTENDER` is a job/shift role, not an account role. A bartender normally authenticates as `EMPLOYEE`.
 
-## 2. Implemented capability table
+## 2. Workspace access observed in source
 
-| Capability | Owner | Admin | Manager | Shift Manager | Employee |
+| Surface | Owner | Admin | Manager | Shift Manager | Employee |
 |---|---:|---:|---:|---:|---:|
-| `manager.workspace` | Yes | Yes | Yes | Yes | No |
-| `operations.read` | Yes | Yes | Yes | Yes | No |
-| `operations.manage` | Yes | Yes | Yes | Yes | No |
-| `schedule.read` | Yes | Yes | Yes | Yes | No |
-| `schedule.edit` | Yes | Yes | Yes | Yes | No |
-| `schedule.publish` | Yes | Yes | Yes | Yes | No |
-| `schedule.templates.manage` | Yes | Yes | Yes | No | No |
-| `attendance.read` | Yes | Yes | Yes | Yes | No |
-| `attendance.manage` | Yes | Yes | Yes | Yes | No |
-| `payroll.read` | Yes | Yes | Yes | Yes | No |
-| `payroll.manage` | Yes | Yes | Yes | No | No |
-| `payroll.export` | Yes | Yes | Yes | No | No |
-| `requests.review` | Yes | Yes | Yes | Yes | No |
-| `inventory.read` | Yes | Yes | Yes | Yes | No |
-| `inventory.adjust` | Yes | Yes | Yes | Yes | No |
-| `orders.manage` | Yes | Yes | Yes | Yes | No |
-| `team.read` | Yes | Yes | Yes | Yes | No |
-| `team.manage` | Yes | Yes | Yes | No | No |
-| `accounts.invite` | Yes | Yes | Yes | No | No |
-| `settings.read` | Yes | Yes | Yes | Yes | No |
-| `settings.manage` | Yes | Yes | Yes | No | No |
-| `security.manage` | Yes | Yes | No | No | No |
-| `control.read` | Yes | Yes | Yes | Yes | No |
-| `employee.self_service` | Yes | Yes | Yes | Yes | Yes |
+| Manager root shell | Yes | Yes | Yes | Yes | No |
+| Today’s Operations | Yes | Yes | Yes | Yes | No |
+| Shift Execution | Yes | Yes | Yes | Yes | No |
+| Shift Plan | Yes | Yes | Yes | Yes | No |
+| Time & Attendance | Yes | Yes | Yes | Yes | No |
+| Inventory | Yes | Yes | Yes | Yes | No |
+| Purchase Orders | Yes | Yes | Yes | Yes | No |
+| Daily Operations | Yes | Yes | Yes | Yes | No |
+| Team | Yes | Yes | Yes | Yes in navigation | No |
+| Requests review | Yes | Yes | Yes | Yes in navigation | No |
+| Settings | Yes | Yes | Yes | Yes in navigation | No |
+| Control Centre | Yes | Yes | Yes | Yes | No |
+| Employee portal | Source permits authenticated access | Source permits authenticated access | Source permits authenticated access | Source permits authenticated access | Yes |
 
-The authentication contract executes all 120 role/capability cells and verifies `rolesWithCapability` returns the same policy in reverse.
+The manager page requires one of `OWNER`, `ADMIN`, `MANAGER`, or `SHIFT_MANAGER`.
 
-## 3. Enforcement rules
+The employee layout uses general authenticated access rather than an employee-only role list. Pages handle missing `employeeId` in different ways. The intended policy is unresolved.
 
-- Server-side capability checks are authoritative; hidden or disabled UI is not authorization.
-- Manager navigation and action visibility use the same capability owner as route enforcement.
-- Direct Orders access requires `orders.manage` for both reads and creation.
-- Product reads require `inventory.read`; product and stock mutations require `inventory.adjust`.
-- Request, shift-claim, and shift-transfer review requires `requests.review`.
-- Shift reads require `schedule.read`; shift mutations and manager-authored notes require `schedule.edit`.
-- Organization-wide timesheet reads require `attendance.read`; corrections continue to require `attendance.manage`.
-- Audit-log reads require `control.read`; Settings writes require `settings.manage`.
-- Request and attendance-review notification audiences are derived from the corresponding review/manage capability.
+## 3. Server capabilities observed
 
-## 4. Employee self-service
+The table below records representative source evidence. It is not a substitute for executable authorization tests.
 
-Every authenticated role may use the employee portal only when that account is linked to an active employee record. Self-service operations remain scoped to that linked employee identity and do not inherit broader manager data access.
+| Capability | Owner | Admin | Manager | Shift Manager | Employee | Evidence summary |
+|---|---:|---:|---:|---:|---:|---|
+| Read manager bootstrap | Yes | Yes | Yes | Yes | No | Manager bootstrap route |
+| Publish schedule | Yes | Yes | Yes | Yes | No | Schedule publish route |
+| Read schedule acknowledgements | Yes | Yes | Yes | Yes | Own/employee routes | Acknowledgement routes |
+| Manage live time clock | Yes | Yes | Yes | Yes | Own clock actions | Time-clock routes |
+| Read attendance alerts | Yes | Yes | Yes | Yes | No | Attendance alerts |
+| Read timesheets | Yes | Yes | Yes | Yes | Own records | Timesheets GET |
+| Change timesheet status | Yes | Yes | Yes | Yes | No | Timesheets mutation |
+| Read payroll periods | Yes | Yes | Yes | Yes | No | Payroll periods GET |
+| Lock/change payroll period | Yes | Yes | Yes | No | No | Payroll periods mutation |
+| Read payroll export ledger | Yes | Yes | Yes | Yes | No | Payroll exports GET |
+| Create payroll export | Yes | Yes | Yes | No | No | Payroll exports POST |
+| Read schedule templates | Yes | Yes | Yes | Yes | No | Templates GET |
+| Mutate schedule templates | Yes | Yes | Yes | No | No | Templates mutation |
+| Employee invitation actions | Yes | Yes | Yes | No | No | Invitation routes use manager-only role set |
+| Security administration | Yes | Yes | No | No | No | Security route |
+| Employee self-service requests | Depends on linked employee record | Depends on linked employee record | Depends on linked employee record | Depends on linked employee record | Yes | Employee routes generally require authenticated user plus employee ID |
+| Notification access | Own user notifications | Own user notifications | Own user notifications | Own user notifications | Own user notifications | Notifications query is user-scoped |
 
-Request and shift-claim submission require both `employee.self_service` and a linked employee record. An employee transfer response is selected by the explicit `accept` operation, then checked against the target employee ID; manager review is a separate path requiring `requests.review`.
+## 4. Confirmed inconsistency
 
-## 5. Intentional direct-role decisions
+The manager UI currently provides substantially the same navigation to all four management roles, while several server mutations intentionally exclude `SHIFT_MANAGER`.
 
-Explicit role values remain valid where the role itself is data rather than an authorization shortcut, including:
+This means server-side security remains in place, but UI capability presentation can be misleading.
 
-- choosing the post-login manager or employee destination;
-- resolving development-session identity;
-- validating the finite development role enum;
-- preventing employee invitations from overwriting an existing management membership;
-- persisting an activated invitation as an `EMPLOYEE` membership.
+Affected areas include at least:
 
-These identity and account-lifecycle decisions must not be generalized into capabilities unless their product semantics change.
+- employee invitation and employee management actions;
+- payroll locking;
+- payroll export creation;
+- schedule-template mutation;
+- settings mutation;
+- security administration.
 
-## 6. Approved product decisions
+## 5. Approved product decisions
 
-1. `SHIFT_MANAGER` is an operational shift lead, not a full location administrator.
-2. Managers may use employee self-service when linked to an employee profile.
-3. `OWNER` and `ADMIN` remain equivalent in capability and governance scope.
+### Decision R-01 — Shift Manager scope
 
-Any policy change must update `lib/auth/capabilities.ts`, this matrix, the 120-cell test table, affected direct-route contracts, and the release notes together.
+`SHIFT_MANAGER` is an **operational shift lead**.
+
+Shift Manager should be able to:
+
+- see Today’s Operations;
+- use Shift Execution;
+- view and adjust the active schedule within approved limits;
+- manage clock state and attendance exceptions;
+- review operational requests;
+- complete daily operations.
+
+Shift Manager should not be able to:
+
+- create employee accounts;
+- invite, resend, revoke, or otherwise administer portal access;
+- lock payroll periods;
+- create payroll exports;
+- change organization or security settings;
+- change persistent schedule templates;
+- perform organization-level governance actions.
+
+The current API layer largely reflects this model. Phase B should bring navigation and action visibility into parity with it.
+
+### Decision R-02 — Manager access to employee portal
+
+Managers may intentionally use the employee portal when linked to an employee profile.
+
+Required conditions:
+
+- the manager must have a valid linked employee record;
+- employee data remains scoped to that linked employee identity;
+- manager privileges must not widen employee self-service data access;
+- direct-route and API behaviour must be tested for all management roles.
+
+### Decision R-03 — Owner versus Admin
+
+`OWNER` and `ADMIN` remain equivalent in capability and governance scope.
+
+Future capability rules should therefore treat them as equivalent unless the product owner explicitly changes this decision.
+
+## 6. Required implementation rule
+
+These decisions are approved. Phase B must:
+
+1. create named capabilities rather than repeating role arrays;
+2. retain server-side authorization as the source of enforcement;
+3. use the capability map to hide or disable unavailable UI actions;
+4. test direct URL and direct API access;
+5. test one real account per role;
+6. do not treat hidden UI as authorization.
+
+## 7. Proposed capability names
+
+These are documentation proposals, not implemented code:
+
+- `operations.read`
+- `operations.manage`
+- `schedule.read`
+- `schedule.edit`
+- `schedule.publish`
+- `schedule.templates.manage`
+- `attendance.read`
+- `attendance.manage`
+- `payroll.read`
+- `payroll.lock`
+- `payroll.export`
+- `requests.review`
+- `inventory.read`
+- `inventory.adjust`
+- `orders.manage`
+- `team.read`
+- `team.manage`
+- `accounts.invite`
+- `settings.read`
+- `settings.manage`
+- `security.manage`
+- `employee.self_service`
+
+The final list should follow actual server operations rather than generic CRUD naming.

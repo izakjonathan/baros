@@ -1,4 +1,4 @@
-type OperationChecklistRecord = {
+export type OperationChecklistRecord = {
   id: string;
   title: string;
   task_type: "Opening" | "Closing" | "Task" | "Maintenance";

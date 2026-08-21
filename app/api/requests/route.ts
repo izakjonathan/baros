@@ -1,27 +1,24 @@
 import { NextResponse } from "next/server";
-import { hasCapability } from "@/lib/auth/capabilities";
 import { getSessionUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, enumValue, jsonError, optionalString, readJsonObject, uuid } from "@/lib/http";
 import { notifyEmployee, notifyManagers } from "@/lib/services/notifications";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const user = await getSessionUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const canReview = hasCapability(user.role, "requests.review");
-    if (!canReview && !hasCapability(user.role, "employee.self_service")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    const rows = canReview
-      ? await db()`select r.*,e.first_name||' '||e.last_name employee_name,l.name location_name from requests r join employees e on e.id=r.employee_id left join locations l on l.id=r.location_id where r.organization_id=${user.organizationId} and r.status='PENDING' order by r.created_at asc`
-      : await db()`select * from requests where organization_id=${user.organizationId} and employee_id=${user.employeeId} order by created_at desc`;
+    const rows = user.role === "EMPLOYEE"
+      ? await db()`select * from requests where organization_id=${user.organizationId} and employee_id=${user.employeeId} order by created_at desc`
+      : await db()`select r.*,e.first_name||' '||e.last_name employee_name,l.name location_name from requests r join employees e on e.id=r.employee_id left join locations l on l.id=r.location_id where r.organization_id=${user.organizationId} and r.status='PENDING' order by r.created_at asc`;
     return NextResponse.json(rows);
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, request); }
 }
 
 export async function POST(req: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || !hasCapability(user.role, "employee.self_service") || !user.employeeId) return NextResponse.json({ error: "Employee profile required" }, { status: 403 });
+    if (!user || !user.employeeId) return NextResponse.json({ error: "Employee profile required" }, { status: 403 });
     const body = await readJsonObject(req);
     const type = enumValue(body.type, "type", ["TIME_OFF", "AVAILABILITY"] as const);
     const startsAt = optionalString(body, "startsAt", 64);
@@ -36,13 +33,13 @@ export async function POST(req: Request) {
       return created;
     });
     return NextResponse.json(row, { status: 201 });
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, req); }
 }
 
 export async function PATCH(req: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || !hasCapability(user.role, "requests.review")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!user || user.role === "EMPLOYEE") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const body = await readJsonObject(req);
     const requestId = uuid(body.requestId, "requestId");
     const status = enumValue(body.status, "status", ["APPROVED", "REJECTED", "CANCELLED"] as const);
@@ -56,5 +53,5 @@ export async function PATCH(req: Request) {
       return updated;
     });
     return NextResponse.json(reviewed);
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, req); }
 }

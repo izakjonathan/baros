@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { hasCapability } from "@/lib/auth/capabilities";
 import { getSessionUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, isoDate, jsonError, readJsonObject, requiredString, uuid } from "@/lib/http";
@@ -20,6 +19,7 @@ type ShiftRow = SqlRow & {
   is_open: boolean;
 };
 type WorkspaceShiftRow = ShiftRow & { employee_name: string | null; location_timezone: string };
+const management = (role?: string) => Boolean(role && role !== "EMPLOYEE");
 const dateTime = (value: unknown, key: string) => {
   const text = requiredString({ [key]: value }, key, 40);
   const parsed = new Date(text);
@@ -31,7 +31,6 @@ export async function GET(request: Request) {
   try {
     const user = await getSessionUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!hasCapability(user.role, "schedule.read")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const query = new URL(request.url).searchParams;
     const from = query.get("from") || new Date().toISOString();
     const to = query.get("to") || new Date(Date.now() + 14 * 864e5).toISOString();
@@ -57,7 +56,7 @@ export async function GET(request: Request) {
       from shifts s left join employees e on e.id=s.employee_id
       where s.organization_id=${user.organizationId} and (${user.locationId}::uuid is null or s.location_id=${user.locationId})
       and s.starts_at>=${from} and s.starts_at<${to} order by starts_at`);
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, request); }
 }
 
 async function assertEmployeeAvailability(tx: SqlExecutor, organizationId: string, employeeId: string, start: Date, end: Date, override = false) {
@@ -76,7 +75,7 @@ async function assertEmployeeAvailability(tx: SqlExecutor, organizationId: strin
 export async function POST(request: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || !hasCapability(user.role, "schedule.edit")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!user || !management(user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const body = await readJsonObject(request, 24_000);
     const locationId = body.locationId ? uuid(body.locationId, "locationId") : user.locationId;
     if (!locationId) throw new ApiError(400, "A location is required");
@@ -118,7 +117,7 @@ export async function POST(request: Request) {
       return { shifts: created, recurrenceGroupId: recurrenceId };
     });
     return NextResponse.json(result, { status: 201 });
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, request); }
 }
 
 function expandStarts(first: Date, recurrence?: Recurrence) {
@@ -140,7 +139,7 @@ function expandStarts(first: Date, recurrence?: Recurrence) {
 export async function PATCH(request: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || !hasCapability(user.role, "schedule.edit")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!user || !management(user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const body = await readJsonObject(request, 20_000);
     const id = uuid(body.id, "id");
     const scope = String(body.scope || "occurrence");
@@ -183,15 +182,15 @@ export async function PATCH(request: Request) {
       return updated;
     });
     return NextResponse.json(rows);
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, request); }
 }
 
 export async function DELETE(request: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || !hasCapability(user.role, "schedule.edit")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!user || !management(user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const id = uuid(new URL(request.url).searchParams.get("id"), "id");
     const rows = await db()`delete from shifts where id=${id} and organization_id=${user.organizationId} returning *`;
     return rows.length ? NextResponse.json({ ok: true }) : NextResponse.json({ error: "Not found" }, { status: 404 });
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, request); }
 }

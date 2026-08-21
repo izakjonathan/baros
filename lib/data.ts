@@ -1,6 +1,6 @@
 export type NavKey = "dashboard" | "execution" | "schedule" | "attendance" | "inventory" | "orders" | "operations" | "team" | "requests" | "control" | "settings";
 export type ShiftRole = "Manager" | "Bartender" | "Floor" | "Kitchen";
-type ShiftStatus = "Published" | "Draft";
+export type ShiftStatus = "Published" | "Draft";
 
 export type Shift = {
   id: string;

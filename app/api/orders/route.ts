@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { hasCapability } from "@/lib/auth/capabilities";
 import { getSessionUser } from "@/lib/auth/session";
 import { requireOrganizationEntity, requireOrganizationLocation } from "@/lib/auth/scope";
 import { db } from "@/lib/db/client";
@@ -8,14 +7,13 @@ import { ApiError, enumValue, isoDate, jsonError, objectArray, optionalString, r
 export async function GET() {
   const user = await getSessionUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!hasCapability(user.role, "orders.manage")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   return NextResponse.json(await db()`select po.*,s.name supplier,coalesce(sum(i.quantity*i.unit_price),0) total,count(i.id)::int items from purchase_orders po join suppliers s on s.id=po.supplier_id left join purchase_order_items i on i.purchase_order_id=po.id where po.organization_id=${user.organizationId} and (${user.locationId}::uuid is null or po.location_id=${user.locationId}) group by po.id,s.name order by po.created_at desc`);
 }
 
 export async function POST(request: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || !hasCapability(user.role, "orders.manage")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!user || user.role === "EMPLOYEE") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const body = await readJsonObject(request, 32_000);
     const locationId = body.locationId ? uuid(body.locationId, "locationId") : user.locationId;
     const supplierId = uuid(body.supplierId, "supplierId");
@@ -45,5 +43,5 @@ export async function POST(request: Request) {
       return created;
     });
     return NextResponse.json(purchaseOrder, { status: 201 });
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, request); }
 }

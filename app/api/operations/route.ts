@@ -13,7 +13,7 @@ export async function GET(req: Request) {
     if (type === "waste") return NextResponse.json(await db()`select w.*,p.name product from waste_logs w join products p on p.id=w.product_id where w.organization_id=${user.organizationId} and (${locationId}::uuid is null or w.location_id=${locationId}) order by w.occurred_at desc`);
     if (type === "transfers") return NextResponse.json(await db()`select t.*,a.name from_location,b.name to_location from stock_transfers t join locations a on a.id=t.from_location_id join locations b on b.id=t.to_location_id where t.organization_id=${user.organizationId} order by t.created_at desc`);
     throw new ApiError(400, "type is required");
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, req); }
 }
 
 export async function POST(req: Request) {
@@ -100,5 +100,5 @@ export async function POST(req: Request) {
       return transfer;
     });
     return NextResponse.json(result, { status: 201 });
-  } catch (error) { return jsonError(error); }
+  } catch (error) { return jsonError(error, req); }
 }

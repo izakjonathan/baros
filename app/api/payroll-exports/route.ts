@@ -25,5 +25,5 @@ export async function POST(req:Request){
   if(!result)return Response.json({error:'Payroll period must be locked before export'},{status:409});
   if('conflict' in result)return Response.json({error:'This payroll period has already been exported',exportId:result.record.id},{status:409});
   return new Response('\ufeff'+result.content,{headers:{'content-type':'text/csv; charset=utf-8','content-disposition':`attachment; filename="${result.name}"`,'x-export-id':result.record.id,'cache-control':'no-store'}});
- }catch(error){return jsonError(error)}
+ }catch(error){return jsonError(error, req)}
 }
