@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.60
+
+- Refined the standalone Operation module UI into a smaller, more professional mobile interface.
+- Reduced oversized hero/card typography, slimmed card borders, tightened spacing, and changed the header navigation into a compact segmented control.
+- Kept the single-colour Operation design, standalone route, article reader, owner editor, Daily Tasks, and We Need workflows intact.
+- Updated release metadata and documentation to identify v0.19.0-rc.59 as the rollback checkpoint.
+- No dependency-version, database-schema, route-shape, authorization, permission, or existing business-workflow changes.
+
 ## v0.19.0-rc.59
 
 - Added a production fallback so `/operation` opens with starter content instead of rendering the generic “Try again” error when the Operation database migration has not been applied yet.

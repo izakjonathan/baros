@@ -1,10 +1,17 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.59**
+Version: **v0.19.0-rc.60**
 
 ## Current focus
 
-Operation migration fallback hotfix from the verified rc.58 baseline.
+Operation interface refinement from the verified rc.59 baseline.
+
+## rc.60
+
+- Made the standalone Operation module smaller and more professional on mobile.
+- Reduced oversized typography, heavy borders, large rounded cards, and loose spacing.
+- Kept the standalone route, single-colour module background, owner editor, article reader, Daily Tasks, and We Need behavior intact.
+- Rollback checkpoint: v0.19.0-rc.59.
 
 ## rc.59
 

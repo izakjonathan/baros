@@ -1,18 +1,18 @@
-# v0.19.0-rc.59 — Operation Migration Fallback Hotfix
+# v0.19.0-rc.60 — Operation Interface Refinement
 
 ## Baseline
 
-- Continued from the exact v0.19.0-rc.58 source verified with clean dependency-backed lint, typecheck, regression, and production build gates. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.59 after the Operation migration fallback hotfix. That release is the rollback checkpoint.
 
-## Hotfix
+## Interface refinement
 
-- `/operation` now falls back to safe starter content if the Operation database migration has not yet been applied in production.
-- `/api/operation-module` GET returns the same starter state with `x-operation-storage: migration-required` when Operation tables are missing.
-- Mutation paths remain database-backed and continue to require the migration before durable owner edits, daily task completion, or We Need updates can persist.
-- The API-integrity contract now checks for this migration fallback.
+- The Operation module keeps its separate single-colour design, but the interface is now more compact and professional.
+- Header navigation is slimmer and behaves like a segmented control.
+- Hero, section headings, cards, labels, forms, task rows, and reader typography were reduced to avoid the oversized/clunky mobile layout.
+- Card borders and radii were reduced while preserving the bordered-card direction.
 
 ## Scope
 
-No visual redesign, dependency, route-shape, permission, or existing business-workflow changes are included. The fix only prevents the new Operation module from crashing before the production database migration is applied.
+No dependency, database-schema, route-shape, permission, or existing business-workflow changes are included. The change is limited to the standalone Operation module presentation.
 
-Rollback checkpoint: **v0.19.0-rc.58**.
+Rollback checkpoint: **v0.19.0-rc.59**.
