@@ -212,7 +212,7 @@ export default function HoursPage() {
             <div><strong>{dateLabel(item.work_date)}</strong><span>{(Number(item.scheduled_minutes || 0) / 60).toFixed(1)}h scheduled</span></div>
             <div>
               <b>{(Number(item.worked_minutes || 0) / 60).toFixed(2)}h</b>
-              <span className={item.status === "APPROVED" ? "approved" : "pending"}>{item.status === "APPROVED" && <CheckCircle2 size={13} />} {item.status[0] + item.status.slice(1).toLowerCase()}</span>
+              <span>{item.status === "APPROVED" && <CheckCircle2 size={13} />} {item.status[0] + item.status.slice(1).toLowerCase()}</span>
               <small>{time(item.clocked_in_at)}–{time(item.clocked_out_at)} · {item.break_minutes || 0}m break</small>
               {item.status !== "OPEN" && (
                 <button type="button" disabled={busy || item.correction_pending} className="correction-request" onClick={() => { setCorrection(item); setCorrectionReason(""); }}>

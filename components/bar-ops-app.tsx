@@ -151,7 +151,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
   }
 
   if (!dataReady) {
-    return <div className="workspace-loading" role="status" aria-live="polite"><div className="card card-compact shared-state-card workspace-loading-card"><Database size={26}/><strong>Loading workspace</strong><span>Synchronizing shifts, employees and operations with PostgreSQL…</span></div></div>;
+    return <div className="workspace-loading" role="status" aria-live="polite"><div className="card card-compact shared-state-card"><Database size={26}/><strong>Loading workspace</strong><span>Synchronizing shifts, employees and operations with PostgreSQL…</span></div></div>;
   }
 
   return (

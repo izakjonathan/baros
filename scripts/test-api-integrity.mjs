@@ -12,7 +12,7 @@ for (const [name, source] of [["orders", orders], ["payroll", payroll]]) {
 }
 if (orders.includes("writeAudit(") || payroll.includes("writeAudit(")) throw new Error("audit write remains outside transaction");
 for (const file of apiRouteFiles) {
-  if (read(file).includes("jsonError(error)")) throw new Error(`${file} drops request context in jsonError`);
+  if (/\bjsonError\s*\(\s*[^,()]+\s*\)/.test(read(file))) throw new Error(`${file} drops request context in jsonError`);
 }
 
 for (const file of [
@@ -30,6 +30,13 @@ if (!templates.includes("requireOrganizationLocation")) throw new Error("schedul
 const security = read("app/api/security/route.ts");
 for (const token of ["SECURITY_ACTIONS", "GDPR_REQUEST_TYPES", "enumValue", "uuid(body.sessionId"]) {
   if (!security.includes(token)) throw new Error(`security action validation is missing ${token}`);
+}
+const operationModule = read("app/api/operation-module/route.ts");
+for (const token of ["getSessionUser", "Owner or Admin permission is required", "operation_articles", "operation_daily_tasks", "operation_needs", "readJsonObject(request, 128_000)", "jsonError(error, request)"]) {
+  if (!operationModule.includes(token)) throw new Error(`operation module API contract is missing ${token}`);
+}
+if (operationModule.includes("requireUser(") || operationModule.includes("requireCapability(")) {
+  throw new Error("operation module API must return JSON auth errors instead of redirecting");
 }
 
 const scope = read("lib/auth/scope.ts");

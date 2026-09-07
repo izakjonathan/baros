@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.19.0-rc.58
+
+- Added a standalone `/operation` module with no inherited side menu, its own header navigation, and a single-colour mobile-first design.
+- Added Handbook, News, Daily Tasks, and We Need submodules with bordered card presentation inspired by the supplied mobile reference.
+- Added full-screen handbook/news article reading with formatted content blocks, linked-article navigation, back handling, and bottom-centred circular close control.
+- Added owner/admin content editing for handbook/news articles and owner/admin creation of day-specific daily tasks.
+- Added employee task completion and shared “We need” ordering-list workflows backed by a new operation module migration and API.
+- Updated employee home to expose the new Operation module.
+- Documented Operation as the explicit second CSS Module exception alongside Shift Plan.
+
+## v0.19.0-rc.57
+
+- Completed the remaining request-context cleanup by correcting all four operation-checklist catch paths missed by the rc.56 variable-name-specific contract.
+- Generalized API-integrity coverage so every single-argument `jsonError(...)` call is rejected regardless of catch-variable name.
+- Removed the unreachable UI primitive directory, the unused shared `EmptyState`, its dead CSS selector, and legacy class hooks that had no CSS owner or runtime consumer.
+- Enabled TypeScript unused-local and unused-parameter checks as permanent compiler gates and extended UI-contract coverage for the removed source surface.
+- Updated release metadata and documentation to identify v0.19.0-rc.56 as the rollback checkpoint.
+- No dependency-version, database-schema, route-shape, authorization, permission, layout, visual, or business-behaviour changes.
+
 ## v0.19.0-rc.56
 
 - Preserved request context in API error responses by passing the incoming `Request` to `jsonError` across API route catch paths.

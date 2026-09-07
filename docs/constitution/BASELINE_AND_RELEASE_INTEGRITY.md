@@ -2,10 +2,10 @@
 
 ## Current confirmed baseline
 
-- **Version:** `v0.19.0-rc.55`
-- **Archive:** `bar-ops-v0.19.0-rc.55-export-surface-dead-code-cleanup.zip`
-- **SHA-256:** `70bc487946d929fa04abcb9588697c5b2c6e879d14b974ab2ed52406e686d974`
-- **Package version:** `0.19.0-rc.55`
+- **Version:** `v0.19.0-rc.57`
+- **Archive:** `bar-ops-v0.19.0-rc.57-residual-corrections-cleanup.zip`
+- **SHA-256:** `8bd05c7d4da5ea121849782bd778c357a9114921a00ecaaeb9a6ac5122b41c2b`
+- **Package version:** `0.19.0-rc.57`
 - **Status:** User-continued verified release candidate
 - **Production approved:** No
 
@@ -24,7 +24,7 @@ A version becomes the current confirmed baseline only when:
 
 ## Current known release blockers
 
-- the rc.56 request-aware API error cleanup requires exact-artifact CI and Vercel confirmation before rc.56 promotion;
+- the rc.58 standalone Operation module requires exact-artifact CI and Vercel confirmation before rc.58 promotion;
 - PostgreSQL migration and runtime verification are incomplete;
 - physical iPhone Safari acceptance is incomplete;
 - VoiceOver acceptance is incomplete;

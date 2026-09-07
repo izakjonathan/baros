@@ -1,12 +1,17 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.56**
+Version: **v0.19.0-rc.58**
 
 ## Current focus
-Request-context preservation for API error responses from the verified rc.55 baseline.
 
-## rc.56
-- Passed the incoming `Request` to API route `jsonError` catch paths so request IDs, no-store headers, and server error log path context are preserved consistently.
-- Extended API-integrity coverage to reject bare `jsonError(error)` calls in API route handlers.
-- No CSS, dependency-version, database-schema, route-shape, authorization, permission, layout, visual, or business-workflow changes.
-- Rollback checkpoint: v0.19.0-rc.55.
+Standalone Operation module from the verified rc.57 baseline.
+
+## rc.58
+
+- Added a separate `/operation` route with its own full-screen module shell and no manager/employee side menu.
+- Added Handbook and News article cards, full-screen reader, formatted content blocks, and linked-article navigation.
+- Added owner/admin article editing for Handbook and News.
+- Added day-specific Daily Tasks with employee completion and owner/admin task creation.
+- Added a shared We Need list for bar items that employees can add and mark ordered.
+- Added migration `014_operation_module.sql` and `/api/operation-module` for durable production data.
+- Rollback checkpoint: v0.19.0-rc.57.

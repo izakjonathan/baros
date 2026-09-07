@@ -37,7 +37,7 @@ export function Dialog({ title, description, onClose, children, className = "" }
     };
   }, [onClose]);
 
-  return <div className="modal-layer" role="presentation"><button type="button" className="modal-scrim" onClick={onClose} aria-label="Close dialog"/><section ref={dialogRef} className={`modal interaction-dialog ${className}`.trim()} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined}><div className="modal-head"><div><h2 id={titleId}>{title}</h2>{description && <p id={descriptionId}>{description}</p>}</div><button ref={closeRef} type="button" className="icon-button" onClick={onClose} aria-label="Close"><X size={19}/></button></div><div className="modal-body">{children}</div></section></div>;
+  return <div className="modal-layer" role="presentation"><button type="button" className="modal-scrim" onClick={onClose} aria-label="Close dialog"/><section ref={dialogRef} className={`modal ${className}`.trim()} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined}><div className="modal-head"><div><h2 id={titleId}>{title}</h2>{description && <p id={descriptionId}>{description}</p>}</div><button ref={closeRef} type="button" className="icon-button" onClick={onClose} aria-label="Close"><X size={19}/></button></div><div className="modal-body">{children}</div></section></div>;
 }
 
 export function DialogActions({ onClose, onConfirm, confirmLabel, busy = false, disabled = false, cancelLabel = "Cancel" }: { onClose: () => void; onConfirm: () => void; confirmLabel: string; busy?: boolean; disabled?: boolean; cancelLabel?: string }) {
@@ -45,5 +45,5 @@ export function DialogActions({ onClose, onConfirm, confirmLabel, busy = false, 
 }
 
 export function FormMessage({ children, tone = "error" }: { children: ReactNode; tone?: "error" | "success" | "info" }) {
-  return <div className={`form-message form-message-${tone}`} role={tone === "error" ? "alert" : "status"} aria-live={tone === "error" ? "assertive" : "polite"}>{children}</div>;
+  return <div className="form-message" role={tone === "error" ? "alert" : "status"} aria-live={tone === "error" ? "assertive" : "polite"}>{children}</div>;
 }

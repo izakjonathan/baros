@@ -10,6 +10,7 @@ const pkg = JSON.parse(read("package.json"));
 const global = read("app/globals.css");
 const tokens = read("styles/tokens.css");
 const schedule = read("features/scheduling/ScheduleWorkspace.module.css");
+const operation = read("features/operation/OperationModule.module.css");
 const layout = read("app/layout.tsx");
 const employeeLayout = read("app/employee/layout.tsx");
 const employeeShell = read("app/employee/employee-shell.tsx");
@@ -20,7 +21,7 @@ const uiClasses = read("lib/ui-classes.ts");
 const exceptionRegister = read("docs/constitution/INTENTIONAL_EXCEPTION_REGISTER.md");
 const workspace = read("components/ui/workspace-ui.tsx");
 const requestForm = read("app/employee/request-form.tsx");
-const card = read("components/ui/primitives/Card.tsx");
+const tsconfig = JSON.parse(read("tsconfig.json"));
 const quality = read(".github/workflows/quality.yml");
 const observability = read("lib/observability.ts");
 const capabilities = read("lib/auth/capabilities.ts");
@@ -47,9 +48,18 @@ const remoteGoogleFontImports = sourceFiles.filter((file) => fs.readFileSync(fil
 const cssModuleImporters = sourceFiles.filter((file) => /from\s+["'][^"']+\.module\.css["']/.test(fs.readFileSync(file, "utf8"))).map((file) => path.relative(root, file));
 const classSelectors = new Set([...global.matchAll(/\.([A-Za-z_][\w-]*)/g)].map((match) => match[1]));
 for (const match of schedule.matchAll(/\.([A-Za-z_][\w-]*)/g)) classSelectors.add(match[1]);
+for (const match of operation.matchAll(/\.([A-Za-z_][\w-]*)/g)) classSelectors.add(match[1]);
 const mappedClasses = [...uiClasses.matchAll(/:\s*"([^"]+)"/g)].flatMap((match) => match[1].split(/\s+/)).filter(Boolean);
 const missingMapped = [...new Set(mappedClasses.filter((name) => !classSelectors.has(name)))];
 const scriptFiles = fs.readdirSync(path.join(root, "scripts")).filter((file) => file.endsWith(".mjs"));
+const primitiveDirectory = path.join(root, "components/ui/primitives");
+const primitiveFiles = fs.existsSync(primitiveDirectory) ? fs.readdirSync(primitiveDirectory) : [];
+const sourceText = sourceFiles.map((file) => fs.readFileSync(file, "utf8")).join("\n");
+const staleClassHooks = [
+  "attention-panel", "control-card", "count-ok", "count-over", "count-short", "interaction-dialog",
+  "quick-panel", "settings-link", "shift-notes-panel", "shared-empty-state", "today-panel", "unread-dot",
+  "workspace-loading-card", "claim-${", "form-message-${", "request-${",
+];
 const architectureModules = [
   ["features/dashboard/manager-overview.tsx", "DashboardWorkspace"],
   ["features/scheduling/ScheduleWorkspace.tsx", "ScheduleWorkspace"],
@@ -101,11 +111,11 @@ const unboundJsxComponents = sourceFiles.flatMap((file) => {
 
 const checks = [
   ["package remains a v0.19 release candidate", /^0\.19\.0-rc\.\d+$/.test(pkg.version)],
-  ["only three CSS files exist", JSON.stringify(cssRelative) === JSON.stringify(["app/globals.css", "features/scheduling/ScheduleWorkspace.module.css", "styles/tokens.css"])],
+  ["only four CSS files exist", JSON.stringify(cssRelative) === JSON.stringify(["app/globals.css", "features/operation/OperationModule.module.css", "features/scheduling/ScheduleWorkspace.module.css", "styles/tokens.css"])],
   ["root imports only global CSS", layout.includes('import "./globals.css";') && !layout.includes("completion-redesign.css") && !layout.includes("system-contracts.css") && !layout.includes("design-system.css")],
   ["root fonts are repository-owned build assets", layout.includes('import localFont from "next/font/local";') && remoteGoogleFontImports.length === 0 && layout.includes('src: "./fonts/inter-latin-variable.woff"') && layout.includes('src: "./fonts/space-grotesk-latin-variable.woff"') && ["app/fonts/inter-latin-variable.woff","app/fonts/space-grotesk-latin-variable.woff","app/fonts/Inter-OFL.txt","app/fonts/Space-Grotesk-OFL.txt"].every((file) => fs.existsSync(path.join(root, file)))],
   ["employee has no route CSS import", !employeeLayout.includes(".css")],
-  ["only Shift Plan uses a CSS module", cssModuleImporters.length > 0 && cssModuleImporters.every((file) => file.startsWith("features/scheduling/"))],
+  ["only Shift Plan and standalone Operation use CSS modules", cssModuleImporters.length > 0 && cssModuleImporters.every((file) => file.startsWith("features/scheduling/") || file.startsWith("features/operation/"))],
   ["global CSS owns shell and controls", global.includes(".sidebar{") && global.includes(".topbar{") && global.includes(".main-shell{") && global.includes(".button,.primary,.secondary") && global.includes("input,select,textarea")],
   ["global CSS owns cards and employee portal", global.includes(".card{") && global.includes(".metrics{") && global.includes(".employee-page{") && global.includes(".shift-action-row{")],
   ["Shift Plan owns its grid", schedule.includes(".calendarGrid{") && schedule.includes(".shiftCard{") && schedule.includes(".dayColumn{")],
@@ -115,16 +125,17 @@ const checks = [
   ["heading and paragraph margins are reset", global.includes("h1,h2,h3,p{margin:0}")],
   ["bold token matches loaded font", tokens.includes("--weight-bold:700;")],
   ["theme toggle stays removed", !chrome.includes("onToggleTheme") && !managerApp.includes("bar-ops-theme") && !employeeShell.includes("bar-ops-theme") && !layout.includes("data-theme")],
-  ["shared state components are styled", global.includes(".shared-empty-state{") && global.includes(".shared-state-card{") && global.includes(".shared-spinner{") && global.includes(".shared-error-state{")],
+  ["shared state components are styled", global.includes(".shared-state-card{") && global.includes(".shared-spinner{") && global.includes(".shared-error-state{")],
   ["Dialog renders shared modal body", dialog.includes('<div className="modal-body">{children}</div>') && global.includes(".modal-body{")],
   ["all mapped UI classes resolve", missingMapped.length === 0],
   ["Shift Plan editor styling is module-owned", schedule.includes(".assignmentToggle{") && schedule.includes(".shiftDialogFields{") && schedule.includes(".repeatPanel{") && schedule.includes(".editShiftActions{")],
   ["global card has only three fundamentals", /\.card\{[^}]*padding:var\(--space-4\)[^}]*border-radius:var\(--radius-lg\)/.test(global) && /\.card-compact\{gap:var\(--space-2\);padding:\.8rem\}/.test(global) && /\.card-flush\{gap:0;padding:0\}/.test(global)],
   ["shared states and requests compose base card", workspace.includes("card card-compact shared-state-card") && requestForm.includes("card card-compact shared-state-card request-success")],
-  ["Card primitive exposes only density variants", card.includes('density?:"default"|"compact"|"flush"') && !card.includes("elevated") && !card.includes("tone?")],
+  ["unused UI primitives and class hooks stay removed", primitiveFiles.length === 0 && !workspace.includes("export function EmptyState") && staleClassHooks.every((hook) => !sourceText.includes(hook))],
   ["topbar remains globally fixed", /\.topbar\{position:fixed;top:0;/.test(global) && !global.includes(".topbar{position:sticky")],
   ["main shell reserves fixed topbar", /\.main-shell\{[^}]*padding-top:calc\(var\(--topbar-h\) \+ env\(safe-area-inset-top\)\)/.test(global)],
   ["Shift Plan page is shrink-safe and only the day scroller owns horizontal scrolling", /html,body\{[^}]*overflow-x:clip/.test(global) && /\.page-wrap\{[^}]*grid-template-columns:minmax\(0,1fr\)/.test(global) && /\.page-flow,[^{]*\{[^}]*grid-template-columns:minmax\(0,1fr\)/.test(global) && schedule.includes(':global(.page-wrap[data-workspace="schedule"]){overflow-x:clip}') && /\.workspace\{[^}]*overflow-x:clip[^}]*contain:inline-size/.test(schedule) && /\.calendarPanel\{[^}]*overflow:hidden[^}]*contain:inline-size/.test(schedule) && /\.calendarScroll\{[^}]*overflow-x:auto[^}]*contain:inline-size[^}]*overscroll-behavior-x:contain/.test(schedule) && !/grid-template-columns:1fr(?:\s+1fr)?(?=[;}])/.test(schedule)],
+  ["standalone Operation module owns its separate shell", read("app/operation/page.tsx").includes("<OperationModule") && read("features/operation/OperationModule.tsx").includes("className={styles.operationShell}") && operation.includes(".operationShell{min-height:100dvh") && operation.includes(".reader{position:fixed;inset:0")],
   ["manager workspaces are feature-owned", architectureOwned && Buffer.byteLength(managerApp) < 60000],
   ["feature dialogs are feature-owned", featureDialogsOwned],
   ["shared chrome has no local forwarding adapters", managerApp.includes("<WorkspaceSidebar") && managerApp.includes("<WorkspaceTopbar") && !managerApp.includes("function Sidebar") && !managerApp.includes("function Topbar")],
@@ -135,6 +146,7 @@ const checks = [
   ["shared WorkspaceHeader is used directly where applicable", headerAdapterFiles.slice(1).every((source) => source.includes("<WorkspaceHeader"))],
   ["shared PanelTitle replaces feature-local copies", workspace.includes("export function PanelTitle") && ["features/dashboard/manager-overview.tsx","features/operations/DailyOperationsWorkspace.tsx","features/settings/SettingsWorkspace.tsx","features/control/ControlCenterWorkspace.tsx"].every((file) => read(file).includes("PanelTitle") && !read(file).includes("function PanelTitle"))],
   ["same-file-only helpers are not exported", !observability.includes("logServerWarning") && !capabilities.includes("export const ROLE_CAPABILITIES") && !devAuth.includes("export function getDevSessionUser") && !sessionCookie.includes("export function sessionTtlDays") && !scheduleUtils.includes("export function shiftsOverlap") && !dataSource.includes("export const days") && !rateLimit.includes("export class RateLimitError")],
+  ["TypeScript rejects unused locals and parameters", tsconfig.compilerOptions?.noUnusedLocals === true && tsconfig.compilerOptions?.noUnusedParameters === true],
   ["active script surface remains compact", scriptFiles.length <= 20 && Object.keys(pkg.scripts).length <= 25],
   ["quality workflow runs current suite", quality.includes("npm run test:all")],
   ["root global-error exception remains documented", exceptionRegister.includes("global-error.tsx") && exceptionRegister.includes("root error boundary")],

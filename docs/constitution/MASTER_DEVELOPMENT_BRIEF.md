@@ -1,9 +1,9 @@
 # Bar Ops — Master Development Brief
 
-**Current confirmed baseline:** `v0.19.0-rc.55`  
-**Baseline archive:** `bar-ops-v0.19.0-rc.55-export-surface-dead-code-cleanup.zip`  
-**SHA-256:** `70bc487946d929fa04abcb9588697c5b2c6e879d14b974ab2ed52406e686d974`  
-**Document date:** 2026-08-16  
+**Current confirmed baseline:** `v0.19.0-rc.57`  
+**Baseline archive:** `bar-ops-v0.19.0-rc.57-residual-corrections-cleanup.zip`  
+**SHA-256:** `8bd05c7d4da5ea121849782bd778c357a9114921a00ecaaeb9a6ac5122b41c2b`  
+**Document date:** 2026-08-23  
 **Status:** Current source of truth for agreed product scope and development direction
 
 ---
@@ -30,7 +30,7 @@ Intentional operational density is not a defect. Bar Ops must not be redesigned 
 
 ## 2. Current release status
 
-`v0.19.0-rc.55` is the current technical baseline. It remains a **release candidate**, not a production-approved final release.
+`v0.19.0-rc.57` is the current technical baseline. It remains a **release candidate**, not a production-approved final release.
 
 The baseline includes:
 
@@ -39,9 +39,9 @@ The baseline includes:
 - accessibility and interaction foundations from `v0.18.14`;
 - production-readiness documentation from `v0.18.15`;
 - acceptance and deployment-signoff foundations from `v0.18.16`;
-- controlled permission, integrity, CSS, workspace-ownership, release-contract, responsive-containment, build-reliability, deterministic-dependency, lint remediation, and export-surface cleanup through `v0.19.0-rc.55`.
+- controlled permission, integrity, CSS, workspace-ownership, release-contract, responsive-containment, build-reliability, deterministic-dependency, lint remediation, export-surface cleanup, request-aware API error handling, and residual cleanup through `v0.19.0-rc.57`.
 
-The rc.55 baseline includes the verified deterministic lockfile, clean dependency-backed local gate, and public export-surface reduction. The rc.56 candidate preserves request context in API error responses and must pass exact-artifact CI and Vercel promotion before becoming the confirmed baseline.
+The rc.57 baseline includes the verified deterministic lockfile, clean dependency-backed local gate, public export-surface reduction, request-aware API error handling, and residual cleanup. The rc.58 candidate introduces the standalone Operation module and must pass exact-artifact CI and Vercel promotion before becoming the confirmed baseline.
 
 The following gates remain external and incomplete:
 
@@ -262,13 +262,13 @@ Every remediation or feature task must:
 The following are current audit findings and should drive planned remediation:
 
 - `components/bar-ops-app.tsx` remains the state and coordination owner, while manager workspace rendering and dialogs are now feature-owned.
-- CSS is consolidated to global tokens, one global stylesheet, and the Shift Plan module; this three-owner contract must remain protected.
+- CSS is consolidated to global tokens, one global stylesheet, the Shift Plan module, and the standalone Operation module; this four-owner contract must remain protected.
 - server authorization is generally stronger than UI capability filtering.
 - role arrays and operational status strings are duplicated.
 - API runtime validation is strong in some routes and inconsistent in others.
 - the regression suite contains many useful source contracts but too few runtime and browser tests.
 - release documentation still contains historical provenance documents that must not be mistaken for the current baseline.
-- rc.56 preserves request context in API error responses, but exact-artifact CI and runtime acceptance remain required.
+- rc.58 introduces the standalone Operation module, but exact-artifact CI, migration verification, and runtime acceptance remain required.
 
 These findings do not justify a rewrite. They require controlled, phased remediation.
 
