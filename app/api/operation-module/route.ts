@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { defaultOperationState } from "@/features/operation/default-content";
 import { mapOperationArticle, ownerCanManageOperation, parseOperationBlocks } from "@/features/operation/content";
 import type { OperationDailyTask, OperationModuleState, OperationNeed } from "@/features/operation/types";
 import { db } from "@/lib/db/client";
@@ -17,6 +18,14 @@ async function requireApiUser() {
 
 function weekdayFromDate(date: string) {
   return new Date(`${date}T00:00:00Z`).getUTCDay();
+}
+
+function isOperationSchemaUnavailable(error: unknown) {
+  if (!error || typeof error !== "object") return false;
+  const record = error as { code?: unknown; message?: unknown };
+  const code = String(record.code || "");
+  const message = String(record.message || "");
+  return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|article_kind|need_status)/i.test(message);
 }
 
 export async function GET(request: Request) {
@@ -73,6 +82,17 @@ export async function GET(request: Request) {
     };
     return NextResponse.json(state, { headers: { "cache-control": "no-store" } });
   } catch (error) {
+    if (isOperationSchemaUnavailable(error)) {
+      const user = await getSessionUser();
+      if (user) {
+        return NextResponse.json({
+          ...defaultOperationState,
+          userRole: user.role,
+          canManageContent: ownerCanManageOperation(user.role),
+          today: new Date().toISOString().slice(0, 10),
+        } satisfies OperationModuleState, { headers: { "cache-control": "no-store", "x-operation-storage": "migration-required" } });
+      }
+    }
     return jsonError(error, request);
   }
 }

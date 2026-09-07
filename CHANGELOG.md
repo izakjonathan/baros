@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.59
+
+- Added a production fallback so `/operation` opens with starter content instead of rendering the generic “Try again” error when the Operation database migration has not been applied yet.
+- Added the same migration-required fallback to the Operation module GET API refresh path.
+- Extended the API-integrity contract to keep the Operation migration fallback in place.
+- Updated release metadata and documentation to identify v0.19.0-rc.58 as the rollback checkpoint.
+- No CSS, dependency-version, route-shape, authorization, permission, layout, visual, or existing business-workflow changes.
+
 ## v0.19.0-rc.58
 
 - Added a standalone `/operation` module with no inherited side menu, its own header navigation, and a single-colour mobile-first design.

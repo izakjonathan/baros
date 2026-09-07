@@ -1,27 +1,18 @@
-# v0.19.0-rc.58 — Standalone Operation Module
+# v0.19.0-rc.59 — Operation Migration Fallback Hotfix
 
 ## Baseline
 
-- Continued from the exact v0.19.0-rc.57 source verified with clean dependency-backed lint, typecheck, regression, and production build gates. That release is the rollback checkpoint.
+- Continued from the exact v0.19.0-rc.58 source verified with clean dependency-backed lint, typecheck, regression, and production build gates. That release is the rollback checkpoint.
 
-## Operation module
+## Hotfix
 
-- Adds `/operation` as a separate module shell with no inherited side menu and a deliberately different single-colour visual design.
-- The module home shows News cards first, then submodule cards for Handbook, Daily Tasks, We Need, and News.
-- Handbook provides title, search, category pills, category-grouped bordered article cards, and full-screen article reading.
-- News uses the same article-card and full-screen reader pattern as Handbook.
-- Daily Tasks provides day-specific tasks that employees can complete; owner/admin can add tasks.
-- We Need provides a reminder-style list where employees can add bar needs and mark them ordered.
-
-## Data and permissions
-
-- Adds migration `014_operation_module.sql` for operation articles, daily task templates/completions, and needed items.
-- Adds `/api/operation-module`; API authentication failures return JSON errors.
-- Owner/Admin can create, edit, and delete handbook/news articles and daily tasks.
-- Authenticated employees can read Operation, complete daily tasks, add needed items, and mark needed items ordered.
+- `/operation` now falls back to safe starter content if the Operation database migration has not yet been applied in production.
+- `/api/operation-module` GET returns the same starter state with `x-operation-storage: migration-required` when Operation tables are missing.
+- Mutation paths remain database-backed and continue to require the migration before durable owner edits, daily task completion, or We Need updates can persist.
+- The API-integrity contract now checks for this migration fallback.
 
 ## Scope
 
-No existing manager workspace, employee-shell layout, Shift Plan grid, dependency version, or existing business workflow was replaced. Operation is documented as the explicit new CSS Module exception requested for a different design.
+No visual redesign, dependency, route-shape, permission, or existing business-workflow changes are included. The fix only prevents the new Operation module from crashing before the production database migration is applied.
 
-Rollback checkpoint: **v0.19.0-rc.57**.
+Rollback checkpoint: **v0.19.0-rc.58**.

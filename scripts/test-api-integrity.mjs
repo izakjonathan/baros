@@ -32,11 +32,15 @@ for (const token of ["SECURITY_ACTIONS", "GDPR_REQUEST_TYPES", "enumValue", "uui
   if (!security.includes(token)) throw new Error(`security action validation is missing ${token}`);
 }
 const operationModule = read("app/api/operation-module/route.ts");
-for (const token of ["getSessionUser", "Owner or Admin permission is required", "operation_articles", "operation_daily_tasks", "operation_needs", "readJsonObject(request, 128_000)", "jsonError(error, request)"]) {
+for (const token of ["getSessionUser", "Owner or Admin permission is required", "operation_articles", "operation_daily_tasks", "operation_needs", "readJsonObject(request, 128_000)", "jsonError(error, request)", "x-operation-storage", "migration-required"]) {
   if (!operationModule.includes(token)) throw new Error(`operation module API contract is missing ${token}`);
 }
 if (operationModule.includes("requireUser(") || operationModule.includes("requireCapability(")) {
   throw new Error("operation module API must return JSON auth errors instead of redirecting");
+}
+const operationPage = read("app/operation/page.tsx");
+for (const token of ["isOperationSchemaUnavailable", "defaultOperationState", "return <OperationModule initialState={fallbackState} devMode={false} />"]) {
+  if (!operationPage.includes(token)) throw new Error(`operation page migration fallback is missing ${token}`);
 }
 
 const scope = read("lib/auth/scope.ts");

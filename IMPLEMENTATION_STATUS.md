@@ -1,10 +1,17 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.58**
+Version: **v0.19.0-rc.59**
 
 ## Current focus
 
-Standalone Operation module from the verified rc.57 baseline.
+Operation migration fallback hotfix from the verified rc.58 baseline.
+
+## rc.59
+
+- Added a server-render fallback so `/operation` opens with starter content when production has not applied `014_operation_module.sql`.
+- Added the same migration-required fallback to `/api/operation-module` GET refreshes.
+- Added contract coverage for the fallback.
+- Rollback checkpoint: v0.19.0-rc.58.
 
 ## rc.58
 
