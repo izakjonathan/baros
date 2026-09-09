@@ -1,18 +1,18 @@
-# v0.19.0-rc.60 — Operation Interface Refinement
+# v0.19.0-rc.61 — Operation Header and Card Icon Cleanup
 
 ## Baseline
 
-- Continued from v0.19.0-rc.59 after the Operation migration fallback hotfix. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.60 after the Operation interface refinement. That release is the rollback checkpoint.
 
-## Interface refinement
+## Interface cleanup
 
-- The Operation module keeps its separate single-colour design, but the interface is now more compact and professional.
-- Header navigation is slimmer and behaves like a segmented control.
-- Hero, section headings, cards, labels, forms, task rows, and reader typography were reduced to avoid the oversized/clunky mobile layout.
-- Card borders and radii were reduced while preserving the bordered-card direction.
+- Removed the extra top Operation label.
+- Removed the Bar Ops pill from the standalone Operation header.
+- Removed arrow icons from Operation article cards and linked-article buttons.
+- Preserved module icons, compact segmented navigation, and the main Operation page title.
 
 ## Scope
 
 No dependency, database-schema, route-shape, permission, or existing business-workflow changes are included. The change is limited to the standalone Operation module presentation.
 
-Rollback checkpoint: **v0.19.0-rc.59**.
+Rollback checkpoint: **v0.19.0-rc.60**.

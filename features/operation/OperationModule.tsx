@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowLeft, ArrowRight, BookOpen, CheckSquare, Megaphone, Plus, ShoppingBasket, Trash2, X } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckSquare, Megaphone, Plus, ShoppingBasket, Trash2, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import styles from "./OperationModule.module.css";
 import type { OperationArticle, OperationArticleKind, OperationContentBlock, OperationDailyTask, OperationModuleState, OperationNeed } from "./types";
@@ -126,8 +125,6 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
 
   return <div className={styles.operationShell}>
     <header className={styles.operationHeader}>
-      <Link href="/">Bar Ops</Link>
-      <strong>Operation</strong>
       <nav aria-label="Operation sections">
         {(["home", "handbook", "tasks", "needs"] as View[]).map(item => <button key={item} type="button" aria-pressed={view === item} onClick={() => setView(item)}>{item === "home" ? "Home" : item}</button>)}
       </nav>
@@ -172,7 +169,7 @@ function SectionHeader({ title, detail }: { title: string; detail: string }) {
 }
 
 function ArticleCard({ article, onClick }: { article: OperationArticle; onClick: () => void }) {
-  return <button type="button" className={styles.operationCard} onClick={onClick}><div><h3>{article.title}</h3><p>{article.description}</p></div><small>{article.category}</small><ArrowRight size={22} /></button>;
+  return <button type="button" className={styles.operationCard} onClick={onClick}><div><h3>{article.title}</h3><p>{article.description}</p></div><small>{article.category}</small></button>;
 }
 
 function ModuleCard({ title, description, icon: Icon, onClick }: { title: string; description: string; icon: typeof BookOpen; onClick: () => void }) {
@@ -192,5 +189,5 @@ function RenderBlock({ block, allArticles, openLinked }: { block: OperationConte
   if (block.type === "numbered") return <ol>{block.items.map(item => <li key={item}>{item}</li>)}</ol>;
   if (block.type === "image") return <Image className={styles.readerImage} src={block.src} alt={block.alt} width={1200} height={800} unoptimized />;
   const linked = allArticles.find(article => article.id === block.articleId);
-  return <button type="button" className={styles.articleLink} disabled={!linked} onClick={() => linked && openLinked(linked)}><span>{block.label}</span><ArrowRight size={18} /></button>;
+  return <button type="button" className={styles.articleLink} disabled={!linked} onClick={() => linked && openLinked(linked)}><span>{block.label}</span></button>;
 }

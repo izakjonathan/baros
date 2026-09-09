@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.61
+
+- Removed the standalone Operation header label and Bar Ops pill from the Operation module.
+- Removed arrow icons from Operation article cards and linked article buttons.
+- Kept the compact segmented navigation, main Operation page title, article/category labels, module icons, and all workflows intact.
+- Updated release metadata and documentation to identify v0.19.0-rc.60 as the rollback checkpoint.
+- No dependency-version, database-schema, route-shape, authorization, permission, or existing business-workflow changes.
+
 ## v0.19.0-rc.60
 
 - Refined the standalone Operation module UI into a smaller, more professional mobile interface.

@@ -1,10 +1,17 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.60**
+Version: **v0.19.0-rc.61**
 
 ## Current focus
 
-Operation interface refinement from the verified rc.59 baseline.
+Operation header and card icon cleanup from the verified rc.60 baseline.
+
+## rc.61
+
+- Removed the extra Operation header label and Bar Ops pill.
+- Removed arrow icons from Operation article cards and linked article buttons.
+- Kept module icons, the main Operation page title, and all workflows intact.
+- Rollback checkpoint: v0.19.0-rc.60.
 
 ## rc.60
 
