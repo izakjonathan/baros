@@ -1,10 +1,18 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.61**
+Version: **v0.19.0-rc.62**
 
 ## Current focus
 
-Operation header and card icon cleanup from the verified rc.60 baseline.
+Operation module compact layout cleanup from the verified rc.61 baseline.
+
+## rc.62
+
+- Removed the Operation home intro title/copy block and duplicate News module card.
+- Removed standalone module page titles from Operation, Handbook, Daily Tasks, and We Need.
+- Fixed the Operation segmented navigation to the viewport and centered its links inside the pill.
+- Reduced Operation section/category heading scale for a more professional mobile presentation.
+- Rollback checkpoint: v0.19.0-rc.61.
 
 ## rc.61
 

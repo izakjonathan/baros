@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.19.0-rc.62
+
+- Removed the Operation home intro title/copy block so News starts the module content directly.
+- Removed the duplicate News submodule card because News already appears at the top of the Operation home screen.
+- Removed the standalone page titles from Operation, Handbook, Daily Tasks, and We Need views.
+- Fixed the Operation top navigation to the viewport and centered the nav items inside the pill.
+- Reduced Operation section and category heading scale for a cleaner mobile interface.
+- Added UI-contract coverage for the fixed centered nav and removed duplicate title/news card patterns.
+- No dependency-version, database-schema, route-shape, authorization, permission, or business-workflow changes.
+
 ## v0.19.0-rc.61
 
 - Removed the standalone Operation header label and Bar Ops pill from the Operation module.

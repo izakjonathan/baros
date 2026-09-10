@@ -11,6 +11,7 @@ const global = read("app/globals.css");
 const tokens = read("styles/tokens.css");
 const schedule = read("features/scheduling/ScheduleWorkspace.module.css");
 const operation = read("features/operation/OperationModule.module.css");
+const operationModule = read("features/operation/OperationModule.tsx");
 const layout = read("app/layout.tsx");
 const employeeLayout = read("app/employee/layout.tsx");
 const employeeShell = read("app/employee/employee-shell.tsx");
@@ -136,6 +137,8 @@ const checks = [
   ["main shell reserves fixed topbar", /\.main-shell\{[^}]*padding-top:calc\(var\(--topbar-h\) \+ env\(safe-area-inset-top\)\)/.test(global)],
   ["Shift Plan page is shrink-safe and only the day scroller owns horizontal scrolling", /html,body\{[^}]*overflow-x:clip/.test(global) && /\.page-wrap\{[^}]*grid-template-columns:minmax\(0,1fr\)/.test(global) && /\.page-flow,[^{]*\{[^}]*grid-template-columns:minmax\(0,1fr\)/.test(global) && schedule.includes(':global(.page-wrap[data-workspace="schedule"]){overflow-x:clip}') && /\.workspace\{[^}]*overflow-x:clip[^}]*contain:inline-size/.test(schedule) && /\.calendarPanel\{[^}]*overflow:hidden[^}]*contain:inline-size/.test(schedule) && /\.calendarScroll\{[^}]*overflow-x:auto[^}]*contain:inline-size[^}]*overscroll-behavior-x:contain/.test(schedule) && !/grid-template-columns:1fr(?:\s+1fr)?(?=[;}])/.test(schedule)],
   ["standalone Operation module owns its separate shell", read("app/operation/page.tsx").includes("<OperationModule") && read("features/operation/OperationModule.tsx").includes("className={styles.operationShell}") && operation.includes(".operationShell{min-height:100dvh") && operation.includes(".reader{position:fixed;inset:0")],
+  ["Operation home has no duplicated title, intro copy, or News module card", !operationModule.includes("News, handbook articles, daily tasks") && !operationModule.includes('<h1 className={styles.pageTitle}>') && !operationModule.includes('ModuleCard title="News"')],
+  ["Operation top navigation is fixed and centered", operation.includes(".operationHeader{position:fixed;top:0;left:0;right:0") && operation.includes(".operationHeader nav{display:flex;justify-content:center") && operation.includes("width:max-content")],
   ["manager workspaces are feature-owned", architectureOwned && Buffer.byteLength(managerApp) < 60000],
   ["feature dialogs are feature-owned", featureDialogsOwned],
   ["shared chrome has no local forwarding adapters", managerApp.includes("<WorkspaceSidebar") && managerApp.includes("<WorkspaceTopbar") && !managerApp.includes("function Sidebar") && !managerApp.includes("function Topbar")],
