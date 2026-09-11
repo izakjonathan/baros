@@ -1,20 +1,17 @@
-# v0.19.0-rc.63 — Operation Reader and Typography Cleanup
+# v0.19.0-rc.64 — Owner Operation Access
 
 ## Baseline
 
-- Continued from v0.19.0-rc.62 after the Operation compact layout cleanup. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.63 after the Operation reader and typography cleanup. That release is the rollback checkpoint.
 
-## Interface cleanup
+## Access fix
 
-- Removed the top-right Close button from fullscreen Handbook and News article readers.
-- Changed the bottom reader X into a centered outlined circle with no fill.
-- Removed visible article-link CTA buttons from article content.
-- Removed Handbook category group headings so categories appear only as article-card pills.
-- Moved article titles higher in the fullscreen reader and tightened reader typography.
-- Improved Operation typography across News, Handbook, Daily Tasks, and We Need.
+- Added an Operation item to the owner/manager workspace navigation.
+- The item opens `/operation`, where OWNER and ADMIN users can access the Handbook and News editor.
+- Preserved the standalone Operation module design, so `/operation` still does not render inside the main side-menu shell.
 
 ## Scope
 
-No dependency, database-schema, route-shape, permission, or existing business-workflow changes are included. The change is limited to the standalone Operation module presentation.
+No dependency, database-schema, route-shape, permission, or existing business-workflow changes are included. The change is limited to exposing the existing standalone Operation module from the owner workspace.
 
-Rollback checkpoint: **v0.19.0-rc.62**.
+Rollback checkpoint: **v0.19.0-rc.63**.

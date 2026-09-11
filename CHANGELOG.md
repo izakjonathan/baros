@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.64
+
+- Added an Operation entry to the owner/manager workspace navigation so the standalone Operation module is reachable after owner login.
+- The Operation entry opens `/operation`, where OWNER and ADMIN users can access the Handbook and News editor.
+- Kept the standalone Operation module outside the main side-menu shell.
+- Added UI-contract coverage to prevent the owner workspace entry point from disappearing again.
+- No dependency-version, database-schema, route-shape, authorization, permission, or business-workflow changes.
+
 ## v0.19.0-rc.63
 
 - Removed the top-right Close button from fullscreen Operation article readers.

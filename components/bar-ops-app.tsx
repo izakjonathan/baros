@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   Activity,
+  BookOpen,
   CalendarDays,
   Check,
   ClipboardList,
@@ -34,7 +35,7 @@ import { WorkspaceSidebar, WorkspaceTopbar } from "@/components/shell/workspace-
 import { hasCapability, type Capability } from "@/lib/auth/capabilities";
 import type { AppRole } from "@/lib/auth/session";
 
-type ManagerNavItem = { id: NavKey; label: string; icon: typeof LayoutDashboard; capability: Capability };
+type ManagerNavItem = { id: NavKey | "operation-module"; label: string; icon: typeof LayoutDashboard; capability: Capability };
 
 const navItems: ManagerNavItem[] = [
   { id: "dashboard", label: "Today’s operations", icon: LayoutDashboard, capability: "operations.read" },
@@ -44,6 +45,7 @@ const navItems: ManagerNavItem[] = [
   { id: "inventory", label: "Inventory", icon: Package, capability: "inventory.read" },
   { id: "orders", label: "Orders", icon: ShoppingCart, capability: "orders.manage" },
   { id: "operations", label: "Daily operations", icon: NotebookPen, capability: "operations.manage" },
+  { id: "operation-module", label: "Operation", icon: BookOpen, capability: "operations.manage" },
   { id: "team", label: "Team", icon: Users, capability: "team.read" },
   { id: "requests", label: "Requests", icon: ClipboardList, capability: "requests.review" },
   { id: "control", label: "Control centre", icon: Settings, capability: "control.read" },
@@ -150,6 +152,15 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
     setDialog("shift");
   }
 
+  function navigateWorkspace(id: string) {
+    if (id === "operation-module") {
+      window.location.assign("/operation");
+      return;
+    }
+    setActive(id as NavKey);
+    setMobileNav(false);
+  }
+
   if (!dataReady) {
     return <div className="workspace-loading" role="status" aria-live="polite"><div className="card card-compact shared-state-card"><Database size={26}/><strong>Loading workspace</strong><span>Synchronizing shifts, employees and operations with PostgreSQL…</span></div></div>;
   }
@@ -160,7 +171,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
       <WorkspaceSidebar
         items={availableNavItems.map((item) => ({ ...item, badge: item.id === "inventory" ? 5 : undefined }))}
         active={active}
-        onNavigate={(id) => { setActive(id as NavKey); setMobileNav(false); }}
+        onNavigate={navigateWorkspace}
         open={mobileNav}
         onClose={() => setMobileNav(false)}
         userName={userName}
@@ -180,7 +191,7 @@ export function BarOpsApp({ userName, userRole, devMode }: { userName: string; u
           locations={locations}
           selectedLocationId={selectedLocationId}
           onLocationChange={setSelectedLocationId}
-          onNavigate={(id) => setActive(id as NavKey)}
+          onNavigate={navigateWorkspace}
           notificationItems={[
             { id: "schedule", label: "Draft schedule", detail: "Review and publish upcoming shifts", icon: CalendarDays },
             { id: "attendance", label: "Timesheet review", detail: "Open time and attendance", icon: Clock3 },

@@ -1,10 +1,17 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.63**
+Version: **v0.19.0-rc.64**
 
 ## Current focus
 
-Operation article reader and typography cleanup from the verified rc.62 baseline.
+Owner workspace access to the standalone Operation module from the verified rc.63 baseline.
+
+## rc.64
+
+- Added an Operation navigation item to the owner/manager workspace.
+- The item opens `/operation`, where OWNER and ADMIN users can use the Handbook and News editor.
+- Preserved Operation as a standalone module without the main side menu inside the module itself.
+- Rollback checkpoint: v0.19.0-rc.63.
 
 ## rc.63
 

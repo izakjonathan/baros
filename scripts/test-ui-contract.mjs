@@ -141,6 +141,7 @@ const checks = [
   ["Operation top navigation is fixed and centered", operation.includes(".operationHeader{position:fixed;top:0;left:0;right:0") && operation.includes(".operationHeader nav{display:flex;justify-content:center") && operation.includes("width:max-content")],
   ["Operation reader has only the bottom outlined close control", !operationModule.includes("<button type=\"button\" onClick={close}>Close</button>") && operation.includes(".closeCircle{width:3.5rem;height:3.5rem;display:grid!important;place-items:center") && operation.includes("background:transparent!important;color:#292929!important")],
   ["Operation handbook has no category group headings or article-link CTA buttons", !operationModule.includes("className={styles.group}") && !operationModule.includes("className={styles.articleLink}") && operationModule.includes("return null;")],
+  ["owner workspace exposes standalone Operation module entry", managerApp.includes('id: "operation-module"') && managerApp.includes('window.location.assign("/operation")')],
   ["manager workspaces are feature-owned", architectureOwned && Buffer.byteLength(managerApp) < 60000],
   ["feature dialogs are feature-owned", featureDialogsOwned],
   ["shared chrome has no local forwarding adapters", managerApp.includes("<WorkspaceSidebar") && managerApp.includes("<WorkspaceTopbar") && !managerApp.includes("function Sidebar") && !managerApp.includes("function Topbar")],
