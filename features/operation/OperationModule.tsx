@@ -7,23 +7,34 @@ import styles from "./OperationModule.module.css";
 import type { OperationArticle, OperationArticleKind, OperationContentBlock, OperationDailyTask, OperationModuleState, OperationNeed } from "./types";
 
 type View = "home" | "handbook" | "tasks" | "needs";
-type DraftArticle = { id?: string; kind: OperationArticleKind; category: string; title: string; description: string; body: string; linkId: string; imageSrc: string };
+type DraftArticle = { id?: string; kind: OperationArticleKind; category: string; title: string; description: string; content: OperationContentBlock[] };
+type EditableBlockType = Exclude<OperationContentBlock["type"], "title" | "articleLink">;
 
 const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 function draftFromArticle(article?: OperationArticle, kind: OperationArticleKind = "HANDBOOK"): DraftArticle {
-  const body = article?.content.filter(block => block.type === "body" || block.type === "h1" || block.type === "h2").map(block => "text" in block ? block.text : "").join("\n\n") || "";
-  const link = article?.content.find((block): block is { type: "articleLink"; articleId: string; label: string } => block.type === "articleLink");
-  const image = article?.content.find((block): block is { type: "image"; src: string; alt: string } => block.type === "image");
-  return { id: article?.id, kind, category: article?.category || "General", title: article?.title || "", description: article?.description || "", body, linkId: link?.articleId || "", imageSrc: image?.src || "" };
+  const content = article?.content.filter(block => block.type !== "title" && block.type !== "articleLink") || [{ type: "body", text: "" }];
+  return { id: article?.id, kind, category: article?.category || "General", title: article?.title || "", description: article?.description || "", content };
 }
 
 function blocksFromDraft(draft: DraftArticle): OperationContentBlock[] {
   const blocks: OperationContentBlock[] = [{ type: "title", text: draft.title }];
-  for (const paragraph of draft.body.split(/\n{2,}/).map(item => item.trim()).filter(Boolean)) blocks.push({ type: "body", text: paragraph });
-  if (draft.imageSrc.trim()) blocks.push({ type: "image", src: draft.imageSrc.trim(), alt: draft.title });
-  if (draft.linkId) blocks.push({ type: "articleLink", articleId: draft.linkId, label: "Open linked article" });
-  return blocks;
+  return blocks.concat(draft.content.flatMap(cleanContentBlock));
+}
+
+function cleanContentBlock(block: OperationContentBlock): OperationContentBlock[] {
+  if (block.type === "title" || block.type === "articleLink") return [];
+  if (block.type === "image") {
+    const src = block.src.trim();
+    if (!src) return [];
+    return [{ type: "image", src, alt: block.alt.trim() || "Article image" }];
+  }
+  if (block.type === "bullets" || block.type === "numbered") {
+    const items = block.items.map(item => item.trim()).filter(Boolean);
+    return items.length ? [{ type: block.type, items }] : [];
+  }
+  const text = block.text.trim();
+  return text ? [{ type: block.type, text }] : [];
 }
 
 export function OperationModule({ initialState, devMode }: { initialState: OperationModuleState; devMode: boolean }) {
@@ -37,6 +48,7 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
   const [taskDescription, setTaskDescription] = useState("");
   const [needTitle, setNeedTitle] = useState("");
   const [saving, setSaving] = useState(false);
+  const [editorMessage, setEditorMessage] = useState("");
   const currentArticle = readerStack.at(-1) || null;
   const allArticles = [...state.news, ...state.handbook];
   const handbookCategories = ["All", ...Array.from(new Set(state.handbook.map(article => article.category)))];
@@ -54,26 +66,35 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
   }
 
   async function saveArticle() {
-    if (!draft.title.trim() || !draft.description.trim()) return;
+    setEditorMessage("");
+    if (!draft.title.trim()) { setEditorMessage("Add an article title first."); return; }
+    if (!draft.description.trim()) { setEditorMessage("Add a short card description first."); return; }
+    const content = blocksFromDraft(draft);
+    if (content.length < 2) { setEditorMessage("Add at least one content block before saving."); return; }
     const article: OperationArticle = {
       id: draft.id || crypto.randomUUID(),
       kind: draft.kind,
       category: draft.category.trim() || "General",
       title: draft.title.trim(),
       description: draft.description.trim(),
-      content: blocksFromDraft(draft),
+      content,
       published: true,
       updatedAt: new Date().toISOString(),
     };
     if (devMode) {
       setState(current => ({ ...current, handbook: article.kind === "HANDBOOK" ? upsertArticle(current.handbook, article) : current.handbook, news: article.kind === "NEWS" ? upsertArticle(current.news, article) : current.news }));
       setDraft(draftFromArticle(undefined, draft.kind));
+      setEditorMessage("Article saved.");
       return;
     }
     setSaving(true);
     const response = await fetch("/api/operation-module", { method: draft.id ? "PATCH" : "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "article", id: draft.id, kind: article.kind, category: article.category, title: article.title, description: article.description, content: article.content }) });
     setSaving(false);
-    if (response.ok) { setDraft(draftFromArticle(undefined, draft.kind)); await refresh(); }
+    if (response.ok) { setDraft(draftFromArticle(undefined, draft.kind)); setEditorMessage("Article saved."); await refresh(); }
+    else {
+      const failure: unknown = await response.json().catch(() => null);
+      setEditorMessage(typeof failure === "object" && failure !== null && "error" in failure && typeof failure.error === "string" ? failure.error : "Could not save article.");
+    }
   }
 
   async function deleteArticle(article: OperationArticle) {
@@ -129,7 +150,7 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
       {view === "handbook" && <HandbookView articles={filteredHandbook} categories={handbookCategories} query={query} category={category} setQuery={setQuery} setCategory={setCategory} openArticle={(article) => setReaderStack([article])} />}
       {view === "tasks" && <TasksView tasks={state.dailyTasks} canManage={state.canManageContent} taskTitle={taskTitle} taskDescription={taskDescription} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} addTask={addTask} toggleTask={toggleTask} />}
       {view === "needs" && <NeedsView needs={state.needs} needTitle={needTitle} setNeedTitle={setNeedTitle} addNeed={addNeed} markNeedOrdered={markNeedOrdered} />}
-      {state.canManageContent && <AdminPanel draft={draft} setDraft={setDraft} saveArticle={saveArticle} saving={saving} articles={allArticles} editArticle={setDraft} deleteArticle={deleteArticle} />}
+      {state.canManageContent && <AdminPanel draft={draft} setDraft={setDraft} saveArticle={saveArticle} saving={saving} message={editorMessage} articles={allArticles} editArticle={(nextDraft) => { setDraft(nextDraft); setEditorMessage(""); }} deleteArticle={deleteArticle} />}
     </main>
     {currentArticle && <Reader article={currentArticle} canGoBack={readerStack.length > 1} goBack={() => setReaderStack(stack => stack.slice(0, -1))} close={() => setReaderStack([])} />}
   </div>;
@@ -155,8 +176,34 @@ function NeedsView({ needs, needTitle, setNeedTitle, addNeed, markNeedOrdered }:
   return <><div className={styles.needInput}><input value={needTitle} onChange={event => setNeedTitle(event.target.value)} placeholder="Add something needed for the bar" /><button type="button" onClick={addNeed}><Plus size={16} />Add</button></div><div className={styles.needList}>{needs.map(need => <article className={styles.needRow} key={need.id} data-ordered={need.status === "ORDERED"}><ShoppingBasket size={22} /><div><h3>{need.title}</h3>{need.note && <p>{need.note}</p>}</div><button type="button" onClick={() => markNeedOrdered(need)}>Ordered</button></article>)}{!needs.length && <div className={styles.empty}>Nothing needed right now.</div>}</div></>;
 }
 
-function AdminPanel({ draft, setDraft, saveArticle, saving, articles, editArticle, deleteArticle }: { draft: DraftArticle; setDraft: (draft: DraftArticle) => void; saveArticle: () => void; saving: boolean; articles: OperationArticle[]; editArticle: (draft: DraftArticle) => void; deleteArticle: (article: OperationArticle) => void }) {
-  return <section className={styles.adminPanel}><h3>Owner editor</h3><div className={styles.adminGrid}><select value={draft.kind} onChange={event => setDraft({ ...draft, kind: event.target.value as OperationArticleKind })}><option value="HANDBOOK">Handbook</option><option value="NEWS">News</option></select><input value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })} placeholder="Category" /><input value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} placeholder="Title" /><input value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} placeholder="Description" /><input value={draft.imageSrc} onChange={event => setDraft({ ...draft, imageSrc: event.target.value })} placeholder="Optional image URL" /><select value={draft.linkId} onChange={event => setDraft({ ...draft, linkId: event.target.value })}><option value="">No linked article</option>{articles.map(article => <option key={article.id} value={article.id}>{article.title}</option>)}</select><textarea value={draft.body} onChange={event => setDraft({ ...draft, body: event.target.value })} placeholder="Article body. Separate paragraphs with blank lines." /></div><div className={styles.adminActions}><button type="button" disabled={saving} onClick={saveArticle}>{draft.id ? "Save article" : "Add article"}</button><button type="button" onClick={() => setDraft(draftFromArticle(undefined, draft.kind))}>Clear</button></div><div className={styles.cardGrid}>{articles.map(article => <article className={styles.operationCard} key={article.id}><div><h3>{article.title}</h3><p>{article.kind.toLowerCase()} · {article.category}</p></div><div className={styles.adminActions}><button type="button" onClick={() => editArticle(draftFromArticle(article, article.kind))}>Edit</button><button type="button" onClick={() => deleteArticle(article)}><Trash2 size={16} /></button></div></article>)}</div></section>;
+function AdminPanel({ draft, setDraft, saveArticle, saving, message, articles, editArticle, deleteArticle }: { draft: DraftArticle; setDraft: (draft: DraftArticle) => void; saveArticle: () => void; saving: boolean; message: string; articles: OperationArticle[]; editArticle: (draft: DraftArticle) => void; deleteArticle: (article: OperationArticle) => void }) {
+  const setBlock = (index: number, block: OperationContentBlock) => setDraft({ ...draft, content: draft.content.map((item, position) => position === index ? block : item) });
+  const addBlock = (type: EditableBlockType) => setDraft({ ...draft, content: [...draft.content, emptyBlock(type)] });
+  const removeBlock = (index: number) => setDraft({ ...draft, content: draft.content.length === 1 ? [emptyBlock("body")] : draft.content.filter((_, position) => position !== index) });
+  const moveBlock = (index: number, direction: -1 | 1) => {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= draft.content.length) return;
+    const content = [...draft.content];
+    [content[index], content[nextIndex]] = [content[nextIndex], content[index]];
+    setDraft({ ...draft, content });
+  };
+  return <section className={styles.adminPanel}><h3>Owner editor</h3><div className={styles.editorMeta}><select value={draft.kind} onChange={event => setDraft({ ...draft, kind: event.target.value as OperationArticleKind })}><option value="HANDBOOK">Handbook</option><option value="NEWS">News</option></select><input value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })} placeholder="Category" /><input value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} placeholder="Title" /><input value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} placeholder="Short card description" /></div><div className={styles.notesToolbar} aria-label="Add article content block">{(["body", "h1", "h2", "bullets", "numbered", "image"] as EditableBlockType[]).map(type => <button key={type} type="button" onClick={() => addBlock(type)}><Plus size={14} />{labelForBlock(type)}</button>)}</div><div className={styles.notesEditor}>{draft.content.map((block, index) => <EditorBlock key={`${index}-${block.type}`} block={block} index={index} setBlock={setBlock} removeBlock={removeBlock} moveBlock={moveBlock} />)}</div>{message && <p className={styles.editorMessage} role="status">{message}</p>}<div className={styles.adminActions}><button type="button" disabled={saving} onClick={saveArticle}>{saving ? "Saving…" : draft.id ? "Save article" : "Add article"}</button><button type="button" onClick={() => setDraft(draftFromArticle(undefined, draft.kind))}>Clear</button></div><div className={styles.cardGrid}>{articles.map(article => <article className={styles.operationCard} key={article.id}><div><h3>{article.title}</h3><p>{article.kind.toLowerCase()} · {article.category}</p></div><div className={styles.adminActions}><button type="button" onClick={() => editArticle(draftFromArticle(article, article.kind))}>Edit</button><button type="button" onClick={() => deleteArticle(article)}><Trash2 size={16} /></button></div></article>)}</div></section>;
+}
+
+function emptyBlock(type: EditableBlockType): OperationContentBlock {
+  if (type === "image") return { type, src: "", alt: "" };
+  if (type === "bullets" || type === "numbered") return { type, items: [""] };
+  return { type, text: "" };
+}
+
+function labelForBlock(type: EditableBlockType) {
+  return ({ body: "Text", h1: "Heading", h2: "Subhead", bullets: "Bullets", numbered: "Numbered", image: "Image" } satisfies Record<EditableBlockType, string>)[type];
+}
+
+function EditorBlock({ block, index, setBlock, removeBlock, moveBlock }: { block: OperationContentBlock; index: number; setBlock: (index: number, block: OperationContentBlock) => void; removeBlock: (index: number) => void; moveBlock: (index: number, direction: -1 | 1) => void }) {
+  if (block.type === "title" || block.type === "articleLink") return null;
+  const textClass = block.type === "h1" ? styles.editorH1 : block.type === "h2" ? styles.editorH2 : styles.editorBody;
+  return <article className={styles.editorBlock}><div className={styles.editorBlockTools}><span>{labelForBlock(block.type)}</span><button type="button" onClick={() => moveBlock(index, -1)}>Up</button><button type="button" onClick={() => moveBlock(index, 1)}>Down</button><button type="button" onClick={() => removeBlock(index)}>Remove</button></div>{block.type === "image" ? <><input value={block.src} onChange={event => setBlock(index, { ...block, src: event.target.value })} placeholder="Image URL" /><input value={block.alt} onChange={event => setBlock(index, { ...block, alt: event.target.value })} placeholder="Image description" /></> : block.type === "bullets" || block.type === "numbered" ? <textarea value={block.items.join("\n")} onChange={event => setBlock(index, { type: block.type, items: event.target.value.split("\n") })} placeholder="One list item per line" /> : <textarea className={textClass} value={block.text} onChange={event => setBlock(index, { ...block, text: event.target.value })} placeholder={block.type === "body" ? "Start writing…" : "Heading text"} />}</article>;
 }
 
 function SectionHeader({ title, detail }: { title: string; detail: string }) {

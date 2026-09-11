@@ -39,9 +39,21 @@
 .closeCircle svg{width:1.35rem;height:1.35rem}
 .adminPanel{display:grid;gap:.75rem;padding:.9rem;border:1px solid #292929;border-radius:1rem;background:rgba(255,255,255,.12)}
 .adminPanel h3{font-size:1rem;letter-spacing:-.01em}
-.adminGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}
+.adminGrid,.editorMeta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}
 .adminPanel input,.adminPanel textarea,.adminPanel select,.needInput input{min-height:2.75rem;border:1px solid #292929;border-radius:.75rem;background:rgba(255,255,255,.16);color:inherit;padding:.65rem .8rem}
 .adminPanel textarea{grid-column:1/-1;min-height:7rem;resize:vertical}
+.editorMeta input:nth-of-type(2){grid-column:1/-1}
+.notesToolbar{display:flex;gap:.35rem;overflow-x:auto;padding:.2rem 0}
+.notesToolbar button{min-height:2rem;display:inline-flex;align-items:center;gap:.25rem;border:1px solid rgba(41,41,41,.4);border-radius:999px;background:rgba(255,255,255,.18);color:inherit;padding:.25rem .65rem;font-size:.68rem;font-weight:750;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.notesEditor{display:grid;gap:.55rem;padding:.55rem;border:1px solid rgba(41,41,41,.35);border-radius:1rem;background:rgba(255,255,255,.12)}
+.editorBlock{display:grid;gap:.45rem;padding:.65rem;border:1px solid rgba(41,41,41,.2);border-radius:.85rem;background:rgba(255,255,255,.18)}
+.editorBlockTools{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}
+.editorBlockTools span{margin-right:auto;font-size:.66rem;font-weight:780;text-transform:uppercase;letter-spacing:.08em;color:#69645d}
+.editorBlockTools button{min-height:1.7rem;border:1px solid rgba(41,41,41,.3);border-radius:999px;background:transparent;color:inherit;padding:.15rem .5rem;font-size:.64rem;font-weight:720;text-transform:uppercase;letter-spacing:.05em}
+.editorBody{font-family:var(--font-body);font-size:.95rem;line-height:1.5}
+.editorH1{min-height:3.2rem!important;font-size:1.55rem;font-weight:760;line-height:1.05;letter-spacing:-.035em}
+.editorH2{min-height:2.8rem!important;font-size:1.15rem;font-weight:760;line-height:1.1;letter-spacing:-.025em}
+.editorMessage{font-family:var(--font-body);font-size:.82rem;color:#5f5a54}
 .adminActions,.needInput{display:flex;gap:.5rem;flex-wrap:wrap}
 .adminActions button,.needInput button,.taskRow button,.needRow button{min-height:2.35rem;border:1px solid #292929;border-radius:999px;background:#292929;color:#e7e3dc;padding:.3rem .8rem;font-weight:750}
 .taskRow,.needRow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.7rem;align-items:center;padding:.78rem .85rem;border:1px solid #292929;border-radius:.92rem;background:rgba(255,255,255,.14)}
@@ -53,7 +65,7 @@
 @media(max-width:42rem){
   .operationShell{padding-inline:max(.85rem,env(safe-area-inset-left));padding-right:max(.85rem,env(safe-area-inset-right))}
   .operationHeader nav{width:100%}
-  .moduleGrid,.adminGrid{grid-template-columns:1fr}
+  .moduleGrid,.adminGrid,.editorMeta{grid-template-columns:1fr}
   .operationCard{min-height:4.5rem;border-radius:.92rem;padding:.78rem .85rem}
   .operationCard h3{font-size:clamp(1.05rem,5.8vw,1.42rem)}
   .operationCard small{font-size:.68rem}

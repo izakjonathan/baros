@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.19.0-rc.65
+
+- Replaced the basic Operation article textarea with an ordered Notes-style block editor for OWNER/ADMIN users.
+- Added insertable text, heading, subheading, bullet list, numbered list, and image blocks that can be placed in article order.
+- Added block move/remove controls so images and formatted text can be arranged where needed.
+- Fixed silent article-save failures by showing validation and API error messages in the editor.
+- Added UI-contract coverage for the block editor and visible save feedback.
+- No dependency-version, database-schema, route-shape, authorization, permission, or business-workflow changes.
+
 ## v0.19.0-rc.64
 
 - Added an Operation entry to the owner/manager workspace navigation so the standalone Operation module is reachable after owner login.

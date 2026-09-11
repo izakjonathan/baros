@@ -1,8 +1,8 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.64**
+Current release: **v0.19.0-rc.65**
 
-Rollback checkpoint: **v0.19.0-rc.63**.
+Rollback checkpoint: **v0.19.0-rc.64**.
 
 Bar Ops is a Next.js operations workspace for hospitality teams. The current architecture uses a global UI system for the manager and employee shells, with Shift Plan and the standalone Operation module as the only custom CSS Module exceptions.
 

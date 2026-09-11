@@ -1,10 +1,18 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.64**
+Version: **v0.19.0-rc.65**
 
 ## Current focus
 
-Owner workspace access to the standalone Operation module from the verified rc.63 baseline.
+Operation article editor upgrade from the verified rc.64 baseline.
+
+## rc.65
+
+- Replaced the simple article textarea with an ordered Notes-style block editor.
+- Added text, heading, subheading, bullet list, numbered list, and image blocks.
+- Added block move/remove controls so content can be arranged in article order.
+- Added visible save validation and API error feedback.
+- Rollback checkpoint: v0.19.0-rc.64.
 
 ## rc.64
 
