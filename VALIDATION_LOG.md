@@ -1,25 +1,26 @@
-# v0.19.0-rc.62 Validation
+# v0.19.0-rc.63 Validation
 
 ## Confirmed baseline
 
-The v0.19.0-rc.61 release source was used as the baseline for the Operation compact layout cleanup.
+The v0.19.0-rc.62 release source was used as the baseline for the Operation reader and typography cleanup.
 
-- Rollback checkpoint: v0.19.0-rc.61
+- Rollback checkpoint: v0.19.0-rc.62
 
 ## Interface implementation
 
-- Removed the Operation home intro title/copy block.
-- Removed the duplicate News module card from the Modules section.
-- Removed standalone Operation, Handbook, Daily Tasks, and We Need page titles.
-- Fixed the Operation segmented navigation to the viewport and centered the links inside the pill.
-- Reduced Operation section and category heading scale.
+- Removed the top-right Close button from fullscreen article readers.
+- Changed the bottom reader X into a centered outlined circle with no fill.
+- Removed visible article-link CTA buttons from article content.
+- Removed Handbook category group headings and kept category pills on article cards.
+- Tightened Operation typography across reader, article cards, task rows, and need rows.
 
 ## Validation status
 
+- Clean install (`npm ci --no-audit --no-fund`): passed.
 - ESLint: passed with zero errors and zero warnings.
 - TypeScript (`tsc --noEmit`): passed with unused-local and unused-parameter checks enabled.
 - Current regression suite: all 10 source-contract suites passed.
-- UI contract: passed, including the fixed centered Operation nav and removed duplicate title/news-card patterns.
+- UI contract: passed, including the bottom-only outlined reader close control, removed article-link buttons, and flat Handbook article list.
 - Release validation, stabilization preflight, and environment validation: passed; `DATABASE_URL` was intentionally absent and reported as a warning.
 - Next.js 16.2.12 Turbopack production build: passed; 47 pages/routes were generated or registered successfully, including `/operation` and `/api/operation-module`.
 

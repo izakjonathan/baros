@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { ArrowLeft, BookOpen, CheckSquare, Plus, ShoppingBasket, Trash2, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import styles from "./OperationModule.module.css";
 import type { OperationArticle, OperationArticleKind, OperationContentBlock, OperationDailyTask, OperationModuleState, OperationNeed } from "./types";
 
@@ -45,11 +45,6 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     const text = `${article.title} ${article.description} ${article.category}`.toLowerCase();
     return categoryMatch && text.includes(query.toLowerCase());
   });
-  const groupedHandbook = useMemo(() => {
-    const groups = new Map<string, OperationArticle[]>();
-    for (const article of filteredHandbook) groups.set(article.category, [...(groups.get(article.category) || []), article]);
-    return [...groups.entries()];
-  }, [filteredHandbook]);
 
   async function refresh() {
     if (devMode) return;
@@ -131,12 +126,12 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     </header>
     <main className={styles.operationMain}>
       {view === "home" && <HomeView news={state.news} openArticle={(article) => setReaderStack([article])} openView={setView} />}
-      {view === "handbook" && <HandbookView articles={groupedHandbook} categories={handbookCategories} query={query} category={category} setQuery={setQuery} setCategory={setCategory} openArticle={(article) => setReaderStack([article])} />}
+      {view === "handbook" && <HandbookView articles={filteredHandbook} categories={handbookCategories} query={query} category={category} setQuery={setQuery} setCategory={setCategory} openArticle={(article) => setReaderStack([article])} />}
       {view === "tasks" && <TasksView tasks={state.dailyTasks} canManage={state.canManageContent} taskTitle={taskTitle} taskDescription={taskDescription} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} addTask={addTask} toggleTask={toggleTask} />}
       {view === "needs" && <NeedsView needs={state.needs} needTitle={needTitle} setNeedTitle={setNeedTitle} addNeed={addNeed} markNeedOrdered={markNeedOrdered} />}
       {state.canManageContent && <AdminPanel draft={draft} setDraft={setDraft} saveArticle={saveArticle} saving={saving} articles={allArticles} editArticle={setDraft} deleteArticle={deleteArticle} />}
     </main>
-    {currentArticle && <Reader article={currentArticle} allArticles={allArticles} canGoBack={readerStack.length > 1} goBack={() => setReaderStack(stack => stack.slice(0, -1))} close={() => setReaderStack([])} openLinked={(article) => setReaderStack(stack => [...stack, article])} />}
+    {currentArticle && <Reader article={currentArticle} canGoBack={readerStack.length > 1} goBack={() => setReaderStack(stack => stack.slice(0, -1))} close={() => setReaderStack([])} />}
   </div>;
 }
 
@@ -148,8 +143,8 @@ function HomeView({ news, openArticle, openView }: { news: OperationArticle[]; o
   return <><SectionHeader title="News" detail="Latest bar updates" /> <div className={styles.cardGrid}>{news.map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} />)}{!news.length && <div className={styles.empty}>No news yet.</div>}</div><SectionHeader title="Modules" detail="Open a sub module" /><div className={styles.moduleGrid}><ModuleCard title="Handbook" description="Employee bar articles grouped by category." icon={BookOpen} onClick={() => openView("handbook")} /><ModuleCard title="Daily tasks" description="Day-specific task lists employees can complete." icon={CheckSquare} onClick={() => openView("tasks")} /><ModuleCard title="We need" description="A shared reminder-style order list." icon={ShoppingBasket} onClick={() => openView("needs")} /></div></>;
 }
 
-function HandbookView({ articles, categories, query, category, setQuery, setCategory, openArticle }: { articles: Array<[string, OperationArticle[]]>; categories: string[]; query: string; category: string; setQuery: (value: string) => void; setCategory: (value: string) => void; openArticle: (article: OperationArticle) => void }) {
-  return <><div className={styles.toolbar}><input className={styles.search} value={query} onChange={event => setQuery(event.target.value)} placeholder="Search handbook" /><div className={styles.pills}>{categories.map(item => <button key={item} className={styles.pill} type="button" aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div></div><div className={styles.articleGroups}>{articles.map(([group, groupArticles]) => <section className={styles.group} key={group}><h2>{group}</h2>{groupArticles.map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} />)}</section>)}{!articles.length && <div className={styles.empty}>No handbook articles found.</div>}</div></>;
+function HandbookView({ articles, categories, query, category, setQuery, setCategory, openArticle }: { articles: OperationArticle[]; categories: string[]; query: string; category: string; setQuery: (value: string) => void; setCategory: (value: string) => void; openArticle: (article: OperationArticle) => void }) {
+  return <><div className={styles.toolbar}><input className={styles.search} value={query} onChange={event => setQuery(event.target.value)} placeholder="Search handbook" /><div className={styles.pills}>{categories.map(item => <button key={item} className={styles.pill} type="button" aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div></div><div className={styles.articleGroups}>{articles.map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} />)}{!articles.length && <div className={styles.empty}>No handbook articles found.</div>}</div></>;
 }
 
 function TasksView({ tasks, canManage, taskTitle, taskDescription, setTaskTitle, setTaskDescription, addTask, toggleTask }: { tasks: OperationDailyTask[]; canManage: boolean; taskTitle: string; taskDescription: string; setTaskTitle: (value: string) => void; setTaskDescription: (value: string) => void; addTask: () => void; toggleTask: (task: OperationDailyTask) => void }) {
@@ -176,11 +171,11 @@ function ModuleCard({ title, description, icon: Icon, onClick }: { title: string
   return <button type="button" className={styles.operationCard} onClick={onClick}><div><h3>{title}</h3><p>{description}</p></div><Icon size={26} /></button>;
 }
 
-function Reader({ article, allArticles, canGoBack, goBack, close, openLinked }: { article: OperationArticle; allArticles: OperationArticle[]; canGoBack: boolean; goBack: () => void; close: () => void; openLinked: (article: OperationArticle) => void }) {
-  return <aside className={styles.reader} aria-modal="true" role="dialog" aria-label={article.title}><div className={styles.readerTop}>{canGoBack ? <button type="button" onClick={goBack}><ArrowLeft size={17} />Back</button> : <span />}<button type="button" onClick={close}>Close</button></div><article className={styles.readerArticle}>{article.content.map((block, index) => <RenderBlock key={`${block.type}-${index}`} block={block} allArticles={allArticles} openLinked={openLinked} />)}</article><div className={styles.readerBottom}><button type="button" className={styles.closeCircle} onClick={close} aria-label="Close article"><X /></button></div></aside>;
+function Reader({ article, canGoBack, goBack, close }: { article: OperationArticle; canGoBack: boolean; goBack: () => void; close: () => void }) {
+  return <aside className={styles.reader} aria-modal="true" role="dialog" aria-label={article.title}>{canGoBack && <div className={styles.readerTop}><button type="button" onClick={goBack}><ArrowLeft size={17} />Back</button></div>}<article className={styles.readerArticle}>{article.content.map((block, index) => <RenderBlock key={`${block.type}-${index}`} block={block} />)}</article><div className={styles.readerBottom}><button type="button" className={styles.closeCircle} onClick={close} aria-label="Close article"><X /></button></div></aside>;
 }
 
-function RenderBlock({ block, allArticles, openLinked }: { block: OperationContentBlock; allArticles: OperationArticle[]; openLinked: (article: OperationArticle) => void }) {
+function RenderBlock({ block }: { block: OperationContentBlock }) {
   if (block.type === "title") return <h1>{block.text}</h1>;
   if (block.type === "h1") return <h2>{block.text}</h2>;
   if (block.type === "h2") return <h3>{block.text}</h3>;
@@ -188,6 +183,5 @@ function RenderBlock({ block, allArticles, openLinked }: { block: OperationConte
   if (block.type === "bullets") return <ul>{block.items.map(item => <li key={item}>{item}</li>)}</ul>;
   if (block.type === "numbered") return <ol>{block.items.map(item => <li key={item}>{item}</li>)}</ol>;
   if (block.type === "image") return <Image className={styles.readerImage} src={block.src} alt={block.alt} width={1200} height={800} unoptimized />;
-  const linked = allArticles.find(article => article.id === block.articleId);
-  return <button type="button" className={styles.articleLink} disabled={!linked} onClick={() => linked && openLinked(linked)}><span>{block.label}</span></button>;
+  return null;
 }

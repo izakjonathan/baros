@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.19.0-rc.63
+
+- Removed the top-right Close button from fullscreen Operation article readers.
+- Changed the bottom article close control to a centered outlined circle with no fill.
+- Removed visible article-link CTA buttons from handbook/news articles.
+- Removed Handbook category group headings so categories appear only as article-card pills.
+- Tightened Operation typography across news, handbook, daily tasks, needs, cards, and reader views.
+- Added UI-contract coverage for the reader close control, removed article-link buttons, and flat Handbook article list.
+- No dependency-version, database-schema, route-shape, authorization, permission, or business-workflow changes.
+
 ## v0.19.0-rc.62
 
 - Removed the Operation home intro title/copy block so News starts the module content directly.

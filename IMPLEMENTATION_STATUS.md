@@ -1,10 +1,19 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.62**
+Version: **v0.19.0-rc.63**
 
 ## Current focus
 
-Operation module compact layout cleanup from the verified rc.61 baseline.
+Operation article reader and typography cleanup from the verified rc.62 baseline.
+
+## rc.63
+
+- Removed the top-right article reader Close button.
+- Converted the bottom reader X into a centered outlined circle with no fill.
+- Removed visible article-link CTA buttons from articles.
+- Removed Handbook category group headings and kept category pills on article cards.
+- Improved Operation typography across news, handbook, daily tasks, and needs.
+- Rollback checkpoint: v0.19.0-rc.62.
 
 ## rc.62
 
