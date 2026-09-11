@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.19.0-rc.66
+
+- Moved the Operation owner article form into a full-screen Notes-style editor window.
+- Added dedicated Add handbook article and Add news buttons that open the editor directly.
+- Kept ordered content blocks for title, heading, subheading, body, bullet list, numbered list, and images.
+- Moved save/close actions into the full-screen editor and kept validation messages visible when saving fails.
+- Added UI-contract coverage for the full-screen editor, fixed bottom format bar, and visible save feedback.
+- No dependency-version, database-schema, route-shape, authorization, permission, or business-workflow changes.
+
 ## v0.19.0-rc.65
 
 - Replaced the basic Operation article textarea with an ordered Notes-style block editor for OWNER/ADMIN users.

@@ -39,21 +39,38 @@
 .closeCircle svg{width:1.35rem;height:1.35rem}
 .adminPanel{display:grid;gap:.75rem;padding:.9rem;border:1px solid #292929;border-radius:1rem;background:rgba(255,255,255,.12)}
 .adminPanel h3{font-size:1rem;letter-spacing:-.01em}
+.adminPanelHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem}
+.adminPanelHeader p{margin-top:.12rem;font-family:var(--font-body);font-size:.78rem;line-height:1.35;color:#69645d}
 .adminGrid,.editorMeta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}
 .adminPanel input,.adminPanel textarea,.adminPanel select,.needInput input{min-height:2.75rem;border:1px solid #292929;border-radius:.75rem;background:rgba(255,255,255,.16);color:inherit;padding:.65rem .8rem}
 .adminPanel textarea{grid-column:1/-1;min-height:7rem;resize:vertical}
 .editorMeta input:nth-of-type(2){grid-column:1/-1}
-.notesToolbar{display:flex;gap:.35rem;overflow-x:auto;padding:.2rem 0}
-.notesToolbar button{min-height:2rem;display:inline-flex;align-items:center;gap:.25rem;border:1px solid rgba(41,41,41,.4);border-radius:999px;background:rgba(255,255,255,.18);color:inherit;padding:.25rem .65rem;font-size:.68rem;font-weight:750;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
-.notesEditor{display:grid;gap:.55rem;padding:.55rem;border:1px solid rgba(41,41,41,.35);border-radius:1rem;background:rgba(255,255,255,.12)}
-.editorBlock{display:grid;gap:.45rem;padding:.65rem;border:1px solid rgba(41,41,41,.2);border-radius:.85rem;background:rgba(255,255,255,.18)}
+.articleEditor{position:fixed;inset:0;z-index:70;display:grid;grid-template-rows:auto minmax(0,1fr) auto;background:#050505;color:#f7f2e7;padding:max(.85rem,env(safe-area-inset-top)) max(.85rem,env(safe-area-inset-right)) max(.85rem,env(safe-area-inset-bottom)) max(.85rem,env(safe-area-inset-left))}
+.articleEditorTop{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.15rem .05rem .9rem}
+.editorIconButton,.editorDoneButton{display:inline-grid;place-items:center;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:#191919;color:#f7f2e7}
+.editorIconButton{width:3.1rem;height:3.1rem}
+.editorDoneButton{width:3.55rem;height:3.55rem;background:#dfbb38;color:#fff7ce;border-color:rgba(255,255,255,.14)}
+.editorDoneButton:disabled{opacity:.6}
+.articleEditorCanvas{width:min(43rem,100%);margin-inline:auto;overflow:auto;padding:1.45rem .35rem 6.5rem}
+.articleEditor .editorMeta{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:.7rem}
+.articleEditor input,.articleEditor textarea,.articleEditor select{width:100%;border:0;background:transparent;color:inherit;outline:0}
+.articleEditor select,.articleEditor .editorMeta input{min-height:2.35rem;border:1px solid rgba(255,255,255,.13);border-radius:999px;background:#151515;padding:.35rem .8rem;font-size:.78rem;font-weight:720;text-transform:uppercase;letter-spacing:.06em}
+.editorTitleInput{font-size:clamp(2.1rem,8vw,3.8rem);line-height:.96;font-weight:760;letter-spacing:-.05em}
+.editorDescriptionInput{min-height:4.8rem;margin:.55rem 0 1.1rem;font-family:var(--font-body);font-size:1rem;line-height:1.45;color:#d6d0c6;resize:vertical}
+.notesToolbar{position:fixed;left:max(.85rem,env(safe-area-inset-left));right:max(.85rem,env(safe-area-inset-right));bottom:max(.85rem,env(safe-area-inset-bottom));z-index:75;display:flex;justify-content:center;gap:.28rem;overflow-x:auto;width:min(42rem,calc(100% - 1.7rem));margin-inline:auto;padding:.42rem;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:#1b1b1b;box-shadow:0 .75rem 2rem rgba(0,0,0,.45)}
+.notesToolbar button{min-height:2.15rem;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:999px;background:transparent;color:#f7f2e7;padding:.2rem .65rem;font-size:.76rem;font-weight:760;white-space:nowrap}
+.notesToolbar button:active{background:#dfbb38;color:#171717}
+.notesEditor{display:grid;gap:.45rem}
+.editorBlock{display:grid;gap:.28rem;padding:.18rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
 .editorBlockTools{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}
-.editorBlockTools span{margin-right:auto;font-size:.66rem;font-weight:780;text-transform:uppercase;letter-spacing:.08em;color:#69645d}
-.editorBlockTools button{min-height:1.7rem;border:1px solid rgba(41,41,41,.3);border-radius:999px;background:transparent;color:inherit;padding:.15rem .5rem;font-size:.64rem;font-weight:720;text-transform:uppercase;letter-spacing:.05em}
-.editorBody{font-family:var(--font-body);font-size:.95rem;line-height:1.5}
-.editorH1{min-height:3.2rem!important;font-size:1.55rem;font-weight:760;line-height:1.05;letter-spacing:-.035em}
-.editorH2{min-height:2.8rem!important;font-size:1.15rem;font-weight:760;line-height:1.1;letter-spacing:-.025em}
-.editorMessage{font-family:var(--font-body);font-size:.82rem;color:#5f5a54}
+.editorBlockTools span{margin-right:auto;font-size:.62rem;font-weight:780;text-transform:uppercase;letter-spacing:.08em;color:#888}
+.editorBlockTools button{min-height:1.55rem;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:#151515;color:#dcd6cc;padding:.1rem .48rem;font-size:.6rem;font-weight:720;text-transform:uppercase;letter-spacing:.05em}
+.editorBlock input{min-height:2.35rem;font-family:var(--font-body);font-size:.92rem;color:#dcd6cc}
+.editorBlock textarea{min-height:4rem;font-family:var(--font-body);font-size:.98rem;line-height:1.5;color:#f7f2e7;resize:vertical}
+.editorBody{font-family:var(--font-body);font-size:1rem!important;line-height:1.55}
+.editorH1{min-height:3.2rem!important;font-size:1.75rem!important;font-weight:760;line-height:1.05;letter-spacing:-.035em}
+.editorH2{min-height:2.8rem!important;font-size:1.22rem!important;font-weight:760;line-height:1.1;letter-spacing:-.025em}
+.editorMessage{font-family:var(--font-body);font-size:.82rem;color:#8a7432}
 .adminActions,.needInput{display:flex;gap:.5rem;flex-wrap:wrap}
 .adminActions button,.needInput button,.taskRow button,.needRow button{min-height:2.35rem;border:1px solid #292929;border-radius:999px;background:#292929;color:#e7e3dc;padding:.3rem .8rem;font-weight:750}
 .taskRow,.needRow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.7rem;align-items:center;padding:.78rem .85rem;border:1px solid #292929;border-radius:.92rem;background:rgba(255,255,255,.14)}
@@ -65,7 +82,9 @@
 @media(max-width:42rem){
   .operationShell{padding-inline:max(.85rem,env(safe-area-inset-left));padding-right:max(.85rem,env(safe-area-inset-right))}
   .operationHeader nav{width:100%}
-  .moduleGrid,.adminGrid,.editorMeta{grid-template-columns:1fr}
+  .moduleGrid,.adminGrid,.editorMeta,.articleEditor .editorMeta{grid-template-columns:1fr}
+  .adminPanelHeader{display:grid}
+  .notesToolbar{justify-content:flex-start}
   .operationCard{min-height:4.5rem;border-radius:.92rem;padding:.78rem .85rem}
   .operationCard h3{font-size:clamp(1.05rem,5.8vw,1.42rem)}
   .operationCard small{font-size:.68rem}

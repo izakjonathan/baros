@@ -1,18 +1,19 @@
-# v0.19.0-rc.65 — Operation Notes-Style Article Editor
+# v0.19.0-rc.66 — Operation Full-Screen Article Editor
 
 ## Baseline
 
-- Continued from v0.19.0-rc.64 after the owner Operation access fix. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.65 after the ordered content block editor release. That release is the rollback checkpoint.
 
 ## Editor upgrade
 
-- Replaced the basic article textarea with an ordered Notes-style block editor for OWNER and ADMIN users.
-- Added insertable text, heading, subheading, bullet list, numbered list, and image blocks.
-- Added block move/remove controls so formatted text and images can be arranged where they belong inside the article.
-- Added visible editor feedback for missing title, missing description, missing content, and API save failures.
+- Replaced the inline owner article form with a full-screen editor window.
+- Added dedicated Add handbook article and Add news buttons that open the full editor directly.
+- Preserved ordered article blocks for title, heading, subheading, body, bullet list, numbered list, and image placement.
+- Moved save and close controls into the editor chrome and kept validation/API messages visible when saving fails.
+- Added a fixed bottom format bar so content block tools stay available while writing.
 
 ## Scope
 
-No dependency, database-schema, route-shape, permission, or existing business-workflow changes are included. The change is limited to the standalone Operation module article editor.
+No dependency, database-schema, route-shape, permission, or existing business-workflow changes are included. The change is limited to the standalone Operation module article editor interface.
 
-Rollback checkpoint: **v0.19.0-rc.64**.
+Rollback checkpoint: **v0.19.0-rc.65**.

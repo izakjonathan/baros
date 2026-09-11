@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowLeft, BookOpen, CheckSquare, Plus, ShoppingBasket, Trash2, X } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, CheckSquare, Plus, ShoppingBasket, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import styles from "./OperationModule.module.css";
 import type { OperationArticle, OperationArticleKind, OperationContentBlock, OperationDailyTask, OperationModuleState, OperationNeed } from "./types";
@@ -49,6 +49,7 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
   const [needTitle, setNeedTitle] = useState("");
   const [saving, setSaving] = useState(false);
   const [editorMessage, setEditorMessage] = useState("");
+  const [editorOpen, setEditorOpen] = useState(false);
   const currentArticle = readerStack.at(-1) || null;
   const allArticles = [...state.news, ...state.handbook];
   const handbookCategories = ["All", ...Array.from(new Set(state.handbook.map(article => article.category)))];
@@ -67,10 +68,10 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
 
   async function saveArticle() {
     setEditorMessage("");
-    if (!draft.title.trim()) { setEditorMessage("Add an article title first."); return; }
-    if (!draft.description.trim()) { setEditorMessage("Add a short card description first."); return; }
+    if (!draft.title.trim()) { setEditorMessage("Add an article title first."); return false; }
+    if (!draft.description.trim()) { setEditorMessage("Add a short card description first."); return false; }
     const content = blocksFromDraft(draft);
-    if (content.length < 2) { setEditorMessage("Add at least one content block before saving."); return; }
+    if (content.length < 2) { setEditorMessage("Add at least one content block before saving."); return false; }
     const article: OperationArticle = {
       id: draft.id || crypto.randomUUID(),
       kind: draft.kind,
@@ -85,15 +86,17 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
       setState(current => ({ ...current, handbook: article.kind === "HANDBOOK" ? upsertArticle(current.handbook, article) : current.handbook, news: article.kind === "NEWS" ? upsertArticle(current.news, article) : current.news }));
       setDraft(draftFromArticle(undefined, draft.kind));
       setEditorMessage("Article saved.");
-      return;
+      setEditorOpen(false);
+      return true;
     }
     setSaving(true);
     const response = await fetch("/api/operation-module", { method: draft.id ? "PATCH" : "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "article", id: draft.id, kind: article.kind, category: article.category, title: article.title, description: article.description, content: article.content }) });
     setSaving(false);
-    if (response.ok) { setDraft(draftFromArticle(undefined, draft.kind)); setEditorMessage("Article saved."); await refresh(); }
+    if (response.ok) { setDraft(draftFromArticle(undefined, draft.kind)); setEditorMessage("Article saved."); setEditorOpen(false); await refresh(); return true; }
     else {
       const failure: unknown = await response.json().catch(() => null);
       setEditorMessage(typeof failure === "object" && failure !== null && "error" in failure && typeof failure.error === "string" ? failure.error : "Could not save article.");
+      return false;
     }
   }
 
@@ -150,9 +153,10 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
       {view === "handbook" && <HandbookView articles={filteredHandbook} categories={handbookCategories} query={query} category={category} setQuery={setQuery} setCategory={setCategory} openArticle={(article) => setReaderStack([article])} />}
       {view === "tasks" && <TasksView tasks={state.dailyTasks} canManage={state.canManageContent} taskTitle={taskTitle} taskDescription={taskDescription} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} addTask={addTask} toggleTask={toggleTask} />}
       {view === "needs" && <NeedsView needs={state.needs} needTitle={needTitle} setNeedTitle={setNeedTitle} addNeed={addNeed} markNeedOrdered={markNeedOrdered} />}
-      {state.canManageContent && <AdminPanel draft={draft} setDraft={setDraft} saveArticle={saveArticle} saving={saving} message={editorMessage} articles={allArticles} editArticle={(nextDraft) => { setDraft(nextDraft); setEditorMessage(""); }} deleteArticle={deleteArticle} />}
+      {state.canManageContent && <AdminPanel message={editorMessage} articles={allArticles} addArticle={(kind) => { setDraft(draftFromArticle(undefined, kind)); setEditorMessage(""); setEditorOpen(true); }} editArticle={(nextDraft) => { setDraft(nextDraft); setEditorMessage(""); setEditorOpen(true); }} deleteArticle={deleteArticle} />}
     </main>
     {currentArticle && <Reader article={currentArticle} canGoBack={readerStack.length > 1} goBack={() => setReaderStack(stack => stack.slice(0, -1))} close={() => setReaderStack([])} />}
+    {editorOpen && <ArticleEditor draft={draft} setDraft={setDraft} saveArticle={saveArticle} saving={saving} message={editorMessage} close={() => { setEditorOpen(false); setEditorMessage(""); }} />}
   </div>;
 }
 
@@ -176,7 +180,11 @@ function NeedsView({ needs, needTitle, setNeedTitle, addNeed, markNeedOrdered }:
   return <><div className={styles.needInput}><input value={needTitle} onChange={event => setNeedTitle(event.target.value)} placeholder="Add something needed for the bar" /><button type="button" onClick={addNeed}><Plus size={16} />Add</button></div><div className={styles.needList}>{needs.map(need => <article className={styles.needRow} key={need.id} data-ordered={need.status === "ORDERED"}><ShoppingBasket size={22} /><div><h3>{need.title}</h3>{need.note && <p>{need.note}</p>}</div><button type="button" onClick={() => markNeedOrdered(need)}>Ordered</button></article>)}{!needs.length && <div className={styles.empty}>Nothing needed right now.</div>}</div></>;
 }
 
-function AdminPanel({ draft, setDraft, saveArticle, saving, message, articles, editArticle, deleteArticle }: { draft: DraftArticle; setDraft: (draft: DraftArticle) => void; saveArticle: () => void; saving: boolean; message: string; articles: OperationArticle[]; editArticle: (draft: DraftArticle) => void; deleteArticle: (article: OperationArticle) => void }) {
+function AdminPanel({ message, articles, addArticle, editArticle, deleteArticle }: { message: string; articles: OperationArticle[]; addArticle: (kind: OperationArticleKind) => void; editArticle: (draft: DraftArticle) => void; deleteArticle: (article: OperationArticle) => void }) {
+  return <section className={styles.adminPanel}><div className={styles.adminPanelHeader}><div><h3>Owner articles</h3><p>Manage handbook and news posts.</p></div><div className={styles.adminActions}><button type="button" onClick={() => addArticle("HANDBOOK")}><Plus size={16} />Add handbook article</button><button type="button" onClick={() => addArticle("NEWS")}><Plus size={16} />Add news</button></div></div>{message && <p className={styles.editorMessage} role="status">{message}</p>}<div className={styles.cardGrid}>{articles.map(article => <article className={styles.operationCard} key={article.id}><div><h3>{article.title}</h3><p>{article.kind.toLowerCase()} · {article.category}</p></div><div className={styles.adminActions}><button type="button" onClick={() => editArticle(draftFromArticle(article, article.kind))}>Edit</button><button type="button" onClick={() => deleteArticle(article)} aria-label={`Delete ${article.title}`}><Trash2 size={16} /></button></div></article>)}</div></section>;
+}
+
+function ArticleEditor({ draft, setDraft, saveArticle, saving, message, close }: { draft: DraftArticle; setDraft: (draft: DraftArticle) => void; saveArticle: () => Promise<boolean>; saving: boolean; message: string; close: () => void }) {
   const setBlock = (index: number, block: OperationContentBlock) => setDraft({ ...draft, content: draft.content.map((item, position) => position === index ? block : item) });
   const addBlock = (type: EditableBlockType) => setDraft({ ...draft, content: [...draft.content, emptyBlock(type)] });
   const removeBlock = (index: number) => setDraft({ ...draft, content: draft.content.length === 1 ? [emptyBlock("body")] : draft.content.filter((_, position) => position !== index) });
@@ -187,7 +195,7 @@ function AdminPanel({ draft, setDraft, saveArticle, saving, message, articles, e
     [content[index], content[nextIndex]] = [content[nextIndex], content[index]];
     setDraft({ ...draft, content });
   };
-  return <section className={styles.adminPanel}><h3>Owner editor</h3><div className={styles.editorMeta}><select value={draft.kind} onChange={event => setDraft({ ...draft, kind: event.target.value as OperationArticleKind })}><option value="HANDBOOK">Handbook</option><option value="NEWS">News</option></select><input value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })} placeholder="Category" /><input value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} placeholder="Title" /><input value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} placeholder="Short card description" /></div><div className={styles.notesToolbar} aria-label="Add article content block">{(["body", "h1", "h2", "bullets", "numbered", "image"] as EditableBlockType[]).map(type => <button key={type} type="button" onClick={() => addBlock(type)}><Plus size={14} />{labelForBlock(type)}</button>)}</div><div className={styles.notesEditor}>{draft.content.map((block, index) => <EditorBlock key={`${index}-${block.type}`} block={block} index={index} setBlock={setBlock} removeBlock={removeBlock} moveBlock={moveBlock} />)}</div>{message && <p className={styles.editorMessage} role="status">{message}</p>}<div className={styles.adminActions}><button type="button" disabled={saving} onClick={saveArticle}>{saving ? "Saving…" : draft.id ? "Save article" : "Add article"}</button><button type="button" onClick={() => setDraft(draftFromArticle(undefined, draft.kind))}>Clear</button></div><div className={styles.cardGrid}>{articles.map(article => <article className={styles.operationCard} key={article.id}><div><h3>{article.title}</h3><p>{article.kind.toLowerCase()} · {article.category}</p></div><div className={styles.adminActions}><button type="button" onClick={() => editArticle(draftFromArticle(article, article.kind))}>Edit</button><button type="button" onClick={() => deleteArticle(article)}><Trash2 size={16} /></button></div></article>)}</div></section>;
+  return <aside className={styles.articleEditor} aria-modal="true" role="dialog" aria-label={draft.id ? "Edit article" : "Add article"}><div className={styles.articleEditorTop}><button type="button" className={styles.editorIconButton} onClick={close} aria-label="Close editor"><ArrowLeft size={22} /></button><button type="button" className={styles.editorDoneButton} disabled={saving} onClick={saveArticle} aria-label="Save article">{saving ? "Saving" : <Check size={24} />}</button></div><div className={styles.articleEditorCanvas}><div className={styles.editorMeta}><select value={draft.kind} onChange={event => setDraft({ ...draft, kind: event.target.value as OperationArticleKind })}><option value="HANDBOOK">Handbook</option><option value="NEWS">News</option></select><input value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })} placeholder="Category" /></div><input className={styles.editorTitleInput} value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} placeholder="Title" /><textarea className={styles.editorDescriptionInput} value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} placeholder="Short card description" /><div className={styles.notesEditor}>{draft.content.map((block, index) => <EditorBlock key={`${index}-${block.type}`} block={block} index={index} setBlock={setBlock} removeBlock={removeBlock} moveBlock={moveBlock} />)}</div>{message && <p className={styles.editorMessage} role="status">{message}</p>}</div><div className={styles.notesToolbar} aria-label="Add article content block">{(["body", "h1", "h2", "bullets", "numbered", "image"] as EditableBlockType[]).map(type => <button key={type} type="button" onClick={() => addBlock(type)}>{labelForBlock(type)}</button>)}</div></aside>;
 }
 
 function emptyBlock(type: EditableBlockType): OperationContentBlock {

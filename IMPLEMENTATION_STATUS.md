@@ -1,10 +1,18 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.65**
+Version: **v0.19.0-rc.66**
 
 ## Current focus
 
-Operation article editor upgrade from the verified rc.64 baseline.
+Operation full-screen article editor upgrade from the verified rc.65 baseline.
+
+## rc.66
+
+- Moved the Operation owner article editor into a full-screen Notes-style window.
+- Added dedicated Add handbook article and Add news buttons.
+- Kept text, heading, subheading, bullet list, numbered list, and image blocks in article order.
+- Kept save validation visible inside the editor so failed Add article attempts explain what is missing.
+- Rollback checkpoint: v0.19.0-rc.65.
 
 ## rc.65
 
