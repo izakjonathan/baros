@@ -2,39 +2,47 @@
 
 import Image from "next/image";
 import { ArrowLeft, BookOpen, Check, CheckSquare, Plus, ShoppingBasket, Trash2, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import styles from "./OperationModule.module.css";
-import type { OperationArticle, OperationArticleKind, OperationContentBlock, OperationDailyTask, OperationModuleState, OperationNeed } from "./types";
+import type { OperationArticle, OperationArticleKind, OperationContentBlock, OperationDailyTask, OperationModuleState, OperationNeed, OperationRichTextDelta, OperationRichTextOp } from "./types";
 
 type View = "home" | "handbook" | "tasks" | "needs";
-type DraftArticle = { id?: string; kind: OperationArticleKind; category: string; title: string; description: string; content: OperationContentBlock[] };
-type EditableBlockType = Exclude<OperationContentBlock["type"], "title" | "articleLink">;
+type DraftArticle = { id?: string; kind: OperationArticleKind; category: string; title: string; description: string; delta: OperationRichTextDelta };
+type QuillInstance = { getContents: () => OperationRichTextDelta; setContents: (delta: OperationRichTextDelta) => void; getSelection: (focus?: boolean) => { index: number; length: number } | null; insertEmbed: (index: number, type: string, value: string, source?: string) => void; setSelection: (index: number, length?: number, source?: string) => void; on: (event: "text-change", callback: () => void) => void; off: (event: "text-change", callback: () => void) => void };
 
 const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 function draftFromArticle(article?: OperationArticle, kind: OperationArticleKind = "HANDBOOK"): DraftArticle {
-  const content = article?.content.filter(block => block.type !== "title" && block.type !== "articleLink") || [{ type: "body", text: "" }];
-  return { id: article?.id, kind, category: article?.category || "General", title: article?.title || "", description: article?.description || "", content };
+  return { id: article?.id, kind, category: article?.category || "General", title: article?.title || "", description: article?.description || "", delta: deltaFromBlocks(article?.content || []) };
 }
 
 function blocksFromDraft(draft: DraftArticle): OperationContentBlock[] {
-  const blocks: OperationContentBlock[] = [{ type: "title", text: draft.title }];
-  return blocks.concat(draft.content.flatMap(cleanContentBlock));
+  return [{ type: "title", text: draft.title }, { type: "richText", delta: cleanRichTextDelta(draft.delta) }];
 }
 
-function cleanContentBlock(block: OperationContentBlock): OperationContentBlock[] {
-  if (block.type === "title" || block.type === "articleLink") return [];
-  if (block.type === "image") {
-    const src = block.src.trim();
-    if (!src) return [];
-    return [{ type: "image", src, alt: block.alt.trim() || "Article image" }];
-  }
-  if (block.type === "bullets" || block.type === "numbered") {
-    const items = block.items.map(item => item.trim()).filter(Boolean);
-    return items.length ? [{ type: block.type, items }] : [];
-  }
-  const text = block.text.trim();
-  return text ? [{ type: block.type, text }] : [];
+function deltaFromBlocks(blocks: OperationContentBlock[]): OperationRichTextDelta {
+  const richText = blocks.find(block => block.type === "richText");
+  if (richText?.type === "richText") return cleanRichTextDelta(richText.delta);
+  const ops = blocks.flatMap((block): OperationRichTextOp[] => {
+    if (block.type === "title" || block.type === "articleLink") return [];
+    if (block.type === "image") return block.src ? [{ insert: { image: block.src }, attributes: block.alt ? { alt: block.alt } : undefined }, { insert: "\n" }] : [];
+    if (block.type === "bullets" || block.type === "numbered") return block.items.flatMap(item => item.trim() ? [{ insert: item.trim() }, { insert: "\n", attributes: { list: block.type === "bullets" ? "bullet" : "ordered" } }] : []);
+    if (block.type === "h1") return block.text.trim() ? [{ insert: block.text.trim() }, { insert: "\n", attributes: { header: 1 } }] : [];
+    if (block.type === "h2") return block.text.trim() ? [{ insert: block.text.trim() }, { insert: "\n", attributes: { header: 2 } }] : [];
+    if (block.type === "richText") return block.delta.ops;
+    return block.text.trim() ? [{ insert: `${block.text.trim()}\n` }] : [];
+  });
+  return ops.length ? { ops } : { ops: [{ insert: "\n" }] };
+}
+
+function cleanRichTextDelta(delta: OperationRichTextDelta): OperationRichTextDelta {
+  const ops = Array.isArray(delta.ops) ? delta.ops.filter((op): op is OperationRichTextOp => typeof op.insert === "string" || (typeof op.insert === "object" && typeof op.insert.image === "string")).slice(0, 500) : [];
+  return ops.length ? { ops } : { ops: [{ insert: "\n" }] };
+}
+
+function hasRichTextContent(delta: OperationRichTextDelta) {
+  return delta.ops.some(op => typeof op.insert === "string" ? op.insert.trim().length > 0 : Boolean(op.insert.image));
 }
 
 export function OperationModule({ initialState, devMode }: { initialState: OperationModuleState; devMode: boolean }) {
@@ -70,8 +78,8 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     setEditorMessage("");
     if (!draft.title.trim()) { setEditorMessage("Add an article title first."); return false; }
     if (!draft.description.trim()) { setEditorMessage("Add a short card description first."); return false; }
+    if (!hasRichTextContent(draft.delta)) { setEditorMessage("Add article text or an image before saving."); return false; }
     const content = blocksFromDraft(draft);
-    if (content.length < 2) { setEditorMessage("Add at least one content block before saving."); return false; }
     const article: OperationArticle = {
       id: draft.id || crypto.randomUUID(),
       kind: draft.kind,
@@ -185,33 +193,51 @@ function AdminPanel({ message, articles, addArticle, editArticle, deleteArticle 
 }
 
 function ArticleEditor({ draft, setDraft, saveArticle, saving, message, close }: { draft: DraftArticle; setDraft: (draft: DraftArticle) => void; saveArticle: () => Promise<boolean>; saving: boolean; message: string; close: () => void }) {
-  const setBlock = (index: number, block: OperationContentBlock) => setDraft({ ...draft, content: draft.content.map((item, position) => position === index ? block : item) });
-  const addBlock = (type: EditableBlockType) => setDraft({ ...draft, content: [...draft.content, emptyBlock(type)] });
-  const removeBlock = (index: number) => setDraft({ ...draft, content: draft.content.length === 1 ? [emptyBlock("body")] : draft.content.filter((_, position) => position !== index) });
-  const moveBlock = (index: number, direction: -1 | 1) => {
-    const nextIndex = index + direction;
-    if (nextIndex < 0 || nextIndex >= draft.content.length) return;
-    const content = [...draft.content];
-    [content[index], content[nextIndex]] = [content[nextIndex], content[index]];
-    setDraft({ ...draft, content });
-  };
-  return <aside className={styles.articleEditor} aria-modal="true" role="dialog" aria-label={draft.id ? "Edit article" : "Add article"}><div className={styles.articleEditorTop}><button type="button" className={styles.editorIconButton} onClick={close} aria-label="Close editor"><ArrowLeft size={22} /></button><button type="button" className={styles.editorDoneButton} disabled={saving} onClick={saveArticle} aria-label="Save article">{saving ? "Saving" : <Check size={24} />}</button></div><div className={styles.articleEditorCanvas}><div className={styles.editorMeta}><select value={draft.kind} onChange={event => setDraft({ ...draft, kind: event.target.value as OperationArticleKind })}><option value="HANDBOOK">Handbook</option><option value="NEWS">News</option></select><input value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })} placeholder="Category" /></div><input className={styles.editorTitleInput} value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} placeholder="Title" /><textarea className={styles.editorDescriptionInput} value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} placeholder="Short card description" /><div className={styles.notesEditor}>{draft.content.map((block, index) => <EditorBlock key={`${index}-${block.type}`} block={block} index={index} setBlock={setBlock} removeBlock={removeBlock} moveBlock={moveBlock} />)}</div>{message && <p className={styles.editorMessage} role="status">{message}</p>}</div><div className={styles.notesToolbar} aria-label="Add article content block">{(["body", "h1", "h2", "bullets", "numbered", "image"] as EditableBlockType[]).map(type => <button key={type} type="button" onClick={() => addBlock(type)}>{labelForBlock(type)}</button>)}</div></aside>;
+  return <aside className={styles.articleEditor} aria-modal="true" role="dialog" aria-label={draft.id ? "Edit article" : "Add article"}><div className={styles.articleEditorTop}><button type="button" className={styles.editorIconButton} onClick={close} aria-label="Close editor"><ArrowLeft size={22} /></button><button type="button" className={styles.editorDoneButton} disabled={saving} onClick={saveArticle} aria-label="Save article">{saving ? "Saving" : <Check size={24} />}</button></div><div className={styles.articleEditorCanvas}><div className={styles.editorMeta}><select value={draft.kind} onChange={event => setDraft({ ...draft, kind: event.target.value as OperationArticleKind })}><option value="HANDBOOK">Handbook</option><option value="NEWS">News</option></select><input value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })} placeholder="Category" /></div><input className={styles.editorTitleInput} value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} placeholder="Title" /><textarea className={styles.editorDescriptionInput} value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} placeholder="Short card description" /><QuillArticleEditor value={draft.delta} onChange={(delta) => setDraft({ ...draft, delta })} />{message && <p className={styles.editorMessage} role="status">{message}</p>}</div></aside>;
 }
 
-function emptyBlock(type: EditableBlockType): OperationContentBlock {
-  if (type === "image") return { type, src: "", alt: "" };
-  if (type === "bullets" || type === "numbered") return { type, items: [""] };
-  return { type, text: "" };
-}
+function QuillArticleEditor({ value, onChange }: { value: OperationRichTextDelta; onChange: (delta: OperationRichTextDelta) => void }) {
+  const toolbarRef = useRef<HTMLDivElement | null>(null);
+  const editorRef = useRef<HTMLDivElement | null>(null);
+  const quillRef = useRef<QuillInstance | null>(null);
+  const onChangeRef = useRef(onChange);
+  const initialValueRef = useRef(value);
 
-function labelForBlock(type: EditableBlockType) {
-  return ({ body: "Text", h1: "Heading", h2: "Subhead", bullets: "Bullets", numbered: "Numbered", image: "Image" } satisfies Record<EditableBlockType, string>)[type];
-}
+  useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
+  useEffect(() => {
+    let active = true;
+    let textChange: (() => void) | null = null;
+    const editorElement = editorRef.current;
+    async function loadQuill() {
+      if (!toolbarRef.current || !editorElement || quillRef.current) return;
+      const { default: Quill } = await import("quill");
+      if (!active || !toolbarRef.current || !editorElement) return;
+      const quill = new Quill(editorElement, {
+        modules: { toolbar: { container: toolbarRef.current, handlers: { image: function imageHandler(this: { quill: QuillInstance }) {
+          const src = prompt("Paste image URL");
+          if (!src?.trim()) return;
+          const range = this.quill.getSelection(true) || { index: this.quill.getContents().ops.length, length: 0 };
+          this.quill.insertEmbed(range.index, "image", src.trim(), "user");
+          this.quill.setSelection(range.index + 1, 0, "user");
+        } } }, history: { delay: 500, maxStack: 100, userOnly: true } },
+        placeholder: "Write the article...",
+        theme: "snow",
+      }) as unknown as QuillInstance;
+      quill.setContents(cleanRichTextDelta(initialValueRef.current));
+      textChange = () => onChangeRef.current(cleanRichTextDelta(quill.getContents()));
+      quill.on("text-change", textChange);
+      quillRef.current = quill;
+    }
+    void loadQuill();
+    return () => {
+      active = false;
+      if (textChange && quillRef.current) quillRef.current.off("text-change", textChange);
+      quillRef.current = null;
+      if (editorElement) editorElement.innerHTML = "";
+    };
+  }, []);
 
-function EditorBlock({ block, index, setBlock, removeBlock, moveBlock }: { block: OperationContentBlock; index: number; setBlock: (index: number, block: OperationContentBlock) => void; removeBlock: (index: number) => void; moveBlock: (index: number, direction: -1 | 1) => void }) {
-  if (block.type === "title" || block.type === "articleLink") return null;
-  const textClass = block.type === "h1" ? styles.editorH1 : block.type === "h2" ? styles.editorH2 : styles.editorBody;
-  return <article className={styles.editorBlock}><div className={styles.editorBlockTools}><span>{labelForBlock(block.type)}</span><button type="button" onClick={() => moveBlock(index, -1)}>Up</button><button type="button" onClick={() => moveBlock(index, 1)}>Down</button><button type="button" onClick={() => removeBlock(index)}>Remove</button></div>{block.type === "image" ? <><input value={block.src} onChange={event => setBlock(index, { ...block, src: event.target.value })} placeholder="Image URL" /><input value={block.alt} onChange={event => setBlock(index, { ...block, alt: event.target.value })} placeholder="Image description" /></> : block.type === "bullets" || block.type === "numbered" ? <textarea value={block.items.join("\n")} onChange={event => setBlock(index, { type: block.type, items: event.target.value.split("\n") })} placeholder="One list item per line" /> : <textarea className={textClass} value={block.text} onChange={event => setBlock(index, { ...block, text: event.target.value })} placeholder={block.type === "body" ? "Start writing…" : "Heading text"} />}</article>;
+  return <div className={styles.quillEditor}><div ref={toolbarRef} className={styles.quillToolbar} aria-label="Article formatting tools"><select className="ql-header" defaultValue=""><option value="1">Title</option><option value="2">H1</option><option value="3">H2</option><option value="">Body</option></select><button className="ql-bold" type="button" aria-label="Bold" /><button className="ql-italic" type="button" aria-label="Italic" /><button className="ql-underline" type="button" aria-label="Underline" /><button className="ql-strike" type="button" aria-label="Strike" /><button className="ql-list" value="bullet" type="button" aria-label="Bullet list" /><button className="ql-list" value="ordered" type="button" aria-label="Numbered list" /><button className="ql-link" type="button" aria-label="Add link" /><button className="ql-image" type="button" aria-label="Add image" /><select className="ql-align" defaultValue=""><option value="" /><option value="center" /><option value="right" /></select><select className="ql-color" defaultValue=""><option value="" /><option value="#d9b833" /><option value="#78a353" /><option value="#ffffff" /></select><button className="ql-clean" type="button" aria-label="Clear formatting" /></div><div ref={editorRef} className={styles.quillSurface} /></div>;
 }
 
 function SectionHeader({ title, detail }: { title: string; detail: string }) {
@@ -232,6 +258,7 @@ function Reader({ article, canGoBack, goBack, close }: { article: OperationArtic
 
 function RenderBlock({ block }: { block: OperationContentBlock }) {
   if (block.type === "title") return <h1>{block.text}</h1>;
+  if (block.type === "richText") return <RichTextArticle delta={block.delta} />;
   if (block.type === "h1") return <h2>{block.text}</h2>;
   if (block.type === "h2") return <h3>{block.text}</h3>;
   if (block.type === "body") return <p>{block.text}</p>;
@@ -239,4 +266,53 @@ function RenderBlock({ block }: { block: OperationContentBlock }) {
   if (block.type === "numbered") return <ol>{block.items.map(item => <li key={item}>{item}</li>)}</ol>;
   if (block.type === "image") return <Image className={styles.readerImage} src={block.src} alt={block.alt} width={1200} height={800} unoptimized />;
   return null;
+}
+
+function RichTextArticle({ delta }: { delta: OperationRichTextDelta }) {
+  return <>{deltaToLines(delta).map((line, index) => <RichTextLine key={index} line={line} />)}</>;
+}
+
+type RichTextSegment = { text: string; attributes?: OperationRichTextOp["attributes"] };
+type RichTextLine = { segments: RichTextSegment[]; image?: string; attributes?: OperationRichTextOp["attributes"] };
+
+function deltaToLines(delta: OperationRichTextDelta): RichTextLine[] {
+  const lines: RichTextLine[] = [];
+  let segments: RichTextSegment[] = [];
+  delta.ops.forEach((op) => {
+    if (typeof op.insert === "object") {
+      if (op.insert.image) lines.push({ segments: [], image: op.insert.image, attributes: op.attributes });
+      return;
+    }
+    const parts = op.insert.split("\n");
+    parts.forEach((part, index) => {
+      if (part) segments.push({ text: part, attributes: op.attributes });
+      if (index < parts.length - 1) {
+        lines.push({ segments, attributes: op.attributes });
+        segments = [];
+      }
+    });
+  });
+  if (segments.length) lines.push({ segments });
+  return lines.filter(line => line.image || line.segments.some(segment => segment.text.trim()));
+}
+
+function RichTextLine({ line }: { line: RichTextLine }) {
+  if (line.image) return <Image className={styles.readerImage} src={line.image} alt="" width={1200} height={800} unoptimized />;
+  const content = line.segments.map((segment, index) => <RichTextSegment key={index} segment={segment} />);
+  if (line.attributes?.list === "bullet") return <ul><li>{content}</li></ul>;
+  if (line.attributes?.list === "ordered") return <ol><li>{content}</li></ol>;
+  if (line.attributes?.header === 1) return <h2>{content}</h2>;
+  if (line.attributes?.header === 2) return <h3>{content}</h3>;
+  if (line.attributes?.header === 3) return <h4>{content}</h4>;
+  return <p>{content}</p>;
+}
+
+function RichTextSegment({ segment }: { segment: RichTextSegment }) {
+  let content: ReactNode = segment.text;
+  if (segment.attributes?.bold) content = <strong>{content}</strong>;
+  if (segment.attributes?.italic) content = <em>{content}</em>;
+  if (segment.attributes?.underline) content = <u>{content}</u>;
+  if (segment.attributes?.strike) content = <s>{content}</s>;
+  if (typeof segment.attributes?.link === "string") content = <a href={segment.attributes.link} target="_blank" rel="noreferrer">{content}</a>;
+  return <>{content}</>;
 }

@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.19.0-rc.67
+
+- Replaced the Operation pseudo-block article editor with Quill 2 rich text editing.
+- Added a Quill toolbar for title/H1/H2/body formatting, bold, italic, underline, strike, links, images, alignment, colour, bullets, numbered lists, and clean formatting.
+- Saved article bodies as Quill Delta JSON inside the existing Operation article content JSON column.
+- Added reader rendering for Quill Delta content while keeping legacy block-based articles readable.
+- Added API parsing support and UI-contract coverage for rich text Delta content.
+- No database-schema, route-shape, authorization, permission, or business-workflow changes.
+
 ## v0.19.0-rc.66
 
 - Moved the Operation owner article form into a full-screen Notes-style editor window.

@@ -1,10 +1,18 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.66**
+Version: **v0.19.0-rc.67**
 
 ## Current focus
 
-Operation full-screen article editor upgrade from the verified rc.65 baseline.
+Operation Quill rich-text article editor upgrade from the verified rc.66 baseline.
+
+## rc.67
+
+- Replaced the temporary block editor with direct Quill 2 rich text editing.
+- Added formatting controls for title/H1/H2/body, inline text styles, links, images, lists, alignment, colour, and clean formatting.
+- Saved article bodies as Quill Delta JSON in the existing Operation content field.
+- Preserved legacy block rendering and conversion when old articles are edited.
+- Rollback checkpoint: v0.19.0-rc.66.
 
 ## rc.66
 

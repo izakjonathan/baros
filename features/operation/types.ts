@@ -1,6 +1,15 @@
 export type OperationArticleKind = "HANDBOOK" | "NEWS";
 export type OperationNeedStatus = "NEEDED" | "ORDERED";
 
+export type OperationRichTextOp = {
+  insert: string | { image: string };
+  attributes?: Record<string, string | number | boolean | null>;
+};
+
+export type OperationRichTextDelta = {
+  ops: OperationRichTextOp[];
+};
+
 export type OperationContentBlock =
   | { type: "title"; text: string }
   | { type: "h1"; text: string }
@@ -9,6 +18,7 @@ export type OperationContentBlock =
   | { type: "bullets"; items: string[] }
   | { type: "numbered"; items: string[] }
   | { type: "image"; src: string; alt: string }
+  | { type: "richText"; delta: OperationRichTextDelta }
   | { type: "articleLink"; articleId: string; label: string };
 
 export type OperationArticle = {

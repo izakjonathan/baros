@@ -1,19 +1,19 @@
-# v0.19.0-rc.66 — Operation Full-Screen Article Editor
+# v0.19.0-rc.67 — Operation Quill Rich Text Editor
 
 ## Baseline
 
-- Continued from v0.19.0-rc.65 after the ordered content block editor release. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.66 after the full-screen Operation editor release. That release is the rollback checkpoint.
 
 ## Editor upgrade
 
-- Replaced the inline owner article form with a full-screen editor window.
-- Added dedicated Add handbook article and Add news buttons that open the full editor directly.
-- Preserved ordered article blocks for title, heading, subheading, body, bullet list, numbered list, and image placement.
-- Moved save and close controls into the editor chrome and kept validation/API messages visible when saving fails.
-- Added a fixed bottom format bar so content block tools stay available while writing.
+- Replaced the temporary Operation block editor with direct Quill 2 rich text editing.
+- Added a real rich text toolbar for title/H1/H2/body formatting, bold, italic, underline, strike, links, images, lists, alignment, colour, and clean formatting.
+- Saved article body content as Quill Delta JSON in the existing Operation article content field.
+- Rendered Quill Delta articles in the full-screen reader while preserving legacy block article rendering and conversion.
+- Kept the full-screen editor shell, owner add buttons, metadata fields, and save validation flow from rc.66.
 
 ## Scope
 
-No dependency, database-schema, route-shape, permission, or existing business-workflow changes are included. The change is limited to the standalone Operation module article editor interface.
+Adds the exact `quill@2.0.3` dependency. No database-schema, route-shape, permission, or existing business-workflow changes are included. The change is limited to the standalone Operation module article editor and reader content rendering.
 
-Rollback checkpoint: **v0.19.0-rc.65**.
+Rollback checkpoint: **v0.19.0-rc.66**.

@@ -31,7 +31,9 @@
 .readerArticle h1{font-size:clamp(2rem,8vw,3.35rem);line-height:.98;letter-spacing:-.045em;font-weight:720}
 .readerArticle h2{margin-top:1.2rem;font-size:clamp(1.35rem,5vw,2rem);line-height:1.05;letter-spacing:-.032em;font-weight:720}
 .readerArticle h3{margin-top:1rem;font-size:clamp(1.05rem,4vw,1.42rem);line-height:1.12;letter-spacing:-.02em}
+.readerArticle h4{margin-top:.9rem;font-size:clamp(.95rem,3.6vw,1.2rem);line-height:1.15;letter-spacing:-.01em}
 .readerArticle p,.readerArticle li{font-family:var(--font-body);font-size:.95rem;line-height:1.52}
+.readerArticle a{color:inherit;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:.18em}
 .readerArticle ul,.readerArticle ol{display:grid;gap:.5rem;padding-left:1.25rem}
 .readerImage{width:100%;height:auto;border:2px solid #292929;border-radius:2rem}
 .readerBottom{position:absolute;left:0;right:0;bottom:max(1.2rem,env(safe-area-inset-bottom));display:grid;place-items:center;pointer-events:none}
@@ -57,19 +59,22 @@
 .articleEditor select,.articleEditor .editorMeta input{min-height:2.35rem;border:1px solid rgba(255,255,255,.13);border-radius:999px;background:#151515;padding:.35rem .8rem;font-size:.78rem;font-weight:720;text-transform:uppercase;letter-spacing:.06em}
 .editorTitleInput{font-size:clamp(2.1rem,8vw,3.8rem);line-height:.96;font-weight:760;letter-spacing:-.05em}
 .editorDescriptionInput{min-height:4.8rem;margin:.55rem 0 1.1rem;font-family:var(--font-body);font-size:1rem;line-height:1.45;color:#d6d0c6;resize:vertical}
-.notesToolbar{position:fixed;left:max(.85rem,env(safe-area-inset-left));right:max(.85rem,env(safe-area-inset-right));bottom:max(.85rem,env(safe-area-inset-bottom));z-index:75;display:flex;justify-content:center;gap:.28rem;overflow-x:auto;width:min(42rem,calc(100% - 1.7rem));margin-inline:auto;padding:.42rem;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:#1b1b1b;box-shadow:0 .75rem 2rem rgba(0,0,0,.45)}
-.notesToolbar button{min-height:2.15rem;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:999px;background:transparent;color:#f7f2e7;padding:.2rem .65rem;font-size:.76rem;font-weight:760;white-space:nowrap}
-.notesToolbar button:active{background:#dfbb38;color:#171717}
-.notesEditor{display:grid;gap:.45rem}
-.editorBlock{display:grid;gap:.28rem;padding:.18rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
-.editorBlockTools{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}
-.editorBlockTools span{margin-right:auto;font-size:.62rem;font-weight:780;text-transform:uppercase;letter-spacing:.08em;color:#888}
-.editorBlockTools button{min-height:1.55rem;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:#151515;color:#dcd6cc;padding:.1rem .48rem;font-size:.6rem;font-weight:720;text-transform:uppercase;letter-spacing:.05em}
-.editorBlock input{min-height:2.35rem;font-family:var(--font-body);font-size:.92rem;color:#dcd6cc}
-.editorBlock textarea{min-height:4rem;font-family:var(--font-body);font-size:.98rem;line-height:1.5;color:#f7f2e7;resize:vertical}
-.editorBody{font-family:var(--font-body);font-size:1rem!important;line-height:1.55}
-.editorH1{min-height:3.2rem!important;font-size:1.75rem!important;font-weight:760;line-height:1.05;letter-spacing:-.035em}
-.editorH2{min-height:2.8rem!important;font-size:1.22rem!important;font-weight:760;line-height:1.1;letter-spacing:-.025em}
+.quillEditor{display:grid;gap:1rem}
+.quillSurface{min-height:42dvh;font-family:var(--font-body);font-size:1rem;line-height:1.55;color:#f7f2e7}
+.quillSurface :global(.ql-editor){min-height:42dvh;padding:0;outline:0}
+.quillSurface :global(.ql-editor.ql-blank::before){left:0;right:auto;color:#777;font-style:normal}
+.quillSurface :global(.ql-editor h1){font-family:var(--font-display);font-size:clamp(2.15rem,8vw,3.7rem);line-height:.98;letter-spacing:-.045em}
+.quillSurface :global(.ql-editor h2){font-family:var(--font-display);font-size:clamp(1.45rem,6vw,2.2rem);line-height:1.05;letter-spacing:-.035em}
+.quillSurface :global(.ql-editor h3){font-family:var(--font-display);font-size:clamp(1.15rem,4.5vw,1.55rem);line-height:1.1;letter-spacing:-.025em}
+.quillSurface :global(.ql-editor p),.quillSurface :global(.ql-editor li){font-family:var(--font-body);font-size:1rem;line-height:1.55;color:#f7f2e7}
+.quillSurface :global(.ql-editor img){display:block;max-width:100%;height:auto;border-radius:1rem;margin:.85rem 0}
+.quillToolbar{position:fixed;left:max(.85rem,env(safe-area-inset-left));right:max(.85rem,env(safe-area-inset-right));bottom:max(.85rem,env(safe-area-inset-bottom));z-index:75;display:flex;align-items:center;justify-content:flex-start;gap:.18rem;overflow-x:auto;width:min(42rem,calc(100% - 1.7rem));margin-inline:auto;padding:.42rem;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:#1b1b1b;box-shadow:0 .75rem 2rem rgba(0,0,0,.45)}
+.quillToolbar button,.quillToolbar select{min-width:2.15rem;min-height:2.15rem;border:0;border-radius:999px;background:transparent;color:#f7f2e7;padding:.2rem .55rem;font-family:var(--font-display);font-size:.72rem;font-weight:760}
+.quillToolbar select{width:auto;background:#282828}
+.quillToolbar button:hover,.quillToolbar :global(.ql-active){background:#dfbb38!important;color:#171717!important}
+.quillToolbar :global(.ql-stroke){stroke:currentColor}
+.quillToolbar :global(.ql-fill){fill:currentColor}
+.quillToolbar :global(.ql-picker-label){color:#f7f2e7}
 .editorMessage{font-family:var(--font-body);font-size:.82rem;color:#8a7432}
 .adminActions,.needInput{display:flex;gap:.5rem;flex-wrap:wrap}
 .adminActions button,.needInput button,.taskRow button,.needRow button{min-height:2.35rem;border:1px solid #292929;border-radius:999px;background:#292929;color:#e7e3dc;padding:.3rem .8rem;font-weight:750}
@@ -84,7 +89,7 @@
   .operationHeader nav{width:100%}
   .moduleGrid,.adminGrid,.editorMeta,.articleEditor .editorMeta{grid-template-columns:1fr}
   .adminPanelHeader{display:grid}
-  .notesToolbar{justify-content:flex-start}
+  .quillToolbar{justify-content:flex-start}
   .operationCard{min-height:4.5rem;border-radius:.92rem;padding:.78rem .85rem}
   .operationCard h3{font-size:clamp(1.05rem,5.8vw,1.42rem)}
   .operationCard small{font-size:.68rem}
