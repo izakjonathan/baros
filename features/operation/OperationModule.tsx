@@ -257,7 +257,7 @@ function QuillArticleEditor({ value, onChange }: { value: OperationRichTextDelta
     };
   }, []);
 
-  return <div className={styles.quillEditor}><div ref={toolbarRef} className={styles.quillToolbar} aria-label="Article formatting tools"><select className="ql-header" defaultValue=""><option value="1">Title</option><option value="2">H1</option><option value="3">H2</option><option value="">Body</option></select><button className="ql-bold" type="button" aria-label="Bold" /><button className="ql-italic" type="button" aria-label="Italic" /><button className="ql-underline" type="button" aria-label="Underline" /><button className="ql-strike" type="button" aria-label="Strike" /><button className="ql-list" value="bullet" type="button" aria-label="Bullet list" /><button className="ql-list" value="ordered" type="button" aria-label="Numbered list" /><button className="ql-link" type="button" aria-label="Add link" /><button className="ql-image" type="button" aria-label="Add image" /><select className="ql-align" defaultValue=""><option value="" /><option value="center" /><option value="right" /></select><select className="ql-color" defaultValue=""><option value="" /><option value="#d9b833" /><option value="#78a353" /><option value="#ffffff" /></select><button className="ql-clean" type="button" aria-label="Clear formatting" /></div><div ref={editorRef} className={styles.quillSurface} /></div>;
+  return <div className={styles.quillEditor}><div ref={toolbarRef} className={styles.quillToolbar} aria-label="Article formatting tools"><select className="ql-header" defaultValue=""><option value="1">H1</option><option value="2">H2</option><option value="">Body</option></select><button className="ql-bold" type="button" aria-label="Bold" /><button className="ql-italic" type="button" aria-label="Italic" /><button className="ql-underline" type="button" aria-label="Underline" /><button className="ql-strike" type="button" aria-label="Strike" /><button className="ql-list" value="bullet" type="button" aria-label="Bullet list" /><button className="ql-list" value="ordered" type="button" aria-label="Numbered list" /><button className="ql-link" type="button" aria-label="Add link" /><button className="ql-image" type="button" aria-label="Add image" /><select className="ql-align" defaultValue=""><option value="" /><option value="center" /><option value="right" /></select><select className="ql-color" defaultValue=""><option value="" /><option value="#d9b833" /><option value="#78a353" /><option value="#ffffff" /></select><button className="ql-clean" type="button" aria-label="Clear formatting" /></div><div ref={editorRef} className={styles.quillSurface} /></div>;
 }
 
 function SectionHeader({ title, detail }: { title: string; detail: string }) {
@@ -321,9 +321,8 @@ function RichTextLine({ line }: { line: RichTextLine }) {
   const content = line.segments.map((segment, index) => <RichTextSegment key={index} segment={segment} />);
   if (line.attributes?.list === "bullet") return <ul><li>{content}</li></ul>;
   if (line.attributes?.list === "ordered") return <ol><li>{content}</li></ol>;
-  if (line.attributes?.header === 1) return <h2>{content}</h2>;
-  if (line.attributes?.header === 2) return <h3>{content}</h3>;
-  if (line.attributes?.header === 3) return <h4>{content}</h4>;
+  if (line.attributes?.header === 1) return <h1>{content}</h1>;
+  if (line.attributes?.header === 2) return <h2>{content}</h2>;
   return <p>{content}</p>;
 }
 

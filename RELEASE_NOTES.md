@@ -1,19 +1,17 @@
-# v0.19.0-rc.68 — Operation Storage Save Feedback
+# v0.19.0-rc.69 — Operation Rich Text Heading Controls
 
 ## Baseline
 
-- Continued from v0.19.0-rc.67 after the Operation Quill rich text editor release. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.68 after the Operation storage save-feedback release. That release is the rollback checkpoint.
 
-## Storage feedback
+## Heading controls
 
-- Added an explicit migration-required state for the Operation module when production has not applied `014_operation_module.sql`.
-- Changed Operation article, daily-task, and needed-item mutations to return a clear `503` storage message when the Operation tables or enum types are missing.
-- Kept article drafts, task text, and needed-item text visible when a save fails instead of clearing inputs after a rejected request.
-- Disabled write controls while the migration-required fallback is active and shows a visible database migration notice.
-- Added API and UI regression coverage for the migration-required storage path.
+- Changed the Operation Quill dropdown from `Title / H1 / H2 / Body` to `H1 / H2 / Body`.
+- Rendered Quill header level 1 as `h1` and header level 2 as `h2` in the full-screen article reader.
+- Added UI-contract coverage for the H1/H2 toolbar and reader mapping.
 
 ## Scope
 
-No database-schema, dependency-version, route-shape, permission, visual redesign, or existing business-workflow changes are included. The change is limited to Operation module save feedback and request handling when the production database has not yet been migrated.
+No database-schema, dependency-version, route-shape, permission, visual redesign, or existing business-workflow changes are included. The change is limited to Operation rich-text heading controls and article reader rendering.
 
-Rollback checkpoint: **v0.19.0-rc.67**.
+Rollback checkpoint: **v0.19.0-rc.68**.

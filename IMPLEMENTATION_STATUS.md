@@ -1,10 +1,16 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.68**
+Version: **v0.19.0-rc.69**
 
 ## Current focus
 
-Operation production storage feedback from the verified rc.67 baseline.
+Operation rich-text heading controls from the verified rc.68 baseline.
+
+## rc.69
+
+- Changed the Operation Quill toolbar to expose H1, H2, and Body rich-text formats.
+- Rendered saved Quill H1/H2 headings as matching article-reader headings.
+- Rollback checkpoint: v0.19.0-rc.68.
 
 ## rc.68
 

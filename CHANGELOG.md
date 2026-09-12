@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.19.0-rc.69
+
+- Corrected the Operation Quill toolbar so rich-text headings are exposed as `H1`, `H2`, and `Body`.
+- Rendered Quill rich-text header level 1 as `h1` and header level 2 as `h2` in article readers.
+- Added UI-contract coverage for the exact H1/H2 rich-text toolbar and reader mapping.
+- No database-schema, dependency-version, route-shape, authorization, permission, or visual redesign changes.
+
 ## v0.19.0-rc.68
 
 - Made missing Operation database storage an explicit UI state instead of a silent save failure.
