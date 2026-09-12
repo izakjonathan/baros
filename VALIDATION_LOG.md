@@ -1,19 +1,18 @@
-# v0.19.0-rc.67 Validation
+# v0.19.0-rc.68 Validation
 
 ## Confirmed baseline
 
-The v0.19.0-rc.66 release source was used as the baseline for the Operation Quill rich text editor.
+The v0.19.0-rc.67 release source was used as the baseline for the Operation storage save-feedback release.
 
-- Rollback checkpoint: v0.19.0-rc.66
+- Rollback checkpoint: v0.19.0-rc.67
 
 ## Implementation
 
-- Added exact dependency `quill@2.0.3`.
-- Replaced the temporary block editor with direct Quill rich text editing.
-- Added toolbar controls for title/H1/H2/body, inline text styles, links, images, lists, alignment, colour, and clean formatting.
-- Saved article bodies as Quill Delta JSON in the existing Operation content field.
-- Added Delta parsing/rendering while preserving legacy block article support.
-- Added UI-contract coverage for the Quill editor and Delta persistence.
+- Added explicit `storageStatus` state for Operation module data.
+- Added migration-required mutation responses for Operation articles, daily tasks, and needed items.
+- Kept article drafts, task fields, and needed-item fields visible when production saves fail.
+- Disabled Operation write controls while the migration-required fallback is active.
+- Added API and UI contract coverage for the migration-required save path.
 
 ## Validation status
 
@@ -21,10 +20,10 @@ The v0.19.0-rc.66 release source was used as the baseline for the Operation Quil
 - ESLint: passed with zero errors and zero warnings.
 - TypeScript (`tsc --noEmit`): passed with unused-local and unused-parameter checks enabled.
 - Current regression suite: all 10 source-contract suites passed.
-- UI contract: passed, including the Quill rich text editor, Delta persistence, and fixed editor surface.
+- API/UI contracts: passed, including migration-required Operation storage feedback.
 - Release validation, stabilization preflight, and environment validation: passed; `DATABASE_URL` was intentionally absent and reported as a warning.
 - Next.js 16.2.12 Turbopack production build: passed; 47 pages/routes were generated or registered successfully, including `/operation` and `/api/operation-module`.
 
 ## Scope
 
-Adds the exact `quill@2.0.3` dependency. No database-schema, route-shape, permission, or existing business-workflow changes are included. The change is limited to the standalone Operation module article editor and reader content rendering.
+No database-schema, dependency-version, route-shape, permission, visual redesign, or existing business-workflow changes are included. The change is limited to Operation module save feedback and request handling when the production database has not yet been migrated.

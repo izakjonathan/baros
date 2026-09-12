@@ -1,5 +1,6 @@
 export type OperationArticleKind = "HANDBOOK" | "NEWS";
 export type OperationNeedStatus = "NEEDED" | "ORDERED";
+export type OperationStorageStatus = "ready" | "migration-required";
 
 export type OperationRichTextOp = {
   insert: string | { image: string };
@@ -51,6 +52,7 @@ export type OperationNeed = {
 export type OperationModuleState = {
   userRole: string;
   canManageContent: boolean;
+  storageStatus: OperationStorageStatus;
   today: string;
   handbook: OperationArticle[];
   news: OperationArticle[];

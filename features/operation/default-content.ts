@@ -3,6 +3,7 @@ import type { OperationModuleState } from "./types";
 export const defaultOperationState: OperationModuleState = {
   userRole: "OWNER",
   canManageContent: true,
+  storageStatus: "ready",
   today: new Date().toISOString().slice(0, 10),
   handbook: [
     {

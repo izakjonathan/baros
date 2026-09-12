@@ -1,19 +1,19 @@
-# v0.19.0-rc.67 — Operation Quill Rich Text Editor
+# v0.19.0-rc.68 — Operation Storage Save Feedback
 
 ## Baseline
 
-- Continued from v0.19.0-rc.66 after the full-screen Operation editor release. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.67 after the Operation Quill rich text editor release. That release is the rollback checkpoint.
 
-## Editor upgrade
+## Storage feedback
 
-- Replaced the temporary Operation block editor with direct Quill 2 rich text editing.
-- Added a real rich text toolbar for title/H1/H2/body formatting, bold, italic, underline, strike, links, images, lists, alignment, colour, and clean formatting.
-- Saved article body content as Quill Delta JSON in the existing Operation article content field.
-- Rendered Quill Delta articles in the full-screen reader while preserving legacy block article rendering and conversion.
-- Kept the full-screen editor shell, owner add buttons, metadata fields, and save validation flow from rc.66.
+- Added an explicit migration-required state for the Operation module when production has not applied `014_operation_module.sql`.
+- Changed Operation article, daily-task, and needed-item mutations to return a clear `503` storage message when the Operation tables or enum types are missing.
+- Kept article drafts, task text, and needed-item text visible when a save fails instead of clearing inputs after a rejected request.
+- Disabled write controls while the migration-required fallback is active and shows a visible database migration notice.
+- Added API and UI regression coverage for the migration-required storage path.
 
 ## Scope
 
-Adds the exact `quill@2.0.3` dependency. No database-schema, route-shape, permission, or existing business-workflow changes are included. The change is limited to the standalone Operation module article editor and reader content rendering.
+No database-schema, dependency-version, route-shape, permission, visual redesign, or existing business-workflow changes are included. The change is limited to Operation module save feedback and request handling when the production database has not yet been migrated.
 
-Rollback checkpoint: **v0.19.0-rc.66**.
+Rollback checkpoint: **v0.19.0-rc.67**.

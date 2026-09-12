@@ -24,6 +24,9 @@
 .pill{min-height:2rem;padding:0 .75rem;border:1px solid #292929;border-radius:999px;background:rgba(255,255,255,.16);color:inherit;font-size:.7rem;font-weight:750;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
 .pill[aria-pressed="true"]{background:#292929;color:#e7e3dc}
 .empty{padding:1.25rem;border:1px dashed #7a746c;border-radius:1rem;text-align:center;color:#5f5a54}
+.storageNotice{display:grid;gap:.15rem;padding:.8rem .9rem;border:1px solid #8a7432;border-radius:.9rem;background:rgba(217,184,51,.14)}
+.storageNotice strong{font-size:.86rem;letter-spacing:.04em;text-transform:uppercase}
+.storageNotice p{font-family:var(--font-body);font-size:.78rem;line-height:1.35;color:#5f5a54}
 .reader{position:fixed;inset:0;z-index:60;display:grid;grid-template-rows:minmax(0,1fr) auto;background:#e7e3dc;color:#292929;padding:max(.72rem,env(safe-area-inset-top)) max(1.2rem,env(safe-area-inset-right)) max(1rem,env(safe-area-inset-bottom)) max(1.2rem,env(safe-area-inset-left))}
 .readerTop{position:absolute;left:max(1.2rem,env(safe-area-inset-left));top:max(.72rem,env(safe-area-inset-top));z-index:1}
 .readerTop button,.readerBottom button,.textButton{border:0;background:transparent;color:inherit;font-weight:760;text-transform:uppercase;letter-spacing:.075em}
@@ -78,6 +81,7 @@
 .editorMessage{font-family:var(--font-body);font-size:.82rem;color:#8a7432}
 .adminActions,.needInput{display:flex;gap:.5rem;flex-wrap:wrap}
 .adminActions button,.needInput button,.taskRow button,.needRow button{min-height:2.35rem;border:1px solid #292929;border-radius:999px;background:#292929;color:#e7e3dc;padding:.3rem .8rem;font-weight:750}
+.adminActions button:disabled,.needInput button:disabled,.taskRow button:disabled,.needRow button:disabled,.adminPanel input:disabled,.needInput input:disabled{opacity:.5;cursor:not-allowed}
 .taskRow,.needRow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.7rem;align-items:center;padding:.78rem .85rem;border:1px solid #292929;border-radius:.92rem;background:rgba(255,255,255,.14)}
 .taskRow input{width:1.35rem;height:1.35rem;accent-color:#292929}
 .taskRow h3,.needRow h3{font-size:.98rem;line-height:1.1;letter-spacing:-.01em}

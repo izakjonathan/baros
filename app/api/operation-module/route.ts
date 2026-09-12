@@ -28,6 +28,13 @@ function isOperationSchemaUnavailable(error: unknown) {
   return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|article_kind|need_status)/i.test(message);
 }
 
+function operationMigrationRequired() {
+  return NextResponse.json(
+    { error: "Operation database migration is required before changes can be saved.", storageStatus: "migration-required" },
+    { status: 503, headers: { "cache-control": "no-store", "x-operation-storage": "migration-required" } },
+  );
+}
+
 export async function GET(request: Request) {
   try {
     const user = await requireApiUser();
@@ -62,6 +69,7 @@ export async function GET(request: Request) {
     const state: OperationModuleState = {
       userRole: user.role,
       canManageContent: ownerCanManageOperation(user.role),
+      storageStatus: "ready",
       today,
       handbook: articles.filter(article => article.kind === "HANDBOOK").map(mapOperationArticle),
       news: articles.filter(article => article.kind === "NEWS").map(mapOperationArticle),
@@ -89,6 +97,7 @@ export async function GET(request: Request) {
           ...defaultOperationState,
           userRole: user.role,
           canManageContent: ownerCanManageOperation(user.role),
+          storageStatus: "migration-required",
           today: new Date().toISOString().slice(0, 10),
         } satisfies OperationModuleState, { headers: { "cache-control": "no-store", "x-operation-storage": "migration-required" } });
       }
@@ -138,6 +147,7 @@ export async function POST(request: Request) {
       returning id,title,note,status,created_at`;
     return NextResponse.json(row, { status: 201 });
   } catch (error) {
+    if (isOperationSchemaUnavailable(error)) return operationMigrationRequired();
     return jsonError(error, request);
   }
 }
@@ -223,6 +233,7 @@ export async function PATCH(request: Request) {
     if (!row) throw new ApiError(404, "Needed item not found");
     return NextResponse.json(row);
   } catch (error) {
+    if (isOperationSchemaUnavailable(error)) return operationMigrationRequired();
     return jsonError(error, request);
   }
 }
@@ -246,6 +257,7 @@ export async function DELETE(request: Request) {
     }
     return NextResponse.json({ ok: true });
   } catch (error) {
+    if (isOperationSchemaUnavailable(error)) return operationMigrationRequired();
     return jsonError(error, request);
   }
 }

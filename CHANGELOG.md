@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.68
+
+- Made missing Operation database storage an explicit UI state instead of a silent save failure.
+- Added mutation responses that return `503` and `x-operation-storage: migration-required` when the Operation migration has not been applied.
+- Kept article, task, and needed-item drafts visible when a save fails, with visible status messages.
+- Added API and UI contract coverage for Operation migration-required save failures.
+- No database-schema, dependency-version, route-shape, authorization, permission, or visual redesign changes.
+
 ## v0.19.0-rc.67
 
 - Replaced the Operation pseudo-block article editor with Quill 2 rich text editing.

@@ -12,6 +12,7 @@ type DraftArticle = { id?: string; kind: OperationArticleKind; category: string;
 type QuillInstance = { getContents: () => OperationRichTextDelta; setContents: (delta: OperationRichTextDelta) => void; getSelection: (focus?: boolean) => { index: number; length: number } | null; insertEmbed: (index: number, type: string, value: string, source?: string) => void; setSelection: (index: number, length?: number, source?: string) => void; on: (event: "text-change", callback: () => void) => void; off: (event: "text-change", callback: () => void) => void };
 
 const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const migrationMessage = "Operation storage is not ready yet. Run the database migration action, then reload this page.";
 
 function draftFromArticle(article?: OperationArticle, kind: OperationArticleKind = "HANDBOOK"): DraftArticle {
   return { id: article?.id, kind, category: article?.category || "General", title: article?.title || "", description: article?.description || "", delta: deltaFromBlocks(article?.content || []) };
@@ -45,6 +46,11 @@ function hasRichTextContent(delta: OperationRichTextDelta) {
   return delta.ops.some(op => typeof op.insert === "string" ? op.insert.trim().length > 0 : Boolean(op.insert.image));
 }
 
+async function responseMessage(response: Response, fallback: string) {
+  const failure: unknown = await response.json().catch(() => null);
+  return typeof failure === "object" && failure !== null && "error" in failure && typeof failure.error === "string" ? failure.error : fallback;
+}
+
 export function OperationModule({ initialState, devMode }: { initialState: OperationModuleState; devMode: boolean }) {
   const [state, setState] = useState(initialState);
   const [view, setView] = useState<View>("home");
@@ -57,6 +63,8 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
   const [needTitle, setNeedTitle] = useState("");
   const [saving, setSaving] = useState(false);
   const [editorMessage, setEditorMessage] = useState("");
+  const [taskMessage, setTaskMessage] = useState("");
+  const [needMessage, setNeedMessage] = useState("");
   const [editorOpen, setEditorOpen] = useState(false);
   const currentArticle = readerStack.at(-1) || null;
   const allArticles = [...state.news, ...state.handbook];
@@ -66,6 +74,7 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     const text = `${article.title} ${article.description} ${article.category}`.toLowerCase();
     return categoryMatch && text.includes(query.toLowerCase());
   });
+  const storageUnavailable = state.storageStatus === "migration-required" && !devMode;
 
   async function refresh() {
     if (devMode) return;
@@ -76,6 +85,7 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
 
   async function saveArticle() {
     setEditorMessage("");
+    if (storageUnavailable) { setEditorMessage(migrationMessage); return false; }
     if (!draft.title.trim()) { setEditorMessage("Add an article title first."); return false; }
     if (!draft.description.trim()) { setEditorMessage("Add a short card description first."); return false; }
     if (!hasRichTextContent(draft.delta)) { setEditorMessage("Add article text or an image before saving."); return false; }
@@ -102,8 +112,7 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     setSaving(false);
     if (response.ok) { setDraft(draftFromArticle(undefined, draft.kind)); setEditorMessage("Article saved."); setEditorOpen(false); await refresh(); return true; }
     else {
-      const failure: unknown = await response.json().catch(() => null);
-      setEditorMessage(typeof failure === "object" && failure !== null && "error" in failure && typeof failure.error === "string" ? failure.error : "Could not save article.");
+      setEditorMessage(await responseMessage(response, "Could not save article."));
       return false;
     }
   }
@@ -119,11 +128,14 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
   }
 
   async function addTask() {
+    setTaskMessage("");
     if (!taskTitle.trim()) return;
+    if (storageUnavailable) { setTaskMessage(migrationMessage); return; }
     const task: OperationDailyTask = { id: crypto.randomUUID(), weekday: new Date(`${state.today}T00:00:00Z`).getUTCDay(), title: taskTitle.trim(), description: taskDescription.trim(), completed: false };
     if (devMode) setState(current => ({ ...current, dailyTasks: [...current.dailyTasks, task] }));
     else {
-      await fetch("/api/operation-module", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", weekday: task.weekday, title: task.title, description: task.description }) });
+      const response = await fetch("/api/operation-module", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", weekday: task.weekday, title: task.title, description: task.description }) });
+      if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not add daily task.")); return; }
       await refresh();
     }
     setTaskTitle(""); setTaskDescription("");
@@ -135,11 +147,14 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
   }
 
   async function addNeed() {
+    setNeedMessage("");
     if (!needTitle.trim()) return;
+    if (storageUnavailable) { setNeedMessage(migrationMessage); return; }
     const need: OperationNeed = { id: crypto.randomUUID(), title: needTitle.trim(), note: null, status: "NEEDED", createdAt: new Date().toISOString() };
     if (devMode) setState(current => ({ ...current, needs: [need, ...current.needs] }));
     else {
-      await fetch("/api/operation-module", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "need", title: need.title }) });
+      const response = await fetch("/api/operation-module", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "need", title: need.title }) });
+      if (!response.ok) { setNeedMessage(await responseMessage(response, "Could not add needed item.")); return; }
       await refresh();
     }
     setNeedTitle("");
@@ -157,11 +172,12 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
       </nav>
     </header>
     <main className={styles.operationMain}>
+      {storageUnavailable && <StorageNotice />}
       {view === "home" && <HomeView news={state.news} openArticle={(article) => setReaderStack([article])} openView={setView} />}
       {view === "handbook" && <HandbookView articles={filteredHandbook} categories={handbookCategories} query={query} category={category} setQuery={setQuery} setCategory={setCategory} openArticle={(article) => setReaderStack([article])} />}
-      {view === "tasks" && <TasksView tasks={state.dailyTasks} canManage={state.canManageContent} taskTitle={taskTitle} taskDescription={taskDescription} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} addTask={addTask} toggleTask={toggleTask} />}
-      {view === "needs" && <NeedsView needs={state.needs} needTitle={needTitle} setNeedTitle={setNeedTitle} addNeed={addNeed} markNeedOrdered={markNeedOrdered} />}
-      {state.canManageContent && <AdminPanel message={editorMessage} articles={allArticles} addArticle={(kind) => { setDraft(draftFromArticle(undefined, kind)); setEditorMessage(""); setEditorOpen(true); }} editArticle={(nextDraft) => { setDraft(nextDraft); setEditorMessage(""); setEditorOpen(true); }} deleteArticle={deleteArticle} />}
+      {view === "tasks" && <TasksView tasks={state.dailyTasks} canManage={state.canManageContent} taskTitle={taskTitle} taskDescription={taskDescription} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} addTask={addTask} toggleTask={toggleTask} disabled={storageUnavailable} message={taskMessage} />}
+      {view === "needs" && <NeedsView needs={state.needs} needTitle={needTitle} setNeedTitle={setNeedTitle} addNeed={addNeed} markNeedOrdered={markNeedOrdered} disabled={storageUnavailable} message={needMessage} />}
+      {state.canManageContent && <AdminPanel message={editorMessage} articles={allArticles} disabled={storageUnavailable} addArticle={(kind) => { setDraft(draftFromArticle(undefined, kind)); setEditorMessage(storageUnavailable ? migrationMessage : ""); setEditorOpen(!storageUnavailable); }} editArticle={(nextDraft) => { setDraft(nextDraft); setEditorMessage(storageUnavailable ? migrationMessage : ""); setEditorOpen(!storageUnavailable); }} deleteArticle={deleteArticle} />}
     </main>
     {currentArticle && <Reader article={currentArticle} canGoBack={readerStack.length > 1} goBack={() => setReaderStack(stack => stack.slice(0, -1))} close={() => setReaderStack([])} />}
     {editorOpen && <ArticleEditor draft={draft} setDraft={setDraft} saveArticle={saveArticle} saving={saving} message={editorMessage} close={() => { setEditorOpen(false); setEditorMessage(""); }} />}
@@ -176,20 +192,24 @@ function HomeView({ news, openArticle, openView }: { news: OperationArticle[]; o
   return <><SectionHeader title="News" detail="Latest bar updates" /> <div className={styles.cardGrid}>{news.map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} />)}{!news.length && <div className={styles.empty}>No news yet.</div>}</div><SectionHeader title="Modules" detail="Open a sub module" /><div className={styles.moduleGrid}><ModuleCard title="Handbook" description="Employee bar articles grouped by category." icon={BookOpen} onClick={() => openView("handbook")} /><ModuleCard title="Daily tasks" description="Day-specific task lists employees can complete." icon={CheckSquare} onClick={() => openView("tasks")} /><ModuleCard title="We need" description="A shared reminder-style order list." icon={ShoppingBasket} onClick={() => openView("needs")} /></div></>;
 }
 
+function StorageNotice() {
+  return <section className={styles.storageNotice} role="status"><strong>Database migration needed</strong><p>Saved Operation articles, daily tasks and needed items will appear after the GitHub database migration action has run against production.</p></section>;
+}
+
 function HandbookView({ articles, categories, query, category, setQuery, setCategory, openArticle }: { articles: OperationArticle[]; categories: string[]; query: string; category: string; setQuery: (value: string) => void; setCategory: (value: string) => void; openArticle: (article: OperationArticle) => void }) {
   return <><div className={styles.toolbar}><input className={styles.search} value={query} onChange={event => setQuery(event.target.value)} placeholder="Search handbook" /><div className={styles.pills}>{categories.map(item => <button key={item} className={styles.pill} type="button" aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div></div><div className={styles.articleGroups}>{articles.map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} />)}{!articles.length && <div className={styles.empty}>No handbook articles found.</div>}</div></>;
 }
 
-function TasksView({ tasks, canManage, taskTitle, taskDescription, setTaskTitle, setTaskDescription, addTask, toggleTask }: { tasks: OperationDailyTask[]; canManage: boolean; taskTitle: string; taskDescription: string; setTaskTitle: (value: string) => void; setTaskDescription: (value: string) => void; addTask: () => void; toggleTask: (task: OperationDailyTask) => void }) {
-  return <><p className={styles.subtleIntro}>{weekdays[new Date().getDay()]} task list</p>{canManage && <div className={styles.adminPanel}><h3>Add task</h3><div className={styles.adminGrid}><input value={taskTitle} onChange={event => setTaskTitle(event.target.value)} placeholder="Task title" /><input value={taskDescription} onChange={event => setTaskDescription(event.target.value)} placeholder="Short description" /></div><div className={styles.adminActions}><button type="button" onClick={addTask}><Plus size={16} />Add daily task</button></div></div>}<div className={styles.taskList}>{tasks.map(task => <article className={styles.taskRow} key={task.id}><input type="checkbox" checked={task.completed} onChange={() => toggleTask(task)} aria-label={`Mark ${task.title} complete`} /><div><h3>{task.title}</h3><p>{task.description}</p></div></article>)}{!tasks.length && <div className={styles.empty}>No tasks for today.</div>}</div></>;
+function TasksView({ tasks, canManage, taskTitle, taskDescription, setTaskTitle, setTaskDescription, addTask, toggleTask, disabled, message }: { tasks: OperationDailyTask[]; canManage: boolean; taskTitle: string; taskDescription: string; setTaskTitle: (value: string) => void; setTaskDescription: (value: string) => void; addTask: () => void; toggleTask: (task: OperationDailyTask) => void; disabled: boolean; message: string }) {
+  return <><p className={styles.subtleIntro}>{weekdays[new Date().getDay()]} task list</p>{canManage && <div className={styles.adminPanel}><h3>Add task</h3><div className={styles.adminGrid}><input value={taskTitle} onChange={event => setTaskTitle(event.target.value)} placeholder="Task title" disabled={disabled} /><input value={taskDescription} onChange={event => setTaskDescription(event.target.value)} placeholder="Short description" disabled={disabled} /></div><div className={styles.adminActions}><button type="button" onClick={addTask} disabled={disabled}><Plus size={16} />Add daily task</button></div>{message && <p className={styles.editorMessage} role="status">{message}</p>}</div>}<div className={styles.taskList}>{tasks.map(task => <article className={styles.taskRow} key={task.id}><input type="checkbox" checked={task.completed} onChange={() => toggleTask(task)} aria-label={`Mark ${task.title} complete`} disabled={disabled} /><div><h3>{task.title}</h3><p>{task.description}</p></div></article>)}{!tasks.length && <div className={styles.empty}>No tasks for today.</div>}</div></>;
 }
 
-function NeedsView({ needs, needTitle, setNeedTitle, addNeed, markNeedOrdered }: { needs: OperationNeed[]; needTitle: string; setNeedTitle: (value: string) => void; addNeed: () => void; markNeedOrdered: (need: OperationNeed) => void }) {
-  return <><div className={styles.needInput}><input value={needTitle} onChange={event => setNeedTitle(event.target.value)} placeholder="Add something needed for the bar" /><button type="button" onClick={addNeed}><Plus size={16} />Add</button></div><div className={styles.needList}>{needs.map(need => <article className={styles.needRow} key={need.id} data-ordered={need.status === "ORDERED"}><ShoppingBasket size={22} /><div><h3>{need.title}</h3>{need.note && <p>{need.note}</p>}</div><button type="button" onClick={() => markNeedOrdered(need)}>Ordered</button></article>)}{!needs.length && <div className={styles.empty}>Nothing needed right now.</div>}</div></>;
+function NeedsView({ needs, needTitle, setNeedTitle, addNeed, markNeedOrdered, disabled, message }: { needs: OperationNeed[]; needTitle: string; setNeedTitle: (value: string) => void; addNeed: () => void; markNeedOrdered: (need: OperationNeed) => void; disabled: boolean; message: string }) {
+  return <><div className={styles.needInput}><input value={needTitle} onChange={event => setNeedTitle(event.target.value)} placeholder="Add something needed for the bar" disabled={disabled} /><button type="button" onClick={addNeed} disabled={disabled}><Plus size={16} />Add</button></div>{message && <p className={styles.editorMessage} role="status">{message}</p>}<div className={styles.needList}>{needs.map(need => <article className={styles.needRow} key={need.id} data-ordered={need.status === "ORDERED"}><ShoppingBasket size={22} /><div><h3>{need.title}</h3>{need.note && <p>{need.note}</p>}</div><button type="button" onClick={() => markNeedOrdered(need)} disabled={disabled}>Ordered</button></article>)}{!needs.length && <div className={styles.empty}>Nothing needed right now.</div>}</div></>;
 }
 
-function AdminPanel({ message, articles, addArticle, editArticle, deleteArticle }: { message: string; articles: OperationArticle[]; addArticle: (kind: OperationArticleKind) => void; editArticle: (draft: DraftArticle) => void; deleteArticle: (article: OperationArticle) => void }) {
-  return <section className={styles.adminPanel}><div className={styles.adminPanelHeader}><div><h3>Owner articles</h3><p>Manage handbook and news posts.</p></div><div className={styles.adminActions}><button type="button" onClick={() => addArticle("HANDBOOK")}><Plus size={16} />Add handbook article</button><button type="button" onClick={() => addArticle("NEWS")}><Plus size={16} />Add news</button></div></div>{message && <p className={styles.editorMessage} role="status">{message}</p>}<div className={styles.cardGrid}>{articles.map(article => <article className={styles.operationCard} key={article.id}><div><h3>{article.title}</h3><p>{article.kind.toLowerCase()} · {article.category}</p></div><div className={styles.adminActions}><button type="button" onClick={() => editArticle(draftFromArticle(article, article.kind))}>Edit</button><button type="button" onClick={() => deleteArticle(article)} aria-label={`Delete ${article.title}`}><Trash2 size={16} /></button></div></article>)}</div></section>;
+function AdminPanel({ message, articles, disabled, addArticle, editArticle, deleteArticle }: { message: string; articles: OperationArticle[]; disabled: boolean; addArticle: (kind: OperationArticleKind) => void; editArticle: (draft: DraftArticle) => void; deleteArticle: (article: OperationArticle) => void }) {
+  return <section className={styles.adminPanel}><div className={styles.adminPanelHeader}><div><h3>Owner articles</h3><p>Manage handbook and news posts.</p></div><div className={styles.adminActions}><button type="button" onClick={() => addArticle("HANDBOOK")} disabled={disabled}><Plus size={16} />Add handbook article</button><button type="button" onClick={() => addArticle("NEWS")} disabled={disabled}><Plus size={16} />Add news</button></div></div>{message && <p className={styles.editorMessage} role="status">{message}</p>}<div className={styles.cardGrid}>{articles.map(article => <article className={styles.operationCard} key={article.id}><div><h3>{article.title}</h3><p>{article.kind.toLowerCase()} · {article.category}</p></div><div className={styles.adminActions}><button type="button" onClick={() => editArticle(draftFromArticle(article, article.kind))} disabled={disabled}>Edit</button><button type="button" onClick={() => deleteArticle(article)} aria-label={`Delete ${article.title}`} disabled={disabled}><Trash2 size={16} /></button></div></article>)}</div></section>;
 }
 
 function ArticleEditor({ draft, setDraft, saveArticle, saving, message, close }: { draft: DraftArticle; setDraft: (draft: DraftArticle) => void; saveArticle: () => Promise<boolean>; saving: boolean; message: string; close: () => void }) {

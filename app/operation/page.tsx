@@ -21,6 +21,7 @@ export default async function OperationPage() {
     ...defaultOperationState,
     userRole: user.role,
     canManageContent: ownerCanManageOperation(user.role),
+    storageStatus: "ready",
     today: new Date().toISOString().slice(0, 10),
   };
   if (devMode) {
@@ -59,7 +60,7 @@ export default async function OperationPage() {
         limit 100`,
     ]);
   } catch (error) {
-    if (isOperationSchemaUnavailable(error)) return <OperationModule initialState={fallbackState} devMode={false} />;
+    if (isOperationSchemaUnavailable(error)) return <OperationModule initialState={{ ...fallbackState, storageStatus: "migration-required" }} devMode={false} />;
     throw error;
   }
 
@@ -68,6 +69,7 @@ export default async function OperationPage() {
   const initialState: OperationModuleState = {
     userRole: user.role,
     canManageContent: ownerCanManageOperation(user.role),
+    storageStatus: "ready",
     today,
     handbook,
     news,

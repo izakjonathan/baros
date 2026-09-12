@@ -1,10 +1,18 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.67**
+Version: **v0.19.0-rc.68**
 
 ## Current focus
 
-Operation Quill rich-text article editor upgrade from the verified rc.66 baseline.
+Operation production storage feedback from the verified rc.67 baseline.
+
+## rc.68
+
+- Added explicit migration-required state for Operation module storage.
+- Returned clear migration-required mutation errors when the Operation tables or enum types are missing.
+- Kept article drafts, task text, and needed-item text visible when saves fail.
+- Disabled Operation write controls with a visible database migration notice while production storage is unavailable.
+- Rollback checkpoint: v0.19.0-rc.67.
 
 ## rc.67
 
