@@ -9,10 +9,17 @@ export function ownerCanManageOperation(role: string) {
 }
 
 export function parseOperationBlocks(value: unknown): OperationContentBlock[] {
-  if (!Array.isArray(value)) return [];
-  return value.slice(0, 60).flatMap((block): OperationContentBlock[] => {
-    if (!block || Array.isArray(block) || typeof block !== "object") return [];
-    const record = block as Record<string, unknown>;
+  const normalizedValue = parseJsonValue(value);
+  if (!Array.isArray(normalizedValue)) {
+    const delta = parseRichTextDelta(normalizedValue);
+    return delta ? [{ type: "richText", delta }] : [];
+  }
+  return normalizedValue.slice(0, 60).flatMap((block): OperationContentBlock[] => {
+    const normalizedBlock = parseJsonValue(block);
+    if (!normalizedBlock || Array.isArray(normalizedBlock) || typeof normalizedBlock !== "object") return [];
+    const directDelta = parseRichTextDelta(normalizedBlock);
+    if (directDelta) return [{ type: "richText", delta: directDelta }];
+    const record = normalizedBlock as Record<string, unknown>;
     const type = String(record.type || "");
     if (!blockTypes.has(type)) return [];
     if (type === "richText") {
@@ -39,8 +46,9 @@ export function parseOperationBlocks(value: unknown): OperationContentBlock[] {
 }
 
 function parseRichTextDelta(value: unknown): OperationRichTextDelta | null {
-  if (!value || Array.isArray(value) || typeof value !== "object") return null;
-  const ops = (value as { ops?: unknown }).ops;
+  const normalizedValue = parseJsonValue(value);
+  if (!normalizedValue || Array.isArray(normalizedValue) || typeof normalizedValue !== "object") return null;
+  const ops = (normalizedValue as { ops?: unknown }).ops;
   if (!Array.isArray(ops)) return null;
   const parsedOps = ops.slice(0, 500).flatMap((op): OperationRichTextOp[] => {
     if (!op || Array.isArray(op) || typeof op !== "object") return [];
@@ -59,6 +67,17 @@ function parseRichTextDelta(value: unknown): OperationRichTextDelta | null {
     return [];
   });
   return parsedOps.length ? { ops: parsedOps } : null;
+}
+
+function parseJsonValue(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  const trimmed = value.trim();
+  if (!trimmed || !/^[{[]/.test(trimmed)) return value;
+  try {
+    return JSON.parse(trimmed) as unknown;
+  } catch {
+    return value;
+  }
 }
 
 function parseRichTextAttributes(value: unknown) {

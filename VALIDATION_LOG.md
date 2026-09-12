@@ -1,16 +1,17 @@
-# v0.19.0-rc.69 Validation
+# v0.19.0-rc.70 Validation
 
 ## Confirmed baseline
 
-The v0.19.0-rc.68 release source was used as the baseline for the Operation rich-text heading release.
+The v0.19.0-rc.69 release source was used as the baseline for the Operation article reader content fallback release.
 
-- Rollback checkpoint: v0.19.0-rc.68
+- Rollback checkpoint: v0.19.0-rc.69
 
 ## Implementation
 
-- Changed the Operation Quill heading dropdown to expose H1, H2, and Body.
-- Rendered Quill header level 1 as `h1` and header level 2 as `h2` in article readers.
-- Added UI contract coverage for the H1/H2 toolbar and reader mapping.
+- Hardened Operation content parsing for block arrays, raw Quill Delta objects, and stringified JSON.
+- Added a non-empty article-reader fallback from title and description.
+- Made H1/H2 rendering tolerant of string or numeric Quill header values.
+- Added API and UI contract coverage for the corrected parsing and rendering behavior.
 
 ## Validation status
 
@@ -24,4 +25,4 @@ The v0.19.0-rc.68 release source was used as the baseline for the Operation rich
 
 ## Scope
 
-No database-schema, dependency-version, route-shape, permission, visual redesign, or existing business-workflow changes are included. The change is limited to Operation rich-text heading controls and article reader rendering.
+No database-schema, dependency-version, route-shape, permission, visual redesign, or existing business-workflow changes are included. The change is limited to Operation article parsing and reader rendering.

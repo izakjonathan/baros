@@ -273,7 +273,8 @@ function ModuleCard({ title, description, icon: Icon, onClick }: { title: string
 }
 
 function Reader({ article, canGoBack, goBack, close }: { article: OperationArticle; canGoBack: boolean; goBack: () => void; close: () => void }) {
-  return <aside className={styles.reader} aria-modal="true" role="dialog" aria-label={article.title}>{canGoBack && <div className={styles.readerTop}><button type="button" onClick={goBack}><ArrowLeft size={17} />Back</button></div>}<article className={styles.readerArticle}>{article.content.map((block, index) => <RenderBlock key={`${block.type}-${index}`} block={block} />)}</article><div className={styles.readerBottom}><button type="button" className={styles.closeCircle} onClick={close} aria-label="Close article"><X /></button></div></aside>;
+  const content = article.content.length ? article.content : [{ type: "title" as const, text: article.title }, { type: "body" as const, text: article.description || "No article content has been added yet." }];
+  return <aside className={styles.reader} aria-modal="true" role="dialog" aria-label={article.title}>{canGoBack && <div className={styles.readerTop}><button type="button" onClick={goBack}><ArrowLeft size={17} />Back</button></div>}<article className={styles.readerArticle}>{content.map((block, index) => <RenderBlock key={`${block.type}-${index}`} block={block} />)}</article><div className={styles.readerBottom}><button type="button" className={styles.closeCircle} onClick={close} aria-label="Close article"><X /></button></div></aside>;
 }
 
 function RenderBlock({ block }: { block: OperationContentBlock }) {
@@ -321,9 +322,13 @@ function RichTextLine({ line }: { line: RichTextLine }) {
   const content = line.segments.map((segment, index) => <RichTextSegment key={index} segment={segment} />);
   if (line.attributes?.list === "bullet") return <ul><li>{content}</li></ul>;
   if (line.attributes?.list === "ordered") return <ol><li>{content}</li></ol>;
-  if (line.attributes?.header === 1) return <h1>{content}</h1>;
-  if (line.attributes?.header === 2) return <h2>{content}</h2>;
+  if (normalizeHeader(line.attributes?.header) === 1) return <h1>{content}</h1>;
+  if (normalizeHeader(line.attributes?.header) === 2) return <h2>{content}</h2>;
   return <p>{content}</p>;
+}
+
+function normalizeHeader(value: string | number | boolean | null | undefined) {
+  return typeof value === "number" ? value : typeof value === "string" ? Number(value) : 0;
 }
 
 function RichTextSegment({ segment }: { segment: RichTextSegment }) {

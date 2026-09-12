@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.70
+
+- Hardened Operation article parsing so saved content can render from block arrays, raw Quill Delta objects, or stringified JSON payloads.
+- Added a non-empty article-reader fallback using the article title and description when saved content is missing or malformed.
+- Made rich-text H1/H2 rendering tolerant of numeric or string Quill header attributes.
+- Added API/UI contract coverage for tolerant rich-text parsing and non-empty article readers.
+- No database-schema, dependency-version, route-shape, authorization, permission, or visual redesign changes.
+
 ## v0.19.0-rc.69
 
 - Corrected the Operation Quill toolbar so rich-text headings are exposed as `H1`, `H2`, and `Body`.

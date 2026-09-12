@@ -1,10 +1,17 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.69**
+Version: **v0.19.0-rc.70**
 
 ## Current focus
 
-Operation rich-text heading controls from the verified rc.68 baseline.
+Operation article reader rendering from the verified rc.69 baseline.
+
+## rc.70
+
+- Hardened Operation content parsing so saved articles render from block arrays, raw Quill Delta objects, and stringified JSON.
+- Added a non-empty reader fallback using the article title and description.
+- Made saved H1/H2 header attributes render whether Quill supplies numeric or string values.
+- Rollback checkpoint: v0.19.0-rc.69.
 
 ## rc.69
 

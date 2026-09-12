@@ -32,8 +32,12 @@ for (const token of ["SECURITY_ACTIONS", "GDPR_REQUEST_TYPES", "enumValue", "uui
   if (!security.includes(token)) throw new Error(`security action validation is missing ${token}`);
 }
 const operationModule = read("app/api/operation-module/route.ts");
+const operationContent = read("features/operation/content.ts");
 for (const token of ["getSessionUser", "Owner or Admin permission is required", "operation_articles", "operation_daily_tasks", "operation_needs", "readJsonObject(request, 128_000)", "jsonError(error, request)", "x-operation-storage", "migration-required", "operationMigrationRequired()", "status: 503", "storageStatus: \"migration-required\""]) {
   if (!operationModule.includes(token)) throw new Error(`operation module API contract is missing ${token}`);
+}
+for (const token of ["parseJsonValue(value)", "parseRichTextDelta(normalizedValue)", "parseRichTextDelta(normalizedBlock)", "JSON.parse(trimmed)"]) {
+  if (!operationContent.includes(token)) throw new Error(`operation content parser does not tolerate saved rich text shape: ${token}`);
 }
 if ((operationModule.match(/isOperationSchemaUnavailable\(error\)\) return operationMigrationRequired\(\)/g) || []).length < 3) {
   throw new Error("operation module mutations must report migration-required storage failures");
