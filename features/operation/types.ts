@@ -12,6 +12,19 @@ export type OperationRichTextDelta = {
   ops: OperationRichTextOp[];
 };
 
+export type OperationTiptapNode = {
+  type: string;
+  attrs?: Record<string, string | number | boolean | null>;
+  marks?: Array<{ type: string; attrs?: Record<string, string | number | boolean | null> }>;
+  text?: string;
+  content?: OperationTiptapNode[];
+};
+
+export type OperationTiptapDocument = {
+  type: "doc";
+  content: OperationTiptapNode[];
+};
+
 export type OperationContentBlock =
   | { type: "title"; text: string }
   | { type: "h1"; text: string }
@@ -21,6 +34,7 @@ export type OperationContentBlock =
   | { type: "numbered"; items: string[] }
   | { type: "image"; src: string; alt: string }
   | { type: "richText"; delta: OperationRichTextDelta }
+  | { type: "tiptap"; document: OperationTiptapDocument }
   | { type: "articleLink"; articleId: string; label: string };
 
 export type OperationArticle = {

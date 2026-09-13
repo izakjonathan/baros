@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.19.0-rc.74
+
+- Kept the article editor full-screen while the keyboard is open; only the formatting dock now moves, preventing the Operation page from showing behind the editor.
+
 ## v0.19.0-rc.73
 
 - Made the Operation article editor react to the mobile visual viewport so its toolbar floats above the iPhone keyboard.

@@ -52,7 +52,7 @@
 .adminPanel input,.adminPanel textarea,.adminPanel select,.needInput input{min-height:2.35rem;border:1px solid rgba(41,41,41,.68);border-radius:.62rem;background:rgba(255,255,255,.12);color:inherit;padding:.52rem .66rem;font-size:.78rem}
 .adminPanel textarea{grid-column:1/-1;min-height:7rem;resize:vertical}
 .editorMeta input:nth-of-type(2){grid-column:1/-1}
-.articleEditor{position:fixed;inset:0 auto auto 0;z-index:70;width:100%;height:var(--editor-visible-height,100dvh);display:grid;grid-template-rows:auto minmax(0,1fr);background:#e9e5dd;color:#292929;padding:max(.78rem,env(safe-area-inset-top)) max(.85rem,env(safe-area-inset-right)) calc(5.9rem + var(--editor-keyboard-offset,0px)) max(.85rem,env(safe-area-inset-left))}
+.articleEditor{position:fixed;inset:0;z-index:70;display:grid;grid-template-rows:auto minmax(0,1fr);background:#e9e5dd;color:#292929;padding:max(.78rem,env(safe-area-inset-top)) max(.85rem,env(safe-area-inset-right)) calc(5.9rem + var(--editor-keyboard-offset,0px)) max(.85rem,env(safe-area-inset-left))}
 .articleEditorTop{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.05rem .05rem .75rem}
 .editorIconButton,.editorDoneButton{display:inline-grid;place-items:center;border:1px solid rgba(41,41,41,.68);border-radius:999px;background:rgba(255,255,255,.16);color:#292929}
 .editorIconButton{width:3.1rem;height:3.1rem}
@@ -85,6 +85,31 @@
 .styleMenu button{min-height:2.2rem!important;padding-inline:.62rem!important;text-align:left}
 .editorMessage{font-family:var(--font-body);font-size:.82rem;color:#8a7432}
 .imageInput{display:none}
+.articleEditor{z-index:80;padding:0;background:#e9e5dd}
+.articleEditorFrame{position:fixed;top:var(--editor-vv-top,0px);left:0;right:0;height:var(--editor-vv-height,100dvh);display:grid;grid-template-rows:auto minmax(0,1fr);overflow:hidden;background:#e9e5dd;color:#292929;padding:max(.78rem,env(safe-area-inset-top)) max(.85rem,env(safe-area-inset-right)) max(.72rem,env(safe-area-inset-bottom)) max(.85rem,env(safe-area-inset-left))}
+.articleEditorCanvas{display:grid;grid-template-rows:auto auto auto minmax(0,1fr);gap:0;overflow:hidden;padding:1.05rem .25rem .2rem}
+.articleEditor .editorMeta{margin-bottom:.45rem}
+.editorDescriptionInput{min-height:3.15rem;margin:.35rem 0 .55rem}
+.tiptapEditor{display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:0}
+.tiptapSurface{min-height:0;overflow:auto;padding:0 .1rem 1rem;font-family:var(--font-body);font-size:1rem;line-height:1.55;color:#292929}
+.tiptapSurface :global(.tiptap){min-height:100%;outline:0}
+.tiptapSurface :global(.tiptap p.is-editor-empty:first-child::before){float:left;height:0;color:#817c75;content:attr(data-placeholder);pointer-events:none}
+.tiptapSurface :global(.tiptap h2){margin:1.15rem 0 .45rem;font-family:var(--font-display);font-size:clamp(1.55rem,6vw,2.15rem);line-height:1.05;letter-spacing:-.035em;font-weight:760}
+.tiptapSurface :global(.tiptap h3){margin:1rem 0 .4rem;font-family:var(--font-display);font-size:clamp(1.14rem,4.5vw,1.45rem);line-height:1.1;letter-spacing:-.02em;font-weight:720}
+.tiptapSurface :global(.tiptap p),.tiptapSurface :global(.tiptap li){font-family:var(--font-body);font-size:1rem;line-height:1.55;color:#292929}
+.tiptapSurface :global(.tiptap p){margin:.1rem 0 .7rem}
+.tiptapSurface :global(.tiptap ul),.tiptapSurface :global(.tiptap ol){margin:.35rem 0 .85rem;padding-left:1.3rem}
+.tiptapSurface :global(.tiptap li p){margin-bottom:.22rem}
+.tiptapSurface :global(.tiptap a){color:inherit;text-decoration:underline;text-underline-offset:.16em}
+.tiptapSurface :global(.tiptap img){display:block;max-width:100%;height:auto;margin:.85rem 0;border:1px solid rgba(41,41,41,.5);border-radius:.85rem}
+.tiptapToolbar{position:relative;z-index:3;display:grid;grid-template-columns:minmax(4.25rem,1fr) repeat(9,2.08rem);align-items:center;gap:.12rem;margin-top:.35rem;padding:.4rem;border:1px solid rgba(41,41,41,.48);border-radius:999px;background:#e9e5dd;box-shadow:0 .45rem 1.4rem rgba(41,41,41,.16)}
+.tiptapToolbar button{display:grid;place-items:center;width:100%;min-width:0;min-height:2.14rem;border:0;border-radius:999px;background:transparent;color:#292929;padding:.2rem}
+.tiptapToolbar button[aria-pressed="true"],.tiptapToolbar button:hover:not(:disabled){background:#292929;color:#e9e5dd}
+.tiptapToolbar button:disabled{opacity:.36}
+.styleControl{position:relative}
+.styleTrigger{display:flex!important;justify-content:center;gap:.25rem!important;background:rgba(41,41,41,.08)!important;padding-inline:.38rem!important;font-family:var(--font-display)!important;font-size:.68rem!important;font-weight:760!important}
+.styleMenu{position:absolute;bottom:calc(100% + .5rem);left:0;z-index:4;display:grid;gap:.16rem;width:9.4rem;padding:.35rem;border:1px solid rgba(41,41,41,.4);border-radius:.72rem;background:#e9e5dd;box-shadow:0 .5rem 1.5rem rgba(41,41,41,.2)}
+.styleMenu button{display:block;min-height:2.25rem!important;padding:.3rem .65rem!important;text-align:left;font-family:var(--font-display)!important;font-size:.75rem!important;font-weight:760!important}
 .adminActions,.needInput{display:flex;gap:.5rem;flex-wrap:wrap}
 .adminActions button,.needInput button,.taskRow button,.needRow button{min-height:2.08rem;border:1px solid #292929;border-radius:999px;background:#292929;color:#e7e3dc;padding:.24rem .65rem;font-size:.72rem;font-weight:750}
 .adminActions button:disabled,.needInput button:disabled,.taskRow button:disabled,.needRow button:disabled,.adminPanel input:disabled,.needInput input:disabled{opacity:.5;cursor:not-allowed}
@@ -104,6 +129,8 @@
   .moduleGrid,.adminGrid,.editorMeta,.articleEditor .editorMeta,.taskSettings{grid-template-columns:1fr}
   .adminPanelHeader{display:grid}
   .quillToolbar{grid-template-columns:minmax(3.45rem,1fr) repeat(8,2.02rem);gap:.12rem}
+  .tiptapToolbar{grid-template-columns:minmax(3.65rem,1fr) repeat(9,2.02rem);gap:.08rem;padding:.34rem}
+  .tiptapToolbar button{min-height:2.04rem}
   .operationCard{min-height:3.72rem;border-radius:.68rem;padding:.62rem .72rem}
   .operationCard h3{font-size:clamp(.98rem,4.7vw,1.18rem)}
   .operationCard small{font-size:.56rem}

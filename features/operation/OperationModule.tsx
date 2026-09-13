@@ -1,49 +1,74 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowLeft, BookOpen, CalendarDays, Check, CheckSquare, Plus, Repeat2, ShoppingBasket, Trash2, X } from "lucide-react";
+import { ArrowLeft, Bold, BookOpen, CalendarDays, Check, CheckSquare, ImagePlus, Italic, Link2, List, ListOrdered, Plus, Redo2, Repeat2, ShoppingBasket, Trash2, Type, Underline, Undo2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import UnderlineExtension from "@tiptap/extension-underline";
+import Link from "@tiptap/extension-link";
+import ImageExtension from "@tiptap/extension-image";
+import Placeholder from "@tiptap/extension-placeholder";
 import styles from "./OperationModule.module.css";
-import type { OperationArticle, OperationArticleKind, OperationContentBlock, OperationDailyTask, OperationModuleState, OperationNeed, OperationRichTextDelta, OperationRichTextOp, OperationTaskRepeatUnit } from "./types";
+import type { OperationArticle, OperationArticleKind, OperationContentBlock, OperationDailyTask, OperationModuleState, OperationNeed, OperationRichTextDelta, OperationRichTextOp, OperationTaskRepeatUnit, OperationTiptapDocument, OperationTiptapNode } from "./types";
 
 type View = "home" | "handbook" | "tasks" | "needs";
-type DraftArticle = { id?: string; kind: OperationArticleKind; category: string; title: string; description: string; delta: OperationRichTextDelta };
-type QuillInstance = { getContents: () => OperationRichTextDelta; setContents: (delta: OperationRichTextDelta) => void; getSelection: (focus?: boolean) => { index: number; length: number } | null; insertEmbed: (index: number, type: string, value: string, source?: string) => void; setSelection: (index: number, length?: number, source?: string) => void; format: (name: string, value: unknown, source?: string) => void; on: (event: "text-change", callback: () => void) => void; off: (event: "text-change", callback: () => void) => void };
+type DraftArticle = { id?: string; kind: OperationArticleKind; category: string; title: string; description: string; document: OperationTiptapDocument };
 
 const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const migrationMessage = "Operation storage is not ready yet. Run the database migration action, then reload this page.";
 
 function draftFromArticle(article?: OperationArticle, kind: OperationArticleKind = "HANDBOOK"): DraftArticle {
-  return { id: article?.id, kind, category: article?.category || "General", title: article?.title || "", description: article?.description || "", delta: deltaFromBlocks(article?.content || []) };
+  return { id: article?.id, kind, category: article?.category || "General", title: article?.title || "", description: article?.description || "", document: documentFromBlocks(article?.content || []) };
 }
 
 function blocksFromDraft(draft: DraftArticle): OperationContentBlock[] {
-  return [{ type: "title", text: draft.title }, { type: "richText", delta: cleanRichTextDelta(draft.delta) }];
+  return [{ type: "title", text: draft.title }, { type: "tiptap", document: draft.document }];
 }
 
-function deltaFromBlocks(blocks: OperationContentBlock[]): OperationRichTextDelta {
-  const richText = blocks.find(block => block.type === "richText");
-  if (richText?.type === "richText") return cleanRichTextDelta(richText.delta);
-  const ops = blocks.flatMap((block): OperationRichTextOp[] => {
+function emptyDocument(): OperationTiptapDocument {
+  return { type: "doc", content: [{ type: "paragraph" }] };
+}
+
+function documentFromBlocks(blocks: OperationContentBlock[]): OperationTiptapDocument {
+  const structured = blocks.find((block): block is Extract<OperationContentBlock, { type: "tiptap" }> => block.type === "tiptap");
+  if (structured) return structured.document;
+  const richText = blocks.find((block): block is Extract<OperationContentBlock, { type: "richText" }> => block.type === "richText");
+  if (richText) return documentFromDelta(richText.delta);
+  const content = blocks.flatMap((block): OperationTiptapNode[] => {
     if (block.type === "title" || block.type === "articleLink") return [];
-    if (block.type === "image") return block.src ? [{ insert: { image: block.src }, attributes: block.alt ? { alt: block.alt } : undefined }, { insert: "\n" }] : [];
-    if (block.type === "bullets" || block.type === "numbered") return block.items.flatMap(item => item.trim() ? [{ insert: item.trim() }, { insert: "\n", attributes: { list: block.type === "bullets" ? "bullet" : "ordered" } }] : []);
-    if (block.type === "h1") return block.text.trim() ? [{ insert: block.text.trim() }, { insert: "\n", attributes: { header: 1 } }] : [];
-    if (block.type === "h2") return block.text.trim() ? [{ insert: block.text.trim() }, { insert: "\n", attributes: { header: 2 } }] : [];
-    if (block.type === "richText") return block.delta.ops;
-    return block.text.trim() ? [{ insert: `${block.text.trim()}\n` }] : [];
+    if (block.type === "h1") return [{ type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: block.text }] }];
+    if (block.type === "h2") return [{ type: "heading", attrs: { level: 3 }, content: [{ type: "text", text: block.text }] }];
+    if (block.type === "body") return [{ type: "paragraph", content: [{ type: "text", text: block.text }] }];
+    if (block.type === "bullets" || block.type === "numbered") return [{ type: block.type === "bullets" ? "bulletList" : "orderedList", content: block.items.map(item => ({ type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: item }] }] })) }];
+    if (block.type === "image") return [{ type: "image", attrs: { src: block.src, alt: block.alt } }];
+    return [];
   });
-  return ops.length ? { ops } : { ops: [{ insert: "\n" }] };
+  return content.length ? { type: "doc", content } : emptyDocument();
 }
 
-function cleanRichTextDelta(delta: OperationRichTextDelta): OperationRichTextDelta {
-  const ops = Array.isArray(delta.ops) ? delta.ops.filter((op): op is OperationRichTextOp => typeof op.insert === "string" || (typeof op.insert === "object" && typeof op.insert.image === "string")).slice(0, 500) : [];
-  return ops.length ? { ops } : { ops: [{ insert: "\n" }] };
+function documentFromDelta(delta: OperationRichTextDelta): OperationTiptapDocument {
+  const content = deltaToLines(delta).flatMap((line): OperationTiptapNode[] => {
+    if (line.image) return [{ type: "image", attrs: { src: line.image, alt: "Operation article image" } }];
+    const inline = line.segments.flatMap((segment): OperationTiptapNode[] => {
+      const marks: NonNullable<OperationTiptapNode["marks"]> = [];
+      if (segment.attributes?.bold) marks.push({ type: "bold" });
+      if (segment.attributes?.italic) marks.push({ type: "italic" });
+      if (segment.attributes?.underline) marks.push({ type: "underline" });
+      if (typeof segment.attributes?.link === "string") marks.push({ type: "link", attrs: { href: segment.attributes.link } });
+      return segment.text ? [{ type: "text", text: segment.text, ...(marks.length ? { marks } : {}) }] : [];
+    });
+    const paragraph = { type: "paragraph", ...(inline.length ? { content: inline } : {}) } satisfies OperationTiptapNode;
+    if (line.attributes?.list === "bullet" || line.attributes?.list === "ordered") return [{ type: line.attributes.list === "bullet" ? "bulletList" : "orderedList", content: [{ type: "listItem", content: [paragraph] }] }];
+    const header = normalizeHeader(line.attributes?.header);
+    return header ? [{ ...paragraph, type: "heading", attrs: { level: header === 1 ? 2 : 3 } }] : [paragraph];
+  });
+  return content.length ? { type: "doc", content } : emptyDocument();
 }
 
-function hasRichTextContent(delta: OperationRichTextDelta) {
-  return delta.ops.some(op => typeof op.insert === "string" ? op.insert.trim().length > 0 : Boolean(op.insert.image));
+function hasRichTextContent(document: OperationTiptapDocument) {
+  return JSON.stringify(document).replace(/[{}\[\]",:\s]/g, "").length > 3 && document.content.some(node => node.type === "image" || Boolean(node.content?.some(child => Boolean(child.text?.trim() || child.content?.length))));
 }
 
 async function responseMessage(response: Response, fallback: string) {
@@ -92,7 +117,7 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     if (storageUnavailable) { setEditorMessage(migrationMessage); return false; }
     if (!draft.title.trim()) { setEditorMessage("Add an article title first."); return false; }
     if (!draft.description.trim()) { setEditorMessage("Add a short card description first."); return false; }
-    if (!hasRichTextContent(draft.delta)) { setEditorMessage("Add article text or an image before saving."); return false; }
+    if (!hasRichTextContent(draft.document)) { setEditorMessage("Add article text or an image before saving."); return false; }
     const content = blocksFromDraft(draft);
     const article: OperationArticle = {
       id: draft.id || crypto.randomUUID(),
@@ -222,10 +247,8 @@ function ArticleEditor({ draft, setDraft, saveArticle, saving, message, close }:
   useEffect(() => {
     const visualViewport = window.visualViewport;
     function syncViewport() {
-      const height = visualViewport?.height || window.innerHeight;
-      const keyboardOffset = Math.max(0, window.innerHeight - height - (visualViewport?.offsetTop || 0));
-      editorRef.current?.style.setProperty("--editor-visible-height", `${height}px`);
-      editorRef.current?.style.setProperty("--editor-keyboard-offset", `${keyboardOffset}px`);
+      editorRef.current?.style.setProperty("--editor-vv-top", `${visualViewport?.offsetTop || 0}px`);
+      editorRef.current?.style.setProperty("--editor-vv-height", `${visualViewport?.height || window.innerHeight}px`);
     }
     syncViewport();
     visualViewport?.addEventListener("resize", syncViewport);
@@ -234,67 +257,63 @@ function ArticleEditor({ draft, setDraft, saveArticle, saving, message, close }:
     return () => { visualViewport?.removeEventListener("resize", syncViewport); visualViewport?.removeEventListener("scroll", syncViewport); window.removeEventListener("resize", syncViewport); };
   }, []);
 
-  return <aside ref={editorRef} className={styles.articleEditor} aria-modal="true" role="dialog" aria-label={draft.id ? "Edit article" : "Add article"}><div className={styles.articleEditorTop}><button type="button" className={styles.editorIconButton} onClick={close} aria-label="Close editor"><ArrowLeft size={22} /></button><button type="button" className={styles.editorDoneButton} disabled={saving} onClick={saveArticle} aria-label="Save article">{saving ? "Saving" : <Check size={24} />}</button></div><div className={styles.articleEditorCanvas}><div className={styles.editorMeta}><select value={draft.kind} onChange={event => setDraft({ ...draft, kind: event.target.value as OperationArticleKind })}><option value="HANDBOOK">Handbook</option><option value="NEWS">News</option></select><input value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })} placeholder="Category" /></div><input className={styles.editorTitleInput} value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} placeholder="Title" /><textarea className={styles.editorDescriptionInput} value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} placeholder="Short card description" /><QuillArticleEditor value={draft.delta} onChange={(delta) => setDraft({ ...draft, delta })} />{message && <p className={styles.editorMessage} role="status">{message}</p>}</div></aside>;
+  return <aside ref={editorRef} className={styles.articleEditor} aria-modal="true" role="dialog" aria-label={draft.id ? "Edit article" : "Add article"}><div className={styles.articleEditorFrame}><div className={styles.articleEditorTop}><button type="button" className={styles.editorIconButton} onClick={close} aria-label="Close editor"><ArrowLeft size={22} /></button><button type="button" className={styles.editorDoneButton} disabled={saving} onClick={saveArticle} aria-label="Save article">{saving ? "Saving" : <Check size={24} />}</button></div><div className={styles.articleEditorCanvas}><div className={styles.editorMeta}><select value={draft.kind} onChange={event => setDraft({ ...draft, kind: event.target.value as OperationArticleKind })}><option value="HANDBOOK">Handbook</option><option value="NEWS">News</option></select><input value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })} placeholder="Category" /></div><input className={styles.editorTitleInput} value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} placeholder="Title" /><textarea className={styles.editorDescriptionInput} value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} placeholder="Short card description" /><TiptapArticleEditor value={draft.document} onChange={(document) => setDraft({ ...draft, document })} />{message && <p className={styles.editorMessage} role="status">{message}</p>}</div></div></aside>;
 }
 
-function QuillArticleEditor({ value, onChange }: { value: OperationRichTextDelta; onChange: (delta: OperationRichTextDelta) => void }) {
-  const toolbarRef = useRef<HTMLDivElement | null>(null);
-  const editorRef = useRef<HTMLDivElement | null>(null);
+function TiptapArticleEditor({ value, onChange }: { value: OperationTiptapDocument; onChange: (document: OperationTiptapDocument) => void }) {
   const imageInputRef = useRef<HTMLInputElement | null>(null);
-  const quillRef = useRef<QuillInstance | null>(null);
   const onChangeRef = useRef(onChange);
-  const initialValueRef = useRef(value);
   const [styleMenuOpen, setStyleMenuOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
-  useEffect(() => {
-    let active = true;
-    let textChange: (() => void) | null = null;
-    const editorElement = editorRef.current;
-    async function loadQuill() {
-      if (!toolbarRef.current || !editorElement || quillRef.current) return;
-      const { default: Quill } = await import("quill");
-      if (!active || !toolbarRef.current || !editorElement) return;
-      const quill = new Quill(editorElement, {
-        modules: { toolbar: { container: toolbarRef.current, handlers: { image: () => imageInputRef.current?.click() } }, history: { delay: 500, maxStack: 100, userOnly: true } },
-        placeholder: "Write the article...",
-        theme: "snow",
-      }) as unknown as QuillInstance;
-      quill.setContents(cleanRichTextDelta(initialValueRef.current));
-      textChange = () => onChangeRef.current(cleanRichTextDelta(quill.getContents()));
-      quill.on("text-change", textChange);
-      quillRef.current = quill;
-    }
-    void loadQuill();
-    return () => {
-      active = false;
-      if (textChange && quillRef.current) quillRef.current.off("text-change", textChange);
-      quillRef.current = null;
-      if (editorElement) editorElement.innerHTML = "";
-    };
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit.configure({ heading: { levels: [2, 3] } }),
+      UnderlineExtension,
+      Link.configure({ openOnClick: false, autolink: true, linkOnPaste: true, protocols: ["http", "https", "mailto", "tel"] }),
+      ImageExtension.configure({ allowBase64: false, inline: false }),
+      Placeholder.configure({ placeholder: "Write the article..." }),
+    ],
+    content: value,
+    onUpdate: ({ editor: current }) => onChangeRef.current(current.getJSON() as OperationTiptapDocument),
   }, []);
 
   async function uploadImage(file: File) {
-    if (!quillRef.current) return;
+    if (!editor) return;
+    setUploading(true);
     const form = new FormData();
     form.append("image", file);
     const response = await fetch("/api/operation-images", { method: "POST", body: form });
     const payload: unknown = await response.json().catch(() => null);
     if (!response.ok || !payload || typeof payload !== "object" || !("url" in payload) || typeof payload.url !== "string") {
       alert(payload && typeof payload === "object" && "error" in payload && typeof payload.error === "string" ? payload.error : "Could not upload image.");
+      setUploading(false);
       return;
     }
-    const range = quillRef.current.getSelection(true) || { index: quillRef.current.getContents().ops.length, length: 0 };
-    quillRef.current.insertEmbed(range.index, "image", payload.url, "user");
-    quillRef.current.setSelection(range.index + 1, 0, "user");
+    editor.chain().focus().setImage({ src: payload.url, alt: "Operation article image" }).run();
+    setUploading(false);
   }
 
-  function applyStyle(header: 1 | 2 | false) {
-    quillRef.current?.format("header", header || false, "user");
+  function applyStyle(style: "heading" | "subheading" | "body") {
+    if (!editor) return;
+    if (style === "heading") editor.chain().focus().toggleHeading({ level: 2 }).run();
+    else if (style === "subheading") editor.chain().focus().toggleHeading({ level: 3 }).run();
+    else editor.chain().focus().setParagraph().run();
     setStyleMenuOpen(false);
   }
 
-  return <div className={styles.quillEditor}><input ref={imageInputRef} className={styles.imageInput} type="file" accept="image/*" onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void uploadImage(file); }} /><div ref={toolbarRef} className={styles.quillToolbar} aria-label="Article formatting tools"><div className={styles.styleControl}><button type="button" className={styles.styleTrigger} onMouseDown={event => event.preventDefault()} onClick={() => setStyleMenuOpen(open => !open)} aria-expanded={styleMenuOpen}>Style</button>{styleMenuOpen && <div className={styles.styleMenu} role="menu"><button type="button" role="menuitem" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle(1)}>Heading</button><button type="button" role="menuitem" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle(2)}>Subheading</button><button type="button" role="menuitem" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle(false)}>Body</button></div>}</div><button className="ql-bold" type="button" aria-label="Bold" /><button className="ql-italic" type="button" aria-label="Italic" /><button className="ql-underline" type="button" aria-label="Underline" /><button className="ql-list" value="bullet" type="button" aria-label="Bullet list" /><button className="ql-list" value="ordered" type="button" aria-label="Numbered list" /><button className="ql-link" type="button" aria-label="Add link" /><button className="ql-image" type="button" aria-label="Add image from device" /><button className="ql-clean" type="button" aria-label="Clear formatting" /></div><div ref={editorRef} className={styles.quillSurface} /></div>;
+  function setLink() {
+    if (!editor) return;
+    const previous = editor.getAttributes("link").href as string | undefined;
+    const href = window.prompt("Paste a link", previous || "");
+    if (href === null) return;
+    if (!href.trim()) editor.chain().focus().unsetLink().run();
+    else editor.chain().focus().extendMarkRange("link").setLink({ href: href.trim() }).run();
+  }
+
+  return <div className={styles.tiptapEditor}><input ref={imageInputRef} className={styles.imageInput} type="file" accept="image/*" onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void uploadImage(file); }} /><EditorContent editor={editor} className={styles.tiptapSurface} /><div className={styles.tiptapToolbar} role="toolbar" aria-label="Article formatting tools"><div className={styles.styleControl}><button type="button" className={styles.styleTrigger} onMouseDown={event => event.preventDefault()} onClick={() => setStyleMenuOpen(open => !open)} aria-expanded={styleMenuOpen}><Type size={18} /><span>Style</span></button>{styleMenuOpen && <div className={styles.styleMenu} role="menu"><button type="button" role="menuitem" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle("heading")}>Heading</button><button type="button" role="menuitem" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle("subheading")}>Subheading</button><button type="button" role="menuitem" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle("body")}>Body</button></div>}</div><button type="button" aria-label="Bold" aria-pressed={editor?.isActive("bold") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleBold().run()}><Bold size={19} /></button><button type="button" aria-label="Italic" aria-pressed={editor?.isActive("italic") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleItalic().run()}><Italic size={19} /></button><button type="button" aria-label="Underline" aria-pressed={editor?.isActive("underline") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleUnderline().run()}><Underline size={19} /></button><button type="button" aria-label="Bullet list" aria-pressed={editor?.isActive("bulletList") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleBulletList().run()}><List size={20} /></button><button type="button" aria-label="Numbered list" aria-pressed={editor?.isActive("orderedList") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleOrderedList().run()}><ListOrdered size={20} /></button><button type="button" aria-label="Add link" onMouseDown={event => event.preventDefault()} onClick={setLink}><Link2 size={19} /></button><button type="button" aria-label="Add image from device" disabled={uploading} onMouseDown={event => event.preventDefault()} onClick={() => imageInputRef.current?.click()}><ImagePlus size={20} /></button><button type="button" aria-label="Undo" disabled={!editor?.can().undo()} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().undo().run()}><Undo2 size={19} /></button><button type="button" aria-label="Redo" disabled={!editor?.can().redo()} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().redo().run()}><Redo2 size={19} /></button></div></div>;
 }
 
 function SectionHeader({ title, detail, action }: { title: string; detail: string; action?: { label: string; onClick: () => void } }) {
@@ -317,6 +336,7 @@ function Reader({ article, canGoBack, goBack, close }: { article: OperationArtic
 function RenderBlock({ block }: { block: OperationContentBlock }) {
   if (block.type === "title") return <h1>{block.text}</h1>;
   if (block.type === "richText") return <RichTextArticle delta={block.delta} />;
+  if (block.type === "tiptap") return <TiptapArticle document={block.document} />;
   if (block.type === "h1") return <h2>{block.text}</h2>;
   if (block.type === "h2") return <h3>{block.text}</h3>;
   if (block.type === "body") return <p>{block.text}</p>;
@@ -324,6 +344,34 @@ function RenderBlock({ block }: { block: OperationContentBlock }) {
   if (block.type === "numbered") return <ol>{block.items.map(item => <li key={item}>{item}</li>)}</ol>;
   if (block.type === "image") return <Image className={styles.readerImage} src={block.src} alt={block.alt} width={1200} height={800} unoptimized />;
   return null;
+}
+
+function TiptapArticle({ document }: { document: OperationTiptapDocument }) {
+  return <>{document.content.map((node, index) => <TiptapNode key={index} node={node} />)}</>;
+}
+
+function TiptapNode({ node }: { node: OperationTiptapNode }) {
+  const content = node.content?.map((child, index) => <TiptapNode key={index} node={child} />);
+  if (node.type === "text") return <TiptapText node={node} />;
+  if (node.type === "paragraph") return <p>{content}</p>;
+  if (node.type === "heading") return node.attrs?.level === 3 ? <h3>{content}</h3> : <h2>{content}</h2>;
+  if (node.type === "bulletList") return <ul>{content}</ul>;
+  if (node.type === "orderedList") return <ol>{content}</ol>;
+  if (node.type === "listItem") return <li>{content}</li>;
+  if (node.type === "image" && typeof node.attrs?.src === "string") return <Image className={styles.readerImage} src={node.attrs.src} alt={typeof node.attrs.alt === "string" ? node.attrs.alt : ""} width={1200} height={800} unoptimized />;
+  if (node.type === "hardBreak") return <br />;
+  return null;
+}
+
+function TiptapText({ node }: { node: OperationTiptapNode }) {
+  let content: ReactNode = node.text || "";
+  node.marks?.forEach(mark => {
+    if (mark.type === "bold") content = <strong>{content}</strong>;
+    if (mark.type === "italic") content = <em>{content}</em>;
+    if (mark.type === "underline") content = <u>{content}</u>;
+    if (mark.type === "link" && typeof mark.attrs?.href === "string") content = <a href={mark.attrs.href} target="_blank" rel="noreferrer">{content}</a>;
+  });
+  return <>{content}</>;
 }
 
 function RichTextArticle({ delta }: { delta: OperationRichTextDelta }) {
