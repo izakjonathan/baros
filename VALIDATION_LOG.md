@@ -1,17 +1,16 @@
-# v0.19.0-rc.70 Validation
+# v0.19.0-rc.71 Validation
 
 ## Confirmed baseline
 
-The v0.19.0-rc.69 release source was used as the baseline for the Operation article reader content fallback release.
+The v0.19.0-rc.70 release source was used as the baseline for the compact Operation UI release.
 
-- Rollback checkpoint: v0.19.0-rc.69
+- Rollback checkpoint: v0.19.0-rc.70
 
 ## Implementation
 
-- Hardened Operation content parsing for block arrays, raw Quill Delta objects, and stringified JSON.
-- Added a non-empty article-reader fallback from title and description.
-- Made H1/H2 rendering tolerant of string or numeric Quill header values.
-- Added API and UI contract coverage for the corrected parsing and rendering behavior.
+- Restyled Operation cards, module rows, task rows, need rows, navigation, section labels, reader typography, and form controls into a tighter field-notes direction.
+- Kept the full-screen dark Apple Notes-style Quill article editor intact.
+- Preserved Operation API, database, route, permission, and workflow behavior.
 
 ## Validation status
 
@@ -25,4 +24,4 @@ The v0.19.0-rc.69 release source was used as the baseline for the Operation arti
 
 ## Scope
 
-No database-schema, dependency-version, route-shape, permission, visual redesign, or existing business-workflow changes are included. The change is limited to Operation article parsing and reader rendering.
+No database-schema, dependency-version, route-shape, permission, or existing business-workflow changes are included. The change is limited to the Operation module visual presentation.

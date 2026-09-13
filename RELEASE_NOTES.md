@@ -1,18 +1,18 @@
-# v0.19.0-rc.70 — Operation Article Reader Content Fallback
+# v0.19.0-rc.71 — Compact Field Notes Operation UI
 
 ## Baseline
 
-- Continued from v0.19.0-rc.69 after the Operation rich-text heading controls release. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.70 after the Operation article reader rendering release. That release is the rollback checkpoint.
 
-## Article rendering
+## Operation design
 
-- Hardened Operation article parsing so saved content can render from block arrays, raw Quill Delta objects, or stringified JSON payloads.
-- Added a non-empty article-reader fallback using the article title and description when saved content is missing or malformed.
-- Made H1/H2 rendering tolerate numeric and string Quill header attributes.
-- Added API and UI contract coverage for tolerant rich-text parsing and non-empty article readers.
+- Restyled the standalone Operation module toward a compact field-notes interface.
+- Reduced card height, border weight, typography scale, section label scale, form control size, and list-row density.
+- Kept the full-screen dark Apple Notes-style Quill article editor intact.
+- Preserved the existing `/operation` route, login/session model, API, and database behavior.
 
 ## Scope
 
-No database-schema, dependency-version, route-shape, permission, visual redesign, or existing business-workflow changes are included. The change is limited to Operation article parsing and reader rendering.
+No database-schema, dependency-version, route-shape, permission, or existing business-workflow changes are included. The change is limited to the Operation module visual presentation.
 
-Rollback checkpoint: **v0.19.0-rc.69**.
+Rollback checkpoint: **v0.19.0-rc.70**.

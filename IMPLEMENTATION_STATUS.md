@@ -1,10 +1,17 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.70**
+Version: **v0.19.0-rc.71**
 
 ## Current focus
 
-Operation article reader rendering from the verified rc.69 baseline.
+Compact Operation field-notes UI from the verified rc.70 baseline.
+
+## rc.71
+
+- Restyled the standalone Operation module into a tighter field-notes interface.
+- Reduced card, row, section-label, control, and reader typography scale.
+- Kept the full-screen dark Apple Notes-style Quill editor intact.
+- Rollback checkpoint: v0.19.0-rc.70.
 
 ## rc.70
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.19.0-rc.71
+
+- Restyled the standalone Operation module into a compact field-notes direction with a narrower content column, smaller section labels, tighter cards, thinner rows, and reduced control scale.
+- Kept the Apple Notes-style full-screen dark article editor and Quill rich-text workflow intact.
+- Preserved the existing `/operation` route, database/API behavior, permissions, and article/task/needs workflows.
+- No database-schema, dependency-version, route-shape, authorization, or business-workflow changes.
+
 ## v0.19.0-rc.70
 
 - Hardened Operation article parsing so saved content can render from block arrays, raw Quill Delta objects, or stringified JSON payloads.
