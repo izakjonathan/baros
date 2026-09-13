@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import "quill/dist/quill.snow.css";
 import { PwaRegister } from "./pwa-register";
 
 const inter = localFont({

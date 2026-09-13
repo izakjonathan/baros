@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { defaultOperationState } from "@/features/operation/default-content";
 import { mapOperationArticle, ownerCanManageOperation, parseOperationBlocks } from "@/features/operation/content";
-import type { OperationDailyTask, OperationModuleState, OperationNeed } from "@/features/operation/types";
+import { isOperationTaskDue, type OperationDailyTask, type OperationModuleState, type OperationNeed } from "@/features/operation/types";
 import { db } from "@/lib/db/client";
 import { ApiError, enumValue, finiteNumber, isoDate, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
 import { getSessionUser } from "@/lib/auth/session";
@@ -40,7 +40,6 @@ export async function GET(request: Request) {
     const user = await requireApiUser();
     const params = new URL(request.url).searchParams;
     const today = isoDate(params.get("date") || new Date().toISOString().slice(0, 10), "date");
-    const weekday = weekdayFromDate(today);
     const [articles, tasks, needs] = await Promise.all([
       db()<Array<Record<string, unknown>>>`
         select id,kind,category,title,description,content,published,updated_at
@@ -48,13 +47,12 @@ export async function GET(request: Request) {
         where organization_id=${user.organizationId} and (published=true or ${ownerCanManageOperation(user.role)})
         order by kind,category,sort_order,updated_at desc`,
       db()<Array<Record<string, unknown>>>`
-        select t.id,t.weekday,t.title,t.description,(c.completed_at is not null) completed
+        select t.id,t.weekday,t.title,t.description,t.due_date,t.repeat_unit,t.repeat_interval,t.repeat_end_date,(c.completed_at is not null) completed
         from operation_daily_tasks t
         left join operation_daily_task_completions c
           on c.task_id=t.id and c.service_date=${today}::date and c.organization_id=t.organization_id
         where t.organization_id=${user.organizationId}
           and (${user.locationId}::uuid is null or t.location_id is null or t.location_id=${user.locationId})
-          and t.weekday=${weekday}
           and t.active=true
         order by t.sort_order,t.created_at`,
       db()<Array<Record<string, unknown>>>`
@@ -78,8 +76,12 @@ export async function GET(request: Request) {
         weekday: Number(task.weekday),
         title: String(task.title),
         description: String(task.description || ""),
+        dueDate: String(task.due_date),
+        repeatUnit: String(task.repeat_unit) as OperationDailyTask["repeatUnit"],
+        repeatInterval: Number(task.repeat_interval),
+        repeatEndDate: task.repeat_end_date == null ? null : String(task.repeat_end_date),
         completed: Boolean(task.completed),
-      })),
+      })).filter(task => isOperationTaskDue(task, today)),
       needs: needs.map((need): OperationNeed => ({
         id: String(need.id),
         title: String(need.title),
@@ -129,13 +131,18 @@ export async function POST(request: Request) {
 
     if (entity === "dailyTask") {
       requireOwner(user.role);
-      const weekday = finiteNumber(body.weekday, "weekday", { min: 0, max: 6, integer: true });
+      const dueDate = isoDate(body.dueDate || new Date().toISOString().slice(0, 10), "dueDate");
+      const weekday = weekdayFromDate(dueDate);
+      const repeatUnit = enumValue(body.repeatUnit || "NONE", "repeatUnit", ["NONE", "DAY", "WEEK", "MONTH", "YEAR"] as const);
+      const repeatInterval = finiteNumber(body.repeatInterval ?? 1, "repeatInterval", { min: 1, max: 365, integer: true });
+      const repeatEndDate = body.repeatEndDate == null || body.repeatEndDate === "" ? null : isoDate(body.repeatEndDate, "repeatEndDate");
+      if (repeatEndDate && repeatEndDate < dueDate) throw new ApiError(400, "Repeat end date must be after the first task date");
       const title = requiredString(body, "title", 160);
       const description = requiredString(body, "description", 300);
       const [row] = await db()<Array<Record<string, unknown>>>`
-        insert into operation_daily_tasks(organization_id,location_id,weekday,title,description,created_by,updated_by)
-        values(${user.organizationId},${user.locationId},${weekday},${title},${description},${user.userId},${user.userId})
-        returning id,weekday,title,description,false completed`;
+        insert into operation_daily_tasks(organization_id,location_id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,created_by,updated_by)
+        values(${user.organizationId},${user.locationId},${weekday},${title},${description},${dueDate}::date,${repeatUnit},${repeatInterval},${repeatEndDate}::date,${user.userId},${user.userId})
+        returning id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,false completed`;
       return NextResponse.json(row, { status: 201 });
     }
 
@@ -186,7 +193,12 @@ export async function PATCH(request: Request) {
       const action = enumValue(body.action || "complete", "action", ["complete", "edit"] as const);
       if (action === "edit") {
         requireOwner(user.role);
-        const weekday = body.weekday == null ? null : finiteNumber(body.weekday, "weekday", { min: 0, max: 6, integer: true });
+        const dueDate = body.dueDate == null ? null : isoDate(body.dueDate, "dueDate");
+        const weekday = dueDate == null ? null : weekdayFromDate(dueDate);
+        const repeatUnit = body.repeatUnit == null ? null : enumValue(body.repeatUnit, "repeatUnit", ["NONE", "DAY", "WEEK", "MONTH", "YEAR"] as const);
+        const repeatInterval = body.repeatInterval == null ? null : finiteNumber(body.repeatInterval, "repeatInterval", { min: 1, max: 365, integer: true });
+        const updateRepeatEndDate = body.repeatEndDate !== undefined;
+        const repeatEndDate = !updateRepeatEndDate || body.repeatEndDate === "" || body.repeatEndDate === null ? null : isoDate(body.repeatEndDate, "repeatEndDate");
         const title = optionalString(body, "title", 160);
         const description = optionalString(body, "description", 300);
         const [row] = await db()<Array<Record<string, unknown>>>`
@@ -194,10 +206,14 @@ export async function PATCH(request: Request) {
           set weekday=coalesce(${weekday},weekday),
               title=coalesce(${title},title),
               description=coalesce(${description},description),
+              due_date=coalesce(${dueDate}::date,due_date),
+              repeat_unit=coalesce(${repeatUnit},repeat_unit),
+              repeat_interval=coalesce(${repeatInterval},repeat_interval),
+              repeat_end_date=case when ${updateRepeatEndDate} then ${repeatEndDate}::date else repeat_end_date end,
               updated_by=${user.userId},
               updated_at=now()
           where id=${id} and organization_id=${user.organizationId}
-          returning id,weekday,title,description`;
+          returning id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date`;
         if (!row) throw new ApiError(404, "Daily task not found");
         return NextResponse.json({ ...row, completed: false });
       }

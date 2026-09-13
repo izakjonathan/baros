@@ -1,6 +1,7 @@
 export type OperationArticleKind = "HANDBOOK" | "NEWS";
 export type OperationNeedStatus = "NEEDED" | "ORDERED";
 export type OperationStorageStatus = "ready" | "migration-required";
+export type OperationTaskRepeatUnit = "NONE" | "DAY" | "WEEK" | "MONTH" | "YEAR";
 
 export type OperationRichTextOp = {
   insert: string | { image: string };
@@ -38,8 +39,25 @@ export type OperationDailyTask = {
   weekday: number;
   title: string;
   description: string;
+  dueDate: string;
+  repeatUnit: OperationTaskRepeatUnit;
+  repeatInterval: number;
+  repeatEndDate: string | null;
   completed: boolean;
 };
+
+export function isOperationTaskDue(task: Pick<OperationDailyTask, "dueDate" | "repeatUnit" | "repeatInterval" | "repeatEndDate">, date: string) {
+  const start = new Date(`${task.dueDate}T00:00:00Z`);
+  const target = new Date(`${date}T00:00:00Z`);
+  const end = task.repeatEndDate ? new Date(`${task.repeatEndDate}T00:00:00Z`) : null;
+  if (Number.isNaN(start.valueOf()) || target < start || (end && target > end)) return false;
+  const days = Math.floor((target.valueOf() - start.valueOf()) / 86_400_000);
+  if (task.repeatUnit === "NONE") return days === 0;
+  if (task.repeatUnit === "DAY") return days % task.repeatInterval === 0;
+  if (task.repeatUnit === "WEEK") return target.getUTCDay() === start.getUTCDay() && Math.floor(days / 7) % task.repeatInterval === 0;
+  if (task.repeatUnit === "MONTH") return target.getUTCDate() === start.getUTCDate() && ((target.getUTCFullYear() - start.getUTCFullYear()) * 12 + target.getUTCMonth() - start.getUTCMonth()) % task.repeatInterval === 0;
+  return target.getUTCMonth() === start.getUTCMonth() && target.getUTCDate() === start.getUTCDate() && (target.getUTCFullYear() - start.getUTCFullYear()) % task.repeatInterval === 0;
+}
 
 export type OperationNeed = {
   id: string;

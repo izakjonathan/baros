@@ -1,18 +1,19 @@
-# v0.19.0-rc.71 — Compact Field Notes Operation UI
+# v0.19.0-rc.72 — Operation editor, uploads and scheduled tasks
 
 ## Baseline
 
-- Continued from v0.19.0-rc.70 after the Operation article reader rendering release. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.71. That release is the rollback checkpoint.
 
-## Operation design
+## Operation editor and actions
 
-- Restyled the standalone Operation module toward a compact field-notes interface.
-- Reduced card height, border weight, typography scale, section label scale, form control size, and list-row density.
-- Kept the full-screen dark Apple Notes-style Quill article editor intact.
-- Preserved the existing `/operation` route, login/session model, API, and database behavior.
+- Restyled the full-screen Quill editor in the cream/charcoal Operation palette.
+- Kept rich-text Heading, Subheading, Body, emphasis, lists, links and device image insertion in the fixed editor toolbar.
+- Replaced the large owner add buttons with circular plus actions at the right of News and Handbook headers.
 
-## Scope
+## Task schedule and images
 
-No database-schema, dependency-version, route-shape, permission, or existing business-workflow changes are included. The change is limited to the Operation module visual presentation.
+- Tasks can be assigned to one specific date or repeat daily, weekly, monthly or yearly, including an interval and optional end date.
+- Image uploads use a private server-side `BLOB_READ_WRITE_TOKEN` and Vercel Blob public URLs. Add the token to the Vercel project environment before using image insertion.
+- Apply database migration `015_operation_task_schedule.sql` after deployment.
 
-Rollback checkpoint: **v0.19.0-rc.70**.
+Rollback checkpoint: **v0.19.0-rc.71**.

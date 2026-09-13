@@ -9,8 +9,10 @@
 .hero h1,.pageTitle{font-size:clamp(2.7rem,10vw,4.25rem);line-height:.95;letter-spacing:-.055em}
 .hero p{max-width:30rem;font-family:var(--font-body);font-size:.92rem;line-height:1.35;color:#5f5a54}
 .sectionHeader{display:flex;align-items:end;justify-content:space-between;gap:1rem;padding-top:.25rem}
+.sectionHeader>div{display:flex;align-items:center;gap:.55rem}
 .sectionHeader h2{font-size:clamp(.86rem,3.4vw,1.08rem);line-height:1;letter-spacing:.035em;text-transform:uppercase}
 .sectionHeader p,.subtleIntro{font-family:var(--font-body);font-size:.72rem;line-height:1.35;color:#706b64}
+.addCircle{width:2.3rem;height:2.3rem;display:grid;place-items:center;border:1px solid #292929;border-radius:50%;background:#292929;color:#e9e5dd;padding:0}
 .cardGrid,.articleGroups,.moduleGrid,.taskList,.needList{display:grid;gap:.46rem}
 .moduleGrid{grid-template-columns:1fr}
 .operationCard{width:100%;min-height:3.85rem;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.65rem;padding:.62rem .72rem;border:1px solid rgba(41,41,41,.72);border-radius:.68rem;background:rgba(255,255,255,.12);color:inherit;text-align:left;text-decoration:none;box-shadow:0 1px 0 rgba(41,41,41,.05)}
@@ -50,35 +52,36 @@
 .adminPanel input,.adminPanel textarea,.adminPanel select,.needInput input{min-height:2.35rem;border:1px solid rgba(41,41,41,.68);border-radius:.62rem;background:rgba(255,255,255,.12);color:inherit;padding:.52rem .66rem;font-size:.78rem}
 .adminPanel textarea{grid-column:1/-1;min-height:7rem;resize:vertical}
 .editorMeta input:nth-of-type(2){grid-column:1/-1}
-.articleEditor{position:fixed;inset:0;z-index:70;display:grid;grid-template-rows:auto minmax(0,1fr) auto;background:#050505;color:#f7f2e7;padding:max(.78rem,env(safe-area-inset-top)) max(.85rem,env(safe-area-inset-right)) max(.85rem,env(safe-area-inset-bottom)) max(.85rem,env(safe-area-inset-left))}
+.articleEditor{position:fixed;inset:0;z-index:70;display:grid;grid-template-rows:auto minmax(0,1fr) auto;background:#e9e5dd;color:#292929;padding:max(.78rem,env(safe-area-inset-top)) max(.85rem,env(safe-area-inset-right)) max(.85rem,env(safe-area-inset-bottom)) max(.85rem,env(safe-area-inset-left))}
 .articleEditorTop{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.05rem .05rem .75rem}
-.editorIconButton,.editorDoneButton{display:inline-grid;place-items:center;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:#191919;color:#f7f2e7}
+.editorIconButton,.editorDoneButton{display:inline-grid;place-items:center;border:1px solid rgba(41,41,41,.68);border-radius:999px;background:rgba(255,255,255,.16);color:#292929}
 .editorIconButton{width:3.1rem;height:3.1rem}
-.editorDoneButton{width:3.55rem;height:3.55rem;background:#dfbb38;color:#fff7ce;border-color:rgba(255,255,255,.14)}
+.editorDoneButton{width:3.55rem;height:3.55rem;background:#292929;color:#e9e5dd;border-color:#292929}
 .editorDoneButton:disabled{opacity:.6}
 .articleEditorCanvas{width:min(38rem,100%);margin-inline:auto;overflow:auto;padding:1.05rem .25rem 6.1rem}
 .articleEditor .editorMeta{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:.7rem}
 .articleEditor input,.articleEditor textarea,.articleEditor select{width:100%;border:0;background:transparent;color:inherit;outline:0}
-.articleEditor select,.articleEditor .editorMeta input{min-height:2.35rem;border:1px solid rgba(255,255,255,.13);border-radius:999px;background:#151515;padding:.35rem .8rem;font-size:.78rem;font-weight:720;text-transform:uppercase;letter-spacing:.06em}
+.articleEditor select,.articleEditor .editorMeta input{min-height:2.35rem;border:1px solid rgba(41,41,41,.62);border-radius:999px;background:rgba(255,255,255,.18);padding:.35rem .8rem;font-size:.78rem;font-weight:720;text-transform:uppercase;letter-spacing:.06em}
 .editorTitleInput{font-size:clamp(1.9rem,7.5vw,3.2rem);line-height:.98;font-weight:760;letter-spacing:-.042em}
-.editorDescriptionInput{min-height:4.2rem;margin:.45rem 0 .95rem;font-family:var(--font-body);font-size:.92rem;line-height:1.45;color:#d6d0c6;resize:vertical}
+.editorDescriptionInput{min-height:4.2rem;margin:.45rem 0 .95rem;font-family:var(--font-body);font-size:.92rem;line-height:1.45;color:#625d56;resize:vertical}
 .quillEditor{display:grid;gap:1rem}
-.quillSurface{min-height:42dvh;font-family:var(--font-body);font-size:1rem;line-height:1.55;color:#f7f2e7}
+.quillSurface{min-height:42dvh;font-family:var(--font-body);font-size:1rem;line-height:1.55;color:#292929}
 .quillSurface :global(.ql-editor){min-height:42dvh;padding:0;outline:0}
-.quillSurface :global(.ql-editor.ql-blank::before){left:0;right:auto;color:#777;font-style:normal}
+.quillSurface :global(.ql-editor.ql-blank::before){left:0;right:auto;color:#817c75;font-style:normal}
 .quillSurface :global(.ql-editor h1){font-family:var(--font-display);font-size:clamp(2.15rem,8vw,3.7rem);line-height:.98;letter-spacing:-.045em}
 .quillSurface :global(.ql-editor h2){font-family:var(--font-display);font-size:clamp(1.45rem,6vw,2.2rem);line-height:1.05;letter-spacing:-.035em}
 .quillSurface :global(.ql-editor h3){font-family:var(--font-display);font-size:clamp(1.15rem,4.5vw,1.55rem);line-height:1.1;letter-spacing:-.025em}
-.quillSurface :global(.ql-editor p),.quillSurface :global(.ql-editor li){font-family:var(--font-body);font-size:1rem;line-height:1.55;color:#f7f2e7}
+.quillSurface :global(.ql-editor p),.quillSurface :global(.ql-editor li){font-family:var(--font-body);font-size:1rem;line-height:1.55;color:#292929}
 .quillSurface :global(.ql-editor img){display:block;max-width:100%;height:auto;border-radius:1rem;margin:.85rem 0}
-.quillToolbar{position:fixed;left:max(.85rem,env(safe-area-inset-left));right:max(.85rem,env(safe-area-inset-right));bottom:max(.85rem,env(safe-area-inset-bottom));z-index:75;display:flex;align-items:center;justify-content:flex-start;gap:.18rem;overflow-x:auto;width:min(42rem,calc(100% - 1.7rem));margin-inline:auto;padding:.42rem;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:#1b1b1b;box-shadow:0 .75rem 2rem rgba(0,0,0,.45)}
-.quillToolbar button,.quillToolbar select{min-width:2.15rem;min-height:2.15rem;border:0;border-radius:999px;background:transparent;color:#f7f2e7;padding:.2rem .55rem;font-family:var(--font-display);font-size:.72rem;font-weight:760}
-.quillToolbar select{width:auto;background:#282828}
-.quillToolbar button:hover,.quillToolbar :global(.ql-active){background:#dfbb38!important;color:#171717!important}
+.quillToolbar{position:fixed;left:max(.85rem,env(safe-area-inset-left));right:max(.85rem,env(safe-area-inset-right));bottom:max(.85rem,env(safe-area-inset-bottom));z-index:75;display:flex;align-items:center;justify-content:flex-start;gap:.18rem;overflow-x:auto;width:min(42rem,calc(100% - 1.7rem));margin-inline:auto;padding:.42rem;border:1px solid rgba(41,41,41,.48);border-radius:999px;background:rgba(233,229,221,.98);box-shadow:0 .75rem 2rem rgba(41,41,41,.18)}
+.quillToolbar button,.quillToolbar select{min-width:2.15rem;min-height:2.15rem;border:0;border-radius:999px;background:transparent;color:#292929;padding:.2rem .55rem;font-family:var(--font-display);font-size:.72rem;font-weight:760}
+.quillToolbar select{width:auto;background:rgba(41,41,41,.08)}
+.quillToolbar button:hover,.quillToolbar :global(.ql-active){background:#292929!important;color:#e9e5dd!important}
 .quillToolbar :global(.ql-stroke){stroke:currentColor}
 .quillToolbar :global(.ql-fill){fill:currentColor}
-.quillToolbar :global(.ql-picker-label){color:#f7f2e7}
+.quillToolbar :global(.ql-picker-label){color:#292929}
 .editorMessage{font-family:var(--font-body);font-size:.82rem;color:#8a7432}
+.imageInput{display:none}
 .adminActions,.needInput{display:flex;gap:.5rem;flex-wrap:wrap}
 .adminActions button,.needInput button,.taskRow button,.needRow button{min-height:2.08rem;border:1px solid #292929;border-radius:999px;background:#292929;color:#e7e3dc;padding:.24rem .65rem;font-size:.72rem;font-weight:750}
 .adminActions button:disabled,.needInput button:disabled,.taskRow button:disabled,.needRow button:disabled,.adminPanel input:disabled,.needInput input:disabled{opacity:.5;cursor:not-allowed}
@@ -86,12 +89,16 @@
 .taskRow input{width:1.12rem;height:1.12rem;accent-color:#292929}
 .taskRow h3,.needRow h3{font-size:.92rem;line-height:1.12;letter-spacing:-.006em}
 .taskRow p,.needRow p{font-family:var(--font-body);font-size:.72rem;line-height:1.35;color:#57534d}
+.taskSettings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.48rem;margin-top:.52rem}
+.taskSettings label{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:.38rem;font-family:var(--font-body);font-size:.7rem;color:#625d56}
+.taskSettings input,.taskSettings select{min-width:0;min-height:2.2rem;border:1px solid rgba(41,41,41,.62);border-radius:.58rem;background:rgba(255,255,255,.14);color:#292929;padding:.35rem .5rem;font:inherit}
+.settingsHint{font-family:var(--font-body);font-size:.68rem;line-height:1.35;color:#706b64}
 .needInput{display:grid;grid-template-columns:minmax(0,1fr) auto}
 .needRow[data-ordered="true"]{opacity:.55}
 @media(max-width:42rem){
   .operationShell{padding-inline:max(.85rem,env(safe-area-inset-left));padding-right:max(.85rem,env(safe-area-inset-right))}
   .operationHeader nav{width:max-content}
-  .moduleGrid,.adminGrid,.editorMeta,.articleEditor .editorMeta{grid-template-columns:1fr}
+  .moduleGrid,.adminGrid,.editorMeta,.articleEditor .editorMeta,.taskSettings{grid-template-columns:1fr}
   .adminPanelHeader{display:grid}
   .quillToolbar{justify-content:flex-start}
   .operationCard{min-height:3.72rem;border-radius:.68rem;padding:.62rem .72rem}

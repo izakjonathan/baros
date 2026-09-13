@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.72
+
+- Restyled the full-screen Quill editor in the same cream/charcoal field-notes palette as the Operation page, with visible Heading, Subheading, and Body controls.
+- Replaced image URL prompts with an authenticated device image upload flow backed by Vercel Blob (up to 8 MB per image).
+- Replaced the large owner article buttons with circular plus actions in the News and Handbook headers.
+- Added date-specific tasks and repeat settings: one-off, daily, weekly, monthly, yearly, interval, and optional end date.
+- Added migration `015_operation_task_schedule.sql`; production must run it before the new task schedule fields can be used.
+
 ## v0.19.0-rc.71
 
 - Restyled the standalone Operation module into a compact field-notes direction with a narrower content column, smaller section labels, tighter cards, thinner rows, and reduced control scale.
