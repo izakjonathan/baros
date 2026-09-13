@@ -4,6 +4,7 @@
 .operationHeader nav{display:flex;justify-content:center;gap:.08rem;width:max-content;max-width:100%;overflow:hidden;padding:.14rem;border:1px solid rgba(41,41,41,.24);border-radius:999px;background:rgba(255,255,255,.24);box-shadow:0 .25rem .9rem rgba(41,41,41,.06)}
 .operationHeader nav button{border:0;background:transparent;padding:.12rem .5rem}
 .operationHeader nav button[aria-pressed="true"]{background:#292929;color:#e7e3dc}
+.operationHeader .addCircle{position:absolute;top:max(.62rem,env(safe-area-inset-top));right:max(1rem,env(safe-area-inset-right));width:2.3rem;height:2.3rem;z-index:1}
 .operationMain{width:min(35rem,100%);margin-inline:auto;display:grid;gap:.68rem}
 .hero{display:grid;gap:.35rem;padding-top:.45rem}
 .hero h1,.pageTitle{font-size:clamp(2.7rem,10vw,4.25rem);line-height:.95;letter-spacing:-.055em}
@@ -122,10 +123,12 @@
 .taskRow h3,.needRow h3{font-size:.92rem;line-height:1.12;letter-spacing:-.006em}
 .taskRow p,.needRow p{font-family:var(--font-body);font-size:.72rem;line-height:1.35;color:#57534d}
 .taskSettings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.48rem;margin-top:.52rem}
-.taskSettings label{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:.38rem;font-family:var(--font-body);font-size:.7rem;color:#625d56}
-.taskSettings input,.taskSettings select{min-width:0;min-height:2.2rem;border:1px solid rgba(41,41,41,.62);border-radius:.58rem;background:rgba(255,255,255,.14);color:#292929;padding:.35rem .5rem;font:inherit}
+.taskSettings label{display:grid;min-width:0;gap:.3rem;font-family:var(--font-body);font-size:.7rem;color:#625d56}
+.taskSettingLabel{display:flex;align-items:center;gap:.32rem;font-weight:650}
+.taskSettings input,.taskSettings select{box-sizing:border-box;width:100%;min-width:0;min-height:2.2rem;border:1px solid rgba(41,41,41,.62);border-radius:.58rem;background:rgba(255,255,255,.14);color:#292929;padding:.35rem .5rem;font:inherit}
 .settingsHint{font-family:var(--font-body);font-size:.68rem;line-height:1.35;color:#706b64}
-.needInput{display:grid;grid-template-columns:minmax(0,1fr) auto}
+.needInput{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center}
+.needAddButton{width:2.35rem;min-height:2.35rem!important;display:grid!important;place-items:center;padding:0!important;border-radius:50%!important}
 .needRow[data-ordered="true"]{opacity:.55}
 @media(max-width:42rem){
   .operationShell{padding-inline:max(.85rem,env(safe-area-inset-left));padding-right:max(.85rem,env(safe-area-inset-right))}
@@ -134,10 +137,10 @@
   .adminPanelHeader{display:grid}
   .quillToolbar{grid-template-columns:minmax(3.45rem,1fr) repeat(8,2.02rem);gap:.12rem}
   .articleEditor select,.articleEditor .editorMeta input,.articleEditor .editorDescriptionInput{font-size:16px}
+  .taskSettings input,.taskSettings select{font-size:16px}
   .tiptapToolbar{grid-template-columns:minmax(4.1rem,1fr) repeat(6,2.12rem);gap:.08rem;padding:.34rem}
   .tiptapToolbar button{min-height:2.04rem}
   .operationCard{min-height:3.72rem;border-radius:.68rem;padding:.62rem .72rem}
   .operationCard h3{font-size:clamp(.98rem,4.7vw,1.18rem)}
   .operationCard small{font-size:.56rem}
-  .needInput{grid-template-columns:1fr}
 }
