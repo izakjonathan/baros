@@ -9,7 +9,7 @@ import type { OperationArticle, OperationArticleKind, OperationContentBlock, Ope
 
 type View = "home" | "handbook" | "tasks" | "needs";
 type DraftArticle = { id?: string; kind: OperationArticleKind; category: string; title: string; description: string; delta: OperationRichTextDelta };
-type QuillInstance = { getContents: () => OperationRichTextDelta; setContents: (delta: OperationRichTextDelta) => void; getSelection: (focus?: boolean) => { index: number; length: number } | null; insertEmbed: (index: number, type: string, value: string, source?: string) => void; setSelection: (index: number, length?: number, source?: string) => void; on: (event: "text-change", callback: () => void) => void; off: (event: "text-change", callback: () => void) => void };
+type QuillInstance = { getContents: () => OperationRichTextDelta; setContents: (delta: OperationRichTextDelta) => void; getSelection: (focus?: boolean) => { index: number; length: number } | null; insertEmbed: (index: number, type: string, value: string, source?: string) => void; setSelection: (index: number, length?: number, source?: string) => void; format: (name: string, value: unknown, source?: string) => void; on: (event: "text-change", callback: () => void) => void; off: (event: "text-change", callback: () => void) => void };
 
 const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const migrationMessage = "Operation storage is not ready yet. Run the database migration action, then reload this page.";
@@ -217,7 +217,24 @@ function AdminPanel({ message, articles, disabled, editArticle, deleteArticle }:
 }
 
 function ArticleEditor({ draft, setDraft, saveArticle, saving, message, close }: { draft: DraftArticle; setDraft: (draft: DraftArticle) => void; saveArticle: () => Promise<boolean>; saving: boolean; message: string; close: () => void }) {
-  return <aside className={styles.articleEditor} aria-modal="true" role="dialog" aria-label={draft.id ? "Edit article" : "Add article"}><div className={styles.articleEditorTop}><button type="button" className={styles.editorIconButton} onClick={close} aria-label="Close editor"><ArrowLeft size={22} /></button><button type="button" className={styles.editorDoneButton} disabled={saving} onClick={saveArticle} aria-label="Save article">{saving ? "Saving" : <Check size={24} />}</button></div><div className={styles.articleEditorCanvas}><div className={styles.editorMeta}><select value={draft.kind} onChange={event => setDraft({ ...draft, kind: event.target.value as OperationArticleKind })}><option value="HANDBOOK">Handbook</option><option value="NEWS">News</option></select><input value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })} placeholder="Category" /></div><input className={styles.editorTitleInput} value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} placeholder="Title" /><textarea className={styles.editorDescriptionInput} value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} placeholder="Short card description" /><QuillArticleEditor value={draft.delta} onChange={(delta) => setDraft({ ...draft, delta })} />{message && <p className={styles.editorMessage} role="status">{message}</p>}</div></aside>;
+  const editorRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const visualViewport = window.visualViewport;
+    function syncViewport() {
+      const height = visualViewport?.height || window.innerHeight;
+      const keyboardOffset = Math.max(0, window.innerHeight - height - (visualViewport?.offsetTop || 0));
+      editorRef.current?.style.setProperty("--editor-visible-height", `${height}px`);
+      editorRef.current?.style.setProperty("--editor-keyboard-offset", `${keyboardOffset}px`);
+    }
+    syncViewport();
+    visualViewport?.addEventListener("resize", syncViewport);
+    visualViewport?.addEventListener("scroll", syncViewport);
+    window.addEventListener("resize", syncViewport);
+    return () => { visualViewport?.removeEventListener("resize", syncViewport); visualViewport?.removeEventListener("scroll", syncViewport); window.removeEventListener("resize", syncViewport); };
+  }, []);
+
+  return <aside ref={editorRef} className={styles.articleEditor} aria-modal="true" role="dialog" aria-label={draft.id ? "Edit article" : "Add article"}><div className={styles.articleEditorTop}><button type="button" className={styles.editorIconButton} onClick={close} aria-label="Close editor"><ArrowLeft size={22} /></button><button type="button" className={styles.editorDoneButton} disabled={saving} onClick={saveArticle} aria-label="Save article">{saving ? "Saving" : <Check size={24} />}</button></div><div className={styles.articleEditorCanvas}><div className={styles.editorMeta}><select value={draft.kind} onChange={event => setDraft({ ...draft, kind: event.target.value as OperationArticleKind })}><option value="HANDBOOK">Handbook</option><option value="NEWS">News</option></select><input value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })} placeholder="Category" /></div><input className={styles.editorTitleInput} value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} placeholder="Title" /><textarea className={styles.editorDescriptionInput} value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} placeholder="Short card description" /><QuillArticleEditor value={draft.delta} onChange={(delta) => setDraft({ ...draft, delta })} />{message && <p className={styles.editorMessage} role="status">{message}</p>}</div></aside>;
 }
 
 function QuillArticleEditor({ value, onChange }: { value: OperationRichTextDelta; onChange: (delta: OperationRichTextDelta) => void }) {
@@ -227,6 +244,7 @@ function QuillArticleEditor({ value, onChange }: { value: OperationRichTextDelta
   const quillRef = useRef<QuillInstance | null>(null);
   const onChangeRef = useRef(onChange);
   const initialValueRef = useRef(value);
+  const [styleMenuOpen, setStyleMenuOpen] = useState(false);
 
   useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
   useEffect(() => {
@@ -271,7 +289,12 @@ function QuillArticleEditor({ value, onChange }: { value: OperationRichTextDelta
     quillRef.current.setSelection(range.index + 1, 0, "user");
   }
 
-  return <div className={styles.quillEditor}><input ref={imageInputRef} className={styles.imageInput} type="file" accept="image/*" onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void uploadImage(file); }} /><div ref={toolbarRef} className={styles.quillToolbar} aria-label="Article formatting tools"><select className="ql-header" defaultValue=""><option value="1">Heading</option><option value="2">Subheading</option><option value="">Body</option></select><button className="ql-bold" type="button" aria-label="Bold" /><button className="ql-italic" type="button" aria-label="Italic" /><button className="ql-underline" type="button" aria-label="Underline" /><button className="ql-list" value="bullet" type="button" aria-label="Bullet list" /><button className="ql-list" value="ordered" type="button" aria-label="Numbered list" /><button className="ql-link" type="button" aria-label="Add link" /><button className="ql-image" type="button" aria-label="Add image from device" /><button className="ql-clean" type="button" aria-label="Clear formatting" /></div><div ref={editorRef} className={styles.quillSurface} /></div>;
+  function applyStyle(header: 1 | 2 | false) {
+    quillRef.current?.format("header", header || false, "user");
+    setStyleMenuOpen(false);
+  }
+
+  return <div className={styles.quillEditor}><input ref={imageInputRef} className={styles.imageInput} type="file" accept="image/*" onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void uploadImage(file); }} /><div ref={toolbarRef} className={styles.quillToolbar} aria-label="Article formatting tools"><div className={styles.styleControl}><button type="button" className={styles.styleTrigger} onMouseDown={event => event.preventDefault()} onClick={() => setStyleMenuOpen(open => !open)} aria-expanded={styleMenuOpen}>Style</button>{styleMenuOpen && <div className={styles.styleMenu} role="menu"><button type="button" role="menuitem" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle(1)}>Heading</button><button type="button" role="menuitem" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle(2)}>Subheading</button><button type="button" role="menuitem" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle(false)}>Body</button></div>}</div><button className="ql-bold" type="button" aria-label="Bold" /><button className="ql-italic" type="button" aria-label="Italic" /><button className="ql-underline" type="button" aria-label="Underline" /><button className="ql-list" value="bullet" type="button" aria-label="Bullet list" /><button className="ql-list" value="ordered" type="button" aria-label="Numbered list" /><button className="ql-link" type="button" aria-label="Add link" /><button className="ql-image" type="button" aria-label="Add image from device" /><button className="ql-clean" type="button" aria-label="Clear formatting" /></div><div ref={editorRef} className={styles.quillSurface} /></div>;
 }
 
 function SectionHeader({ title, detail, action }: { title: string; detail: string; action?: { label: string; onClick: () => void } }) {

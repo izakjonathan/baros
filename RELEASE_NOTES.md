@@ -1,19 +1,12 @@
-# v0.19.0-rc.72 — Operation editor, uploads and scheduled tasks
+# v0.19.0-rc.73 — Mobile editor refinement
 
 ## Baseline
 
-- Continued from v0.19.0-rc.71. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.72. That release is the rollback checkpoint.
 
-## Operation editor and actions
+## Editor interaction
 
-- Restyled the full-screen Quill editor in the cream/charcoal Operation palette.
-- Kept rich-text Heading, Subheading, Body, emphasis, lists, links and device image insertion in the fixed editor toolbar.
-- Replaced the large owner add buttons with circular plus actions at the right of News and Handbook headers.
+- Made the full-screen Quill editor use the device's visible viewport while the keyboard is open.
+- Moved the style choices into a menu that opens above the dock, leaving the dock at a fixed mobile width without horizontal scrolling.
 
-## Task schedule and images
-
-- Tasks can be assigned to one specific date or repeat daily, weekly, monthly or yearly, including an interval and optional end date.
-- Image uploads use a private server-side `BLOB_READ_WRITE_TOKEN` and Vercel Blob public URLs. Add the token to the Vercel project environment before using image insertion.
-- Apply database migration `015_operation_task_schedule.sql` after deployment.
-
-Rollback checkpoint: **v0.19.0-rc.71**.
+Rollback checkpoint: **v0.19.0-rc.72**.

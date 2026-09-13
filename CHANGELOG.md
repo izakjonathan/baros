@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.19.0-rc.73
+
+- Made the Operation article editor react to the mobile visual viewport so its toolbar floats above the iPhone keyboard.
+- Replaced the horizontal Heading selector with a fixed-width Style menu that opens above the toolbar with Heading, Subheading, and Body options.
+
 ## v0.19.0-rc.72
 
 - Restyled the full-screen Quill editor in the same cream/charcoal field-notes palette as the Operation page, with visible Heading, Subheading, and Body controls.
