@@ -53,9 +53,10 @@ export const defaultOperationState: OperationModuleState = {
     },
   ],
   dailyTasks: [
-    { id: "daily-ice", weekday: new Date().getDay(), title: "Check ice and fridges", description: "Make sure the bar has enough ice and cold stock for service.", dueDate: new Date().toISOString().slice(0, 10), repeatUnit: "WEEK", repeatInterval: 1, repeatEndDate: null, completed: false },
-    { id: "daily-glassware", weekday: new Date().getDay(), title: "Polish front-bar glassware", description: "Fill the main shelves before the evening rush.", dueDate: new Date().toISOString().slice(0, 10), repeatUnit: "WEEK", repeatInterval: 1, repeatEndDate: null, completed: false },
+    { id: "daily-ice", weekday: new Date().getDay(), title: "Check ice and fridges", description: "Make sure the bar has enough ice and cold stock for service.", dueDate: new Date().toISOString().slice(0, 10), repeatUnit: "WEEK", repeatInterval: 1, repeatEndDate: null, dueTime: "16:00", reminderMinutes: 30, priority: "HIGH", taskType: "OPENING", assignedEmployeeId: null, assignedEmployeeName: null, completedByName: null, completed: false },
+    { id: "daily-glassware", weekday: new Date().getDay(), title: "Polish front-bar glassware", description: "Fill the main shelves before the evening rush.", dueDate: new Date().toISOString().slice(0, 10), repeatUnit: "WEEK", repeatInterval: 1, repeatEndDate: null, dueTime: null, reminderMinutes: null, priority: "NORMAL", taskType: "SERVICE", assignedEmployeeId: null, assignedEmployeeName: null, completedByName: null, completed: false },
   ],
+  assignees: [],
   needs: [
     { id: "need-tonic", title: "Tonic water", note: "Low stock behind the bar", status: "NEEDED", createdAt: new Date().toISOString() },
   ],

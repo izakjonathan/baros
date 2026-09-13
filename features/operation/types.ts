@@ -2,6 +2,8 @@ export type OperationArticleKind = "HANDBOOK" | "NEWS";
 export type OperationNeedStatus = "NEEDED" | "ORDERED";
 export type OperationStorageStatus = "ready" | "migration-required";
 export type OperationTaskRepeatUnit = "NONE" | "DAY" | "WEEK" | "MONTH" | "YEAR";
+export type OperationTaskPriority = "LOW" | "NORMAL" | "HIGH";
+export type OperationTaskType = "OPENING" | "SERVICE" | "CLOSING" | "MAINTENANCE" | "ADMIN";
 
 export type OperationRichTextOp = {
   insert: string | { image: string };
@@ -57,7 +59,19 @@ export type OperationDailyTask = {
   repeatUnit: OperationTaskRepeatUnit;
   repeatInterval: number;
   repeatEndDate: string | null;
+  dueTime: string | null;
+  reminderMinutes: number | null;
+  priority: OperationTaskPriority;
+  taskType: OperationTaskType;
+  assignedEmployeeId: string | null;
+  assignedEmployeeName: string | null;
+  completedByName: string | null;
   completed: boolean;
+};
+
+export type OperationAssignee = {
+  id: string;
+  name: string;
 };
 
 export function isOperationTaskDue(task: Pick<OperationDailyTask, "dueDate" | "repeatUnit" | "repeatInterval" | "repeatEndDate">, date: string) {
@@ -89,5 +103,6 @@ export type OperationModuleState = {
   handbook: OperationArticle[];
   news: OperationArticle[];
   dailyTasks: OperationDailyTask[];
+  assignees: OperationAssignee[];
   needs: OperationNeed[];
 };
