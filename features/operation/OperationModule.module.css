@@ -86,7 +86,7 @@
 .editorMessage{font-family:var(--font-body);font-size:.82rem;color:#8a7432}
 .imageInput{display:none}
 .articleEditor{z-index:80;padding:0;background:#e9e5dd}
-.articleEditorFrame{position:fixed;top:var(--editor-vv-top,0px);left:0;right:0;height:var(--editor-vv-height,100dvh);display:grid;grid-template-rows:auto minmax(0,1fr);overflow:hidden;background:#e9e5dd;color:#292929;padding:max(.78rem,env(safe-area-inset-top)) max(.85rem,env(safe-area-inset-right)) max(.72rem,env(safe-area-inset-bottom)) max(.85rem,env(safe-area-inset-left))}
+.articleEditorFrame{position:fixed;top:var(--editor-vv-top,0px);left:0;right:0;height:var(--editor-vv-height,100dvh);box-sizing:border-box;display:grid;grid-template-rows:auto minmax(0,1fr);overflow:hidden;background:#e9e5dd;color:#292929;padding:max(.78rem,env(safe-area-inset-top)) max(.85rem,env(safe-area-inset-right)) max(.72rem,env(safe-area-inset-bottom)) max(.85rem,env(safe-area-inset-left))}
 .articleEditorCanvas{display:grid;grid-template-rows:auto auto auto minmax(0,1fr);gap:0;overflow:hidden;padding:1.05rem .25rem .2rem}
 .articleEditor .editorMeta{margin-bottom:.45rem}
 .editorDescriptionInput{min-height:3.15rem;margin:.35rem 0 .55rem}
@@ -102,14 +102,17 @@
 .tiptapSurface :global(.tiptap li p){margin-bottom:.22rem}
 .tiptapSurface :global(.tiptap a){color:inherit;text-decoration:underline;text-underline-offset:.16em}
 .tiptapSurface :global(.tiptap img){display:block;max-width:100%;height:auto;margin:.85rem 0;border:1px solid rgba(41,41,41,.5);border-radius:.85rem}
-.tiptapToolbar{position:relative;z-index:3;display:grid;grid-template-columns:minmax(4.25rem,1fr) repeat(9,2.08rem);align-items:center;gap:.12rem;margin-top:.35rem;padding:.4rem;border:1px solid rgba(41,41,41,.48);border-radius:999px;background:#e9e5dd;box-shadow:0 .45rem 1.4rem rgba(41,41,41,.16)}
+.tiptapToolbar{position:relative;z-index:3;display:grid;grid-template-columns:minmax(4.25rem,1fr) repeat(6,2.2rem);align-items:center;gap:.12rem;margin-top:.35rem;padding:.4rem;border:1px solid rgba(41,41,41,.48);border-radius:999px;background:#e9e5dd;box-shadow:0 .45rem 1.4rem rgba(41,41,41,.16)}
 .tiptapToolbar button{display:grid;place-items:center;width:100%;min-width:0;min-height:2.14rem;border:0;border-radius:999px;background:transparent;color:#292929;padding:.2rem}
 .tiptapToolbar button[aria-pressed="true"],.tiptapToolbar button:hover:not(:disabled){background:#292929;color:#e9e5dd}
 .tiptapToolbar button:disabled{opacity:.36}
 .styleControl{position:relative}
+.moreControl{position:relative}
 .styleTrigger{display:flex!important;justify-content:center;gap:.25rem!important;background:rgba(41,41,41,.08)!important;padding-inline:.38rem!important;font-family:var(--font-display)!important;font-size:.68rem!important;font-weight:760!important}
 .styleMenu{position:absolute;bottom:calc(100% + .5rem);left:0;z-index:4;display:grid;gap:.16rem;width:9.4rem;padding:.35rem;border:1px solid rgba(41,41,41,.4);border-radius:.72rem;background:#e9e5dd;box-shadow:0 .5rem 1.5rem rgba(41,41,41,.2)}
 .styleMenu button{display:block;min-height:2.25rem!important;padding:.3rem .65rem!important;text-align:left;font-family:var(--font-display)!important;font-size:.75rem!important;font-weight:760!important}
+.moreMenu{position:absolute;right:0;bottom:calc(100% + .5rem);z-index:4;display:grid;gap:.16rem;width:10.7rem;padding:.35rem;border:1px solid rgba(41,41,41,.4);border-radius:.72rem;background:#e9e5dd;box-shadow:0 .5rem 1.5rem rgba(41,41,41,.2)}
+.moreMenu button{display:flex;align-items:center;justify-content:flex-start;gap:.55rem;min-height:2.3rem!important;padding:.3rem .65rem!important;text-align:left;font-family:var(--font-display)!important;font-size:.74rem!important;font-weight:760!important}
 .adminActions,.needInput{display:flex;gap:.5rem;flex-wrap:wrap}
 .adminActions button,.needInput button,.taskRow button,.needRow button{min-height:2.08rem;border:1px solid #292929;border-radius:999px;background:#292929;color:#e7e3dc;padding:.24rem .65rem;font-size:.72rem;font-weight:750}
 .adminActions button:disabled,.needInput button:disabled,.taskRow button:disabled,.needRow button:disabled,.adminPanel input:disabled,.needInput input:disabled{opacity:.5;cursor:not-allowed}
@@ -129,7 +132,8 @@
   .moduleGrid,.adminGrid,.editorMeta,.articleEditor .editorMeta,.taskSettings{grid-template-columns:1fr}
   .adminPanelHeader{display:grid}
   .quillToolbar{grid-template-columns:minmax(3.45rem,1fr) repeat(8,2.02rem);gap:.12rem}
-  .tiptapToolbar{grid-template-columns:minmax(3.65rem,1fr) repeat(9,2.02rem);gap:.08rem;padding:.34rem}
+  .articleEditor select,.articleEditor .editorMeta input,.articleEditor .editorDescriptionInput{font-size:16px}
+  .tiptapToolbar{grid-template-columns:minmax(4.1rem,1fr) repeat(6,2.12rem);gap:.08rem;padding:.34rem}
   .tiptapToolbar button{min-height:2.04rem}
   .operationCard{min-height:3.72rem;border-radius:.68rem;padding:.62rem .72rem}
   .operationCard h3{font-size:clamp(.98rem,4.7vw,1.18rem)}
