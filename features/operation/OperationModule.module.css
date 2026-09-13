@@ -85,13 +85,13 @@
 .styleMenu button{min-height:2.2rem!important;padding-inline:.62rem!important;text-align:left}
 .editorMessage{font-family:var(--font-body);font-size:.82rem;color:#8a7432}
 .imageInput{display:none}
-.articleEditor{z-index:80;padding:0;background:#e9e5dd}
-.articleEditorFrame{position:fixed;top:var(--editor-vv-top,0px);left:0;right:0;height:var(--editor-vv-height,100dvh);box-sizing:border-box;display:grid;grid-template-rows:auto minmax(0,1fr);overflow:hidden;background:#e9e5dd;color:#292929;padding:max(.78rem,env(safe-area-inset-top)) max(.85rem,env(safe-area-inset-right)) max(.72rem,env(safe-area-inset-bottom)) max(.85rem,env(safe-area-inset-left))}
-.articleEditorCanvas{display:grid;grid-template-rows:auto auto auto minmax(0,1fr);gap:0;overflow:hidden;padding:1.05rem .25rem .2rem}
+.articleEditor{z-index:80;padding:0;background:#e9e5dd;overscroll-behavior:none}
+.articleEditorFrame{position:fixed;top:var(--editor-vv-top,0px);left:0;right:0;height:var(--editor-vv-height,100dvh);box-sizing:border-box;display:grid;grid-template-rows:auto minmax(0,1fr);overflow:visible;background:#e9e5dd;color:#292929;padding:max(.78rem,env(safe-area-inset-top)) max(.85rem,env(safe-area-inset-right)) max(.72rem,env(safe-area-inset-bottom)) max(.85rem,env(safe-area-inset-left))}
+.articleEditorCanvas{display:block;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:1.05rem .25rem 4.35rem}
 .articleEditor .editorMeta{margin-bottom:.45rem}
 .editorDescriptionInput{min-height:3.15rem;margin:.35rem 0 .55rem}
-.tiptapEditor{display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:0}
-.tiptapSurface{min-height:0;overflow:auto;padding:0 .1rem 1rem;font-family:var(--font-body);font-size:1rem;line-height:1.55;color:#292929}
+.tiptapEditor{display:block;min-height:20rem}
+.tiptapSurface{min-height:20rem;overflow:visible;padding:0 .1rem 4.45rem;font-family:var(--font-body);font-size:1rem;line-height:1.55;color:#292929}
 .tiptapSurface :global(.tiptap){min-height:100%;outline:0}
 .tiptapSurface :global(.tiptap p.is-editor-empty:first-child::before){float:left;height:0;color:#817c75;content:attr(data-placeholder);pointer-events:none}
 .tiptapSurface :global(.tiptap h2){margin:1.15rem 0 .45rem;font-family:var(--font-display);font-size:clamp(1.55rem,6vw,2.15rem);line-height:1.05;letter-spacing:-.035em;font-weight:760}
@@ -102,10 +102,11 @@
 .tiptapSurface :global(.tiptap li p){margin-bottom:.22rem}
 .tiptapSurface :global(.tiptap a){color:inherit;text-decoration:underline;text-underline-offset:.16em}
 .tiptapSurface :global(.tiptap img){display:block;max-width:100%;height:auto;margin:.85rem 0;border:1px solid rgba(41,41,41,.5);border-radius:.85rem}
-.tiptapToolbar{position:relative;z-index:3;display:grid;grid-template-columns:minmax(4.25rem,1fr) repeat(6,2.2rem);align-items:center;gap:.12rem;margin-top:.35rem;padding:.4rem;border:1px solid rgba(41,41,41,.48);border-radius:999px;background:#e9e5dd;box-shadow:0 .45rem 1.4rem rgba(41,41,41,.16)}
+.tiptapToolbar{position:fixed;z-index:90;top:calc(var(--editor-vv-top,0px) + var(--editor-vv-height,100dvh) - 3.15rem);left:max(.85rem,env(safe-area-inset-left));right:max(.85rem,env(safe-area-inset-right));box-sizing:border-box;display:grid;grid-template-columns:minmax(4.25rem,1fr) repeat(6,2.2rem);align-items:center;gap:.12rem;margin:0;padding:.4rem;border:1px solid rgba(41,41,41,.48);border-radius:999px;background:#e9e5dd;box-shadow:0 .45rem 1.4rem rgba(41,41,41,.16)}
 .tiptapToolbar button{display:grid;place-items:center;width:100%;min-width:0;min-height:2.14rem;border:0;border-radius:999px;background:transparent;color:#292929;padding:.2rem}
 .tiptapToolbar button[aria-pressed="true"],.tiptapToolbar button:hover:not(:disabled){background:#292929;color:#e9e5dd}
 .tiptapToolbar button:disabled{opacity:.36}
+.editorIconButton,.editorDoneButton{background:transparent;color:#292929;border-color:rgba(41,41,41,.68)}
 .styleControl{position:relative}
 .moreControl{position:relative}
 .styleTrigger{display:flex!important;justify-content:center;gap:.25rem!important;background:rgba(41,41,41,.08)!important;padding-inline:.38rem!important;font-family:var(--font-display)!important;font-size:.68rem!important;font-weight:760!important}
