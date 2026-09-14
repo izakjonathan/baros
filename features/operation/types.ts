@@ -48,6 +48,10 @@ export type OperationArticle = {
   content: OperationContentBlock[];
   published: boolean;
   updatedAt: string;
+  version?: number;
+  reviewDueDate?: string | null;
+  authorName?: string | null;
+  acknowledged?: boolean;
 };
 
 export type OperationDailyTask = {
@@ -66,7 +70,19 @@ export type OperationDailyTask = {
   assignedEmployeeId: string | null;
   assignedEmployeeName: string | null;
   completedByName: string | null;
+  checklist: Array<{ id: string; label: string; completed: boolean }>;
   completed: boolean;
+};
+
+export type OperationTaskTemplate = {
+  id: string;
+  title: string;
+  description: string;
+  taskType: OperationTaskType;
+  priority: OperationTaskPriority;
+  dueTime: string | null;
+  reminderMinutes: number | null;
+  checklist: Array<{ id: string; label: string }>;
 };
 
 export type OperationAssignee = {
@@ -93,6 +109,22 @@ export type OperationNeed = {
   note: string | null;
   status: OperationNeedStatus;
   createdAt: string;
+  quantity: string | null;
+  unit: string | null;
+  supplier: string | null;
+  priority: OperationTaskPriority;
+  neededBy: string | null;
+  orderedAt: string | null;
+  orderedByName: string | null;
+};
+
+export type OperationMetrics = {
+  completionRate: number;
+  completedCount: number;
+  dueCount: number;
+  overdueCount: number;
+  openNeedsCount: number;
+  overdueNeedsCount: number;
 };
 
 export type OperationModuleState = {
@@ -104,5 +136,7 @@ export type OperationModuleState = {
   news: OperationArticle[];
   dailyTasks: OperationDailyTask[];
   assignees: OperationAssignee[];
+  taskTemplates: OperationTaskTemplate[];
+  metrics: OperationMetrics;
   needs: OperationNeed[];
 };

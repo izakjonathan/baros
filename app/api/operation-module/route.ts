@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { defaultOperationState } from "@/features/operation/default-content";
 import { mapOperationArticle, ownerCanManageOperation, parseOperationBlocks } from "@/features/operation/content";
-import { isOperationTaskDue, type OperationDailyTask, type OperationModuleState, type OperationNeed } from "@/features/operation/types";
+import { isOperationTaskDue, type OperationDailyTask, type OperationModuleState, type OperationNeed, type OperationTaskPriority, type OperationTaskType } from "@/features/operation/types";
 import { db } from "@/lib/db/client";
 import { ApiError, enumValue, finiteNumber, isoDate, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
 import { getSessionUser } from "@/lib/auth/session";
@@ -20,13 +20,25 @@ function weekdayFromDate(date: string) {
   return new Date(`${date}T00:00:00Z`).getUTCDay();
 }
 
+function parseChecklist(value: unknown) {
+  if (!Array.isArray(value)) return [] as Array<{ id: string; label: string }>;
+  return value.slice(0, 30).flatMap((item, index): Array<{ id: string; label: string }> => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const record = item as Record<string, unknown>;
+    const label = String(record.label || "").trim().slice(0, 180);
+    if (!label) return [];
+    const id = String(record.id || `item-${index + 1}`).replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 48) || `item-${index + 1}`;
+    return [{ id, label }];
+  });
+}
+
 function isOperationSchemaUnavailable(error: unknown) {
   if (!error || typeof error !== "object") return false;
   const record = error as { code?: unknown; message?: unknown };
   const code = String(record.code || "");
   const message = String(record.message || "");
-  return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|article_kind|need_status)/i.test(message)
-    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id)/i.test(message);
+  return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|article_kind|need_status|task_templates|task_checklist_completions|article_versions|article_acknowledgements|task_reminders)/i.test(message)
+    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|checklist|quantity|supplier|needed_by|review_due_date|version)/i.test(message);
 }
 
 function operationMigrationRequired() {
@@ -41,14 +53,17 @@ export async function GET(request: Request) {
     const user = await requireApiUser();
     const params = new URL(request.url).searchParams;
     const today = isoDate(params.get("date") || new Date().toISOString().slice(0, 10), "date");
-    const [articles, tasks, needs, assignees] = await Promise.all([
+    const [articles, tasks, needs, assignees, taskTemplates] = await Promise.all([
       db()<Array<Record<string, unknown>>>`
-        select id,kind,category,title,description,content,published,updated_at
-        from operation_articles
-        where organization_id=${user.organizationId} and (published=true or ${ownerCanManageOperation(user.role)})
-        order by kind,category,sort_order,updated_at desc`,
+        select a.id,a.kind,a.category,a.title,a.description,a.content,a.published,a.updated_at,a.version,a.review_due_date,
+               coalesce(author.name,'') author_name,
+               exists(select 1 from operation_article_acknowledgements ack where ack.article_id=a.id and ack.user_id=${user.userId} and ack.version=a.version) acknowledged
+        from operation_articles a left join users author on author.id=a.updated_by
+        where a.organization_id=${user.organizationId} and (a.published=true or ${ownerCanManageOperation(user.role)})
+        order by a.kind,a.category,a.sort_order,a.updated_at desc`,
       db()<Array<Record<string, unknown>>>`
-        select t.id,t.weekday,t.title,t.description,t.due_date,t.repeat_unit,t.repeat_interval,t.repeat_end_date,t.task_type,t.priority,t.due_time,t.reminder_minutes,t.assigned_employee_id,
+        select t.id,t.weekday,t.title,t.description,t.due_date,t.repeat_unit,t.repeat_interval,t.repeat_end_date,t.task_type,t.priority,t.due_time,t.reminder_minutes,t.assigned_employee_id,t.checklist,
+               coalesce((select jsonb_object_agg(cc.item_id,true) from operation_task_checklist_completions cc where cc.task_id=t.id and cc.service_date=${today}::date), '{}'::jsonb) checklist_completed,
                (a.first_name||' '||a.last_name) assigned_employee_name,
                (completed_employee.first_name||' '||completed_employee.last_name) completed_by_name,
                (c.completed_at is not null) completed
@@ -62,27 +77,32 @@ export async function GET(request: Request) {
           and t.active=true
         order by t.sort_order,t.created_at`,
       db()<Array<Record<string, unknown>>>`
-        select id,title,note,status,created_at
-        from operation_needs
-        where organization_id=${user.organizationId}
-          and (${user.locationId}::uuid is null or location_id is null or location_id=${user.locationId})
-          and status='NEEDED'
-        order by created_at desc
-        limit 100`,
+        select n.id,n.title,n.note,n.status,n.created_at,n.quantity,n.unit,n.supplier,n.priority,n.needed_by,n.ordered_at,
+               coalesce(orderer.name,'') ordered_by_name
+        from operation_needs n left join users orderer on orderer.id=n.ordered_by
+        where n.organization_id=${user.organizationId}
+          and (${user.locationId}::uuid is null or n.location_id is null or n.location_id=${user.locationId})
+        order by (n.status='NEEDED') desc,n.priority desc,n.needed_by nulls last,n.created_at desc
+        limit 150`,
       db()<Array<Record<string, unknown>>>`
         select e.id,e.first_name||' '||e.last_name name
         from employees e
         where e.organization_id=${user.organizationId} and e.active=true
           and (${user.locationId}::uuid is null or exists(select 1 from employee_locations el where el.employee_id=e.id and el.location_id=${user.locationId}))
         order by e.first_name,e.last_name`,
+      db()<Array<Record<string, unknown>>>`
+        select id,title,description,task_type,priority,due_time,reminder_minutes,checklist
+        from operation_task_templates
+        where organization_id=${user.organizationId} and (${user.locationId}::uuid is null or location_id is null or location_id=${user.locationId})
+        order by task_type,title`,
     ]);
     const state: OperationModuleState = {
       userRole: user.role,
       canManageContent: ownerCanManageOperation(user.role),
       storageStatus: "ready",
       today,
-      handbook: articles.filter(article => article.kind === "HANDBOOK").map(mapOperationArticle),
-      news: articles.filter(article => article.kind === "NEWS").map(mapOperationArticle),
+      handbook: articles.filter(article => article.kind === "HANDBOOK").map(article => ({ ...mapOperationArticle(article), version: Number(article.version || 1), reviewDueDate: article.review_due_date == null ? null : String(article.review_due_date), authorName: String(article.author_name || "") || null, acknowledged: Boolean(article.acknowledged) })),
+      news: articles.filter(article => article.kind === "NEWS").map(article => ({ ...mapOperationArticle(article), version: Number(article.version || 1), reviewDueDate: article.review_due_date == null ? null : String(article.review_due_date), authorName: String(article.author_name || "") || null, acknowledged: Boolean(article.acknowledged) })),
       dailyTasks: tasks.map((task): OperationDailyTask => ({
         id: String(task.id),
         weekday: Number(task.weekday),
@@ -99,15 +119,25 @@ export async function GET(request: Request) {
         assignedEmployeeId: task.assigned_employee_id == null ? null : String(task.assigned_employee_id),
         assignedEmployeeName: task.assigned_employee_name == null ? null : String(task.assigned_employee_name),
         completedByName: task.completed_by_name == null ? null : String(task.completed_by_name),
+        checklist: Array.isArray(task.checklist) ? task.checklist.slice(0, 30).flatMap((item): OperationDailyTask["checklist"] => item && typeof item === "object" && "id" in item && "label" in item ? [{ id: String(item.id), label: String(item.label), completed: Boolean(task.checklist_completed && typeof task.checklist_completed === "object" && String(item.id) in task.checklist_completed) }] : []) : [],
         completed: Boolean(task.completed),
       })).filter(task => isOperationTaskDue(task, today)),
       assignees: assignees.map(assignee => ({ id: String(assignee.id), name: String(assignee.name) })),
+      taskTemplates: taskTemplates.map(template => ({ id: String(template.id), title: String(template.title), description: String(template.description || ""), taskType: String(template.task_type) as OperationTaskType, priority: String(template.priority) as OperationTaskPriority, dueTime: template.due_time == null ? null : String(template.due_time).slice(0, 5), reminderMinutes: template.reminder_minutes == null ? null : Number(template.reminder_minutes), checklist: Array.isArray(template.checklist) ? template.checklist.slice(0, 30).flatMap((item): Array<{ id: string; label: string }> => item && typeof item === "object" && "id" in item && "label" in item ? [{ id: String(item.id), label: String(item.label) }] : []) : [] })),
+      metrics: { completionRate: 0, completedCount: 0, dueCount: 0, overdueCount: 0, openNeedsCount: needs.filter(need => need.status === "NEEDED").length, overdueNeedsCount: needs.filter(need => need.status === "NEEDED" && need.needed_by && String(need.needed_by) < today).length },
       needs: needs.map((need): OperationNeed => ({
         id: String(need.id),
         title: String(need.title),
         note: need.note == null ? null : String(need.note),
         status: String(need.status) === "ORDERED" ? "ORDERED" : "NEEDED",
         createdAt: String(need.created_at),
+        quantity: need.quantity == null ? null : String(need.quantity),
+        unit: need.unit == null ? null : String(need.unit),
+        supplier: need.supplier == null ? null : String(need.supplier),
+        priority: String(need.priority) as OperationDailyTask["priority"],
+        neededBy: need.needed_by == null ? null : String(need.needed_by),
+        orderedAt: need.ordered_at == null ? null : String(need.ordered_at),
+        orderedByName: String(need.ordered_by_name || "") || null,
       })),
     };
     return NextResponse.json(state, { headers: { "cache-control": "no-store" } });
@@ -132,7 +162,7 @@ export async function POST(request: Request) {
   try {
     const user = await requireApiUser();
     const body = await readJsonObject(request, 128_000);
-    const entity = enumValue(body.entity, "entity", ["article", "dailyTask", "need"] as const);
+    const entity = enumValue(body.entity, "entity", ["article", "dailyTask", "need", "taskTemplate"] as const);
 
     if (entity === "article") {
       requireOwner(user.role);
@@ -162,6 +192,7 @@ export async function POST(request: Request) {
       const priority = enumValue(body.priority || "NORMAL", "priority", ["LOW", "NORMAL", "HIGH"] as const);
       const taskType = enumValue(body.taskType || "SERVICE", "taskType", ["OPENING", "SERVICE", "CLOSING", "MAINTENANCE", "ADMIN"] as const);
       const assignedEmployeeId = body.assignedEmployeeId == null || body.assignedEmployeeId === "" ? null : uuid(body.assignedEmployeeId, "assignedEmployeeId");
+      const checklist = parseChecklist(body.checklist);
       if (assignedEmployeeId) {
         const [employee] = await db()`select id from employees where id=${assignedEmployeeId} and organization_id=${user.organizationId} and active=true`;
         if (!employee) throw new ApiError(400, "Assigned employee is not active in this organization");
@@ -170,18 +201,40 @@ export async function POST(request: Request) {
       const title = requiredString(body, "title", 160);
       const description = requiredString(body, "description", 300);
       const [row] = await db()<Array<Record<string, unknown>>>`
-        insert into operation_daily_tasks(organization_id,location_id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assigned_employee_id,created_by,updated_by)
-        values(${user.organizationId},${user.locationId},${weekday},${title},${description},${dueDate}::date,${repeatUnit},${repeatInterval},${repeatEndDate}::date,${taskType},${priority},${dueTime}::time,${reminderMinutes},${assignedEmployeeId},${user.userId},${user.userId})
-        returning id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assigned_employee_id,false completed`;
+        insert into operation_daily_tasks(organization_id,location_id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assigned_employee_id,checklist,created_by,updated_by)
+        values(${user.organizationId},${user.locationId},${weekday},${title},${description},${dueDate}::date,${repeatUnit},${repeatInterval},${repeatEndDate}::date,${taskType},${priority},${dueTime}::time,${reminderMinutes},${assignedEmployeeId},${JSON.stringify(checklist)}::jsonb,${user.userId},${user.userId})
+        returning id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assigned_employee_id,checklist,false completed`;
+      return NextResponse.json(row, { status: 201 });
+    }
+
+    if (entity === "taskTemplate") {
+      requireOwner(user.role);
+      const title = requiredString(body, "title", 160);
+      const description = optionalString(body, "description", 300) || "";
+      const taskType = enumValue(body.taskType || "SERVICE", "taskType", ["OPENING", "SERVICE", "CLOSING", "MAINTENANCE", "ADMIN"] as const);
+      const priority = enumValue(body.priority || "NORMAL", "priority", ["LOW", "NORMAL", "HIGH"] as const);
+      const dueTime = body.dueTime == null || body.dueTime === "" ? null : requiredString(body, "dueTime", 5);
+      const reminderMinutes = body.reminderMinutes == null || body.reminderMinutes === "" ? null : finiteNumber(body.reminderMinutes, "reminderMinutes", { min: 0, max: 10080, integer: true });
+      const checklist = parseChecklist(body.checklist);
+      const [row] = await db()<Array<Record<string, unknown>>>`
+        insert into operation_task_templates(organization_id,location_id,title,description,task_type,priority,due_time,reminder_minutes,checklist,created_by,updated_by)
+        values(${user.organizationId},${user.locationId},${title},${description},${taskType},${priority},${dueTime}::time,${reminderMinutes},${JSON.stringify(checklist)}::jsonb,${user.userId},${user.userId})
+        returning id,title,description,task_type,priority,due_time,reminder_minutes,checklist`;
       return NextResponse.json(row, { status: 201 });
     }
 
     const title = requiredString(body, "title", 160);
     const note = optionalString(body, "note", 400);
+    const quantity = body.quantity == null || body.quantity === "" ? null : finiteNumber(body.quantity, "quantity", { min: 0, max: 100000 });
+    const unit = optionalString(body, "unit", 40);
+    const supplier = optionalString(body, "supplier", 120);
+    const priority = enumValue(body.priority || "NORMAL", "priority", ["LOW", "NORMAL", "HIGH"] as const);
+    const neededBy = body.neededBy == null || body.neededBy === "" ? null : isoDate(body.neededBy, "neededBy");
     const [row] = await db()<Array<Record<string, unknown>>>`
-      insert into operation_needs(organization_id,location_id,title,note,created_by)
-      values(${user.organizationId},${user.locationId},${title},${note},${user.userId})
-      returning id,title,note,status,created_at`;
+      insert into operation_needs(organization_id,location_id,title,note,quantity,unit,supplier,priority,needed_by,created_by,updated_by)
+      values(${user.organizationId},${user.locationId},${title},${note},${quantity},${unit},${supplier},${priority},${neededBy}::date,${user.userId},${user.userId})
+      returning id,title,note,status,created_at,quantity,unit,supplier,priority,needed_by,ordered_at`;
+    await db()`insert into operation_need_events(need_id,organization_id,actor_user_id,event_type,snapshot) values(${String(row.id)},${user.organizationId},${user.userId},'CREATED',${JSON.stringify(row)}::jsonb)`;
     return NextResponse.json(row, { status: 201 });
   } catch (error) {
     if (isOperationSchemaUnavailable(error)) return operationMigrationRequired();
@@ -220,7 +273,17 @@ export async function PATCH(request: Request) {
     }
 
     if (entity === "dailyTask") {
-      const action = enumValue(body.action || "complete", "action", ["complete", "edit"] as const);
+      const action = enumValue(body.action || "complete", "action", ["complete", "edit", "checklist"] as const);
+      if (action === "checklist") {
+        const serviceDate = isoDate(body.date || new Date().toISOString().slice(0, 10), "date");
+        const itemId = requiredString(body, "itemId", 48);
+        const completed = body.completed !== false;
+        const [task] = await db()<Array<{ id: string }>>`select id from operation_daily_tasks where id=${id} and organization_id=${user.organizationId} and active=true`;
+        if (!task) throw new ApiError(404, "Daily task not found");
+        if (completed) await db()`insert into operation_task_checklist_completions(task_id,service_date,item_id,organization_id,completed_by) values(${id},${serviceDate}::date,${itemId},${user.organizationId},${user.userId}) on conflict(task_id,service_date,item_id) do update set completed_by=excluded.completed_by,completed_at=now()`;
+        else await db()`delete from operation_task_checklist_completions where task_id=${id} and service_date=${serviceDate}::date and item_id=${itemId} and organization_id=${user.organizationId}`;
+        return NextResponse.json({ id, itemId, completed });
+      }
       if (action === "edit") {
         requireOwner(user.role);
         const dueDate = body.dueDate == null ? null : isoDate(body.dueDate, "dueDate");
@@ -292,6 +355,7 @@ export async function PATCH(request: Request) {
         and (${user.locationId}::uuid is null or location_id is null or location_id=${user.locationId})
       returning id,title,note,status,created_at`;
     if (!row) throw new ApiError(404, "Needed item not found");
+    await db()`insert into operation_need_events(need_id,organization_id,actor_user_id,event_type,snapshot) values(${id},${user.organizationId},${user.userId},${status === "ORDERED" ? "ORDERED" : "REOPENED"},${JSON.stringify(row)}::jsonb)`;
     return NextResponse.json(row);
   } catch (error) {
     if (isOperationSchemaUnavailable(error)) return operationMigrationRequired();
@@ -304,7 +368,7 @@ export async function DELETE(request: Request) {
     const user = await requireApiUser();
     requireOwner(user.role);
     const params = new URL(request.url).searchParams;
-    const entity = enumValue(params.get("entity"), "entity", ["article", "dailyTask", "need"] as const);
+    const entity = enumValue(params.get("entity"), "entity", ["article", "dailyTask", "need", "taskTemplate"] as const);
     const id = uuid(params.get("id"), "id");
     if (entity === "article") {
       const [row] = await db()`delete from operation_articles where id=${id} and organization_id=${user.organizationId} returning id`;
@@ -312,6 +376,9 @@ export async function DELETE(request: Request) {
     } else if (entity === "dailyTask") {
       const [row] = await db()`update operation_daily_tasks set active=false,updated_by=${user.userId},updated_at=now() where id=${id} and organization_id=${user.organizationId} returning id`;
       if (!row) throw new ApiError(404, "Daily task not found");
+    } else if (entity === "taskTemplate") {
+      const [row] = await db()`delete from operation_task_templates where id=${id} and organization_id=${user.organizationId} returning id`;
+      if (!row) throw new ApiError(404, "Task template not found");
     } else {
       const [row] = await db()`delete from operation_needs where id=${id} and organization_id=${user.organizationId} returning id`;
       if (!row) throw new ApiError(404, "Needed item not found");

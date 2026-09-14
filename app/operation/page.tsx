@@ -100,15 +100,19 @@ export default async function OperationPage() {
       assignedEmployeeId: task.assigned_employee_id == null ? null : String(task.assigned_employee_id),
       assignedEmployeeName: task.assigned_employee_name == null ? null : String(task.assigned_employee_name),
       completedByName: task.completed_by_name == null ? null : String(task.completed_by_name),
+      checklist: [],
       completed: Boolean(task.completed),
     })).filter(task => isOperationTaskDue(task, today)),
     assignees: assignees.map(assignee => ({ id: String(assignee.id), name: String(assignee.name) })),
+    taskTemplates: [],
+    metrics: { completionRate: 0, completedCount: 0, dueCount: 0, overdueCount: 0, openNeedsCount: needs.filter(need => need.status === "NEEDED").length, overdueNeedsCount: 0 },
     needs: needs.map((need): OperationNeed => ({
       id: String(need.id),
       title: String(need.title),
       note: need.note == null ? null : String(need.note),
       status: String(need.status) === "ORDERED" ? "ORDERED" : "NEEDED",
       createdAt: String(need.created_at),
+      quantity: null, unit: null, supplier: null, priority: "NORMAL", neededBy: null, orderedAt: null, orderedByName: null,
     })),
   };
 
