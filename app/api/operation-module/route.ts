@@ -70,7 +70,7 @@ export async function GET(request: Request) {
         where a.organization_id=${user.organizationId} and (a.published=true or ${ownerCanManageOperation(user.role)})
         order by a.kind,a.category,a.sort_order,a.updated_at desc`,
       db()<Array<Record<string, unknown>>>`
-        select t.id,t.weekday,t.title,t.description,t.due_date,t.repeat_unit,t.repeat_interval,t.repeat_end_date,t.task_type,t.priority,t.due_time,t.reminder_minutes,t.assignment_scope,t.assigned_employee_id,t.checklist,
+        select t.id,t.weekday,t.title,t.description,t.due_date::text due_date,t.repeat_unit,t.repeat_interval,t.repeat_end_date::text repeat_end_date,t.task_type,t.priority,t.due_time,t.reminder_minutes,t.assignment_scope,t.assigned_employee_id,t.checklist,
                coalesce((select jsonb_object_agg(cc.item_id,true) from operation_task_checklist_completions cc where cc.task_id=t.id and cc.service_date=${today}::date), '{}'::jsonb) checklist_completed,
                (a.first_name||' '||a.last_name) assigned_employee_name,
                (completed_employee.first_name||' '||completed_employee.last_name) completed_by_name,
