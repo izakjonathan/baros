@@ -181,3 +181,18 @@
   .operationCard h3{font-size:clamp(.98rem,4.7vw,1.18rem)}
   .operationCard small{font-size:.56rem}
 }
+
+/* Compact task cards: match the density of the handbook/article cards. */
+.taskList{gap:.4rem}
+.taskGroup{gap:.28rem}
+.taskGroup>h3{padding:.32rem 0 .04rem}
+.taskRow{height:auto!important;min-height:0!important;align-self:start;align-content:start;align-items:start;gap:.52rem;padding:.54rem .62rem}
+.taskRow>input{margin-top:.18rem}
+.taskRowTitle{min-height:1.28rem;gap:.35rem}
+.taskRowTitle h4{font-size:.94rem;line-height:1.18}
+.taskRow p{margin-top:.12rem;line-height:1.28}
+.taskMeta{margin-top:.16rem}
+.taskChecklist{margin-top:.32rem;padding:.32rem .42rem}
+@media(max-width:42rem){
+  .taskRow{padding:.52rem .6rem;border-radius:.68rem}
+}
