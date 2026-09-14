@@ -139,6 +139,10 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     return () => window.clearTimeout(timer);
   }, [refresh, selectedTaskDate]);
 
+  useEffect(() => {
+    setTaskDueDate(selectedTaskDate);
+  }, [selectedTaskDate]);
+
   async function saveArticle() {
     setEditorMessage("");
     if (storageUnavailable) { setEditorMessage(migrationMessage); return false; }
