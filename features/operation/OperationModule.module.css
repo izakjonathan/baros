@@ -41,6 +41,9 @@
 .storageNotice{display:grid;gap:.12rem;padding:.68rem .76rem;border:1px solid #8a7432;border-radius:.72rem;background:rgba(217,184,51,.12)}
 .storageNotice strong{font-size:.74rem;letter-spacing:.055em;text-transform:uppercase}
 .storageNotice p{font-family:var(--font-body);font-size:.72rem;line-height:1.35;color:#5f5a54}
+.duePrompt{display:flex;align-items:flex-start;gap:.55rem;padding:.65rem .72rem;border:1px solid #8a7432;border-radius:.72rem;background:rgba(217,184,51,.12)}
+.duePrompt strong{font-size:.74rem;letter-spacing:.055em;text-transform:uppercase}
+.duePrompt p{margin-top:.08rem;font-family:var(--font-body);font-size:.72rem;line-height:1.35;color:#5f5a54}
 .reader{position:fixed;inset:0;z-index:60;display:grid;grid-template-rows:minmax(0,1fr) auto;background:#e9e5dd;color:#292929;padding:max(.72rem,env(safe-area-inset-top)) max(1.2rem,env(safe-area-inset-right)) max(1rem,env(safe-area-inset-bottom)) max(1.2rem,env(safe-area-inset-left))}
 .readerTop{position:absolute;left:max(1.2rem,env(safe-area-inset-left));top:max(.72rem,env(safe-area-inset-top));z-index:1}
 .readerTop button,.readerBottom button,.textButton{border:0;background:transparent;color:inherit;font-weight:760;text-transform:uppercase;letter-spacing:.075em}

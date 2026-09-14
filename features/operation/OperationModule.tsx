@@ -108,6 +108,15 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
   const [needMessage, setNeedMessage] = useState("");
   const [editorOpen, setEditorOpen] = useState(false);
   const currentArticle = readerStack.at(-1) || null;
+  const dueSoonTasks = state.dailyTasks.filter(task => {
+    if (task.completed || !task.dueTime || task.reminderMinutes == null) return false;
+    const now = new Date();
+    const [hours, minutes] = task.dueTime.split(":").map(Number);
+    const due = new Date();
+    due.setHours(hours, minutes, 0, 0);
+    const reminderAt = due.valueOf() - task.reminderMinutes * 60_000;
+    return now.valueOf() >= reminderAt && now.valueOf() < due.valueOf() + 60 * 60_000;
+  });
   const allArticles = [...state.news, ...state.handbook];
   const handbookCategories = ["All", ...Array.from(new Set(state.handbook.map(article => article.category)))];
   const filteredHandbook = state.handbook.filter(article => {
@@ -236,6 +245,7 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     </header>
     <main className={styles.operationMain}>
       {storageUnavailable && <StorageNotice />}
+      {dueSoonTasks.length > 0 && <section className={styles.duePrompt} role="status"><Clock3 size={18} /><div><strong>{dueSoonTasks.length === 1 ? "Task due soon" : `${dueSoonTasks.length} tasks due soon`}</strong><p>{dueSoonTasks.map(task => `${task.title} · ${task.dueTime}`).join(" · ")}</p></div></section>}
       {view === "home" && <HomeView news={state.news} tasks={state.dailyTasks} openArticle={(article) => setReaderStack([article])} openView={setView} />}
       {view === "handbook" && <HandbookView articles={filteredHandbook} categories={handbookCategories} query={query} category={category} setQuery={setQuery} setCategory={setCategory} openArticle={(article) => setReaderStack([article])} />}
       {view === "tasks" && <TasksView tasks={state.dailyTasks} taskTemplates={state.taskTemplates} assignees={state.assignees} selectedDate={selectedTaskDate} setSelectedDate={setSelectedTaskDate} canManage={state.canManageContent} taskTitle={taskTitle} taskDescription={taskDescription} taskDueDate={taskDueDate} taskRepeatUnit={taskRepeatUnit} taskRepeatInterval={taskRepeatInterval} taskRepeatEndDate={taskRepeatEndDate} taskType={taskType} taskPriority={taskPriority} taskDueTime={taskDueTime} taskReminderMinutes={taskReminderMinutes} taskAssigneeId={taskAssigneeId} taskChecklistText={taskChecklistText} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} setTaskDueDate={setTaskDueDate} setTaskRepeatUnit={setTaskRepeatUnit} setTaskRepeatInterval={setTaskRepeatInterval} setTaskRepeatEndDate={setTaskRepeatEndDate} setTaskType={setTaskType} setTaskPriority={setTaskPriority} setTaskDueTime={setTaskDueTime} setTaskReminderMinutes={setTaskReminderMinutes} setTaskAssigneeId={setTaskAssigneeId} setTaskChecklistText={setTaskChecklistText} saveTaskTemplate={saveTaskTemplate} addTask={addTask} toggleTask={toggleTask} toggleTaskChecklist={toggleTaskChecklist} disabled={storageUnavailable} message={taskMessage} />}
