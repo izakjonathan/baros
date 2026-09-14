@@ -186,7 +186,9 @@
 .taskList{gap:.4rem}
 .taskGroup{gap:.28rem}
 .taskGroup>h3{padding:.32rem 0 .04rem}
-.taskRow{height:auto!important;min-height:0!important;align-self:start;align-content:start;align-items:start;gap:.52rem;padding:.54rem .62rem}
+.taskRow{display:flex!important;height:auto!important;min-height:0!important;align-self:start;align-content:start;align-items:flex-start!important;gap:.52rem;padding:.54rem .62rem}
+.taskRow>div{min-width:0;flex:1}
+.taskRow>.rowDelete{flex:none}
 .taskRow>input{margin-top:.18rem}
 .taskRowTitle{min-height:1.28rem;gap:.35rem}
 .taskRowTitle h4{font-size:.94rem;line-height:1.18}
