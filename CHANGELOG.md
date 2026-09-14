@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.19.0-rc.84
+
+- Corrected task completion so it is recorded against the selected service date, including historical and future task views.
+- Aligned task configuration and deletion with the shared `operations.manage` capability; handbook/news remain OWNER/ADMIN managed.
+- Added authoritative refresh/error recovery for task, checklist, article-delete and Needs-order mutations.
+- Made Operation service dates explicitly Copenhagen-based and made monthly/yearly recurrence use the last valid day of shorter months.
+- Removed unshipped handbook governance, reminder and audit-history schema through migration `018_operation_integrity_cleanup.sql`.
+- Rejected SVG image uploads and added Operation integrity regression coverage.
+
 ## v0.19.0-rc.74
 
 - Kept the article editor full-screen while the keyboard is open; only the formatting dock now moves, preventing the Operation page from showing behind the editor.

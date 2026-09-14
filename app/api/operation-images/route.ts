@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     const form = await request.formData();
     const file = form.get("image");
     if (!(file instanceof File)) throw new ApiError(400, "Choose an image to upload.");
-    if (!file.type.startsWith("image/")) throw new ApiError(400, "Only image files can be uploaded.");
+    if (!/^image\/(avif|gif|jpe?g|png|webp)$/i.test(file.type)) throw new ApiError(400, "Use a JPG, PNG, WebP, GIF or AVIF image.");
     if (file.size > maxImageBytes) throw new ApiError(400, "Images must be 8 MB or smaller.");
 
     const extension = file.type.split("/")[1]?.replace(/[^a-z0-9]/gi, "") || "jpg";

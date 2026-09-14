@@ -1,10 +1,14 @@
 import type { OperationModuleState } from "./types";
+import { operationDateNow } from "./date";
+
+const today = operationDateNow();
 
 export const defaultOperationState: OperationModuleState = {
   userRole: "OWNER",
   canManageContent: true,
+  canManageTasks: true,
   storageStatus: "ready",
-  today: new Date().toISOString().slice(0, 10),
+  today,
   handbook: [
     {
       id: "handbook-opening",
@@ -53,8 +57,8 @@ export const defaultOperationState: OperationModuleState = {
     },
   ],
   dailyTasks: [
-    { id: "daily-ice", weekday: new Date().getDay(), title: "Check ice and fridges", description: "Make sure the bar has enough ice and cold stock for service.", dueDate: new Date().toISOString().slice(0, 10), repeatUnit: "WEEK", repeatInterval: 1, repeatEndDate: null, dueTime: "16:00", reminderMinutes: 30, priority: "HIGH", taskType: "OPENING", assignedEmployeeId: null, assignedEmployeeName: null, completedByName: null, checklist: [{ id: "ice", label: "Restock ice" }, { id: "fridges", label: "Check fridge temperatures" }].map(item => ({ ...item, completed: false })), completed: false },
-    { id: "daily-glassware", weekday: new Date().getDay(), title: "Polish front-bar glassware", description: "Fill the main shelves before the evening rush.", dueDate: new Date().toISOString().slice(0, 10), repeatUnit: "WEEK", repeatInterval: 1, repeatEndDate: null, dueTime: null, reminderMinutes: null, priority: "NORMAL", taskType: "SERVICE", assignedEmployeeId: null, assignedEmployeeName: null, completedByName: null, checklist: [], completed: false },
+    { id: "daily-ice", weekday: new Date(`${today}T00:00:00Z`).getUTCDay(), title: "Check ice and fridges", description: "Make sure the bar has enough ice and cold stock for service.", dueDate: today, repeatUnit: "WEEK", repeatInterval: 1, repeatEndDate: null, dueTime: "16:00", reminderMinutes: 30, priority: "HIGH", taskType: "OPENING", assignedEmployeeId: null, assignedEmployeeName: null, completedByName: null, checklist: [{ id: "ice", label: "Restock ice" }, { id: "fridges", label: "Check fridge temperatures" }].map(item => ({ ...item, completed: false })), completed: false },
+    { id: "daily-glassware", weekday: new Date(`${today}T00:00:00Z`).getUTCDay(), title: "Polish front-bar glassware", description: "Fill the main shelves before the evening rush.", dueDate: today, repeatUnit: "WEEK", repeatInterval: 1, repeatEndDate: null, dueTime: null, reminderMinutes: null, priority: "NORMAL", taskType: "SERVICE", assignedEmployeeId: null, assignedEmployeeName: null, completedByName: null, checklist: [], completed: false },
   ],
   assignees: [],
   taskTemplates: [],

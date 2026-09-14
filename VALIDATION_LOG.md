@@ -1,27 +1,25 @@
-# v0.19.0-rc.71 Validation
+# v0.19.0-rc.84 Validation
 
 ## Confirmed baseline
 
-The v0.19.0-rc.70 release source was used as the baseline for the compact Operation UI release.
+The v0.19.0-rc.83 release source was used as the baseline for the Operation integrity release.
 
-- Rollback checkpoint: v0.19.0-rc.70
+- Rollback checkpoint: v0.19.0-rc.83
 
 ## Implementation
 
-- Restyled Operation cards, module rows, task rows, need rows, navigation, section labels, reader typography, and form controls into a tighter field-notes direction.
-- Kept the full-screen dark Apple Notes-style Quill article editor intact.
-- Preserved Operation API, database, route, permission, and workflow behavior.
+- Corrected selected-date completion, authoritative mutation recovery and role-capability handling.
+- Added Copenhagen service dates, month-end recurrence behavior, SVG upload rejection and the RC84 cleanup migration.
 
 ## Validation status
 
-- Clean install (`npm ci --no-audit --no-fund`): passed.
 - ESLint: passed.
 - TypeScript (`tsc --noEmit`): passed.
 - Current regression suite: passed.
 - UI contract: passed.
-- Release validation, stabilization preflight, and environment validation: passed.
+- Release validation and artifact audit: passed.
 - Next.js 16.2.12 Turbopack production build: passed.
 
 ## Scope
 
-No database-schema, dependency-version, route-shape, permission, or existing business-workflow changes are included. The change is limited to the Operation module visual presentation.
+Run migration `018_operation_integrity_cleanup.sql` after deployment. It intentionally removes unused governance, reminder, acknowledgement and audit-history schema.

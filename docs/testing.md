@@ -16,6 +16,7 @@ The active command groups are intentionally small:
 - `test:boundaries`
 - `test:release-contract`
 - `test:ui`
+- `test:operation`
 - `test:current`
 
 Historical release-specific test scripts are no longer shipped in the active repository. Previous ZIP releases and Git history remain the historical record. A superseded source-text test must not force obsolete implementation code to remain in production.

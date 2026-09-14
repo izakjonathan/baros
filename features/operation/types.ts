@@ -48,10 +48,6 @@ export type OperationArticle = {
   content: OperationContentBlock[];
   published: boolean;
   updatedAt: string;
-  version?: number;
-  reviewDueDate?: string | null;
-  authorName?: string | null;
-  acknowledged?: boolean;
 };
 
 export type OperationDailyTask = {
@@ -99,8 +95,13 @@ export function isOperationTaskDue(task: Pick<OperationDailyTask, "dueDate" | "r
   if (task.repeatUnit === "NONE") return days === 0;
   if (task.repeatUnit === "DAY") return days % task.repeatInterval === 0;
   if (task.repeatUnit === "WEEK") return target.getUTCDay() === start.getUTCDay() && Math.floor(days / 7) % task.repeatInterval === 0;
-  if (task.repeatUnit === "MONTH") return target.getUTCDate() === start.getUTCDate() && ((target.getUTCFullYear() - start.getUTCFullYear()) * 12 + target.getUTCMonth() - start.getUTCMonth()) % task.repeatInterval === 0;
-  return target.getUTCMonth() === start.getUTCMonth() && target.getUTCDate() === start.getUTCDate() && (target.getUTCFullYear() - start.getUTCFullYear()) % task.repeatInterval === 0;
+  if (task.repeatUnit === "MONTH") {
+    const months = (target.getUTCFullYear() - start.getUTCFullYear()) * 12 + target.getUTCMonth() - start.getUTCMonth();
+    const lastDay = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate();
+    return months % task.repeatInterval === 0 && target.getUTCDate() === Math.min(start.getUTCDate(), lastDay);
+  }
+  const lastDay = new Date(Date.UTC(target.getUTCFullYear(), start.getUTCMonth() + 1, 0)).getUTCDate();
+  return target.getUTCMonth() === start.getUTCMonth() && target.getUTCDate() === Math.min(start.getUTCDate(), lastDay) && (target.getUTCFullYear() - start.getUTCFullYear()) % task.repeatInterval === 0;
 }
 
 export type OperationNeed = {
@@ -130,6 +131,7 @@ export type OperationMetrics = {
 export type OperationModuleState = {
   userRole: string;
   canManageContent: boolean;
+  canManageTasks: boolean;
   storageStatus: OperationStorageStatus;
   today: string;
   handbook: OperationArticle[];

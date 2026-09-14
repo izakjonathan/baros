@@ -1,10 +1,18 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.71**
+Version: **v0.19.0-rc.84**
 
 ## Current focus
 
-Compact Operation field-notes UI from the verified rc.70 baseline.
+Operation integrity completion from the verified rc.83 baseline.
+
+## rc.84
+
+- Corrected selected-date task completion, mutation recovery, Copenhagen service dates, and month-end recurrence.
+- Aligned task management with `operations.manage`; articles remain OWNER/ADMIN managed.
+- Removed unshipped governance, reminder, and audit tables with migration `018_operation_integrity_cleanup.sql`.
+- Added Operation integrity coverage and rejected SVG uploads.
+- Rollback checkpoint: v0.19.0-rc.83.
 
 ## rc.71
 

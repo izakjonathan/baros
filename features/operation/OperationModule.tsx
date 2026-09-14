@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { ArrowLeft, Bold, BookOpen, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, Clock3, ImagePlus, Italic, Link2, List, ListOrdered, MoreHorizontal, Plus, Redo2, Repeat2, ShoppingBasket, Trash2, Type, Underline, Undo2, UserRound, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -126,14 +126,17 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
   });
   const storageUnavailable = state.storageStatus === "migration-required" && !devMode;
 
-  async function refresh(date = selectedTaskDate) {
+  const refresh = useCallback(async (date: string) => {
     if (devMode) return;
     const response = await fetch(`/api/operation-module?date=${encodeURIComponent(date)}`, { cache: "no-store" });
     const next = await response.json();
     if (response.ok) setState(next as OperationModuleState);
-  }
+  }, [devMode]);
 
-  useEffect(() => { void refresh(selectedTaskDate); }, [selectedTaskDate]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void refresh(selectedTaskDate); }, 0);
+    return () => window.clearTimeout(timer);
+  }, [refresh, selectedTaskDate]);
 
   async function saveArticle() {
     setEditorMessage("");
@@ -162,7 +165,7 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     setSaving(true);
     const response = await fetch("/api/operation-module", { method: draft.id ? "PATCH" : "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "article", id: draft.id, kind: article.kind, category: article.category, title: article.title, description: article.description, content: article.content }) });
     setSaving(false);
-    if (response.ok) { setDraft(draftFromArticle(undefined, draft.kind)); setEditorMessage("Article saved."); setEditorOpen(false); await refresh(); return true; }
+    if (response.ok) { setDraft(draftFromArticle(undefined, draft.kind)); setEditorMessage("Article saved."); setEditorOpen(false); await refresh(selectedTaskDate); return true; }
     else {
       setEditorMessage(await responseMessage(response, "Could not save article."));
       return false;
@@ -175,8 +178,9 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
       setState(current => ({ ...current, handbook: current.handbook.filter(item => item.id !== article.id), news: current.news.filter(item => item.id !== article.id) }));
       return;
     }
-    await fetch(`/api/operation-module?entity=article&id=${encodeURIComponent(article.id)}`, { method: "DELETE" });
-    await refresh();
+    const response = await fetch(`/api/operation-module?entity=article&id=${encodeURIComponent(article.id)}`, { method: "DELETE" });
+    if (!response.ok) setEditorMessage(await responseMessage(response, "Could not delete article."));
+    await refresh(selectedTaskDate);
   }
 
   async function addTask() {
@@ -190,7 +194,7 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     else {
       const response = await fetch("/api/operation-module", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", title: task.title, description: task.description, dueDate: task.dueDate, repeatUnit: task.repeatUnit, repeatInterval: task.repeatInterval, repeatEndDate: task.repeatEndDate, dueTime: task.dueTime, reminderMinutes: task.reminderMinutes, priority: task.priority, taskType: task.taskType, assignedEmployeeId: task.assignedEmployeeId, checklist: task.checklist }) });
       if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not add daily task.")); return; }
-      await refresh();
+      await refresh(selectedTaskDate);
     }
     setTaskTitle(""); setTaskDescription(""); setTaskDueDate(selectedTaskDate); setTaskRepeatUnit("NONE"); setTaskRepeatInterval(1); setTaskRepeatEndDate(""); setTaskType("SERVICE"); setTaskPriority("NORMAL"); setTaskDueTime(""); setTaskReminderMinutes(""); setTaskAssigneeId(""); setTaskChecklistText("");
   }
@@ -200,7 +204,10 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     if (!item) return;
     const completed = !item.completed;
     setState(current => ({ ...current, dailyTasks: current.dailyTasks.map(currentTask => currentTask.id === task.id ? { ...currentTask, checklist: currentTask.checklist.map(checklistItem => checklistItem.id === itemId ? { ...checklistItem, completed } : checklistItem) } : currentTask) }));
-    if (!devMode) await fetch("/api/operation-module", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", action: "checklist", id: task.id, itemId, date: selectedTaskDate, completed }) });
+    if (!devMode) {
+      const response = await fetch("/api/operation-module", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", action: "checklist", id: task.id, itemId, date: selectedTaskDate, completed }) });
+      if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not update checklist.")); await refresh(selectedTaskDate); }
+    }
   }
 
   async function saveTaskTemplate() {
@@ -208,12 +215,23 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     const checklist = taskChecklistText.split("\n").map(label => label.trim()).filter(Boolean).slice(0, 30).map((label, index) => ({ id: `item-${index + 1}`, label }));
     const response = await fetch("/api/operation-module", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "taskTemplate", title: taskTitle.trim(), description: taskDescription.trim(), taskType, priority: taskPriority, dueTime: taskDueTime || null, reminderMinutes: taskReminderMinutes === "" ? null : Number(taskReminderMinutes), checklist }) });
     if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not save task template.")); return; }
-    setTaskMessage("Template saved."); await refresh();
+    setTaskMessage("Template saved."); await refresh(selectedTaskDate);
   }
 
   async function toggleTask(task: OperationDailyTask) {
     setState(current => ({ ...current, dailyTasks: current.dailyTasks.map(item => item.id === task.id ? { ...item, completed: !item.completed } : item) }));
-    if (!devMode) await fetch("/api/operation-module", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", id: task.id, date: state.today, completed: !task.completed }) });
+    if (!devMode) {
+      const response = await fetch("/api/operation-module", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", id: task.id, date: selectedTaskDate, completed: !task.completed }) });
+      if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not update task.")); await refresh(selectedTaskDate); }
+    }
+  }
+
+  async function deleteTask(task: OperationDailyTask) {
+    if (!confirm(`Delete ${task.title}?`)) return;
+    if (devMode) { setState(current => ({ ...current, dailyTasks: current.dailyTasks.filter(item => item.id !== task.id) })); return; }
+    const response = await fetch(`/api/operation-module?entity=dailyTask&id=${encodeURIComponent(task.id)}`, { method: "DELETE" });
+    if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not delete task.")); return; }
+    await refresh(selectedTaskDate);
   }
 
   async function addNeed() {
@@ -225,14 +243,17 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     else {
       const response = await fetch("/api/operation-module", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "need", title: need.title, note: need.note, quantity: need.quantity, unit: need.unit, supplier: need.supplier, priority: need.priority, neededBy: need.neededBy }) });
       if (!response.ok) { setNeedMessage(await responseMessage(response, "Could not add needed item.")); return; }
-      await refresh();
+      await refresh(selectedTaskDate);
     }
     setNeedTitle(""); setNeedQuantity(""); setNeedUnit(""); setNeedSupplier(""); setNeedPriority("NORMAL"); setNeedBy(""); setNeedNote("");
   }
 
   async function markNeedOrdered(need: OperationNeed) {
     setState(current => ({ ...current, needs: current.needs.filter(item => item.id !== need.id) }));
-    if (!devMode) await fetch("/api/operation-module", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "need", id: need.id, status: "ORDERED" }) });
+    if (!devMode) {
+      const response = await fetch("/api/operation-module", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "need", id: need.id, status: "ORDERED" }) });
+      if (!response.ok) { setNeedMessage(await responseMessage(response, "Could not update needed item.")); await refresh(selectedTaskDate); }
+    }
   }
 
   return <div className={styles.operationShell}>
@@ -246,9 +267,9 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     <main className={styles.operationMain}>
       {storageUnavailable && <StorageNotice />}
       {dueSoonTasks.length > 0 && <section className={styles.duePrompt} role="status"><Clock3 size={18} /><div><strong>{dueSoonTasks.length === 1 ? "Task due soon" : `${dueSoonTasks.length} tasks due soon`}</strong><p>{dueSoonTasks.map(task => `${task.title} · ${task.dueTime}`).join(" · ")}</p></div></section>}
-      {view === "home" && <HomeView news={state.news} tasks={state.dailyTasks} openArticle={(article) => setReaderStack([article])} openView={setView} />}
+      {view === "home" && <HomeView news={state.news} tasks={state.dailyTasks} metrics={state.metrics} openArticle={(article) => setReaderStack([article])} openView={setView} />}
       {view === "handbook" && <HandbookView articles={filteredHandbook} categories={handbookCategories} query={query} category={category} setQuery={setQuery} setCategory={setCategory} openArticle={(article) => setReaderStack([article])} />}
-      {view === "tasks" && <TasksView tasks={state.dailyTasks} taskTemplates={state.taskTemplates} assignees={state.assignees} selectedDate={selectedTaskDate} setSelectedDate={setSelectedTaskDate} canManage={state.canManageContent} taskTitle={taskTitle} taskDescription={taskDescription} taskDueDate={taskDueDate} taskRepeatUnit={taskRepeatUnit} taskRepeatInterval={taskRepeatInterval} taskRepeatEndDate={taskRepeatEndDate} taskType={taskType} taskPriority={taskPriority} taskDueTime={taskDueTime} taskReminderMinutes={taskReminderMinutes} taskAssigneeId={taskAssigneeId} taskChecklistText={taskChecklistText} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} setTaskDueDate={setTaskDueDate} setTaskRepeatUnit={setTaskRepeatUnit} setTaskRepeatInterval={setTaskRepeatInterval} setTaskRepeatEndDate={setTaskRepeatEndDate} setTaskType={setTaskType} setTaskPriority={setTaskPriority} setTaskDueTime={setTaskDueTime} setTaskReminderMinutes={setTaskReminderMinutes} setTaskAssigneeId={setTaskAssigneeId} setTaskChecklistText={setTaskChecklistText} saveTaskTemplate={saveTaskTemplate} addTask={addTask} toggleTask={toggleTask} toggleTaskChecklist={toggleTaskChecklist} disabled={storageUnavailable} message={taskMessage} />}
+      {view === "tasks" && <TasksView tasks={state.dailyTasks} taskTemplates={state.taskTemplates} assignees={state.assignees} selectedDate={selectedTaskDate} setSelectedDate={setSelectedTaskDate} canManage={state.canManageTasks} taskTitle={taskTitle} taskDescription={taskDescription} taskDueDate={taskDueDate} taskRepeatUnit={taskRepeatUnit} taskRepeatInterval={taskRepeatInterval} taskRepeatEndDate={taskRepeatEndDate} taskType={taskType} taskPriority={taskPriority} taskDueTime={taskDueTime} taskReminderMinutes={taskReminderMinutes} taskAssigneeId={taskAssigneeId} taskChecklistText={taskChecklistText} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} setTaskDueDate={setTaskDueDate} setTaskRepeatUnit={setTaskRepeatUnit} setTaskRepeatInterval={setTaskRepeatInterval} setTaskRepeatEndDate={setTaskRepeatEndDate} setTaskType={setTaskType} setTaskPriority={setTaskPriority} setTaskDueTime={setTaskDueTime} setTaskReminderMinutes={setTaskReminderMinutes} setTaskAssigneeId={setTaskAssigneeId} setTaskChecklistText={setTaskChecklistText} saveTaskTemplate={saveTaskTemplate} addTask={addTask} toggleTask={toggleTask} toggleTaskChecklist={toggleTaskChecklist} deleteTask={deleteTask} disabled={storageUnavailable} message={taskMessage} />}
       {view === "needs" && <NeedsView needs={state.needs} needTitle={needTitle} needQuantity={needQuantity} needUnit={needUnit} needSupplier={needSupplier} needPriority={needPriority} needBy={needBy} needNote={needNote} setNeedTitle={setNeedTitle} setNeedQuantity={setNeedQuantity} setNeedUnit={setNeedUnit} setNeedSupplier={setNeedSupplier} setNeedPriority={setNeedPriority} setNeedBy={setNeedBy} setNeedNote={setNeedNote} addNeed={addNeed} markNeedOrdered={markNeedOrdered} disabled={storageUnavailable} message={needMessage} />}
       {state.canManageContent && <AdminPanel message={editorMessage} articles={allArticles} disabled={storageUnavailable} editArticle={(nextDraft) => { setDraft(nextDraft); setEditorMessage(storageUnavailable ? migrationMessage : ""); setEditorOpen(!storageUnavailable); }} deleteArticle={deleteArticle} />}
     </main>
@@ -261,9 +282,9 @@ function upsertArticle(list: OperationArticle[], article: OperationArticle) {
   return list.some(item => item.id === article.id) ? list.map(item => item.id === article.id ? article : item) : [article, ...list];
 }
 
-function HomeView({ news, tasks, openArticle, openView }: { news: OperationArticle[]; tasks: OperationDailyTask[]; openArticle: (article: OperationArticle) => void; openView: (view: View) => void }) {
+function HomeView({ news, tasks, metrics, openArticle, openView }: { news: OperationArticle[]; tasks: OperationDailyTask[]; metrics: OperationModuleState["metrics"]; openArticle: (article: OperationArticle) => void; openView: (view: View) => void }) {
   const outstanding = tasks.filter(task => !task.completed);
-  return <><section className={styles.todayPanel}><div><p className={styles.eyebrow}>Today</p><h1>{outstanding.length ? `${outstanding.length} task${outstanding.length === 1 ? "" : "s"} to finish` : "Daily work is complete"}</h1><p>{tasks.length ? `${tasks.length - outstanding.length} of ${tasks.length} complete` : "No scheduled work today."}</p></div><button type="button" onClick={() => openView("tasks")}>Open tasks <ChevronRight size={17} /></button></section><div className={styles.todayTaskPreview}>{outstanding.slice(0, 3).map(task => <div key={task.id}><span data-priority={task.priority} /><strong>{task.title}</strong>{task.dueTime && <small>{task.dueTime}</small>}</div>)}</div><SectionHeader title="News" detail="Latest updates" /> <div className={styles.cardGrid}>{news.slice(0, 3).map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} />)}{!news.length && <div className={styles.empty}>No news yet.</div>}</div><SectionHeader title="Tools" detail="Daily operation" /><div className={styles.moduleGrid}><ModuleCard title="Handbook" description="Routines and procedures." icon={BookOpen} onClick={() => openView("handbook")} /><ModuleCard title="Tasks" description="Scheduled work and check-offs." icon={CheckSquare} onClick={() => openView("tasks")} /><ModuleCard title="We need" description="Shared order list." icon={ShoppingBasket} onClick={() => openView("needs")} /></div></>;
+  return <><section className={styles.todayPanel}><div><p className={styles.eyebrow}>Today</p><h1>{outstanding.length ? `${outstanding.length} task${outstanding.length === 1 ? "" : "s"} to finish` : "Daily work is complete"}</h1><p>{tasks.length ? `${tasks.length - outstanding.length} of ${tasks.length} complete` : "No scheduled work today."}</p></div><button type="button" onClick={() => openView("tasks")}>Open tasks <ChevronRight size={17} /></button></section><div className={styles.todayTaskPreview}>{outstanding.slice(0, 3).map(task => <div key={task.id}><span data-priority={task.priority} /><strong>{task.title}</strong>{task.dueTime && <small>{task.dueTime}</small>}</div>)}</div><section className={styles.metricsPanel} aria-label="Today’s operation summary"><div><strong>{metrics.completionRate}%</strong><span>complete</span></div><div><strong>{metrics.dueCount}</strong><span>scheduled</span></div><div><strong>{metrics.openNeedsCount}</strong><span>to order</span></div></section><SectionHeader title="News" detail="Latest updates" /> <div className={styles.cardGrid}>{news.slice(0, 3).map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} />)}{!news.length && <div className={styles.empty}>No news yet.</div>}</div><SectionHeader title="Tools" detail="Daily operation" /><div className={styles.moduleGrid}><ModuleCard title="Handbook" description="Routines and procedures." icon={BookOpen} onClick={() => openView("handbook")} /><ModuleCard title="Tasks" description="Scheduled work and check-offs." icon={CheckSquare} onClick={() => openView("tasks")} /><ModuleCard title="We need" description="Shared order list." icon={ShoppingBasket} onClick={() => openView("needs")} /></div></>;
 }
 
 function StorageNotice() {
@@ -274,7 +295,7 @@ function HandbookView({ articles, categories, query, category, setQuery, setCate
   return <><SectionHeader title="Handbook" detail="Bar routines" /><div className={styles.toolbar}><input className={styles.search} value={query} onChange={event => setQuery(event.target.value)} placeholder="Search handbook" /><div className={styles.pills}>{categories.map(item => <button key={item} className={styles.pill} type="button" aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div></div><div className={styles.articleGroups}>{articles.map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} />)}{!articles.length && <div className={styles.empty}>No handbook articles found.</div>}</div></>;
 }
 
-function TasksView({ tasks, taskTemplates, assignees, selectedDate, setSelectedDate, canManage, taskTitle, taskDescription, taskDueDate, taskRepeatUnit, taskRepeatInterval, taskRepeatEndDate, taskType, taskPriority, taskDueTime, taskReminderMinutes, taskAssigneeId, taskChecklistText, setTaskTitle, setTaskDescription, setTaskDueDate, setTaskRepeatUnit, setTaskRepeatInterval, setTaskRepeatEndDate, setTaskType, setTaskPriority, setTaskDueTime, setTaskReminderMinutes, setTaskAssigneeId, setTaskChecklistText, saveTaskTemplate, addTask, toggleTask, toggleTaskChecklist, disabled, message }: { tasks: OperationDailyTask[]; taskTemplates: OperationModuleState["taskTemplates"]; assignees: OperationModuleState["assignees"]; selectedDate: string; setSelectedDate: (value: string) => void; canManage: boolean; taskTitle: string; taskDescription: string; taskDueDate: string; taskRepeatUnit: OperationTaskRepeatUnit; taskRepeatInterval: number; taskRepeatEndDate: string; taskType: OperationTaskType; taskPriority: OperationTaskPriority; taskDueTime: string; taskReminderMinutes: string; taskAssigneeId: string; taskChecklistText: string; setTaskTitle: (value: string) => void; setTaskDescription: (value: string) => void; setTaskDueDate: (value: string) => void; setTaskRepeatUnit: (value: OperationTaskRepeatUnit) => void; setTaskRepeatInterval: (value: number) => void; setTaskRepeatEndDate: (value: string) => void; setTaskType: (value: OperationTaskType) => void; setTaskPriority: (value: OperationTaskPriority) => void; setTaskDueTime: (value: string) => void; setTaskReminderMinutes: (value: string) => void; setTaskAssigneeId: (value: string) => void; setTaskChecklistText: (value: string) => void; saveTaskTemplate: () => void; addTask: () => void; toggleTask: (task: OperationDailyTask) => void; toggleTaskChecklist: (task: OperationDailyTask, itemId: string) => void; disabled: boolean; message: string }) {
+function TasksView({ tasks, taskTemplates, assignees, selectedDate, setSelectedDate, canManage, taskTitle, taskDescription, taskDueDate, taskRepeatUnit, taskRepeatInterval, taskRepeatEndDate, taskType, taskPriority, taskDueTime, taskReminderMinutes, taskAssigneeId, taskChecklistText, setTaskTitle, setTaskDescription, setTaskDueDate, setTaskRepeatUnit, setTaskRepeatInterval, setTaskRepeatEndDate, setTaskType, setTaskPriority, setTaskDueTime, setTaskReminderMinutes, setTaskAssigneeId, setTaskChecklistText, saveTaskTemplate, addTask, toggleTask, toggleTaskChecklist, deleteTask, disabled, message }: { tasks: OperationDailyTask[]; taskTemplates: OperationModuleState["taskTemplates"]; assignees: OperationModuleState["assignees"]; selectedDate: string; setSelectedDate: (value: string) => void; canManage: boolean; taskTitle: string; taskDescription: string; taskDueDate: string; taskRepeatUnit: OperationTaskRepeatUnit; taskRepeatInterval: number; taskRepeatEndDate: string; taskType: OperationTaskType; taskPriority: OperationTaskPriority; taskDueTime: string; taskReminderMinutes: string; taskAssigneeId: string; taskChecklistText: string; setTaskTitle: (value: string) => void; setTaskDescription: (value: string) => void; setTaskDueDate: (value: string) => void; setTaskRepeatUnit: (value: OperationTaskRepeatUnit) => void; setTaskRepeatInterval: (value: number) => void; setTaskRepeatEndDate: (value: string) => void; setTaskType: (value: OperationTaskType) => void; setTaskPriority: (value: OperationTaskPriority) => void; setTaskDueTime: (value: string) => void; setTaskReminderMinutes: (value: string) => void; setTaskAssigneeId: (value: string) => void; setTaskChecklistText: (value: string) => void; saveTaskTemplate: () => void; addTask: () => void; toggleTask: (task: OperationDailyTask) => void; toggleTaskChecklist: (task: OperationDailyTask, itemId: string) => void; deleteTask: (task: OperationDailyTask) => void; disabled: boolean; message: string }) {
   const current = new Date(`${selectedDate}T00:00:00Z`);
   const formattedDate = new Intl.DateTimeFormat(undefined, { weekday: "long", day: "numeric", month: "short" }).format(current);
   const shiftDate = (days: number) => setSelectedDate(new Date(current.valueOf() + days * 86_400_000).toISOString().slice(0, 10));
@@ -295,7 +316,7 @@ function TasksView({ tasks, taskTemplates, assignees, selectedDate, setSelectedD
       <p className={styles.settingsHint}>Recurring tasks keep a separate completion record for every scheduled date. Use an owner only when one person is accountable; otherwise leave it open for the shift.</p>
       <div className={styles.adminActions}><button type="button" onClick={addTask} disabled={disabled}><Plus size={16} />Create task</button><button type="button" onClick={saveTaskTemplate} disabled={disabled || !taskTitle.trim()}>Save template</button></div>{message && <p className={styles.editorMessage} role="status">{message}</p>}
     </div></details>}
-    <div className={styles.taskList}>{grouped.map(([type, items]) => <section className={styles.taskGroup} key={type}><h3>{type.toLowerCase()}</h3>{items.map(task => <article className={styles.taskRow} key={task.id} data-complete={task.completed}><input type="checkbox" checked={task.completed} onChange={() => toggleTask(task)} aria-label={`Mark ${task.title} complete`} disabled={disabled} /><div><div className={styles.taskRowTitle}><h4>{task.title}</h4><span data-priority={task.priority}>{task.priority.toLowerCase()}</span></div>{task.description && <p>{task.description}</p>}{task.checklist.length > 0 && <div className={styles.taskChecklist}>{task.checklist.map(item => <label key={item.id}><input type="checkbox" checked={item.completed} onChange={() => toggleTaskChecklist(task, item.id)} disabled={disabled} />{item.label}</label>)}</div>}<div className={styles.taskMeta}>{task.dueTime && <span><Clock3 size={13} />{task.dueTime}</span>}{task.assignedEmployeeName && <span><UserRound size={13} />{task.assignedEmployeeName}</span>}{task.completed && task.completedByName && <span>Completed by {task.completedByName}</span>}</div></div></article>)}</section>)}{!tasks.length && <div className={styles.empty}>No tasks scheduled for this date.</div>}</div>
+    <div className={styles.taskList}>{grouped.map(([type, items]) => <section className={styles.taskGroup} key={type}><h3>{type.toLowerCase()}</h3>{items.map(task => <article className={styles.taskRow} key={task.id} data-complete={task.completed}><input type="checkbox" checked={task.completed} onChange={() => toggleTask(task)} aria-label={`Mark ${task.title} complete`} disabled={disabled} /><div><div className={styles.taskRowTitle}><h4>{task.title}</h4><span data-priority={task.priority}>{task.priority.toLowerCase()}</span></div>{task.description && <p>{task.description}</p>}{task.checklist.length > 0 && <div className={styles.taskChecklist}>{task.checklist.map(item => <label key={item.id}><input type="checkbox" checked={item.completed} onChange={() => toggleTaskChecklist(task, item.id)} disabled={disabled} />{item.label}</label>)}</div>}<div className={styles.taskMeta}>{task.dueTime && <span><Clock3 size={13} />{task.dueTime}</span>}{task.assignedEmployeeName && <span><UserRound size={13} />{task.assignedEmployeeName}</span>}{task.completed && task.completedByName && <span>Completed by {task.completedByName}</span>}</div></div>{canManage && <button type="button" className={styles.rowDelete} onClick={() => deleteTask(task)} aria-label={`Delete ${task.title}`} disabled={disabled}><Trash2 size={16} /></button>}</article>)}</section>)}{!tasks.length && <div className={styles.empty}>No tasks scheduled for this date.</div>}</div>
   </>;
 }
 
@@ -394,7 +415,7 @@ function TiptapArticleEditor({ value, onChange }: { value: OperationTiptapDocume
     else editor.chain().focus().extendMarkRange("link").setLink({ href: href.trim() }).run();
   }
 
-  return <div className={styles.tiptapEditor}><input ref={imageInputRef} className={styles.imageInput} type="file" accept="image/*" onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void uploadImage(file); }} /><EditorContent editor={editor} className={styles.tiptapSurface} /><div className={styles.tiptapToolbar} role="toolbar" aria-label="Article formatting tools"><div className={styles.styleControl}><button type="button" className={styles.styleTrigger} onMouseDown={event => event.preventDefault()} onClick={() => { setStyleMenuOpen(open => !open); setMoreMenuOpen(false); }} aria-expanded={styleMenuOpen}><Type size={18} /><span>Style</span></button>{styleMenuOpen && <div className={styles.styleMenu} role="menu"><button type="button" role="menuitem" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle("heading")}>Heading</button><button type="button" role="menuitem" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle("subheading")}>Subheading</button><button type="button" role="menuitem" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle("body")}>Body</button></div>}</div><button type="button" aria-label="Bold" aria-pressed={editor?.isActive("bold") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleBold().run()}><Bold size={19} /></button><button type="button" aria-label="Italic" aria-pressed={editor?.isActive("italic") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleItalic().run()}><Italic size={19} /></button><button type="button" aria-label="Underline" aria-pressed={editor?.isActive("underline") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleUnderline().run()}><Underline size={19} /></button><button type="button" aria-label="Bullet list" aria-pressed={editor?.isActive("bulletList") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleBulletList().run()}><List size={20} /></button><button type="button" aria-label="Add image from device" disabled={uploading} onMouseDown={event => event.preventDefault()} onClick={() => imageInputRef.current?.click()}><ImagePlus size={20} /></button><div className={styles.moreControl}><button type="button" aria-label="More formatting tools" onMouseDown={event => event.preventDefault()} onClick={() => { setMoreMenuOpen(open => !open); setStyleMenuOpen(false); }} aria-expanded={moreMenuOpen}><MoreHorizontal size={21} /></button>{moreMenuOpen && <div className={styles.moreMenu} role="menu"><button type="button" role="menuitem" aria-pressed={editor?.isActive("orderedList") || false} onClick={() => { editor?.chain().focus().toggleOrderedList().run(); setMoreMenuOpen(false); }}><ListOrdered size={18} />Numbered list</button><button type="button" role="menuitem" onClick={() => { setLink(); setMoreMenuOpen(false); }}><Link2 size={18} />Link</button><button type="button" role="menuitem" disabled={!editor?.can().undo()} onClick={() => { editor?.chain().focus().undo().run(); setMoreMenuOpen(false); }}><Undo2 size={18} />Undo</button><button type="button" role="menuitem" disabled={!editor?.can().redo()} onClick={() => { editor?.chain().focus().redo().run(); setMoreMenuOpen(false); }}><Redo2 size={18} />Redo</button></div>}</div></div></div>;
+  return <div className={styles.tiptapEditor}><input ref={imageInputRef} className={styles.imageInput} type="file" accept="image/*" onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void uploadImage(file); }} /><EditorContent editor={editor} className={styles.tiptapSurface} /><div className={styles.tiptapToolbar} role="toolbar" aria-label="Article formatting tools"><div className={styles.styleControl}><button type="button" className={styles.styleTrigger} onMouseDown={event => event.preventDefault()} onClick={() => { setStyleMenuOpen(open => !open); setMoreMenuOpen(false); }} aria-expanded={styleMenuOpen}><Type size={18} /><span>Style</span></button>{styleMenuOpen && <div className={styles.styleMenu}><button type="button" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle("heading")}>Heading</button><button type="button" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle("subheading")}>Subheading</button><button type="button" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle("body")}>Body</button></div>}</div><button type="button" aria-label="Bold" aria-pressed={editor?.isActive("bold") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleBold().run()}><Bold size={19} /></button><button type="button" aria-label="Italic" aria-pressed={editor?.isActive("italic") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleItalic().run()}><Italic size={19} /></button><button type="button" aria-label="Underline" aria-pressed={editor?.isActive("underline") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleUnderline().run()}><Underline size={19} /></button><button type="button" aria-label="Bullet list" aria-pressed={editor?.isActive("bulletList") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleBulletList().run()}><List size={20} /></button><button type="button" aria-label="Add image from device" disabled={uploading} onMouseDown={event => event.preventDefault()} onClick={() => imageInputRef.current?.click()}><ImagePlus size={20} /></button><div className={styles.moreControl}><button type="button" aria-label="More formatting tools" onMouseDown={event => event.preventDefault()} onClick={() => { setMoreMenuOpen(open => !open); setStyleMenuOpen(false); }} aria-expanded={moreMenuOpen}><MoreHorizontal size={21} /></button>{moreMenuOpen && <div className={styles.moreMenu}><button type="button" aria-pressed={editor?.isActive("orderedList") || false} onClick={() => { editor?.chain().focus().toggleOrderedList().run(); setMoreMenuOpen(false); }}><ListOrdered size={18} />Numbered list</button><button type="button" onClick={() => { setLink(); setMoreMenuOpen(false); }}><Link2 size={18} />Link</button><button type="button" disabled={!editor?.can().undo()} onClick={() => { editor?.chain().focus().undo().run(); setMoreMenuOpen(false); }}><Undo2 size={18} />Undo</button><button type="button" disabled={!editor?.can().redo()} onClick={() => { editor?.chain().focus().redo().run(); setMoreMenuOpen(false); }}><Redo2 size={18} />Redo</button></div>}</div></div></div>;
 }
 
 function SectionHeader({ title, detail }: { title: string; detail: string }) {

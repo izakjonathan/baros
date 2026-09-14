@@ -1,6 +1,6 @@
 {
   "name": "bar-ops",
-  "version": "0.19.0-rc.83",
+  "version": "0.19.0-rc.84",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -25,7 +25,8 @@
     "test:boundaries": "node scripts/test-api-integrity.mjs",
     "test:release-contract": "node scripts/test-release-contract.mjs",
     "test:ui": "node scripts/test-ui-contract.mjs",
-    "test:current": "npm run test:logic && npm run test:payroll && npm run test:integrity && npm run test:production && npm run test:inventory && npm run test:remediation && npm run test:auth && npm run test:boundaries && npm run test:release-contract && npm run test:ui",
+    "test:operation": "node scripts/test-operation-module.mjs",
+    "test:current": "npm run test:logic && npm run test:payroll && npm run test:integrity && npm run test:production && npm run test:inventory && npm run test:remediation && npm run test:auth && npm run test:boundaries && npm run test:operation && npm run test:release-contract && npm run test:ui",
     "test:all": "npm run test:current"
   },
   "dependencies": {

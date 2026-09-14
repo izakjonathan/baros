@@ -5,9 +5,19 @@ import { isOperationTaskDue, type OperationDailyTask, type OperationModuleState,
 import { db } from "@/lib/db/client";
 import { ApiError, enumValue, finiteNumber, isoDate, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
 import { getSessionUser } from "@/lib/auth/session";
+import { hasCapability } from "@/lib/auth/capabilities";
+import { operationDateNow } from "@/features/operation/date";
 
 function requireOwner(role: string) {
   if (!ownerCanManageOperation(role)) throw new ApiError(403, "Owner or Admin permission is required");
+}
+
+function canManageTasks(role: Parameters<typeof hasCapability>[0]) {
+  return hasCapability(role, "operations.manage");
+}
+
+function requireTaskManager(role: Parameters<typeof hasCapability>[0]) {
+  if (!canManageTasks(role)) throw new ApiError(403, "Operation management permission is required");
 }
 
 async function requireApiUser() {
@@ -37,8 +47,8 @@ function isOperationSchemaUnavailable(error: unknown) {
   const record = error as { code?: unknown; message?: unknown };
   const code = String(record.code || "");
   const message = String(record.message || "");
-  return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|article_kind|need_status|task_templates|task_checklist_completions|article_versions|article_acknowledgements|task_reminders)/i.test(message)
-    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|checklist|quantity|supplier|needed_by|review_due_date|version)/i.test(message);
+  return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|article_kind|need_status|task_templates|task_checklist_completions)/i.test(message)
+    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|checklist|quantity|supplier|needed_by)/i.test(message);
 }
 
 function operationMigrationRequired() {
@@ -52,13 +62,11 @@ export async function GET(request: Request) {
   try {
     const user = await requireApiUser();
     const params = new URL(request.url).searchParams;
-    const today = isoDate(params.get("date") || new Date().toISOString().slice(0, 10), "date");
+    const today = isoDate(params.get("date") || operationDateNow(), "date");
     const [articles, tasks, needs, assignees, taskTemplates] = await Promise.all([
       db()<Array<Record<string, unknown>>>`
-        select a.id,a.kind,a.category,a.title,a.description,a.content,a.published,a.updated_at,a.version,a.review_due_date,
-               coalesce(author.name,'') author_name,
-               exists(select 1 from operation_article_acknowledgements ack where ack.article_id=a.id and ack.user_id=${user.userId} and ack.version=a.version) acknowledged
-        from operation_articles a left join users author on author.id=a.updated_by
+        select a.id,a.kind,a.category,a.title,a.description,a.content,a.published,a.updated_at
+        from operation_articles a
         where a.organization_id=${user.organizationId} and (a.published=true or ${ownerCanManageOperation(user.role)})
         order by a.kind,a.category,a.sort_order,a.updated_at desc`,
       db()<Array<Record<string, unknown>>>`
@@ -66,6 +74,7 @@ export async function GET(request: Request) {
                coalesce((select jsonb_object_agg(cc.item_id,true) from operation_task_checklist_completions cc where cc.task_id=t.id and cc.service_date=${today}::date), '{}'::jsonb) checklist_completed,
                (a.first_name||' '||a.last_name) assigned_employee_name,
                (completed_employee.first_name||' '||completed_employee.last_name) completed_by_name,
+               c.completed_at,
                (c.completed_at is not null) completed
         from operation_daily_tasks t
         left join operation_daily_task_completions c
@@ -99,10 +108,11 @@ export async function GET(request: Request) {
     const state: OperationModuleState = {
       userRole: user.role,
       canManageContent: ownerCanManageOperation(user.role),
+      canManageTasks: canManageTasks(user.role),
       storageStatus: "ready",
       today,
-      handbook: articles.filter(article => article.kind === "HANDBOOK").map(article => ({ ...mapOperationArticle(article), version: Number(article.version || 1), reviewDueDate: article.review_due_date == null ? null : String(article.review_due_date), authorName: String(article.author_name || "") || null, acknowledged: Boolean(article.acknowledged) })),
-      news: articles.filter(article => article.kind === "NEWS").map(article => ({ ...mapOperationArticle(article), version: Number(article.version || 1), reviewDueDate: article.review_due_date == null ? null : String(article.review_due_date), authorName: String(article.author_name || "") || null, acknowledged: Boolean(article.acknowledged) })),
+      handbook: articles.filter(article => article.kind === "HANDBOOK").map(mapOperationArticle),
+      news: articles.filter(article => article.kind === "NEWS").map(mapOperationArticle),
       dailyTasks: tasks.map((task): OperationDailyTask => ({
         id: String(task.id),
         weekday: Number(task.weekday),
@@ -124,7 +134,7 @@ export async function GET(request: Request) {
       })).filter(task => isOperationTaskDue(task, today)),
       assignees: assignees.map(assignee => ({ id: String(assignee.id), name: String(assignee.name) })),
       taskTemplates: taskTemplates.map(template => ({ id: String(template.id), title: String(template.title), description: String(template.description || ""), taskType: String(template.task_type) as OperationTaskType, priority: String(template.priority) as OperationTaskPriority, dueTime: template.due_time == null ? null : String(template.due_time).slice(0, 5), reminderMinutes: template.reminder_minutes == null ? null : Number(template.reminder_minutes), checklist: Array.isArray(template.checklist) ? template.checklist.slice(0, 30).flatMap((item): Array<{ id: string; label: string }> => item && typeof item === "object" && "id" in item && "label" in item ? [{ id: String(item.id), label: String(item.label) }] : []) : [] })),
-      metrics: { completionRate: 0, completedCount: 0, dueCount: 0, overdueCount: 0, openNeedsCount: needs.filter(need => need.status === "NEEDED").length, overdueNeedsCount: needs.filter(need => need.status === "NEEDED" && need.needed_by && String(need.needed_by) < today).length },
+      metrics: (() => { const due = tasks.filter(task => isOperationTaskDue({ dueDate: String(task.due_date), repeatUnit: String(task.repeat_unit) as OperationDailyTask["repeatUnit"], repeatInterval: Number(task.repeat_interval), repeatEndDate: task.repeat_end_date == null ? null : String(task.repeat_end_date) }, today)); const completed = due.filter(task => Boolean(task.completed_at)).length; return { completionRate: due.length ? Math.round(completed / due.length * 100) : 100, completedCount: completed, dueCount: due.length, overdueCount: 0, openNeedsCount: needs.filter(need => need.status === "NEEDED").length, overdueNeedsCount: needs.filter(need => need.status === "NEEDED" && need.needed_by && String(need.needed_by) < today).length }; })(),
       needs: needs.map((need): OperationNeed => ({
         id: String(need.id),
         title: String(need.title),
@@ -149,8 +159,9 @@ export async function GET(request: Request) {
           ...defaultOperationState,
           userRole: user.role,
           canManageContent: ownerCanManageOperation(user.role),
+          canManageTasks: canManageTasks(user.role),
           storageStatus: "migration-required",
-          today: new Date().toISOString().slice(0, 10),
+          today: operationDateNow(),
         } satisfies OperationModuleState, { headers: { "cache-control": "no-store", "x-operation-storage": "migration-required" } });
       }
     }
@@ -180,8 +191,8 @@ export async function POST(request: Request) {
     }
 
     if (entity === "dailyTask") {
-      requireOwner(user.role);
-      const dueDate = isoDate(body.dueDate || new Date().toISOString().slice(0, 10), "dueDate");
+      requireTaskManager(user.role);
+      const dueDate = isoDate(body.dueDate || operationDateNow(), "dueDate");
       const weekday = weekdayFromDate(dueDate);
       const repeatUnit = enumValue(body.repeatUnit || "NONE", "repeatUnit", ["NONE", "DAY", "WEEK", "MONTH", "YEAR"] as const);
       const repeatInterval = finiteNumber(body.repeatInterval ?? 1, "repeatInterval", { min: 1, max: 365, integer: true });
@@ -208,7 +219,7 @@ export async function POST(request: Request) {
     }
 
     if (entity === "taskTemplate") {
-      requireOwner(user.role);
+      requireTaskManager(user.role);
       const title = requiredString(body, "title", 160);
       const description = optionalString(body, "description", 300) || "";
       const taskType = enumValue(body.taskType || "SERVICE", "taskType", ["OPENING", "SERVICE", "CLOSING", "MAINTENANCE", "ADMIN"] as const);
@@ -234,7 +245,6 @@ export async function POST(request: Request) {
       insert into operation_needs(organization_id,location_id,title,note,quantity,unit,supplier,priority,needed_by,created_by,updated_by)
       values(${user.organizationId},${user.locationId},${title},${note},${quantity},${unit},${supplier},${priority},${neededBy}::date,${user.userId},${user.userId})
       returning id,title,note,status,created_at,quantity,unit,supplier,priority,needed_by,ordered_at`;
-    await db()`insert into operation_need_events(need_id,organization_id,actor_user_id,event_type,snapshot) values(${String(row.id)},${user.organizationId},${user.userId},'CREATED',${JSON.stringify(row)}::jsonb)`;
     return NextResponse.json(row, { status: 201 });
   } catch (error) {
     if (isOperationSchemaUnavailable(error)) return operationMigrationRequired();
@@ -275,7 +285,7 @@ export async function PATCH(request: Request) {
     if (entity === "dailyTask") {
       const action = enumValue(body.action || "complete", "action", ["complete", "edit", "checklist"] as const);
       if (action === "checklist") {
-        const serviceDate = isoDate(body.date || new Date().toISOString().slice(0, 10), "date");
+        const serviceDate = isoDate(body.date || operationDateNow(), "date");
         const itemId = requiredString(body, "itemId", 48);
         const completed = body.completed !== false;
         const [task] = await db()<Array<{ id: string }>>`select id from operation_daily_tasks where id=${id} and organization_id=${user.organizationId} and active=true`;
@@ -285,7 +295,7 @@ export async function PATCH(request: Request) {
         return NextResponse.json({ id, itemId, completed });
       }
       if (action === "edit") {
-        requireOwner(user.role);
+        requireTaskManager(user.role);
         const dueDate = body.dueDate == null ? null : isoDate(body.dueDate, "dueDate");
         const weekday = dueDate == null ? null : weekdayFromDate(dueDate);
         const repeatUnit = body.repeatUnit == null ? null : enumValue(body.repeatUnit, "repeatUnit", ["NONE", "DAY", "WEEK", "MONTH", "YEAR"] as const);
@@ -325,7 +335,7 @@ export async function PATCH(request: Request) {
         if (!row) throw new ApiError(404, "Daily task not found");
         return NextResponse.json({ ...row, completed: false });
       }
-      const serviceDate = isoDate(body.date || new Date().toISOString().slice(0, 10), "date");
+      const serviceDate = isoDate(body.date || operationDateNow(), "date");
       const completed = body.completed !== false;
       const [task] = await db()<Array<{ id: string }>>`
         select id from operation_daily_tasks
@@ -355,7 +365,6 @@ export async function PATCH(request: Request) {
         and (${user.locationId}::uuid is null or location_id is null or location_id=${user.locationId})
       returning id,title,note,status,created_at`;
     if (!row) throw new ApiError(404, "Needed item not found");
-    await db()`insert into operation_need_events(need_id,organization_id,actor_user_id,event_type,snapshot) values(${id},${user.organizationId},${user.userId},${status === "ORDERED" ? "ORDERED" : "REOPENED"},${JSON.stringify(row)}::jsonb)`;
     return NextResponse.json(row);
   } catch (error) {
     if (isOperationSchemaUnavailable(error)) return operationMigrationRequired();
@@ -366,20 +375,23 @@ export async function PATCH(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const user = await requireApiUser();
-    requireOwner(user.role);
     const params = new URL(request.url).searchParams;
     const entity = enumValue(params.get("entity"), "entity", ["article", "dailyTask", "need", "taskTemplate"] as const);
     const id = uuid(params.get("id"), "id");
     if (entity === "article") {
+      requireOwner(user.role);
       const [row] = await db()`delete from operation_articles where id=${id} and organization_id=${user.organizationId} returning id`;
       if (!row) throw new ApiError(404, "Article not found");
     } else if (entity === "dailyTask") {
+      requireTaskManager(user.role);
       const [row] = await db()`update operation_daily_tasks set active=false,updated_by=${user.userId},updated_at=now() where id=${id} and organization_id=${user.organizationId} returning id`;
       if (!row) throw new ApiError(404, "Daily task not found");
     } else if (entity === "taskTemplate") {
+      requireTaskManager(user.role);
       const [row] = await db()`delete from operation_task_templates where id=${id} and organization_id=${user.organizationId} returning id`;
       if (!row) throw new ApiError(404, "Task template not found");
     } else {
+      requireTaskManager(user.role);
       const [row] = await db()`delete from operation_needs where id=${id} and organization_id=${user.organizationId} returning id`;
       if (!row) throw new ApiError(404, "Needed item not found");
     }

@@ -5,13 +5,15 @@ import { isOperationTaskDue, type OperationDailyTask, type OperationModuleState,
 import { isDevAuthEnabled } from "@/lib/auth/dev-auth";
 import { requireUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
+import { operationDateNow } from "@/features/operation/date";
+import { hasCapability } from "@/lib/auth/capabilities";
 
 function isOperationSchemaUnavailable(error: unknown) {
   if (!error || typeof error !== "object") return false;
   const record = error as { code?: unknown; message?: unknown };
   const code = String(record.code || "");
   const message = String(record.message || "");
-  return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|article_kind|need_status)/i.test(message)
+  return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|article_kind|need_status|task_templates|task_checklist_completions)/i.test(message)
     || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id)/i.test(message);
 }
 
@@ -22,14 +24,15 @@ export default async function OperationPage() {
     ...defaultOperationState,
     userRole: user.role,
     canManageContent: ownerCanManageOperation(user.role),
+    canManageTasks: hasCapability(user.role, "operations.manage"),
     storageStatus: "ready",
-    today: new Date().toISOString().slice(0, 10),
+    today: operationDateNow(),
   };
   if (devMode) {
     return <OperationModule initialState={fallbackState} devMode />;
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = operationDateNow();
   let articles: Array<Record<string, unknown>>;
   let tasks: Array<Record<string, unknown>>;
   let needs: Array<Record<string, unknown>>;
@@ -80,6 +83,7 @@ export default async function OperationPage() {
   const initialState: OperationModuleState = {
     userRole: user.role,
     canManageContent: ownerCanManageOperation(user.role),
+    canManageTasks: hasCapability(user.role, "operations.manage"),
     storageStatus: "ready",
     today,
     handbook,

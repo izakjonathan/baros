@@ -1,12 +1,14 @@
-# v0.19.0-rc.74 — Mobile editor keyboard fix
+# v0.19.0-rc.84 — Operation integrity completion
 
 ## Baseline
 
-- Continued from v0.19.0-rc.73. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.83. That release is the rollback checkpoint.
 
-## Editor interaction
+## Included
 
-- Kept the full-screen Quill editor covering the page while its formatting dock moves above the keyboard.
-- Moved the style choices into a menu that opens above the dock, leaving the dock at a fixed mobile width without horizontal scrolling.
+- Correct service-date persistence and authoritative mutation recovery.
+- Shared role-capability handling for task management.
+- Copenhagen date handling, safer image upload validation, and month-end recurrence.
+- Migration `018_operation_integrity_cleanup.sql` removes unshipped reminder, governance, acknowledgement and audit-history tables.
 
-Rollback checkpoint: **v0.19.0-rc.73**.
+Rollback checkpoint: **v0.19.0-rc.83**.
