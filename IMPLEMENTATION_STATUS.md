@@ -1,10 +1,18 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.84**
+Version: **v0.19.0-rc.85**
 
 ## Current focus
 
-Operation integrity completion from the verified rc.83 baseline.
+Operation task visibility and audience assignment from the verified rc.84 baseline.
+
+## rc.85
+
+- Fixed task creation when the optional short instruction is blank.
+- Added persisted task audiences: specific employee, everyone on shift, and everyone.
+- Everyone on shift uses the published rota for the selected service date; it does not use clock-in status. Everyone is independent of scheduling.
+- Added migration `019_operation_task_assignment_scope.sql`.
+- Rollback checkpoint: v0.19.0-rc.84.
 
 ## rc.84
 

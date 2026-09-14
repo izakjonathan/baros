@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { defaultOperationState } from "@/features/operation/default-content";
 import { mapOperationArticle, ownerCanManageOperation, parseOperationBlocks } from "@/features/operation/content";
-import { isOperationTaskDue, type OperationDailyTask, type OperationModuleState, type OperationNeed, type OperationTaskPriority, type OperationTaskType } from "@/features/operation/types";
+import { isOperationTaskDue, type OperationDailyTask, type OperationModuleState, type OperationNeed, type OperationTaskAssignmentScope, type OperationTaskPriority, type OperationTaskType } from "@/features/operation/types";
 import { db } from "@/lib/db/client";
 import { ApiError, enumValue, finiteNumber, isoDate, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
 import { getSessionUser } from "@/lib/auth/session";
@@ -48,7 +48,7 @@ function isOperationSchemaUnavailable(error: unknown) {
   const code = String(record.code || "");
   const message = String(record.message || "");
   return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|article_kind|need_status|task_templates|task_checklist_completions)/i.test(message)
-    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|checklist|quantity|supplier|needed_by)/i.test(message);
+    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|assignment_scope|checklist|quantity|supplier|needed_by)/i.test(message);
 }
 
 function operationMigrationRequired() {
@@ -70,7 +70,7 @@ export async function GET(request: Request) {
         where a.organization_id=${user.organizationId} and (a.published=true or ${ownerCanManageOperation(user.role)})
         order by a.kind,a.category,a.sort_order,a.updated_at desc`,
       db()<Array<Record<string, unknown>>>`
-        select t.id,t.weekday,t.title,t.description,t.due_date,t.repeat_unit,t.repeat_interval,t.repeat_end_date,t.task_type,t.priority,t.due_time,t.reminder_minutes,t.assigned_employee_id,t.checklist,
+        select t.id,t.weekday,t.title,t.description,t.due_date,t.repeat_unit,t.repeat_interval,t.repeat_end_date,t.task_type,t.priority,t.due_time,t.reminder_minutes,t.assignment_scope,t.assigned_employee_id,t.checklist,
                coalesce((select jsonb_object_agg(cc.item_id,true) from operation_task_checklist_completions cc where cc.task_id=t.id and cc.service_date=${today}::date), '{}'::jsonb) checklist_completed,
                (a.first_name||' '||a.last_name) assigned_employee_name,
                (completed_employee.first_name||' '||completed_employee.last_name) completed_by_name,
@@ -84,6 +84,16 @@ export async function GET(request: Request) {
         where t.organization_id=${user.organizationId}
           and (${user.locationId}::uuid is null or t.location_id is null or t.location_id=${user.locationId})
           and t.active=true
+          and (${canManageTasks(user.role)}
+            or t.assignment_scope='EVERYONE'
+            or (t.assignment_scope='EMPLOYEE' and t.assigned_employee_id=${user.employeeId}::uuid)
+            or (t.assignment_scope='ON_SHIFT' and ${user.employeeId}::uuid is not null and exists(
+              select 1 from shifts s
+              where s.organization_id=t.organization_id and s.location_id=t.location_id and s.employee_id=${user.employeeId}
+                and s.status in ('PUBLISHED','CONFIRMED')
+                and s.starts_at < (${today}::date + interval '1 day')::timestamp at time zone 'Europe/Copenhagen'
+                and s.ends_at > ${today}::date::timestamp at time zone 'Europe/Copenhagen'
+            )))
         order by t.sort_order,t.created_at`,
       db()<Array<Record<string, unknown>>>`
         select n.id,n.title,n.note,n.status,n.created_at,n.quantity,n.unit,n.supplier,n.priority,n.needed_by,n.ordered_at,
@@ -126,6 +136,7 @@ export async function GET(request: Request) {
         reminderMinutes: task.reminder_minutes == null ? null : Number(task.reminder_minutes),
         priority: String(task.priority) as OperationDailyTask["priority"],
         taskType: String(task.task_type) as OperationDailyTask["taskType"],
+        assignmentScope: String(task.assignment_scope) as OperationTaskAssignmentScope,
         assignedEmployeeId: task.assigned_employee_id == null ? null : String(task.assigned_employee_id),
         assignedEmployeeName: task.assigned_employee_name == null ? null : String(task.assigned_employee_name),
         completedByName: task.completed_by_name == null ? null : String(task.completed_by_name),
@@ -202,7 +213,8 @@ export async function POST(request: Request) {
       const reminderMinutes = body.reminderMinutes == null || body.reminderMinutes === "" ? null : finiteNumber(body.reminderMinutes, "reminderMinutes", { min: 0, max: 10080, integer: true });
       const priority = enumValue(body.priority || "NORMAL", "priority", ["LOW", "NORMAL", "HIGH"] as const);
       const taskType = enumValue(body.taskType || "SERVICE", "taskType", ["OPENING", "SERVICE", "CLOSING", "MAINTENANCE", "ADMIN"] as const);
-      const assignedEmployeeId = body.assignedEmployeeId == null || body.assignedEmployeeId === "" ? null : uuid(body.assignedEmployeeId, "assignedEmployeeId");
+      const assignmentScope = enumValue(body.assignmentScope || "EVERYONE", "assignmentScope", ["EMPLOYEE", "ON_SHIFT", "EVERYONE"] as const);
+      const assignedEmployeeId = assignmentScope === "EMPLOYEE" ? uuid(body.assignedEmployeeId, "assignedEmployeeId") : null;
       const checklist = parseChecklist(body.checklist);
       if (assignedEmployeeId) {
         const [employee] = await db()`select id from employees where id=${assignedEmployeeId} and organization_id=${user.organizationId} and active=true`;
@@ -210,11 +222,11 @@ export async function POST(request: Request) {
       }
       if (repeatEndDate && repeatEndDate < dueDate) throw new ApiError(400, "Repeat end date must be after the first task date");
       const title = requiredString(body, "title", 160);
-      const description = requiredString(body, "description", 300);
+      const description = optionalString(body, "description", 300) || "";
       const [row] = await db()<Array<Record<string, unknown>>>`
-        insert into operation_daily_tasks(organization_id,location_id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assigned_employee_id,checklist,created_by,updated_by)
-        values(${user.organizationId},${user.locationId},${weekday},${title},${description},${dueDate}::date,${repeatUnit},${repeatInterval},${repeatEndDate}::date,${taskType},${priority},${dueTime}::time,${reminderMinutes},${assignedEmployeeId},${JSON.stringify(checklist)}::jsonb,${user.userId},${user.userId})
-        returning id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assigned_employee_id,checklist,false completed`;
+        insert into operation_daily_tasks(organization_id,location_id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assignment_scope,assigned_employee_id,checklist,created_by,updated_by)
+        values(${user.organizationId},${user.locationId},${weekday},${title},${description},${dueDate}::date,${repeatUnit},${repeatInterval},${repeatEndDate}::date,${taskType},${priority},${dueTime}::time,${reminderMinutes},${assignmentScope},${assignedEmployeeId},${JSON.stringify(checklist)}::jsonb,${user.userId},${user.userId})
+        returning id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assignment_scope,assigned_employee_id,checklist,false completed`;
       return NextResponse.json(row, { status: 201 });
     }
 
@@ -305,7 +317,8 @@ export async function PATCH(request: Request) {
         const reminderMinutes = body.reminderMinutes === undefined ? null : body.reminderMinutes === "" || body.reminderMinutes === null ? null : finiteNumber(body.reminderMinutes, "reminderMinutes", { min: 0, max: 10080, integer: true });
         const priority = body.priority == null ? null : enumValue(body.priority, "priority", ["LOW", "NORMAL", "HIGH"] as const);
         const taskType = body.taskType == null ? null : enumValue(body.taskType, "taskType", ["OPENING", "SERVICE", "CLOSING", "MAINTENANCE", "ADMIN"] as const);
-        const assignedEmployeeId = body.assignedEmployeeId === undefined ? null : body.assignedEmployeeId === "" || body.assignedEmployeeId === null ? null : uuid(body.assignedEmployeeId, "assignedEmployeeId");
+        const assignmentScope = body.assignmentScope === undefined ? null : enumValue(body.assignmentScope, "assignmentScope", ["EMPLOYEE", "ON_SHIFT", "EVERYONE"] as const);
+        const assignedEmployeeId = assignmentScope === null ? null : assignmentScope === "EMPLOYEE" ? uuid(body.assignedEmployeeId, "assignedEmployeeId") : null;
         if (assignedEmployeeId) {
           const [employee] = await db()`select id from employees where id=${assignedEmployeeId} and organization_id=${user.organizationId} and active=true`;
           if (!employee) throw new ApiError(400, "Assigned employee is not active in this organization");
@@ -327,11 +340,12 @@ export async function PATCH(request: Request) {
               reminder_minutes=case when ${body.reminderMinutes !== undefined} then ${reminderMinutes} else reminder_minutes end,
               priority=coalesce(${priority},priority),
               task_type=coalesce(${taskType},task_type),
-              assigned_employee_id=case when ${body.assignedEmployeeId !== undefined} then ${assignedEmployeeId}::uuid else assigned_employee_id end,
+              assignment_scope=coalesce(${assignmentScope},assignment_scope),
+              assigned_employee_id=case when ${assignmentScope !== null} then ${assignedEmployeeId}::uuid else assigned_employee_id end,
               updated_by=${user.userId},
               updated_at=now()
           where id=${id} and organization_id=${user.organizationId}
-          returning id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assigned_employee_id`;
+          returning id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assignment_scope,assigned_employee_id`;
         if (!row) throw new ApiError(404, "Daily task not found");
         return NextResponse.json({ ...row, completed: false });
       }

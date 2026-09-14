@@ -1,14 +1,14 @@
-# v0.19.0-rc.84 — Operation integrity completion
+# v0.19.0-rc.85 — Task visibility and assignment
 
 ## Baseline
 
-- Continued from v0.19.0-rc.83. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.84. That release is the rollback checkpoint.
 
 ## Included
 
-- Correct service-date persistence and authoritative mutation recovery.
-- Shared role-capability handling for task management.
-- Copenhagen date handling, safer image upload validation, and month-end recurrence.
-- Migration `018_operation_integrity_cleanup.sql` removes unshipped reminder, governance, acknowledgement and audit-history tables.
+- Fixed task creation with an empty optional instruction.
+- Added explicit task audiences: Specific employee, Everyone on shift, and Everyone.
+- Everyone on shift uses the published rota for the task’s service date; it never requires clocking in. Everyone is independent of the Shift module.
+- Migration `019_operation_task_assignment_scope.sql` persists the audience safely.
 
-Rollback checkpoint: **v0.19.0-rc.83**.
+Rollback checkpoint: **v0.19.0-rc.84**.

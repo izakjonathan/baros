@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.19.0-rc.85
+
+- Fixed daily-task creation when the optional short instruction is blank.
+- Replaced the ambiguous task-assignment model with explicit audiences: a specific employee, everyone scheduled for that service date, or everyone regardless of scheduling.
+- Added migration `019_operation_task_assignment_scope.sql`; existing individually assigned tasks remain individually assigned and all other existing tasks become Everyone.
+
 ## v0.19.0-rc.84
 
 - Corrected task completion so it is recorded against the selected service date, including historical and future task views.

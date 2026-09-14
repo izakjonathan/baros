@@ -5,6 +5,7 @@ const operation = read("features/operation/OperationModule.tsx");
 const route = read("app/api/operation-module/route.ts");
 const types = read("features/operation/types.ts");
 const migration = read("db/migrations/018_operation_integrity_cleanup.sql");
+const taskAudienceMigration = read("db/migrations/019_operation_task_assignment_scope.sql");
 
 const checks = [
   ["selected task date is persisted", operation.includes("date: selectedTaskDate, completed: !task.completed")],
@@ -14,6 +15,8 @@ const checks = [
   ["month-end recurrence is handled", types.includes("Math.min(start.getUTCDate(), lastDay)")],
   ["unused governance/reminder/audit schema is removed", ["operation_task_reminders", "operation_article_acknowledgements", "operation_article_versions", "operation_need_events"].every(name => migration.includes(`drop table if exists ${name}`))],
   ["SVG upload is rejected", route.includes("requireTaskManager") && read("app/api/operation-images/route.ts").includes("avif|gif|jpe?g|png|webp")],
+  ["task instructions are genuinely optional", route.includes('optionalString(body, "description", 300) || ""')],
+  ["task audiences are explicit and persisted", taskAudienceMigration.includes("assignment_scope") && route.includes('"ON_SHIFT", "EVERYONE"')],
 ];
 
 for (const [name, ok] of checks) {

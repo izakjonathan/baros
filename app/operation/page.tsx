@@ -14,7 +14,7 @@ function isOperationSchemaUnavailable(error: unknown) {
   const code = String(record.code || "");
   const message = String(record.message || "");
   return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|article_kind|need_status|task_templates|task_checklist_completions)/i.test(message)
-    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id)/i.test(message);
+    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|assignment_scope)/i.test(message);
 }
 
 export default async function OperationPage() {
@@ -45,7 +45,7 @@ export default async function OperationPage() {
         where organization_id=${user.organizationId} and published=true
         order by kind,category,sort_order,updated_at desc`,
       db()<Array<Record<string, unknown>>>`
-        select t.id,t.weekday,t.title,t.description,t.due_date,t.repeat_unit,t.repeat_interval,t.repeat_end_date,t.task_type,t.priority,t.due_time,t.reminder_minutes,t.assigned_employee_id,
+        select t.id,t.weekday,t.title,t.description,t.due_date,t.repeat_unit,t.repeat_interval,t.repeat_end_date,t.task_type,t.priority,t.due_time,t.reminder_minutes,t.assignment_scope,t.assigned_employee_id,
                (a.first_name||' '||a.last_name) assigned_employee_name,
                (completed_employee.first_name||' '||completed_employee.last_name) completed_by_name,
                (c.completed_at is not null) completed
@@ -101,6 +101,7 @@ export default async function OperationPage() {
       reminderMinutes: task.reminder_minutes == null ? null : Number(task.reminder_minutes),
       priority: String(task.priority) as OperationDailyTask["priority"],
       taskType: String(task.task_type) as OperationDailyTask["taskType"],
+      assignmentScope: String(task.assignment_scope) as OperationDailyTask["assignmentScope"],
       assignedEmployeeId: task.assigned_employee_id == null ? null : String(task.assigned_employee_id),
       assignedEmployeeName: task.assigned_employee_name == null ? null : String(task.assigned_employee_name),
       completedByName: task.completed_by_name == null ? null : String(task.completed_by_name),

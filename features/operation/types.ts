@@ -4,6 +4,7 @@ export type OperationStorageStatus = "ready" | "migration-required";
 export type OperationTaskRepeatUnit = "NONE" | "DAY" | "WEEK" | "MONTH" | "YEAR";
 export type OperationTaskPriority = "LOW" | "NORMAL" | "HIGH";
 export type OperationTaskType = "OPENING" | "SERVICE" | "CLOSING" | "MAINTENANCE" | "ADMIN";
+export type OperationTaskAssignmentScope = "EMPLOYEE" | "ON_SHIFT" | "EVERYONE";
 
 export type OperationRichTextOp = {
   insert: string | { image: string };
@@ -63,6 +64,7 @@ export type OperationDailyTask = {
   reminderMinutes: number | null;
   priority: OperationTaskPriority;
   taskType: OperationTaskType;
+  assignmentScope: OperationTaskAssignmentScope;
   assignedEmployeeId: string | null;
   assignedEmployeeName: string | null;
   completedByName: string | null;

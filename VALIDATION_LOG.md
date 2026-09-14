@@ -1,15 +1,15 @@
-# v0.19.0-rc.84 Validation
+# v0.19.0-rc.85 Validation
 
 ## Confirmed baseline
 
-The v0.19.0-rc.83 release source was used as the baseline for the Operation integrity release.
+The v0.19.0-rc.84 release source was used as the baseline for the Operation task-visibility release.
 
-- Rollback checkpoint: v0.19.0-rc.83
+- Rollback checkpoint: v0.19.0-rc.84
 
 ## Implementation
 
-- Corrected selected-date completion, authoritative mutation recovery and role-capability handling.
-- Added Copenhagen service dates, month-end recurrence behavior, SVG upload rejection and the RC84 cleanup migration.
+- Fixed creation when the optional task instruction is blank.
+- Added persisted audiences for specific employee, everyone scheduled for the service date, and everyone independent of the shift module.
 
 ## Validation status
 
@@ -22,4 +22,4 @@ The v0.19.0-rc.83 release source was used as the baseline for the Operation inte
 
 ## Scope
 
-Run migration `018_operation_integrity_cleanup.sql` after deployment. It intentionally removes unused governance, reminder, acknowledgement and audit-history schema.
+Run migration `019_operation_task_assignment_scope.sql` after deployment. Existing individual assignments are preserved; all other existing tasks become Everyone.
