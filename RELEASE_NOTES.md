@@ -1,17 +1,15 @@
-# v0.19.0-rc.86 — Compact private-media article editor
+# v0.19.0-rc.87 — Minimal article-editor controls
 
 ## Baseline
 
-- Continued from v0.19.0-rc.85. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.86. That release is the rollback checkpoint.
 
 ## Included
 
-- Compact one-row article editor controls for Back, article type, category and Save.
-- Existing category selection plus an explicit compact New category input.
-- Editing title uses article body typography; published titles retain their reader presentation.
-- Private Vercel Blob upload/delivery with authentication and organisation scoping.
-- `@vercel/blob` upgraded to v2.3.0.
+- Made Handbook/News and category selector text visibly smaller.
+- Added the explicit “Add new category…” category-menu action.
+- Removed the format dock’s enclosing surface so it does not create a box above Safari’s URL/keyboard area.
 
 No database migration is required.
 
-Rollback checkpoint: **v0.19.0-rc.85**.
+Rollback checkpoint: **v0.19.0-rc.86**.

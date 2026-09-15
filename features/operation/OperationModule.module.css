@@ -82,6 +82,7 @@
 .articleEditor input,.articleEditor textarea,.articleEditor select{width:100%;border:0;background:transparent;color:inherit;outline:0}
 .editorTopSelect{min-width:0}
 .editorTopSelect select,.editorNewCategory input{box-sizing:border-box;min-height:2.25rem;border:1px solid rgba(41,41,41,.62);border-radius:.62rem;background:rgba(255,255,255,.18);padding:.32rem .5rem;font-family:var(--font-display);font-size:.65rem;font-weight:720;letter-spacing:.055em;text-transform:uppercase}
+.editorTopSelect select{font-size:.6rem}
 .editorNewCategory{display:grid;gap:.22rem;margin-bottom:.35rem;font-family:var(--font-body);font-size:.68rem;color:#625d56}
 .editorTitleInput{font-family:var(--font-body);font-size:1rem;line-height:1.55;font-weight:400;letter-spacing:normal}
 .editorDescriptionInput{min-height:2.25rem;margin:.18rem 0 .5rem;font-family:var(--font-body);font-size:.88rem;line-height:1.4;color:#625d56;resize:vertical}
@@ -106,7 +107,7 @@
 .tiptapSurface :global(.tiptap li p){margin-bottom:.22rem}
 .tiptapSurface :global(.tiptap a){color:inherit;text-decoration:underline;text-underline-offset:.16em}
 .tiptapSurface :global(.tiptap img){display:block;max-width:100%;height:auto;margin:.85rem 0;border:1px solid rgba(41,41,41,.5);border-radius:.85rem}
-.tiptapToolbar{position:fixed;z-index:90;top:calc(var(--editor-vv-top,0px) + var(--editor-vv-height,100dvh) - 3.65rem);left:max(.85rem,env(safe-area-inset-left));right:max(.85rem,env(safe-area-inset-right));box-sizing:border-box;display:grid;grid-template-columns:minmax(4.25rem,1fr) repeat(6,2.2rem);align-items:center;gap:.12rem;margin:0;padding:.4rem;border:1px solid rgba(41,41,41,.48);border-radius:999px;background:#e9e5dd;box-shadow:0 .45rem 1.4rem rgba(41,41,41,.16)}
+.tiptapToolbar{position:fixed;z-index:90;top:calc(var(--editor-vv-top,0px) + var(--editor-vv-height,100dvh) - 3.65rem);left:max(.85rem,env(safe-area-inset-left));right:max(.85rem,env(safe-area-inset-right));box-sizing:border-box;display:grid;grid-template-columns:minmax(4.25rem,1fr) repeat(6,2.2rem);align-items:center;gap:.12rem;margin:0;padding:0;border:0;background:transparent;box-shadow:none}
 .tiptapToolbar button{display:grid;place-items:center;width:100%;min-width:0;min-height:2.14rem;border:0;border-radius:999px;background:transparent;color:#292929;padding:.2rem}
 .tiptapToolbar button[aria-pressed="true"],.tiptapToolbar button:hover:not(:disabled){background:#292929;color:#e9e5dd}
 .tiptapToolbar button:disabled{opacity:.36}
@@ -174,9 +175,9 @@
   .operationHeader nav{width:max-content}
   .moduleGrid,.adminGrid,.editorMeta,.taskSettings{grid-template-columns:1fr}
   .adminPanelHeader{display:grid}
-  .editorTopSelect select,.editorNewCategory input,.articleEditor .editorDescriptionInput{font-size:16px}
+  .editorNewCategory input,.articleEditor .editorDescriptionInput{font-size:16px}
   .taskSettings input,.taskSettings select{font-size:16px}
-  .tiptapToolbar{grid-template-columns:minmax(4.1rem,1fr) repeat(6,2.12rem);gap:.08rem;padding:.34rem}
+  .tiptapToolbar{grid-template-columns:minmax(4.1rem,1fr) repeat(6,2.12rem);gap:.08rem;padding:0}
   .tiptapToolbar button{min-height:2.04rem}
   .operationCard{min-height:3.72rem;border-radius:.68rem;padding:.62rem .72rem}
   .operationCard h3{font-size:clamp(.98rem,4.7vw,1.18rem)}

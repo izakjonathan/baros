@@ -1,16 +1,15 @@
-# v0.19.0-rc.86 Validation
+# v0.19.0-rc.87 Validation
 
 ## Confirmed baseline
 
-The v0.19.0-rc.85 release source was used as the baseline for the compact private-media article-editor release.
+The v0.19.0-rc.86 release source was used as the baseline for the minimal article-editor controls release.
 
-- Rollback checkpoint: v0.19.0-rc.85
+- Rollback checkpoint: v0.19.0-rc.86
 
 ## Implementation
 
-- Compacted the article editor header and added existing/new category controls.
-- Converted private-Blob image upload and delivery to authenticated, organisation-scoped routes.
-- Updated `@vercel/blob` to v2.3.0.
+- Reduced the top selector typography and exposed Add new category in the menu.
+- Removed the format dock’s enclosing surface.
 
 ## Validation status
 
@@ -21,4 +20,4 @@ The v0.19.0-rc.85 release source was used as the baseline for the compact privat
 
 ## Scope
 
-No database migration is required. Production iOS visual confirmation is still required after deployment; the private Blob route was verified by source-level regression coverage and production build, not against a live uploaded photo in this release.
+No database migration is required. Production iOS visual confirmation is required after deployment.

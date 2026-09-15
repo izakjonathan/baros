@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.19.0-rc.87
+
+- Reduced the visual size of the Handbook/News and category selectors without reducing the new-category text input below Safari’s no-zoom size.
+- Renamed the category-menu action to “Add new category…” so the creation path is explicit.
+- Removed the formatting dock’s enclosing border, fill, shadow and padding; only the formatting controls remain above the iOS browser chrome.
+
 ## v0.19.0-rc.86
 
 - Compacted the Operation article-editor header into one row: smaller Back and Save controls, Handbook/News selector, and existing-category selector.

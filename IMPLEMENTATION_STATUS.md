@@ -1,10 +1,17 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.86**
+Version: **v0.19.0-rc.87**
 
 ## Current focus
 
-Compact private-media article editing from the verified rc.85 baseline.
+Minimal article-editor controls from the verified rc.86 baseline.
+
+## rc.87
+
+- Reduced editor-selector typography and made the New-category menu action explicit.
+- Removed the format dock’s enclosing surface above Safari browser chrome.
+- No database migration is required.
+- Rollback checkpoint: v0.19.0-rc.86.
 
 ## rc.86
 
