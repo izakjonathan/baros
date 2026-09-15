@@ -22,6 +22,10 @@ const uiClasses = read("lib/ui-classes.ts");
 const exceptionRegister = read("docs/constitution/INTENTIONAL_EXCEPTION_REGISTER.md");
 const workspace = read("components/ui/workspace-ui.tsx");
 const requestForm = read("app/employee/request-form.tsx");
+const uiThemeRoute = read("app/api/settings/ui-theme/route.ts");
+const uiTheme = read("lib/ui-theme.ts");
+const uiThemeProvider = read("components/ui-theme-provider.tsx");
+const uiThemeMigration = read("db/migrations/020_organization_ui_theme.sql");
 const tsconfig = JSON.parse(read("tsconfig.json"));
 const quality = read(".github/workflows/quality.yml");
 const observability = read("lib/observability.ts");
@@ -155,6 +159,10 @@ const checks = [
   ["shared PanelTitle replaces feature-local copies", workspace.includes("export function PanelTitle") && ["features/dashboard/manager-overview.tsx","features/operations/DailyOperationsWorkspace.tsx","features/settings/SettingsWorkspace.tsx","features/control/ControlCenterWorkspace.tsx"].every((file) => read(file).includes("PanelTitle") && !read(file).includes("function PanelTitle"))],
   ["same-file-only helpers are not exported", !observability.includes("logServerWarning") && !capabilities.includes("export const ROLE_CAPABILITIES") && !devAuth.includes("export function getDevSessionUser") && !sessionCookie.includes("export function sessionTtlDays") && !scheduleUtils.includes("export function shiftsOverlap") && !dataSource.includes("export const days") && !rateLimit.includes("export class RateLimitError")],
   ["TypeScript rejects unused locals and parameters", tsconfig.compilerOptions?.noUnusedLocals === true && tsconfig.compilerOptions?.noUnusedParameters === true],
+  ["UI Studio is owner-only, persistent, and organization-scoped", uiThemeRoute.includes('requireUser(["OWNER"])') && uiThemeRoute.includes("UI_THEME_UPDATED") && uiThemeMigration.includes("organization_id uuid primary key") && uiTheme.includes("new ApiError(400")],
+  ["UI Studio palette is applied at the root and refreshed for active logins", layout.includes("getUiTheme") && layout.includes("themeCustomProperties") && uiThemeProvider.includes("barops-theme-updated") && uiThemeProvider.includes("setInterval")],
+  ["UI Studio derives shared palette roles from canvas and ink", tokens.includes("--ui-canvas") && tokens.includes("--ui-ink") && tokens.includes("color-mix(in srgb,var(--ui-canvas)")],
+  ["UI Studio navigation is restricted to owner settings", read("features/settings/SettingsWorkspace.tsx").includes('const canManageStudio = userRole === "OWNER"') && read("features/settings/SettingsWorkspace.tsx").includes("Save global scheme")],
   ["active script surface remains compact", scriptFiles.length <= 20 && Object.keys(pkg.scripts).length <= 25],
   ["quality workflow runs current suite", quality.includes("npm run test:all")],
   ["root global-error exception remains documented", exceptionRegister.includes("global-error.tsx") && exceptionRegister.includes("root error boundary")],

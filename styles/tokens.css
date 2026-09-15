@@ -1,19 +1,21 @@
 :root {
-  --black:#000;
-  --cream:#fff4c4;
-  --neon:#dfee4b;
-  --pink:#f47add;
-  --purple:#9561e6;
-  --orange:#eb6746;
-  --green:#1f7a4d;
-  --red:#b8362b;
-  --blue:#35548c;
+  --ui-canvas:#fff4c4;
+  --ui-ink:#000000;
+  --black:var(--ui-ink);
+  --cream:var(--ui-canvas);
+  --neon:color-mix(in srgb,var(--ui-canvas) 76%,var(--ui-ink));
+  --pink:color-mix(in srgb,var(--ui-canvas) 64%,var(--ui-ink));
+  --purple:color-mix(in srgb,var(--ui-canvas) 50%,var(--ui-ink));
+  --orange:color-mix(in srgb,var(--ui-canvas) 72%,var(--ui-ink));
+  --green:color-mix(in srgb,var(--ui-canvas) 44%,var(--ui-ink));
+  --red:color-mix(in srgb,var(--ui-canvas) 42%,var(--ui-ink));
+  --blue:color-mix(in srgb,var(--ui-canvas) 36%,var(--ui-ink));
 
-  --canvas:var(--black);
-  --text:var(--cream);
+  --canvas:var(--cream);
+  --text:var(--ink);
   --ink:var(--black);
-  --muted-cream:rgb(255 244 196 / .68);
-  --muted-ink:rgb(0 0 0 / .62);
+  --muted-cream:color-mix(in srgb,var(--cream) 68%,transparent);
+  --muted-ink:color-mix(in srgb,var(--ink) 62%,transparent);
 
   --font-body:var(--font-inter),system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   --font-display:var(--font-space-grotesk),var(--font-body);

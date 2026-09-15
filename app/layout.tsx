@@ -3,6 +3,9 @@ import localFont from "next/font/local";
 import "./globals.css";
 import "quill/dist/quill.snow.css";
 import { PwaRegister } from "./pwa-register";
+import { UiThemeProvider } from "@/components/ui-theme-provider";
+import { getSessionUser } from "@/lib/auth/session";
+import { defaultTheme, getUiTheme, themeCustomProperties } from "@/lib/ui-theme";
 
 const inter = localFont({
   src: "./fonts/inter-latin-variable.woff",
@@ -48,10 +51,12 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const session = await getSessionUser().catch(() => null);
+  const theme = await getUiTheme(session?.organizationId).catch(() => defaultTheme);
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${spaceGrotesk.variable}`}>
-      <body>{children}<PwaRegister /></body>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${spaceGrotesk.variable}`} style={themeCustomProperties(theme)}>
+      <body><UiThemeProvider initialTheme={theme} />{children}<PwaRegister /></body>
     </html>
   );
 }
