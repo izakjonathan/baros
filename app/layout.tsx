@@ -1,26 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
+import { Work_Sans } from "next/font/google";
 import "./globals.css";
 import "quill/dist/quill.snow.css";
 import { PwaRegister } from "./pwa-register";
-import { UiThemeProvider } from "@/components/ui-theme-provider";
-import { getSessionUser } from "@/lib/auth/session";
-import { defaultTheme, getUiTheme, themeCustomProperties } from "@/lib/ui-theme";
 
-const inter = localFont({
-  src: "./fonts/inter-latin-variable.woff",
-  variable: "--font-inter",
+const workSans = Work_Sans({
+  subsets: ["latin"],
+  variable: "--font-work-sans",
   display: "swap",
-  weight: "100 900",
-  style: "normal",
-});
-
-const spaceGrotesk = localFont({
-  src: "./fonts/space-grotesk-latin-variable.woff",
-  variable: "--font-space-grotesk",
-  display: "swap",
-  weight: "300 700",
-  style: "normal",
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -52,11 +40,9 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const session = await getSessionUser().catch(() => null);
-  const theme = await getUiTheme(session?.organizationId).catch(() => defaultTheme);
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${spaceGrotesk.variable}`} style={themeCustomProperties(theme)}>
-      <body><UiThemeProvider initialTheme={theme} />{children}<PwaRegister /></body>
+    <html lang="en" suppressHydrationWarning className={workSans.variable}>
+      <body>{children}<PwaRegister /></body>
     </html>
   );
 }

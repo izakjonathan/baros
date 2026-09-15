@@ -1,10 +1,18 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.89**
+Version: **v0.19.0-rc.94**
 
 ## Current focus
 
-Handbook owner actions and reliable image persistence from the verified rc.88 baseline.
+Operation-scoped owner UI Studio, Work Sans, and read-only public handbook/news from the verified rc.93 baseline.
+
+## rc.94
+
+- Owners manage the persisted Operation canvas and ink pair from the Operation header; all Operation roles see the saved palette.
+- Added `/operation/public/<organization-slug>` for published handbook and news without login. It deliberately excludes Tasks, Needs, editor actions and UI Studio.
+- Added Google Work Sans as the shared font and retained iPad-safe Operation input and editor viewport handling.
+- Added migration `020_organization_ui_theme.sql`.
+- Rollback checkpoint: v0.19.0-rc.93.
 
 ## rc.89
 

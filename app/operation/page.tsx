@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { operationDateNow } from "@/features/operation/date";
 import { hasCapability } from "@/lib/auth/capabilities";
+import { defaultTheme, getUiTheme } from "@/lib/ui-theme";
 
 function isOperationSchemaUnavailable(error: unknown) {
   if (!error || typeof error !== "object") return false;
@@ -20,6 +21,9 @@ function isOperationSchemaUnavailable(error: unknown) {
 export default async function OperationPage() {
   const user = await requireUser();
   const devMode = isDevAuthEnabled();
+  const initialTheme = await getUiTheme(user.organizationId).catch(() => defaultTheme);
+  const [organization] = devMode ? [] : await db()<Array<{ slug: string }>>`select slug from organizations where id=${user.organizationId} limit 1`;
+  const publicUrl = organization ? `/operation/public/${organization.slug}` : undefined;
   const fallbackState: OperationModuleState = {
     ...defaultOperationState,
     userRole: user.role,
@@ -29,7 +33,7 @@ export default async function OperationPage() {
     today: operationDateNow(),
   };
   if (devMode) {
-    return <OperationModule initialState={fallbackState} devMode />;
+    return <OperationModule initialState={fallbackState} initialTheme={initialTheme} devMode publicUrl={publicUrl} />;
   }
 
   const today = operationDateNow();
@@ -74,7 +78,7 @@ export default async function OperationPage() {
         order by e.first_name,e.last_name`,
     ]);
   } catch (error) {
-    if (isOperationSchemaUnavailable(error)) return <OperationModule initialState={{ ...fallbackState, storageStatus: "migration-required" }} devMode={false} />;
+    if (isOperationSchemaUnavailable(error)) return <OperationModule initialState={{ ...fallbackState, storageStatus: "migration-required" }} initialTheme={initialTheme} devMode={false} publicUrl={publicUrl} />;
     throw error;
   }
 
@@ -121,5 +125,5 @@ export default async function OperationPage() {
     })),
   };
 
-  return <OperationModule initialState={initialState} devMode={false} />;
+  return <OperationModule initialState={initialState} initialTheme={initialTheme} devMode={false} publicUrl={publicUrl} />;
 }

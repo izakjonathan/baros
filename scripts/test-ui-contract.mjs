@@ -13,6 +13,8 @@ const schedule = read("features/scheduling/ScheduleWorkspace.module.css");
 const operation = read("features/operation/OperationModule.module.css");
 const operationModule = read("features/operation/OperationModule.tsx");
 const layout = read("app/layout.tsx");
+const operationPage = read("app/operation/page.tsx");
+const publicOperationPage = read("app/operation/public/[organizationSlug]/page.tsx");
 const employeeLayout = read("app/employee/layout.tsx");
 const employeeShell = read("app/employee/employee-shell.tsx");
 const managerApp = read("components/bar-ops-app.tsx");
@@ -24,7 +26,6 @@ const workspace = read("components/ui/workspace-ui.tsx");
 const requestForm = read("app/employee/request-form.tsx");
 const uiThemeRoute = read("app/api/settings/ui-theme/route.ts");
 const uiTheme = read("lib/ui-theme.ts");
-const uiThemeProvider = read("components/ui-theme-provider.tsx");
 const uiThemeMigration = read("db/migrations/020_organization_ui_theme.sql");
 const tsconfig = JSON.parse(read("tsconfig.json"));
 const quality = read(".github/workflows/quality.yml");
@@ -118,7 +119,7 @@ const checks = [
   ["package remains a v0.19 release candidate", /^0\.19\.0-rc\.\d+$/.test(pkg.version)],
   ["only four CSS files exist", JSON.stringify(cssRelative) === JSON.stringify(["app/globals.css", "features/operation/OperationModule.module.css", "features/scheduling/ScheduleWorkspace.module.css", "styles/tokens.css"])],
   ["root imports only global CSS", layout.includes('import "./globals.css";') && !layout.includes("completion-redesign.css") && !layout.includes("system-contracts.css") && !layout.includes("design-system.css")],
-  ["root fonts are repository-owned build assets", layout.includes('import localFont from "next/font/local";') && remoteGoogleFontImports.length === 0 && layout.includes('src: "./fonts/inter-latin-variable.woff"') && layout.includes('src: "./fonts/space-grotesk-latin-variable.woff"') && ["app/fonts/inter-latin-variable.woff","app/fonts/space-grotesk-latin-variable.woff","app/fonts/Inter-OFL.txt","app/fonts/Space-Grotesk-OFL.txt"].every((file) => fs.existsSync(path.join(root, file)))],
+  ["root uses the requested Google Work Sans font", remoteGoogleFontImports.includes("app/layout.tsx") && layout.includes("Work_Sans") && layout.includes("--font-work-sans") && tokens.includes("--font-work-sans")],
   ["employee has no route CSS import", !employeeLayout.includes(".css")],
   ["only Shift Plan and standalone Operation use CSS modules", cssModuleImporters.length > 0 && cssModuleImporters.every((file) => file.startsWith("features/scheduling/") || file.startsWith("features/operation/"))],
   ["global CSS owns shell and controls", global.includes(".sidebar{") && global.includes(".topbar{") && global.includes(".main-shell{") && global.includes(".button,.primary,.secondary") && global.includes("input,select,textarea")],
@@ -160,9 +161,9 @@ const checks = [
   ["same-file-only helpers are not exported", !observability.includes("logServerWarning") && !capabilities.includes("export const ROLE_CAPABILITIES") && !devAuth.includes("export function getDevSessionUser") && !sessionCookie.includes("export function sessionTtlDays") && !scheduleUtils.includes("export function shiftsOverlap") && !dataSource.includes("export const days") && !rateLimit.includes("export class RateLimitError")],
   ["TypeScript rejects unused locals and parameters", tsconfig.compilerOptions?.noUnusedLocals === true && tsconfig.compilerOptions?.noUnusedParameters === true],
   ["UI Studio is owner-only, persistent, and organization-scoped", uiThemeRoute.includes('requireUser(["OWNER"])') && uiThemeRoute.includes("UI_THEME_UPDATED") && uiThemeMigration.includes("organization_id uuid primary key") && uiTheme.includes("new ApiError(400")],
-  ["UI Studio palette is applied at the root and refreshed for active logins", layout.includes("getUiTheme") && layout.includes("themeCustomProperties") && uiThemeProvider.includes("barops-theme-updated") && uiThemeProvider.includes("setInterval")],
-  ["UI Studio derives shared palette roles from canvas and ink", tokens.includes("--ui-canvas") && tokens.includes("--ui-ink") && tokens.includes("color-mix(in srgb,var(--ui-canvas)")],
-  ["UI Studio navigation is restricted to owner settings", read("features/settings/SettingsWorkspace.tsx").includes('const canManageStudio = userRole === "OWNER"') && read("features/settings/SettingsWorkspace.tsx").includes("Save global scheme")],
+  ["UI Studio is scoped to Operation instead of the shared app shell", !layout.includes("getUiTheme") && !layout.includes("themeCustomProperties") && !tokens.includes("--ui-canvas") && operationPage.includes("getUiTheme") && operationModule.includes("operationThemeCustomProperties(uiTheme)")],
+  ["UI Studio is only exposed to Operation owners and restores canceled previews", operationModule.includes('const canManageUiStudio = state.userRole === "OWNER"') && operationModule.includes("setUiTheme(savedUiTheme)") && !read("features/settings/SettingsWorkspace.tsx").includes("UI Studio")],
+  ["public Operation route is read-only handbook and news", publicOperationPage.includes("publicMode") && publicOperationPage.includes("canManageContent: false") && publicOperationPage.includes("dailyTasks: []") && operationModule.includes("...(publicMode ? [] : [\"tasks\", \"needs\"])")],
   ["active script surface remains compact", scriptFiles.length <= 20 && Object.keys(pkg.scripts).length <= 25],
   ["quality workflow runs current suite", quality.includes("npm run test:all")],
   ["root global-error exception remains documented", exceptionRegister.includes("global-error.tsx") && exceptionRegister.includes("root error boundary")],

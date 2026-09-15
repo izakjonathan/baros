@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.94
+
+- Added an owner-only UI Studio directly to Operation. It persists each organization’s canvas and ink colors, applies them to Operation, its editor and reader, and keeps the shared manager, employee, scheduling and settings surfaces unchanged.
+- Added the read-only `/operation/public/<organization-slug>` route for published handbook and news. It excludes Tasks, Needs, editing and owner controls; published article images are readable only when their image path is referenced by published content.
+- Switched the shared display and body family to Google Work Sans through `next/font/google`.
+- Kept iPad-safe 16px touch input sizing and visual-viewport-aware editor controls. The production build now verifies that database-only theme access cannot enter the Operations browser bundle.
+- Added `020_organization_ui_theme.sql`; apply it before enabling persisted color changes in production.
+
 ## v0.19.0-rc.89
 
 - Removed the duplicate Owner articles panel. Owners now receive Edit and Delete controls on the ordinary Handbook article cards; other roles receive only the normal reader action.

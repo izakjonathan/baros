@@ -46,7 +46,7 @@ if (operationModule.includes("requireUser(") || operationModule.includes("requir
   throw new Error("operation module API must return JSON auth errors instead of redirecting");
 }
 const operationPage = read("app/operation/page.tsx");
-for (const token of ["isOperationSchemaUnavailable", "defaultOperationState", "storageStatus: \"migration-required\"", "return <OperationModule initialState={{ ...fallbackState, storageStatus: \"migration-required\" }} devMode={false} />"]) {
+for (const token of ["isOperationSchemaUnavailable", "defaultOperationState", "storageStatus: \"migration-required\"", "return <OperationModule initialState={{ ...fallbackState, storageStatus: \"migration-required\" }} initialTheme={initialTheme} devMode={false} publicUrl={publicUrl} />"]) {
   if (!operationPage.includes(token)) throw new Error(`operation page migration fallback is missing ${token}`);
 }
 

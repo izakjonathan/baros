@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowLeft, Bold, BookOpen, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, Clock3, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Plus, Redo2, Repeat2, ShoppingBasket, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
+import { ArrowLeft, Bold, BookOpen, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, Clock3, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Palette, Plus, Redo2, Repeat2, ShoppingBasket, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -11,6 +11,7 @@ import Link from "@tiptap/extension-link";
 import ImageExtension from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import styles from "./OperationModule.module.css";
+import { operationThemeCustomProperties, type UiTheme } from "@/lib/ui-theme-shared";
 import type { OperationArticle, OperationArticleKind, OperationContentBlock, OperationDailyTask, OperationModuleState, OperationNeed, OperationRichTextDelta, OperationRichTextOp, OperationTaskAssignmentScope, OperationTaskPriority, OperationTaskRepeatUnit, OperationTaskType, OperationTiptapDocument, OperationTiptapNode } from "./types";
 
 type View = "home" | "handbook" | "tasks" | "needs";
@@ -75,7 +76,7 @@ async function responseMessage(response: Response, fallback: string) {
   return typeof failure === "object" && failure !== null && "error" in failure && typeof failure.error === "string" ? failure.error : fallback;
 }
 
-export function OperationModule({ initialState, devMode }: { initialState: OperationModuleState; devMode: boolean }) {
+export function OperationModule({ initialState, initialTheme, devMode, publicMode = false, publicUrl }: { initialState: OperationModuleState; initialTheme: UiTheme; devMode: boolean; publicMode?: boolean; publicUrl?: string }) {
   const [state, setState] = useState(initialState);
   const [view, setView] = useState<View>("home");
   const [query, setQuery] = useState("");
@@ -106,6 +107,10 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
   const [taskMessage, setTaskMessage] = useState("");
   const [needMessage, setNeedMessage] = useState("");
   const [editorOpen, setEditorOpen] = useState(false);
+  const [uiTheme, setUiTheme] = useState<UiTheme>(initialTheme);
+  const [savedUiTheme, setSavedUiTheme] = useState<UiTheme>(initialTheme);
+  const [studioOpen, setStudioOpen] = useState(false);
+  const [studioSaving, setStudioSaving] = useState(false);
   const currentArticle = readerStack.at(-1) || null;
   const dueSoonTasks = state.dailyTasks.filter(task => {
     if (task.completed || !task.dueTime || task.reminderMinutes == null) return false;
@@ -125,13 +130,14 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     return categoryMatch && text.includes(query.toLowerCase());
   });
   const storageUnavailable = state.storageStatus === "migration-required" && !devMode;
+  const canManageUiStudio = state.userRole === "OWNER";
 
   const refresh = useCallback(async (date: string) => {
-    if (devMode) return;
+    if (devMode || publicMode) return;
     const response = await fetch(`/api/operation-module?date=${encodeURIComponent(date)}`, { cache: "no-store" });
     const next = await response.json();
     if (response.ok) setState(next as OperationModuleState);
-  }, [devMode]);
+  }, [devMode, publicMode]);
 
   const selectTaskDate = useCallback((date: string) => {
     setSelectedTaskDate(date);
@@ -142,6 +148,30 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     const timer = window.setTimeout(() => { void refresh(selectedTaskDate); }, 0);
     return () => window.clearTimeout(timer);
   }, [refresh, selectedTaskDate]);
+
+  useEffect(() => {
+    if (devMode || publicMode) return;
+    const refreshTheme = async () => {
+      try {
+        const response = await fetch("/api/settings/ui-theme", { cache: "no-store" });
+        if (!response.ok) return;
+        const next = await response.json() as UiTheme;
+        if (next.canvasColor && next.inkColor) {
+          setUiTheme(next);
+          setSavedUiTheme(next);
+        }
+      } catch {
+        // Keep the last confirmed palette if the connection is temporarily unavailable.
+      }
+    };
+    const interval = window.setInterval(() => { void refreshTheme(); }, 30_000);
+    return () => window.clearInterval(interval);
+  }, [devMode, publicMode]);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty("--operation-canvas", uiTheme.canvasColor);
+    return () => { document.documentElement.style.removeProperty("--operation-canvas"); };
+  }, [uiTheme.canvasColor]);
 
 
   async function saveArticle() {
@@ -263,25 +293,41 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     }
   }
 
-  return <div className={styles.operationShell}>
+  async function saveUiTheme(next: UiTheme) {
+    setStudioSaving(true);
+    try {
+      if (devMode) { setUiTheme(next); setSavedUiTheme(next); setStudioOpen(false); return; }
+      const response = await fetch("/api/settings/ui-theme", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(next) });
+      const saved = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(typeof saved === "object" && saved !== null && "error" in saved && typeof saved.error === "string" ? saved.error : "Could not save UI Studio colors.");
+      if (!saved || typeof saved !== "object" || !("canvasColor" in saved) || !("inkColor" in saved)) throw new Error("UI Studio returned an invalid color scheme.");
+      const confirmed = saved as UiTheme;
+      setUiTheme(confirmed); setSavedUiTheme(confirmed); setStudioOpen(false);
+    } catch (error) { setEditorMessage(error instanceof Error ? error.message : "Could not save UI Studio colors."); }
+    finally { setStudioSaving(false); }
+  }
+
+  return <div className={styles.operationShell} style={operationThemeCustomProperties(uiTheme)}>
     <header className={styles.operationHeader}>
       <nav aria-label="Operation sections">
-        {(["home", "handbook", "tasks", "needs"] as View[]).map(item => <button key={item} type="button" aria-pressed={view === item} onClick={() => setView(item)}>{item === "home" ? "Home" : item}</button>)}
+        {(["home", "handbook", ...(publicMode ? [] : ["tasks", "needs"])] as View[]).map(item => <button key={item} type="button" aria-pressed={view === item} onClick={() => setView(item)}>{item === "home" ? "Home" : item}</button>)}
       </nav>
       {state.canManageContent && view === "home" && <button className={styles.addCircle} type="button" onClick={() => { setDraft(draftFromArticle(undefined, "NEWS")); setEditorOpen(!storageUnavailable); }} aria-label="Add news"><Plus size={20} /></button>}
       {state.canManageContent && view === "handbook" && <button className={styles.addCircle} type="button" onClick={() => { setDraft(draftFromArticle(undefined, "HANDBOOK")); setEditorOpen(!storageUnavailable); }} aria-label="Add handbook article"><Plus size={20} /></button>}
+      {canManageUiStudio && <button className={styles.studioCircle} type="button" onClick={() => setStudioOpen(true)} aria-label="Open Operation UI Studio"><Palette size={18} /></button>}
     </header>
     <main className={styles.operationMain}>
       {storageUnavailable && <StorageNotice />}
       {dueSoonTasks.length > 0 && <section className={styles.duePrompt} role="status"><Clock3 size={18} /><div><strong>{dueSoonTasks.length === 1 ? "Task due soon" : `${dueSoonTasks.length} tasks due soon`}</strong><p>{dueSoonTasks.map(task => `${task.title} · ${task.dueTime}`).join(" · ")}</p></div></section>}
-      {view === "home" && <HomeView news={state.news} tasks={state.dailyTasks} metrics={state.metrics} openArticle={(article) => setReaderStack([article])} openView={setView} />}
+      {view === "home" && (publicMode ? <PublicHomeView news={state.news} openArticle={(article) => setReaderStack([article])} openHandbook={() => setView("handbook")} /> : <HomeView news={state.news} tasks={state.dailyTasks} metrics={state.metrics} openArticle={(article) => setReaderStack([article])} openView={setView} />)}
       {editorMessage && !editorOpen && <p className={styles.editorMessage} role="status">{editorMessage}</p>}
       {view === "handbook" && <HandbookView articles={filteredHandbook} categories={handbookCategories} query={query} category={category} setQuery={setQuery} setCategory={setCategory} openArticle={(article) => setReaderStack([article])} canManageContent={state.canManageContent} disabled={storageUnavailable} editArticle={(article) => { setDraft(draftFromArticle(article, article.kind)); setEditorMessage(storageUnavailable ? migrationMessage : ""); setEditorOpen(!storageUnavailable); }} deleteArticle={deleteArticle} />}
-      {view === "tasks" && <TasksView tasks={state.dailyTasks} taskTemplates={state.taskTemplates} assignees={state.assignees} selectedDate={selectedTaskDate} setSelectedDate={selectTaskDate} canManage={state.canManageTasks} taskTitle={taskTitle} taskDescription={taskDescription} taskDueDate={taskDueDate} taskRepeatUnit={taskRepeatUnit} taskRepeatInterval={taskRepeatInterval} taskRepeatEndDate={taskRepeatEndDate} taskPriority={taskPriority} taskDueTime={taskDueTime} taskReminderMinutes={taskReminderMinutes} taskAssignmentScope={taskAssignmentScope} taskAssigneeId={taskAssigneeId} taskChecklistText={taskChecklistText} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} setTaskDueDate={setTaskDueDate} setTaskRepeatUnit={setTaskRepeatUnit} setTaskRepeatInterval={setTaskRepeatInterval} setTaskRepeatEndDate={setTaskRepeatEndDate} setTaskType={setTaskType} setTaskPriority={setTaskPriority} setTaskDueTime={setTaskDueTime} setTaskReminderMinutes={setTaskReminderMinutes} setTaskAssignmentScope={setTaskAssignmentScope} setTaskAssigneeId={setTaskAssigneeId} setTaskChecklistText={setTaskChecklistText} saveTaskTemplate={saveTaskTemplate} addTask={addTask} toggleTask={toggleTask} toggleTaskChecklist={toggleTaskChecklist} deleteTask={deleteTask} disabled={storageUnavailable} message={taskMessage} />}
-      {view === "needs" && <NeedsView needs={state.needs} needTitle={needTitle} needQuantity={needQuantity} needSupplier={needSupplier} needPriority={needPriority} needNote={needNote} setNeedTitle={setNeedTitle} setNeedQuantity={setNeedQuantity} setNeedSupplier={setNeedSupplier} setNeedPriority={setNeedPriority} setNeedNote={setNeedNote} addNeed={addNeed} markNeedOrdered={markNeedOrdered} disabled={storageUnavailable} message={needMessage} />}
+      {!publicMode && view === "tasks" && <TasksView tasks={state.dailyTasks} taskTemplates={state.taskTemplates} assignees={state.assignees} selectedDate={selectedTaskDate} setSelectedDate={selectTaskDate} canManage={state.canManageTasks} taskTitle={taskTitle} taskDescription={taskDescription} taskDueDate={taskDueDate} taskRepeatUnit={taskRepeatUnit} taskRepeatInterval={taskRepeatInterval} taskRepeatEndDate={taskRepeatEndDate} taskPriority={taskPriority} taskDueTime={taskDueTime} taskReminderMinutes={taskReminderMinutes} taskAssignmentScope={taskAssignmentScope} taskAssigneeId={taskAssigneeId} taskChecklistText={taskChecklistText} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} setTaskDueDate={setTaskDueDate} setTaskRepeatUnit={setTaskRepeatUnit} setTaskRepeatInterval={setTaskRepeatInterval} setTaskRepeatEndDate={setTaskRepeatEndDate} setTaskType={setTaskType} setTaskPriority={setTaskPriority} setTaskDueTime={setTaskDueTime} setTaskReminderMinutes={setTaskReminderMinutes} setTaskAssignmentScope={setTaskAssignmentScope} setTaskAssigneeId={setTaskAssigneeId} setTaskChecklistText={setTaskChecklistText} saveTaskTemplate={saveTaskTemplate} addTask={addTask} toggleTask={toggleTask} toggleTaskChecklist={toggleTaskChecklist} deleteTask={deleteTask} disabled={storageUnavailable} message={taskMessage} />}
+      {!publicMode && view === "needs" && <NeedsView needs={state.needs} needTitle={needTitle} needQuantity={needQuantity} needSupplier={needSupplier} needPriority={needPriority} needNote={needNote} setNeedTitle={setNeedTitle} setNeedQuantity={setNeedQuantity} setNeedSupplier={setNeedSupplier} setNeedPriority={setNeedPriority} setNeedNote={setNeedNote} addNeed={addNeed} markNeedOrdered={markNeedOrdered} disabled={storageUnavailable} message={needMessage} />}
     </main>
     {currentArticle && <Reader article={currentArticle} canGoBack={readerStack.length > 1} goBack={() => setReaderStack(stack => stack.slice(0, -1))} close={() => setReaderStack([])} />}
     {editorOpen && <ArticleEditor draft={draft} categories={editorCategories} setDraft={setDraft} saveArticle={saveArticle} saving={saving} message={editorMessage} close={() => { setEditorOpen(false); setEditorMessage(""); }} />}
+    {studioOpen && <OperationUiStudio theme={uiTheme} saving={studioSaving} close={() => { setUiTheme(savedUiTheme); setStudioOpen(false); }} preview={setUiTheme} save={saveUiTheme} publicUrl={publicUrl} />}
   </div>;
 }
 
@@ -289,9 +335,47 @@ function upsertArticle(list: OperationArticle[], article: OperationArticle) {
   return list.some(item => item.id === article.id) ? list.map(item => item.id === article.id ? article : item) : [article, ...list];
 }
 
+function OperationUiStudio({ theme, saving, close, preview, save, publicUrl }: { theme: UiTheme; saving: boolean; close: () => void; preview: (theme: UiTheme) => void; save: (theme: UiTheme) => Promise<void>; publicUrl?: string }) {
+  const [draft, setDraft] = useState(theme);
+  const [message, setMessage] = useState("");
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") close(); };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [close]);
+  function update(key: "canvasColor" | "inkColor", value: string) {
+    const next = { ...draft, [key]: value };
+    setDraft(next);
+    if (/^#[0-9a-f]{6}$/i.test(next.canvasColor) && /^#[0-9a-f]{6}$/i.test(next.inkColor)) preview(next);
+  }
+  async function submit() {
+    if (!/^#[0-9a-f]{6}$/i.test(draft.canvasColor) || !/^#[0-9a-f]{6}$/i.test(draft.inkColor)) { setMessage("Use a six-digit hex color, for example #fff4c4."); return; }
+    if (draft.canvasColor.toLowerCase() === draft.inkColor.toLowerCase()) { setMessage("Canvas and ink colors must be different."); return; }
+    await save(draft);
+  }
+  return <div className={styles.uiStudioBackdrop} onMouseDown={event => { if (event.target === event.currentTarget) close(); }}>
+    <section className={styles.uiStudioPanel} role="dialog" aria-modal="true" aria-labelledby="operation-ui-studio-title">
+      <div className={styles.uiStudioHeader}><div><p>Owner tools</p><h2 id="operation-ui-studio-title">UI Studio</h2></div><button type="button" onClick={close} aria-label="Close UI Studio"><X size={18} /></button></div>
+      <p className={styles.uiStudioIntro}>These colors apply only to Operation, its article reader, and editor for every role.</p>
+      <div className={styles.uiStudioFields}>
+        <label><span>Canvas / background</span><input type="color" aria-label="Canvas color picker" value={draft.canvasColor} onChange={event => update("canvasColor", event.target.value)} /><input aria-label="Canvas hex value" value={draft.canvasColor} onChange={event => update("canvasColor", event.target.value)} maxLength={7} /></label>
+        <label><span>Ink / text and borders</span><input type="color" aria-label="Ink color picker" value={draft.inkColor} onChange={event => update("inkColor", event.target.value)} /><input aria-label="Ink hex value" value={draft.inkColor} onChange={event => update("inkColor", event.target.value)} maxLength={7} /></label>
+      </div>
+      <div className={styles.uiStudioPreview} style={{ background: draft.canvasColor, color: draft.inkColor }}><strong>Operation preview</strong><span>Muted copy, badges and surfaces inherit this pair.</span><button type="button" style={{ background: draft.inkColor, color: draft.canvasColor }}>Example action</button></div>
+      {publicUrl && <p className={styles.uiStudioLink}>Read-only handbook and news: <a href={publicUrl} target="_blank" rel="noreferrer">Open direct link</a></p>}
+      {message && <p className={styles.uiStudioMessage} role="status">{message}</p>}
+      <div className={styles.uiStudioActions}><button type="button" onClick={close}>Cancel</button><button type="button" onClick={() => void submit()} disabled={saving}>{saving ? <LoaderCircle className={styles.saveSpinner} size={16} /> : <Check size={16} />}Save colors</button></div>
+    </section>
+  </div>;
+}
+
 function HomeView({ news, tasks, metrics, openArticle, openView }: { news: OperationArticle[]; tasks: OperationDailyTask[]; metrics: OperationModuleState["metrics"]; openArticle: (article: OperationArticle) => void; openView: (view: View) => void }) {
   const outstanding = tasks.filter(task => !task.completed);
   return <><section className={styles.todayPanel}><div><p className={styles.eyebrow}>Today</p><h1>{outstanding.length ? `${outstanding.length} task${outstanding.length === 1 ? "" : "s"} to finish` : "Daily work is complete"}</h1><p>{tasks.length ? `${tasks.length - outstanding.length} of ${tasks.length} complete` : "No scheduled work today."}</p></div><button type="button" onClick={() => openView("tasks")}>Open tasks <ChevronRight size={17} /></button></section><div className={styles.todayTaskPreview}>{outstanding.slice(0, 3).map(task => <div key={task.id}><span data-priority={task.priority} /><strong>{task.title}</strong>{task.dueTime && <small>{task.dueTime}</small>}</div>)}</div><section className={styles.metricsPanel} aria-label="Today’s operation summary"><div><strong>{metrics.completionRate}%</strong><span>complete</span></div><div><strong>{metrics.dueCount}</strong><span>scheduled</span></div><div><strong>{metrics.openNeedsCount}</strong><span>to order</span></div></section><SectionHeader title="News" detail="Latest updates" /> <div className={styles.cardGrid}>{news.slice(0, 3).map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} />)}{!news.length && <div className={styles.empty}>No news yet.</div>}</div><SectionHeader title="Tools" detail="Daily operation" /><div className={styles.moduleGrid}><ModuleCard title="Handbook" description="Routines and procedures." icon={BookOpen} onClick={() => openView("handbook")} /><ModuleCard title="Tasks" description="Scheduled work and check-offs." icon={CheckSquare} onClick={() => openView("tasks")} /><ModuleCard title="We need" description="Shared order list." icon={ShoppingBasket} onClick={() => openView("needs")} /></div></>;
+}
+
+function PublicHomeView({ news, openArticle, openHandbook }: { news: OperationArticle[]; openArticle: (article: OperationArticle) => void; openHandbook: () => void }) {
+  return <><section className={styles.todayPanel}><div><p className={styles.eyebrow}>Bar Ops</p><h1>Handbook & news</h1><p>Read the latest published routines and updates.</p></div><button type="button" onClick={openHandbook}>Open handbook <ChevronRight size={17} /></button></section><SectionHeader title="News" detail="Latest updates" /><div className={styles.cardGrid}>{news.slice(0, 3).map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} />)}{!news.length && <div className={styles.empty}>No news yet.</div>}</div></>;
 }
 
 function StorageNotice() {

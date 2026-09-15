@@ -35,6 +35,7 @@ const checks = [
   ["task audiences are explicit and persisted", taskAudienceMigration.includes("assignment_scope") && route.includes('"ON_SHIFT", "EVERYONE"')],
   ["task audience is composed beside repeat", operation.includes('<Repeat2 size={15} />Repeat') && operation.includes('<label className={styles.taskAudienceField}><span className={styles.taskSettingLabel}><UserRound size={15} />Task audience')],
   ["task settings constrain native date and time controls", operationStyles.includes("contain:inline-size") && operationStyles.includes("max-inline-size:100%")],
+  ["Operations keeps iPad touch inputs and the editor viewport safe", operation.includes("window.visualViewport") && operation.includes('visualViewport?.addEventListener("resize", syncViewport)') && operationStyles.includes("@media (hover:none) and (pointer:coarse)") && operationStyles.includes("font-size:16px")],
 ];
 
 for (const [name, ok] of checks) {

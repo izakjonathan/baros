@@ -1,14 +1,17 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.93**
+Current release: **v0.19.0-rc.94**
 
 Rollback checkpoint: **v0.19.0-rc.70**.
 
-## RC.93 — Owner UI Studio
+## RC.94 — UI Studio and Work Sans
 
-- Owners can save an organization-wide Canvas and Ink palette from **Settings → UI Studio**.
-- The palette is read at the root for every signed-in session; shared accents, muted text, borders and Operations canvases derive from those two values.
+- Owners can save an organization-wide Canvas and Ink palette from the **Operation** module’s UI Studio.
+- The palette is scoped to Operation, its handbook/news reader, and editor; shared manager, scheduling, and employee shells keep their existing palettes.
 - Saving is owner-authorized, organization-scoped and audited. Apply `db/migrations/020_organization_ui_theme.sql` before enabling the control in production.
+- Each organization has a read-only direct URL at `/operation/public/<organization-slug>` for published handbook and news articles. It does not expose Tasks, Needs, editing, or the UI Studio.
+- Work Sans is loaded with `next/font/google` as the shared body and display family.
+- Operations keeps iPad-safe input sizing and keyboard-aware visual-viewport handling; real iPad Safari acceptance remains required before production sign-off.
 
 Bar Ops is a Next.js operations workspace for hospitality teams. The current architecture uses a global UI system for the manager and employee shells, with Shift Plan and the standalone Operation module as the only custom CSS Module exceptions.
 
