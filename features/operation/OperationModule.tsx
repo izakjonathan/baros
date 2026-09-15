@@ -156,7 +156,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
         const response = await fetch("/api/settings/ui-theme", { cache: "no-store" });
         if (!response.ok) return;
         const next = await response.json() as UiTheme;
-        if (next.canvasColor && next.inkColor) {
+        if (next.canvasColor && next.inkColor && next.accentColor && next.positiveColor) {
           setUiTheme(next);
           setSavedUiTheme(next);
         }
@@ -300,7 +300,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
       const response = await fetch("/api/settings/ui-theme", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(next) });
       const saved = await response.json().catch(() => null);
       if (!response.ok) throw new Error(typeof saved === "object" && saved !== null && "error" in saved && typeof saved.error === "string" ? saved.error : "Could not save UI Studio colors.");
-      if (!saved || typeof saved !== "object" || !("canvasColor" in saved) || !("inkColor" in saved)) throw new Error("UI Studio returned an invalid color scheme.");
+      if (!saved || typeof saved !== "object" || !("canvasColor" in saved) || !("inkColor" in saved) || !("accentColor" in saved) || !("positiveColor" in saved)) throw new Error("UI Studio returned an invalid color scheme.");
       const confirmed = saved as UiTheme;
       setUiTheme(confirmed); setSavedUiTheme(confirmed); setStudioOpen(false);
     } catch (error) { setEditorMessage(error instanceof Error ? error.message : "Could not save UI Studio colors."); }
@@ -343,13 +343,13 @@ function OperationUiStudio({ theme, saving, close, preview, save, publicUrl }: {
     document.addEventListener("keydown", closeOnEscape);
     return () => document.removeEventListener("keydown", closeOnEscape);
   }, [close]);
-  function update(key: "canvasColor" | "inkColor", value: string) {
+  function update(key: "canvasColor" | "inkColor" | "accentColor" | "positiveColor", value: string) {
     const next = { ...draft, [key]: value };
     setDraft(next);
-    if (/^#[0-9a-f]{6}$/i.test(next.canvasColor) && /^#[0-9a-f]{6}$/i.test(next.inkColor)) preview(next);
+    if (/^#[0-9a-f]{6}$/i.test(next.canvasColor) && /^#[0-9a-f]{6}$/i.test(next.inkColor) && /^#[0-9a-f]{6}$/i.test(next.accentColor) && /^#[0-9a-f]{6}$/i.test(next.positiveColor)) preview(next);
   }
   async function submit() {
-    if (!/^#[0-9a-f]{6}$/i.test(draft.canvasColor) || !/^#[0-9a-f]{6}$/i.test(draft.inkColor)) { setMessage("Use a six-digit hex color, for example #fff4c4."); return; }
+    if (![draft.canvasColor, draft.inkColor, draft.accentColor, draft.positiveColor].every(value => /^#[0-9a-f]{6}$/i.test(value))) { setMessage("Use a six-digit hex color, for example #fff4c4."); return; }
     if (draft.canvasColor.toLowerCase() === draft.inkColor.toLowerCase()) { setMessage("Canvas and ink colors must be different."); return; }
     await save(draft);
   }
@@ -360,8 +360,10 @@ function OperationUiStudio({ theme, saving, close, preview, save, publicUrl }: {
       <div className={styles.uiStudioFields}>
         <label><span>Canvas / background</span><input type="color" aria-label="Canvas color picker" value={draft.canvasColor} onChange={event => update("canvasColor", event.target.value)} /><input aria-label="Canvas hex value" value={draft.canvasColor} onChange={event => update("canvasColor", event.target.value)} maxLength={7} /></label>
         <label><span>Ink / text and borders</span><input type="color" aria-label="Ink color picker" value={draft.inkColor} onChange={event => update("inkColor", event.target.value)} /><input aria-label="Ink hex value" value={draft.inkColor} onChange={event => update("inkColor", event.target.value)} maxLength={7} /></label>
+        <label><span>Accent / attention</span><input type="color" aria-label="Accent color picker" value={draft.accentColor} onChange={event => update("accentColor", event.target.value)} /><input aria-label="Accent hex value" value={draft.accentColor} onChange={event => update("accentColor", event.target.value)} maxLength={7} /></label>
+        <label><span>Positive / calm</span><input type="color" aria-label="Positive color picker" value={draft.positiveColor} onChange={event => update("positiveColor", event.target.value)} /><input aria-label="Positive hex value" value={draft.positiveColor} onChange={event => update("positiveColor", event.target.value)} maxLength={7} /></label>
       </div>
-      <div className={styles.uiStudioPreview} style={{ background: draft.canvasColor, color: draft.inkColor }}><strong>Operation preview</strong><span>Muted copy, badges and surfaces inherit this pair.</span><button type="button" style={{ background: draft.inkColor, color: draft.canvasColor }}>Example action</button></div>
+      <div className={styles.uiStudioPreview} style={{ background: draft.canvasColor, color: draft.inkColor }}><strong>Operation preview</strong><span>Muted copy, badges and surfaces inherit this pair.</span><button type="button" style={{ background: draft.inkColor, color: draft.canvasColor }}>Example action</button><span style={{ color: draft.accentColor }}>High priority uses accent</span><span style={{ color: draft.positiveColor }}>Low priority uses positive</span></div>
       {publicUrl && <p className={styles.uiStudioLink}>Read-only handbook and news: <a href={publicUrl} target="_blank" rel="noreferrer">Open direct link</a></p>}
       {message && <p className={styles.uiStudioMessage} role="status">{message}</p>}
       <div className={styles.uiStudioActions}><button type="button" onClick={close}>Cancel</button><button type="button" onClick={() => void submit()} disabled={saving}>{saving ? <LoaderCircle className={styles.saveSpinner} size={16} /> : <Check size={16} />}Save colors</button></div>

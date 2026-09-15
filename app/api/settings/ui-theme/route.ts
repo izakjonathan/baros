@@ -22,19 +22,23 @@ export async function PUT(request: Request) {
     const body = await readJsonObject(request);
     const canvasColor = normalizeUiColor(body.canvasColor, "Canvas color");
     const inkColor = normalizeUiColor(body.inkColor, "Ink color");
+    const accentColor = normalizeUiColor(body.accentColor, "Accent color");
+    const positiveColor = normalizeUiColor(body.positiveColor, "Positive color");
     if (canvasColor === inkColor) throw new ApiError(400, "Canvas and ink colors must be different");
     const before = await getUiTheme(user.organizationId);
-    const [theme] = await db()<Array<{ canvas_color: string; ink_color: string; updated_at: Date }>>`
-      insert into organization_ui_themes(organization_id, canvas_color, ink_color, updated_by, updated_at)
-      values(${user.organizationId}, ${canvasColor}, ${inkColor}, ${user.userId}, now())
+    const [theme] = await db()<Array<{ canvas_color: string; ink_color: string; accent_color: string; positive_color: string; updated_at: Date }>>`
+      insert into organization_ui_themes(organization_id, canvas_color, ink_color, accent_color, positive_color, updated_by, updated_at)
+      values(${user.organizationId}, ${canvasColor}, ${inkColor}, ${accentColor}, ${positiveColor}, ${user.userId}, now())
       on conflict (organization_id) do update set
         canvas_color=excluded.canvas_color,
         ink_color=excluded.ink_color,
+        accent_color=excluded.accent_color,
+        positive_color=excluded.positive_color,
         updated_by=excluded.updated_by,
         updated_at=now()
-      returning canvas_color, ink_color, updated_at
+      returning canvas_color, ink_color, accent_color, positive_color, updated_at
     `;
-    const next = { canvasColor: theme.canvas_color, inkColor: theme.ink_color, updatedAt: theme.updated_at.toISOString() };
+    const next = { canvasColor: theme.canvas_color, inkColor: theme.ink_color, accentColor: theme.accent_color, positiveColor: theme.positive_color, updatedAt: theme.updated_at.toISOString() };
     await db()`
       insert into audit_logs(organization_id, actor_user_id, action, entity_type, entity_id, before_data, after_data)
       values(${user.organizationId}, ${user.userId}, 'UI_THEME_UPDATED', 'organization_ui_theme', ${user.organizationId}, ${JSON.stringify(before)}::jsonb, ${JSON.stringify(next)}::jsonb)
