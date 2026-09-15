@@ -33,6 +33,8 @@ const checks = [
   ["task date and time retain a two-column mobile layout", !operationStyles.includes(".moduleGrid,.adminGrid,.editorMeta,.taskSettings{grid-template-columns:1fr}" )],
   ["task instructions are genuinely optional", route.includes('optionalString(body, "description", 300) || ""')],
   ["task audiences are explicit and persisted", taskAudienceMigration.includes("assignment_scope") && route.includes('"ON_SHIFT", "EVERYONE"')],
+  ["task audience is composed beside repeat", operation.includes('<Repeat2 size={15} />Repeat') && operation.includes('<label className={styles.taskAudienceField}><span className={styles.taskSettingLabel}><UserRound size={15} />Task audience')],
+  ["task settings constrain native date and time controls", operationStyles.includes("contain:inline-size") && operationStyles.includes("max-inline-size:100%")],
 ];
 
 for (const [name, ok] of checks) {
