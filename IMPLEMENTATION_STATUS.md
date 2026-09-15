@@ -1,10 +1,19 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.85**
+Version: **v0.19.0-rc.86**
 
 ## Current focus
 
-Operation task visibility and audience assignment from the verified rc.84 baseline.
+Compact private-media article editing from the verified rc.85 baseline.
+
+## rc.86
+
+- Consolidated the full-screen article editor controls into one compact top row.
+- Added existing-category selection and a dedicated New category input.
+- Made the editing title body-sized while retaining reader title styling.
+- Fixed private Vercel Blob image upload and authenticated rendering.
+- No database migration is required.
+- Rollback checkpoint: v0.19.0-rc.85.
 
 ## rc.85
 

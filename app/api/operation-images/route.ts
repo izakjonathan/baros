@@ -21,11 +21,11 @@ export async function POST(request: Request) {
 
     const extension = file.type.split("/")[1]?.replace(/[^a-z0-9]/gi, "") || "jpg";
     const blob = await put(`operation/${user.organizationId}/${crypto.randomUUID()}.${extension}`, file, {
-      access: "public",
+      access: "private",
       addRandomSuffix: false,
       contentType: file.type,
     });
-    return NextResponse.json({ url: blob.url }, { status: 201 });
+    return NextResponse.json({ url: `/api/operation-images/${blob.pathname}` }, { status: 201 });
   } catch (error) {
     return jsonError(error, request);
   }

@@ -1,14 +1,17 @@
-# v0.19.0-rc.85 — Task visibility and assignment
+# v0.19.0-rc.86 — Compact private-media article editor
 
 ## Baseline
 
-- Continued from v0.19.0-rc.84. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.85. That release is the rollback checkpoint.
 
 ## Included
 
-- Fixed task creation with an empty optional instruction.
-- Added explicit task audiences: Specific employee, Everyone on shift, and Everyone.
-- Everyone on shift uses the published rota for the task’s service date; it never requires clocking in. Everyone is independent of the Shift module.
-- Migration `019_operation_task_assignment_scope.sql` persists the audience safely.
+- Compact one-row article editor controls for Back, article type, category and Save.
+- Existing category selection plus an explicit compact New category input.
+- Editing title uses article body typography; published titles retain their reader presentation.
+- Private Vercel Blob upload/delivery with authentication and organisation scoping.
+- `@vercel/blob` upgraded to v2.3.0.
 
-Rollback checkpoint: **v0.19.0-rc.84**.
+No database migration is required.
+
+Rollback checkpoint: **v0.19.0-rc.85**.

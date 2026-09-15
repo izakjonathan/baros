@@ -119,6 +119,7 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
     return now.valueOf() >= reminderAt && now.valueOf() < due.valueOf() + 60 * 60_000;
   });
   const allArticles = [...state.news, ...state.handbook];
+  const editorCategories = ["General", ...Array.from(new Set(allArticles.map(article => article.category).filter(categoryName => categoryName !== "General"))).sort((left, right) => left.localeCompare(right))];
   const handbookCategories = ["All", ...Array.from(new Set(state.handbook.map(article => article.category)))];
   const filteredHandbook = state.handbook.filter(article => {
     const categoryMatch = category === "All" || article.category === category;
@@ -282,7 +283,7 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
       {state.canManageContent && <AdminPanel message={editorMessage} articles={allArticles} disabled={storageUnavailable} editArticle={(nextDraft) => { setDraft(nextDraft); setEditorMessage(storageUnavailable ? migrationMessage : ""); setEditorOpen(!storageUnavailable); }} deleteArticle={deleteArticle} />}
     </main>
     {currentArticle && <Reader article={currentArticle} canGoBack={readerStack.length > 1} goBack={() => setReaderStack(stack => stack.slice(0, -1))} close={() => setReaderStack([])} />}
-    {editorOpen && <ArticleEditor draft={draft} setDraft={setDraft} saveArticle={saveArticle} saving={saving} message={editorMessage} close={() => { setEditorOpen(false); setEditorMessage(""); }} />}
+    {editorOpen && <ArticleEditor draft={draft} categories={editorCategories} setDraft={setDraft} saveArticle={saveArticle} saving={saving} message={editorMessage} close={() => { setEditorOpen(false); setEditorMessage(""); }} />}
   </div>;
 }
 
@@ -340,8 +341,9 @@ function AdminPanel({ message, articles, disabled, editArticle, deleteArticle }:
   return <section className={styles.adminPanel}><div className={styles.adminPanelHeader}><div><h3>Owner articles</h3><p>Edit or remove handbook and news posts.</p></div></div>{message && <p className={styles.editorMessage} role="status">{message}</p>}<div className={styles.cardGrid}>{articles.map(article => <article className={styles.operationCard} key={article.id}><div><h3>{article.title}</h3><p>{article.kind.toLowerCase()} · {article.category}</p></div><div className={styles.adminActions}><button type="button" onClick={() => editArticle(draftFromArticle(article, article.kind))} disabled={disabled}>Edit</button><button type="button" onClick={() => deleteArticle(article)} aria-label={`Delete ${article.title}`} disabled={disabled}><Trash2 size={16} /></button></div></article>)}</div></section>;
 }
 
-function ArticleEditor({ draft, setDraft, saveArticle, saving, message, close }: { draft: DraftArticle; setDraft: (draft: DraftArticle) => void; saveArticle: () => Promise<boolean>; saving: boolean; message: string; close: () => void }) {
+function ArticleEditor({ draft, categories, setDraft, saveArticle, saving, message, close }: { draft: DraftArticle; categories: string[]; setDraft: (draft: DraftArticle) => void; saveArticle: () => Promise<boolean>; saving: boolean; message: string; close: () => void }) {
   const editorRef = useRef<HTMLElement | null>(null);
+  const categoryIsNew = !categories.includes(draft.category);
 
   useEffect(() => {
     const visualViewport = window.visualViewport;
@@ -367,7 +369,7 @@ function ArticleEditor({ draft, setDraft, saveArticle, saving, message, close }:
     };
   }, []);
 
-  return <aside ref={editorRef} className={styles.articleEditor} aria-modal="true" role="dialog" aria-label={draft.id ? "Edit article" : "Add article"}><div className={styles.articleEditorFrame}><div className={styles.articleEditorTop}><button type="button" className={styles.editorIconButton} onClick={close} aria-label="Close editor"><ArrowLeft size={22} /></button><button type="button" className={styles.editorDoneButton} disabled={saving} onClick={saveArticle} aria-label="Save article">{saving ? "Saving" : <Check size={24} />}</button></div><div className={styles.articleEditorCanvas}><div className={styles.editorMeta}><select value={draft.kind} onChange={event => setDraft({ ...draft, kind: event.target.value as OperationArticleKind })}><option value="HANDBOOK">Handbook</option><option value="NEWS">News</option></select><input value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })} placeholder="Category" /></div><input className={styles.editorTitleInput} value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} placeholder="Title" /><textarea className={styles.editorDescriptionInput} value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} placeholder="Short card description" /><TiptapArticleEditor value={draft.document} onChange={(document) => setDraft({ ...draft, document })} />{message && <p className={styles.editorMessage} role="status">{message}</p>}</div></div></aside>;
+  return <aside ref={editorRef} className={styles.articleEditor} aria-modal="true" role="dialog" aria-label={draft.id ? "Edit article" : "Add article"}><div className={styles.articleEditorFrame}><div className={styles.articleEditorTop}><button type="button" className={styles.editorIconButton} onClick={close} aria-label="Close editor"><ArrowLeft size={18} /></button><label className={styles.editorTopSelect}><span className="sr-only">Article type</span><select value={draft.kind} onChange={event => setDraft({ ...draft, kind: event.target.value as OperationArticleKind })}><option value="HANDBOOK">Handbook</option><option value="NEWS">News</option></select></label><label className={styles.editorTopSelect}><span className="sr-only">Existing category</span><select value={categoryIsNew ? "" : draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })}><option value="">New category</option>{categories.map(categoryName => <option key={categoryName} value={categoryName}>{categoryName}</option>)}</select></label><button type="button" className={styles.editorDoneButton} disabled={saving} onClick={saveArticle} aria-label="Save article">{saving ? "Save" : <Check size={19} />}</button></div><div className={styles.articleEditorCanvas}>{categoryIsNew && <label className={styles.editorNewCategory}><span>New category</span><input value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })} placeholder="Category name" /></label>}<input className={styles.editorTitleInput} value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} placeholder="Title" /><textarea className={styles.editorDescriptionInput} value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} placeholder="Short card description" /><TiptapArticleEditor value={draft.document} onChange={(document) => setDraft({ ...draft, document })} />{message && <p className={styles.editorMessage} role="status">{message}</p>}</div></div></aside>;
 }
 
 function TiptapArticleEditor({ value, onChange }: { value: OperationTiptapDocument; onChange: (document: OperationTiptapDocument) => void }) {

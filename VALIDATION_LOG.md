@@ -1,25 +1,24 @@
-# v0.19.0-rc.85 Validation
+# v0.19.0-rc.86 Validation
 
 ## Confirmed baseline
 
-The v0.19.0-rc.84 release source was used as the baseline for the Operation task-visibility release.
+The v0.19.0-rc.85 release source was used as the baseline for the compact private-media article-editor release.
 
-- Rollback checkpoint: v0.19.0-rc.84
+- Rollback checkpoint: v0.19.0-rc.85
 
 ## Implementation
 
-- Fixed creation when the optional task instruction is blank.
-- Added persisted audiences for specific employee, everyone scheduled for the service date, and everyone independent of the shift module.
+- Compacted the article editor header and added existing/new category controls.
+- Converted private-Blob image upload and delivery to authenticated, organisation-scoped routes.
+- Updated `@vercel/blob` to v2.3.0.
 
 ## Validation status
 
 - ESLint: passed.
 - TypeScript (`tsc --noEmit`): passed.
-- Current regression suite: passed.
-- UI contract: passed.
-- Release validation and artifact audit: passed.
+- Operation regression suite: passed.
 - Next.js 16.2.12 Turbopack production build: passed.
 
 ## Scope
 
-Run migration `019_operation_task_assignment_scope.sql` after deployment. Existing individual assignments are preserved; all other existing tasks become Everyone.
+No database migration is required. Production iOS visual confirmation is still required after deployment; the private Blob route was verified by source-level regression coverage and production build, not against a live uploaded photo in this release.

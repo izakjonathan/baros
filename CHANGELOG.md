@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.19.0-rc.86
+
+- Compacted the Operation article-editor header into one row: smaller Back and Save controls, Handbook/News selector, and existing-category selector.
+- Added an explicit New category path with a compact input, while preserving existing categories for reuse.
+- Made the editing title use the same body-text scale and rhythm as article text; published article titles retain their reader styling.
+- Left visual space between the format dock and Safari’s bottom browser chrome.
+- Fixed image uploads for the connected private Vercel Blob store. Images are stored privately and served through an authenticated, organisation-scoped app route.
+- Upgraded `@vercel/blob` to v2.3.0 for private-store reads.
+
 ## v0.19.0-rc.85
 
 - Fixed daily-task creation when the optional short instruction is blank.
