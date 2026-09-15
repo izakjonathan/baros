@@ -22,8 +22,8 @@ export default async function OperationPage() {
   const user = await requireUser();
   const devMode = isDevAuthEnabled();
   const initialTheme = await getUiTheme(user.organizationId).catch(() => defaultTheme);
-  const [organization] = devMode ? [] : await db()<Array<{ slug: string }>>`select slug from organizations where id=${user.organizationId} limit 1`;
-  const publicUrl = organization ? `/operation/public/${organization.slug}` : undefined;
+  const [publicAccess] = devMode ? [] : await db()<Array<{ access_token: string }>>`select access_token from operation_public_access where organization_id=${user.organizationId} and enabled=true limit 1`;
+  const publicUrl = publicAccess ? `/operation/public/${publicAccess.access_token}` : undefined;
   const fallbackState: OperationModuleState = {
     ...defaultOperationState,
     userRole: user.role,

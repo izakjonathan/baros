@@ -1,15 +1,15 @@
-# v0.19.0-rc.95 Validation
+# v0.19.0-rc.96 Validation
 
 ## Confirmed baseline
 
-The supplied `baros-main-updated.zip` v0.19.0-rc.94 source was used as the baseline for the Operation palette coverage release.
+The supplied `baros-main-updated.zip` v0.19.0-rc.95 source was used as the baseline for the shared staff Operations link release.
 
-- Rollback checkpoint: v0.19.0-rc.94
+- Rollback checkpoint: v0.19.0-rc.95
 
 ## Implementation
 
-- Removed the last fixed Operations accent and success colors so the entire Operation surface derives from Canvas and Ink.
-- Added static coverage that fails if a fixed hex or RGBA color reappears in the Operation stylesheet, and added the public palette refresh route used by open read-only sessions.
+- Replaced the slug-based handbook/news-only route with a token-based shared Operations route and public mutation boundary.
+- Shared task and need actions retain audit history without fabricating an employee identity.
 
 ## Validation status
 
@@ -21,4 +21,4 @@ The supplied `baros-main-updated.zip` v0.19.0-rc.94 source was used as the basel
 
 ## Scope
 
-Apply migration `020_organization_ui_theme.sql` before persisted UI Studio changes are enabled. Production iPad Safari visual confirmation is still required after deployment.
+Apply migration `022_operation_public_staff_link.sql` before the shared link is enabled. Production iPad Safari visual confirmation is still required after deployment.

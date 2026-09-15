@@ -1,10 +1,16 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.95**
+Version: **v0.19.0-rc.96**
 
 ## Current focus
 
-Operation palette coverage from the verified rc.94 baseline.
+Shared staff Operations link from the verified rc.95 baseline.
+
+## rc.96
+
+- The owner-visible direct link now uses an unguessable organization access token and opens the employee-level Operations workspace without a login.
+- Shared links can act on Everyone tasks and Needs only; owner/editor/task-management controls stay unavailable and public changes are audit-labelled.
+- Apply `022_operation_public_staff_link.sql` before enabling the link. Rollback checkpoint: v0.19.0-rc.95.
 
 ## rc.95
 

@@ -14,7 +14,8 @@ const operation = read("features/operation/OperationModule.module.css");
 const operationModule = read("features/operation/OperationModule.tsx");
 const layout = read("app/layout.tsx");
 const operationPage = read("app/operation/page.tsx");
-const publicOperationPage = read("app/operation/public/[organizationSlug]/page.tsx");
+const publicOperationPage = read("app/operation/public/[accessToken]/page.tsx");
+const publicOperationRoute = read("app/api/operation-public/[accessToken]/route.ts");
 const employeeLayout = read("app/employee/layout.tsx");
 const employeeShell = read("app/employee/employee-shell.tsx");
 const managerApp = read("components/bar-ops-app.tsx");
@@ -163,7 +164,7 @@ const checks = [
   ["UI Studio is owner-only, persistent, and organization-scoped", uiThemeRoute.includes('requireUser(["OWNER"])') && uiThemeRoute.includes("UI_THEME_UPDATED") && uiThemeMigration.includes("organization_id uuid primary key") && uiTheme.includes("new ApiError(400")],
   ["UI Studio is scoped to Operation instead of the shared app shell", !layout.includes("getUiTheme") && !layout.includes("themeCustomProperties") && !tokens.includes("--ui-canvas") && operationPage.includes("getUiTheme") && operationModule.includes("operationThemeCustomProperties(uiTheme)")],
   ["UI Studio is only exposed to Operation owners and restores canceled previews", operationModule.includes('const canManageUiStudio = state.userRole === "OWNER"') && operationModule.includes("setUiTheme(savedUiTheme)") && !read("features/settings/SettingsWorkspace.tsx").includes("UI Studio")],
-  ["public Operation route is read-only handbook and news", publicOperationPage.includes("publicMode") && publicOperationPage.includes("canManageContent: false") && publicOperationPage.includes("dailyTasks: []") && operationModule.includes("...(publicMode ? [] : [\"tasks\", \"needs\"])")],
+  ["public Operation route is a shared staff link with employee-level Operations access", publicOperationPage.includes("operationApiUrl={apiUrl}") && publicOperationRoute.includes("assignment_scope='EVERYONE'") && publicOperationRoute.includes("PUBLIC_OPERATION_TASK_UPDATED") && publicOperationRoute.includes("PUBLIC_OPERATION_NEED_ORDERED") && operationModule.includes("operationApiUrl")],
   ["active script surface remains compact", scriptFiles.length <= 20 && Object.keys(pkg.scripts).length <= 25],
   ["quality workflow runs current suite", quality.includes("npm run test:all")],
   ["root global-error exception remains documented", exceptionRegister.includes("global-error.tsx") && exceptionRegister.includes("root error boundary")],

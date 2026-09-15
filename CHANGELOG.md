@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.19.0-rc.96
+
+- Replaced the handbook/news-only public page with an unguessable shared staff Operations link.
+- Shared links expose employee-level Home, Handbook, Tasks and Needs; they can complete shared tasks, tick shared checklists, create needed items and mark orders, while owner/manager actions remain unavailable.
+- Added migration `022_operation_public_staff_link.sql`; its audit entries clearly record shared-link actions without inventing an employee identity.
+
 ## v0.19.0-rc.95
 
 - Removed the final fixed Operation accent and success colors. Every Operations color now derives from the saved Canvas/Ink pair.

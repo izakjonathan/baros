@@ -1,8 +1,13 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.95**
+Current release: **v0.19.0-rc.96**
 
-Rollback checkpoint: **v0.19.0-rc.94**.
+Rollback checkpoint: **v0.19.0-rc.95**.
+
+## RC.96 — Shared staff Operations link
+
+- The direct Operations link now uses an unguessable, organisation-scoped token and exposes the employee-level Home, Handbook, Tasks and Needs workspace without a login.
+- It includes shared (`Everyone`) tasks and staff ordering actions only. Changes are recorded as shared-link actions, never attributed to an individual employee.
 
 ## RC.95 — Operation palette coverage
 

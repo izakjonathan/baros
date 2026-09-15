@@ -76,7 +76,7 @@ async function responseMessage(response: Response, fallback: string) {
   return typeof failure === "object" && failure !== null && "error" in failure && typeof failure.error === "string" ? failure.error : fallback;
 }
 
-export function OperationModule({ initialState, initialTheme, devMode, publicMode = false, publicUrl, themeRefreshUrl }: { initialState: OperationModuleState; initialTheme: UiTheme; devMode: boolean; publicMode?: boolean; publicUrl?: string; themeRefreshUrl?: string }) {
+export function OperationModule({ initialState, initialTheme, devMode, publicMode = false, publicUrl, themeRefreshUrl, operationApiUrl }: { initialState: OperationModuleState; initialTheme: UiTheme; devMode: boolean; publicMode?: boolean; publicUrl?: string; themeRefreshUrl?: string; operationApiUrl?: string }) {
   const [state, setState] = useState(initialState);
   const [view, setView] = useState<View>("home");
   const [query, setQuery] = useState("");
@@ -131,13 +131,15 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   });
   const storageUnavailable = state.storageStatus === "migration-required" && !devMode;
   const canManageUiStudio = state.userRole === "OWNER";
+  const operationEndpoint = operationApiUrl || "/api/operation-module";
+  const operationUrl = (query?: string) => query ? `${operationEndpoint}${operationEndpoint.includes("?") ? "&" : "?"}${query}` : operationEndpoint;
 
   const refresh = useCallback(async (date: string) => {
-    if (devMode || publicMode) return;
-    const response = await fetch(`/api/operation-module?date=${encodeURIComponent(date)}`, { cache: "no-store" });
+    if (devMode) return;
+    const response = await fetch(`${operationEndpoint}${operationEndpoint.includes("?") ? "&" : "?"}date=${encodeURIComponent(date)}`, { cache: "no-store" });
     const next = await response.json();
     if (response.ok) setState(next as OperationModuleState);
-  }, [devMode, publicMode]);
+  }, [devMode, operationEndpoint]);
 
   const selectTaskDate = useCallback((date: string) => {
     setSelectedTaskDate(date);
@@ -201,7 +203,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
       return true;
     }
     setSaving(true);
-    const response = await fetch("/api/operation-module", { method: draft.id ? "PATCH" : "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "article", id: draft.id, kind: article.kind, category: article.category, title: article.title, description: article.description, content: article.content }) });
+    const response = await fetch(operationEndpoint, { method: draft.id ? "PATCH" : "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "article", id: draft.id, kind: article.kind, category: article.category, title: article.title, description: article.description, content: article.content }) });
     setSaving(false);
     if (response.ok) { setDraft(draftFromArticle(undefined, draft.kind)); setEditorMessage("Article saved."); setEditorOpen(false); await refresh(selectedTaskDate); return true; }
     else {
@@ -216,7 +218,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
       setState(current => ({ ...current, handbook: current.handbook.filter(item => item.id !== article.id), news: current.news.filter(item => item.id !== article.id) }));
       return;
     }
-    const response = await fetch(`/api/operation-module?entity=article&id=${encodeURIComponent(article.id)}`, { method: "DELETE" });
+    const response = await fetch(operationUrl(`entity=article&id=${encodeURIComponent(article.id)}`), { method: "DELETE" });
     if (!response.ok) setEditorMessage(await responseMessage(response, "Could not delete article."));
     await refresh(selectedTaskDate);
   }
@@ -231,7 +233,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     const task: OperationDailyTask = { id: crypto.randomUUID(), weekday: new Date(`${taskDueDate}T00:00:00Z`).getUTCDay(), title: taskTitle.trim(), description: taskDescription.trim(), dueDate: taskDueDate, repeatUnit: taskRepeatUnit, repeatInterval: taskRepeatInterval, repeatEndDate: taskRepeatEndDate || null, dueTime: taskDueTime || null, reminderMinutes: taskReminderMinutes === "" ? null : Math.max(0, Number(taskReminderMinutes) || 0), priority: taskPriority, taskType, assignmentScope: taskAssignmentScope, assignedEmployeeId: assignee?.id || null, assignedEmployeeName: assignee?.name || null, completedByName: null, checklist, completed: false };
     if (devMode) setState(current => ({ ...current, dailyTasks: [...current.dailyTasks, task] }));
     else {
-      const response = await fetch("/api/operation-module", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", title: task.title, description: task.description, dueDate: task.dueDate, repeatUnit: task.repeatUnit, repeatInterval: task.repeatInterval, repeatEndDate: task.repeatEndDate, dueTime: task.dueTime, reminderMinutes: task.reminderMinutes, priority: task.priority, taskType: task.taskType, assignmentScope: task.assignmentScope, assignedEmployeeId: task.assignedEmployeeId, checklist: task.checklist }) });
+      const response = await fetch(operationEndpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", title: task.title, description: task.description, dueDate: task.dueDate, repeatUnit: task.repeatUnit, repeatInterval: task.repeatInterval, repeatEndDate: task.repeatEndDate, dueTime: task.dueTime, reminderMinutes: task.reminderMinutes, priority: task.priority, taskType: task.taskType, assignmentScope: task.assignmentScope, assignedEmployeeId: task.assignedEmployeeId, checklist: task.checklist }) });
       if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not add daily task.")); return; }
       await refresh(selectedTaskDate);
     }
@@ -244,7 +246,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     const completed = !item.completed;
     setState(current => ({ ...current, dailyTasks: current.dailyTasks.map(currentTask => currentTask.id === task.id ? { ...currentTask, checklist: currentTask.checklist.map(checklistItem => checklistItem.id === itemId ? { ...checklistItem, completed } : checklistItem) } : currentTask) }));
     if (!devMode) {
-      const response = await fetch("/api/operation-module", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", action: "checklist", id: task.id, itemId, date: selectedTaskDate, completed }) });
+      const response = await fetch(operationEndpoint, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", action: "checklist", id: task.id, itemId, date: selectedTaskDate, completed }) });
       if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not update checklist.")); await refresh(selectedTaskDate); }
     }
   }
@@ -252,7 +254,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   async function saveTaskTemplate() {
     if (!taskTitle.trim() || storageUnavailable) return;
     const checklist = taskChecklistText.split("\n").map(label => label.trim()).filter(Boolean).slice(0, 30).map((label, index) => ({ id: `item-${index + 1}`, label }));
-    const response = await fetch("/api/operation-module", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "taskTemplate", title: taskTitle.trim(), description: taskDescription.trim(), taskType, priority: taskPriority, dueTime: taskDueTime || null, reminderMinutes: taskReminderMinutes === "" ? null : Number(taskReminderMinutes), checklist }) });
+    const response = await fetch(operationEndpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "taskTemplate", title: taskTitle.trim(), description: taskDescription.trim(), taskType, priority: taskPriority, dueTime: taskDueTime || null, reminderMinutes: taskReminderMinutes === "" ? null : Number(taskReminderMinutes), checklist }) });
     if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not save task template.")); return; }
     setTaskMessage("Template saved."); await refresh(selectedTaskDate);
   }
@@ -260,7 +262,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   async function toggleTask(task: OperationDailyTask) {
     setState(current => ({ ...current, dailyTasks: current.dailyTasks.map(item => item.id === task.id ? { ...item, completed: !item.completed } : item) }));
     if (!devMode) {
-      const response = await fetch("/api/operation-module", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", id: task.id, date: selectedTaskDate, completed: !task.completed }) });
+      const response = await fetch(operationEndpoint, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", id: task.id, date: selectedTaskDate, completed: !task.completed }) });
       if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not update task.")); await refresh(selectedTaskDate); }
     }
   }
@@ -268,7 +270,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   async function deleteTask(task: OperationDailyTask) {
     if (!confirm(`Delete ${task.title}?`)) return;
     if (devMode) { setState(current => ({ ...current, dailyTasks: current.dailyTasks.filter(item => item.id !== task.id) })); return; }
-    const response = await fetch(`/api/operation-module?entity=dailyTask&id=${encodeURIComponent(task.id)}`, { method: "DELETE" });
+    const response = await fetch(operationUrl(`entity=dailyTask&id=${encodeURIComponent(task.id)}`), { method: "DELETE" });
     if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not delete task.")); return; }
     await refresh(selectedTaskDate);
   }
@@ -280,7 +282,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     const need: OperationNeed = { id: crypto.randomUUID(), title: needTitle.trim(), note: needNote.trim() || null, status: "NEEDED", createdAt: new Date().toISOString(), quantity: needQuantity || null, unit: null, supplier: needSupplier.trim() || null, priority: needPriority, neededBy: null, orderedAt: null, orderedByName: null };
     if (devMode) setState(current => ({ ...current, needs: [need, ...current.needs] }));
     else {
-      const response = await fetch("/api/operation-module", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "need", title: need.title, note: need.note, quantity: need.quantity, unit: need.unit, supplier: need.supplier, priority: need.priority, neededBy: need.neededBy }) });
+      const response = await fetch(operationEndpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "need", title: need.title, note: need.note, quantity: need.quantity, unit: need.unit, supplier: need.supplier, priority: need.priority, neededBy: need.neededBy }) });
       if (!response.ok) { setNeedMessage(await responseMessage(response, "Could not add needed item.")); return; }
       await refresh(selectedTaskDate);
     }
@@ -290,7 +292,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   async function markNeedOrdered(need: OperationNeed) {
     setState(current => ({ ...current, needs: current.needs.filter(item => item.id !== need.id) }));
     if (!devMode) {
-      const response = await fetch("/api/operation-module", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "need", id: need.id, status: "ORDERED" }) });
+      const response = await fetch(operationEndpoint, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "need", id: need.id, status: "ORDERED" }) });
       if (!response.ok) { setNeedMessage(await responseMessage(response, "Could not update needed item.")); await refresh(selectedTaskDate); }
     }
   }
@@ -366,7 +368,7 @@ function OperationUiStudio({ theme, saving, close, preview, save, publicUrl }: {
         <label><span>Positive / calm</span><input type="color" aria-label="Positive color picker" value={draft.positiveColor} onChange={event => update("positiveColor", event.target.value)} /><input aria-label="Positive hex value" value={draft.positiveColor} onChange={event => update("positiveColor", event.target.value)} maxLength={7} /></label>
       </div>
       <div className={styles.uiStudioPreview} style={{ background: draft.canvasColor, color: draft.inkColor }}><strong>Operation preview</strong><span>Muted copy, badges and surfaces inherit this pair.</span><button type="button" style={{ background: draft.inkColor, color: draft.canvasColor }}>Example action</button><span style={{ color: draft.accentColor }}>High priority uses accent</span><span style={{ color: draft.positiveColor }}>Low priority uses positive</span></div>
-      {publicUrl && <p className={styles.uiStudioLink}>Read-only handbook and news: <a href={publicUrl} target="_blank" rel="noreferrer">Open direct link</a></p>}
+      {publicUrl && <p className={styles.uiStudioLink}>Shared staff Operations link: <a href={publicUrl} target="_blank" rel="noreferrer">Open direct link</a></p>}
       {message && <p className={styles.uiStudioMessage} role="status">{message}</p>}
       <div className={styles.uiStudioActions}><button type="button" onClick={close}>Cancel</button><button type="button" onClick={() => void submit()} disabled={saving}>{saving ? <LoaderCircle className={styles.saveSpinner} size={16} /> : <Check size={16} />}Save colors</button></div>
     </section>
