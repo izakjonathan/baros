@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.19.0-rc.89
+
+- Removed the duplicate Owner articles panel. Owners now receive Edit and Delete controls on the ordinary Handbook article cards; other roles receive only the normal reader action.
+- Fixed private article-image persistence by allowing the app’s authenticated image-delivery route in the constrained Tiptap schema.
+- Resize compatible device photos in-browser to WebP (maximum 2048px, quality 0.82) before upload; GIFs remain unchanged.
+- Made Vercel Blob failures actionable and restored the valid RC88 package lock after the published lockfile was found malformed.
+
 ## v0.19.0-rc.88
 
 - Removed inherited full-size control padding from the article title and description fields, then tightened the editor canvas spacing between the header, title, description and article body.

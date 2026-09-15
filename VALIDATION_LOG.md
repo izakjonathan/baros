@@ -1,15 +1,16 @@
-# v0.19.0-rc.88 Validation
+# v0.19.0-rc.89 Validation
 
 ## Confirmed baseline
 
-The v0.19.0-rc.87 release source was used as the baseline for the compact article-editor spacing release.
+The v0.19.0-rc.88 release source was used as the baseline for the Handbook owner actions and image reliability release.
 
-- Rollback checkpoint: v0.19.0-rc.87
+- Rollback checkpoint: v0.19.0-rc.88
 
 ## Implementation
 
-- Removed inherited generic control sizing from editor metadata and tightened the vertical canvas rhythm.
-- Moved the borderless format controls closer to the visual viewport edge.
+- Moved owner article actions onto regular Handbook cards and removed the duplicate owner panel.
+- Fixed private-image persistence, added browser-side image preparation, and made Blob failures actionable.
+- Restored the verified valid package lock.
 
 ## Validation status
 

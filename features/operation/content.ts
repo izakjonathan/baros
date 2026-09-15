@@ -51,6 +51,11 @@ export function parseOperationBlocks(value: unknown): OperationContentBlock[] {
 
 const tiptapNodes = new Set(["paragraph", "heading", "bulletList", "orderedList", "listItem", "image", "hardBreak", "text"]);
 const tiptapMarks = new Set(["bold", "italic", "underline", "link"]);
+const operationImagePath = /^\/api\/operation-images\/operation\/[0-9a-f-]+\/[0-9a-f-]+\.(?:avif|gif|jpe?g|png|webp)$/i;
+
+function isArticleImageSource(value: string) {
+  return /^https:\/\//.test(value) || operationImagePath.test(value);
+}
 
 function parseTiptapDocument(value: unknown): OperationTiptapDocument | null {
   const parsed = parseTiptapNode(parseJsonValue(value), 0, true);
@@ -76,7 +81,7 @@ function parseTiptapNode(value: unknown, depth: number, root = false): Operation
   if (type === "image") {
     const attrs = record.attrs && typeof record.attrs === "object" && !Array.isArray(record.attrs) ? record.attrs as Record<string, unknown> : {};
     const src = String(attrs.src || "").trim();
-    if (!/^https:\/\//.test(src) || src.length > 2000) return null;
+    if (!isArticleImageSource(src) || src.length > 2000) return null;
     return { type, attrs: { src, alt: String(attrs.alt || "").slice(0, 180) || "Operation article image" } };
   }
   if (type === "heading") {

@@ -5,6 +5,7 @@ const operation = read("features/operation/OperationModule.tsx");
 const route = read("app/api/operation-module/route.ts");
 const imageRoute = read("app/api/operation-images/route.ts");
 const imageDeliveryRoute = read("app/api/operation-images/[...pathname]/route.ts");
+const operationContent = read("features/operation/content.ts");
 const operationStyles = read("features/operation/OperationModule.module.css");
 const types = read("features/operation/types.ts");
 const migration = read("db/migrations/018_operation_integrity_cleanup.sql");
@@ -18,7 +19,10 @@ const checks = [
   ["month-end recurrence is handled", types.includes("Math.min(start.getUTCDate(), lastDay)")],
   ["unused governance/reminder/audit schema is removed", ["operation_task_reminders", "operation_article_acknowledgements", "operation_article_versions", "operation_need_events"].every(name => migration.includes(`drop table if exists ${name}`))],
   ["SVG upload is rejected", route.includes("requireTaskManager") && imageRoute.includes("avif|gif|jpe?g|png|webp")],
-  ["private image uploads have an authenticated delivery route", imageRoute.includes('access: "private"') && imageDeliveryRoute.includes('access: "private"') && imageDeliveryRoute.includes("getSessionUser")],
+  ["private image uploads have an authenticated delivery route", imageRoute.includes('access: "private"') && imageRoute.includes("logServerError") && imageDeliveryRoute.includes('access: "private"') && imageDeliveryRoute.includes("getSessionUser")],
+  ["uploaded private image paths persist in article content", operationContent.includes("operationImagePath") && operationContent.includes("isArticleImageSource(src)")],
+  ["device images are resized before upload", operation.includes("async function prepareOperationImage") && operation.includes('canvas.toBlob(resolve, "image/webp", 0.82)') && operation.includes("imageUploadMaxDimension = 2048")],
+  ["owner article management reuses Handbook cards", !operation.includes("function AdminPanel") && operation.includes("canManageContent={state.canManageContent}") && operation.includes("onEdit={canManageContent ? () => editArticle(article) : undefined}")],
   ["article editor header is compact and supports existing or new categories", operation.includes("categories={editorCategories}") && operation.includes('className={styles.editorTopSelect}') && operation.includes('Add new category…') && operationStyles.includes("grid-template-columns:2.25rem minmax(0,1fr) minmax(0,1fr) 2.25rem")],
   ["format controls have no enclosing dock surface", operationStyles.includes("padding:0;border:0;background:transparent;box-shadow:none")],
   ["article editor metadata does not inherit full-size form controls", operationStyles.includes(".editorTitleInput{box-sizing:border-box;display:block;min-height:1.55rem;margin:0;padding:0}") && operationStyles.includes(".editorDescriptionInput{box-sizing:border-box;display:block;min-height:1.4rem;margin:.1rem 0 .28rem;padding:0}")],

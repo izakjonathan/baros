@@ -277,10 +277,10 @@ export function OperationModule({ initialState, devMode }: { initialState: Opera
       {storageUnavailable && <StorageNotice />}
       {dueSoonTasks.length > 0 && <section className={styles.duePrompt} role="status"><Clock3 size={18} /><div><strong>{dueSoonTasks.length === 1 ? "Task due soon" : `${dueSoonTasks.length} tasks due soon`}</strong><p>{dueSoonTasks.map(task => `${task.title} · ${task.dueTime}`).join(" · ")}</p></div></section>}
       {view === "home" && <HomeView news={state.news} tasks={state.dailyTasks} metrics={state.metrics} openArticle={(article) => setReaderStack([article])} openView={setView} />}
-      {view === "handbook" && <HandbookView articles={filteredHandbook} categories={handbookCategories} query={query} category={category} setQuery={setQuery} setCategory={setCategory} openArticle={(article) => setReaderStack([article])} />}
+      {editorMessage && !editorOpen && <p className={styles.editorMessage} role="status">{editorMessage}</p>}
+      {view === "handbook" && <HandbookView articles={filteredHandbook} categories={handbookCategories} query={query} category={category} setQuery={setQuery} setCategory={setCategory} openArticle={(article) => setReaderStack([article])} canManageContent={state.canManageContent} disabled={storageUnavailable} editArticle={(article) => { setDraft(draftFromArticle(article, article.kind)); setEditorMessage(storageUnavailable ? migrationMessage : ""); setEditorOpen(!storageUnavailable); }} deleteArticle={deleteArticle} />}
       {view === "tasks" && <TasksView tasks={state.dailyTasks} taskTemplates={state.taskTemplates} assignees={state.assignees} selectedDate={selectedTaskDate} setSelectedDate={selectTaskDate} canManage={state.canManageTasks} taskTitle={taskTitle} taskDescription={taskDescription} taskDueDate={taskDueDate} taskRepeatUnit={taskRepeatUnit} taskRepeatInterval={taskRepeatInterval} taskRepeatEndDate={taskRepeatEndDate} taskType={taskType} taskPriority={taskPriority} taskDueTime={taskDueTime} taskReminderMinutes={taskReminderMinutes} taskAssignmentScope={taskAssignmentScope} taskAssigneeId={taskAssigneeId} taskChecklistText={taskChecklistText} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} setTaskDueDate={setTaskDueDate} setTaskRepeatUnit={setTaskRepeatUnit} setTaskRepeatInterval={setTaskRepeatInterval} setTaskRepeatEndDate={setTaskRepeatEndDate} setTaskType={setTaskType} setTaskPriority={setTaskPriority} setTaskDueTime={setTaskDueTime} setTaskReminderMinutes={setTaskReminderMinutes} setTaskAssignmentScope={setTaskAssignmentScope} setTaskAssigneeId={setTaskAssigneeId} setTaskChecklistText={setTaskChecklistText} saveTaskTemplate={saveTaskTemplate} addTask={addTask} toggleTask={toggleTask} toggleTaskChecklist={toggleTaskChecklist} deleteTask={deleteTask} disabled={storageUnavailable} message={taskMessage} />}
       {view === "needs" && <NeedsView needs={state.needs} needTitle={needTitle} needQuantity={needQuantity} needUnit={needUnit} needSupplier={needSupplier} needPriority={needPriority} needBy={needBy} needNote={needNote} setNeedTitle={setNeedTitle} setNeedQuantity={setNeedQuantity} setNeedUnit={setNeedUnit} setNeedSupplier={setNeedSupplier} setNeedPriority={setNeedPriority} setNeedBy={setNeedBy} setNeedNote={setNeedNote} addNeed={addNeed} markNeedOrdered={markNeedOrdered} disabled={storageUnavailable} message={needMessage} />}
-      {state.canManageContent && <AdminPanel message={editorMessage} articles={allArticles} disabled={storageUnavailable} editArticle={(nextDraft) => { setDraft(nextDraft); setEditorMessage(storageUnavailable ? migrationMessage : ""); setEditorOpen(!storageUnavailable); }} deleteArticle={deleteArticle} />}
     </main>
     {currentArticle && <Reader article={currentArticle} canGoBack={readerStack.length > 1} goBack={() => setReaderStack(stack => stack.slice(0, -1))} close={() => setReaderStack([])} />}
     {editorOpen && <ArticleEditor draft={draft} categories={editorCategories} setDraft={setDraft} saveArticle={saveArticle} saving={saving} message={editorMessage} close={() => { setEditorOpen(false); setEditorMessage(""); }} />}
@@ -300,8 +300,8 @@ function StorageNotice() {
   return <section className={styles.storageNotice} role="status"><strong>Database migration needed</strong><p>Saved Operation articles, daily tasks and needed items will appear after the GitHub database migration action has run against production.</p></section>;
 }
 
-function HandbookView({ articles, categories, query, category, setQuery, setCategory, openArticle }: { articles: OperationArticle[]; categories: string[]; query: string; category: string; setQuery: (value: string) => void; setCategory: (value: string) => void; openArticle: (article: OperationArticle) => void }) {
-  return <><SectionHeader title="Handbook" detail="Bar routines" /><div className={styles.toolbar}><input className={styles.search} value={query} onChange={event => setQuery(event.target.value)} placeholder="Search handbook" /><div className={styles.pills}>{categories.map(item => <button key={item} className={styles.pill} type="button" aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div></div><div className={styles.articleGroups}>{articles.map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} />)}{!articles.length && <div className={styles.empty}>No handbook articles found.</div>}</div></>;
+function HandbookView({ articles, categories, query, category, setQuery, setCategory, openArticle, canManageContent, disabled, editArticle, deleteArticle }: { articles: OperationArticle[]; categories: string[]; query: string; category: string; setQuery: (value: string) => void; setCategory: (value: string) => void; openArticle: (article: OperationArticle) => void; canManageContent: boolean; disabled: boolean; editArticle: (article: OperationArticle) => void; deleteArticle: (article: OperationArticle) => void }) {
+  return <><SectionHeader title="Handbook" detail="Bar routines" /><div className={styles.toolbar}><input className={styles.search} value={query} onChange={event => setQuery(event.target.value)} placeholder="Search handbook" /><div className={styles.pills}>{categories.map(item => <button key={item} className={styles.pill} type="button" aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div></div><div className={styles.articleGroups}>{articles.map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} onEdit={canManageContent ? () => editArticle(article) : undefined} onDelete={canManageContent ? () => deleteArticle(article) : undefined} disabled={disabled} />)}{!articles.length && <div className={styles.empty}>No handbook articles found.</div>}</div></>;
 }
 
 function TasksView({ tasks, taskTemplates, assignees, selectedDate, setSelectedDate, canManage, taskTitle, taskDescription, taskDueDate, taskRepeatUnit, taskRepeatInterval, taskRepeatEndDate, taskType, taskPriority, taskDueTime, taskReminderMinutes, taskAssignmentScope, taskAssigneeId, taskChecklistText, setTaskTitle, setTaskDescription, setTaskDueDate, setTaskRepeatUnit, setTaskRepeatInterval, setTaskRepeatEndDate, setTaskType, setTaskPriority, setTaskDueTime, setTaskReminderMinutes, setTaskAssignmentScope, setTaskAssigneeId, setTaskChecklistText, saveTaskTemplate, addTask, toggleTask, toggleTaskChecklist, deleteTask, disabled, message }: { tasks: OperationDailyTask[]; taskTemplates: OperationModuleState["taskTemplates"]; assignees: OperationModuleState["assignees"]; selectedDate: string; setSelectedDate: (value: string) => void; canManage: boolean; taskTitle: string; taskDescription: string; taskDueDate: string; taskRepeatUnit: OperationTaskRepeatUnit; taskRepeatInterval: number; taskRepeatEndDate: string; taskType: OperationTaskType; taskPriority: OperationTaskPriority; taskDueTime: string; taskReminderMinutes: string; taskAssignmentScope: OperationTaskAssignmentScope; taskAssigneeId: string; taskChecklistText: string; setTaskTitle: (value: string) => void; setTaskDescription: (value: string) => void; setTaskDueDate: (value: string) => void; setTaskRepeatUnit: (value: OperationTaskRepeatUnit) => void; setTaskRepeatInterval: (value: number) => void; setTaskRepeatEndDate: (value: string) => void; setTaskType: (value: OperationTaskType) => void; setTaskPriority: (value: OperationTaskPriority) => void; setTaskDueTime: (value: string) => void; setTaskReminderMinutes: (value: string) => void; setTaskAssignmentScope: (value: OperationTaskAssignmentScope) => void; setTaskAssigneeId: (value: string) => void; setTaskChecklistText: (value: string) => void; saveTaskTemplate: () => void; addTask: () => void; toggleTask: (task: OperationDailyTask) => void; toggleTaskChecklist: (task: OperationDailyTask, itemId: string) => void; deleteTask: (task: OperationDailyTask) => void; disabled: boolean; message: string }) {
@@ -335,10 +335,6 @@ function NeedsView({ needs, needTitle, needQuantity, needUnit, needSupplier, nee
   const ordered = needs.filter(need => need.status === "ORDERED");
   const rows = (items: OperationNeed[], history = false) => <div className={styles.needList}>{items.map(need => <article className={styles.needRow} key={need.id} data-ordered={need.status === "ORDERED"}><ShoppingBasket size={22} /><div><div className={styles.taskRowTitle}><h3>{need.title}</h3><span data-priority={need.priority}>{need.priority.toLowerCase()}</span></div>{need.note && <p>{need.note}</p>}<div className={styles.taskMeta}>{need.quantity && <span>{need.quantity} {need.unit || ""}</span>}{need.supplier && <span>{need.supplier}</span>}{need.neededBy && <span>Need by {need.neededBy}</span>}{need.orderedAt && <span>Ordered {new Date(need.orderedAt).toLocaleDateString()}</span>}</div></div>{!history && <button type="button" onClick={() => markNeedOrdered(need)} disabled={disabled}>Ordered</button>}</article>)}{!items.length && <div className={styles.empty}>{history ? "No order history yet." : "Nothing needed right now."}</div>}</div>;
   return <><details className={styles.taskComposer}><summary><span><Plus size={17} />Add to order list</span><small>Quantity, supplier and deadline</small></summary><div className={styles.taskComposerBody}><div className={styles.adminGrid}><input value={needTitle} onChange={event => setNeedTitle(event.target.value)} placeholder="What is needed?" disabled={disabled} /><input value={needSupplier} onChange={event => setNeedSupplier(event.target.value)} placeholder="Supplier (optional)" disabled={disabled} /></div><div className={styles.taskSettings}><label><span className={styles.taskSettingLabel}>Quantity</span><input type="number" min="0" inputMode="decimal" value={needQuantity} onChange={event => setNeedQuantity(event.target.value)} disabled={disabled} /></label><label><span className={styles.taskSettingLabel}>Unit</span><input value={needUnit} onChange={event => setNeedUnit(event.target.value)} placeholder="Bottles, kg…" disabled={disabled} /></label><label><span className={styles.taskSettingLabel}>Priority</span><select value={needPriority} onChange={event => setNeedPriority(event.target.value as OperationTaskPriority)} disabled={disabled}><option value="LOW">Low</option><option value="NORMAL">Normal</option><option value="HIGH">High</option></select></label><label><span className={styles.taskSettingLabel}>Need by</span><input type="date" value={needBy} onChange={event => setNeedBy(event.target.value)} disabled={disabled} /></label></div><textarea className={styles.needNoteInput} value={needNote} onChange={event => setNeedNote(event.target.value)} placeholder="Ordering note (optional)" disabled={disabled} /><div className={styles.adminActions}><button type="button" onClick={addNeed} disabled={disabled}><Plus size={16} />Add needed item</button></div></div></details>{message && <p className={styles.editorMessage} role="status">{message}</p>}<SectionHeader title="To order" detail={`${open.length} open`} />{rows(open)}<details className={styles.orderHistory}><summary>Order history ({ordered.length})</summary>{rows(ordered, true)}</details></>;
-}
-
-function AdminPanel({ message, articles, disabled, editArticle, deleteArticle }: { message: string; articles: OperationArticle[]; disabled: boolean; editArticle: (draft: DraftArticle) => void; deleteArticle: (article: OperationArticle) => void }) {
-  return <section className={styles.adminPanel}><div className={styles.adminPanelHeader}><div><h3>Owner articles</h3><p>Edit or remove handbook and news posts.</p></div></div>{message && <p className={styles.editorMessage} role="status">{message}</p>}<div className={styles.cardGrid}>{articles.map(article => <article className={styles.operationCard} key={article.id}><div><h3>{article.title}</h3><p>{article.kind.toLowerCase()} · {article.category}</p></div><div className={styles.adminActions}><button type="button" onClick={() => editArticle(draftFromArticle(article, article.kind))} disabled={disabled}>Edit</button><button type="button" onClick={() => deleteArticle(article)} aria-label={`Delete ${article.title}`} disabled={disabled}><Trash2 size={16} /></button></div></article>)}</div></section>;
 }
 
 function ArticleEditor({ draft, categories, setDraft, saveArticle, saving, message, close }: { draft: DraftArticle; categories: string[]; setDraft: (draft: DraftArticle) => void; saveArticle: () => Promise<boolean>; saving: boolean; message: string; close: () => void }) {
@@ -396,17 +392,21 @@ function TiptapArticleEditor({ value, onChange }: { value: OperationTiptapDocume
   async function uploadImage(file: File) {
     if (!editor) return;
     setUploading(true);
-    const form = new FormData();
-    form.append("image", file);
-    const response = await fetch("/api/operation-images", { method: "POST", body: form });
-    const payload: unknown = await response.json().catch(() => null);
-    if (!response.ok || !payload || typeof payload !== "object" || !("url" in payload) || typeof payload.url !== "string") {
-      alert(payload && typeof payload === "object" && "error" in payload && typeof payload.error === "string" ? payload.error : "Could not upload image.");
+    try {
+      const image = await prepareOperationImage(file);
+      const form = new FormData();
+      form.append("image", image);
+      const response = await fetch("/api/operation-images", { method: "POST", body: form });
+      const payload: unknown = await response.json().catch(() => null);
+      if (!response.ok || !payload || typeof payload !== "object" || !("url" in payload) || typeof payload.url !== "string") {
+        throw new Error(payload && typeof payload === "object" && "error" in payload && typeof payload.error === "string" ? payload.error : "Could not upload image.");
+      }
+      editor.chain().focus().setImage({ src: payload.url, alt: "Operation article image" }).run();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Could not upload image.");
+    } finally {
       setUploading(false);
-      return;
     }
-    editor.chain().focus().setImage({ src: payload.url, alt: "Operation article image" }).run();
-    setUploading(false);
   }
 
   function applyStyle(style: "heading" | "subheading" | "body") {
@@ -433,8 +433,37 @@ function SectionHeader({ title, detail }: { title: string; detail: string }) {
   return <div className={styles.sectionHeader}><h2>{title}</h2><div><p>{detail}</p></div></div>;
 }
 
-function ArticleCard({ article, onClick }: { article: OperationArticle; onClick: () => void }) {
-  return <button type="button" className={styles.operationCard} onClick={onClick}><div><h3>{article.title}</h3><p>{article.description}</p></div><small>{article.category}</small></button>;
+function ArticleCard({ article, onClick, onEdit, onDelete, disabled = false }: { article: OperationArticle; onClick: () => void; onEdit?: () => void; onDelete?: () => void; disabled?: boolean }) {
+  return <article className={styles.operationCard}><button type="button" className={styles.articleCardOpen} onClick={onClick}><div><h3>{article.title}</h3><p>{article.description}</p></div><small>{article.category}</small></button>{onEdit && onDelete && <div className={styles.articleCardActions}><button type="button" onClick={onEdit} disabled={disabled}>Edit</button><button type="button" onClick={onDelete} aria-label={`Delete ${article.title}`} disabled={disabled}><Trash2 size={16} /></button></div>}</article>;
+}
+
+const imageUploadMaxDimension = 2048;
+
+async function prepareOperationImage(file: File) {
+  if (!file.type.startsWith("image/") || file.type === "image/gif") return file;
+  const sourceUrl = URL.createObjectURL(file);
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const element = new window.Image();
+      element.onload = () => resolve(element);
+      element.onerror = () => reject(new Error("This image could not be prepared. Choose a JPG, PNG or WebP image."));
+      element.src = sourceUrl;
+    });
+    const scale = Math.min(1, imageUploadMaxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+    const context = canvas.getContext("2d");
+    if (!context) return file;
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const output = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/webp", 0.82));
+    if (!output || output.size >= file.size) return file;
+    const stem = file.name.replace(/\.[^.]+$/, "") || "operation-image";
+    const extension = output.type === "image/png" ? "png" : output.type === "image/jpeg" ? "jpg" : "webp";
+    return new File([output], `${stem}.${extension}`, { type: output.type, lastModified: file.lastModified });
+  } finally {
+    URL.revokeObjectURL(sourceUrl);
+  }
 }
 
 function ModuleCard({ title, description, icon: Icon, onClick }: { title: string; description: string; icon: typeof BookOpen; onClick: () => void }) {

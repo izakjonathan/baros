@@ -1,10 +1,18 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.88**
+Version: **v0.19.0-rc.89**
 
 ## Current focus
 
-Compact article-editor spacing from the verified rc.87 baseline.
+Handbook owner actions and reliable image persistence from the verified rc.88 baseline.
+
+## rc.89
+
+- Removed the duplicate owner article list; actions now live on regular Handbook cards for owners only.
+- Fixed private image persistence and added in-browser 2048px WebP preparation before upload.
+- Returns a specific Vercel Blob storage error and restores a valid package lock.
+- No database migration is required.
+- Rollback checkpoint: v0.19.0-rc.88.
 
 ## rc.88
 
