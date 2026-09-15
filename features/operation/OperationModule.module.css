@@ -137,9 +137,10 @@
 .taskRow h3,.needRow h3{font-size:.92rem;line-height:1.12;letter-spacing:-.006em}
 .taskRow p,.needRow p{font-family:var(--font-body);font-size:.72rem;line-height:1.35;color:#57534d}
 .taskSettings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.48rem;margin-top:.52rem}
-.taskSettings label{display:grid;min-width:0;gap:.3rem;font-family:var(--font-body);font-size:.7rem;color:#625d56}
+.taskSettings label{display:grid;min-width:0;overflow:hidden;gap:.3rem;font-family:var(--font-body);font-size:.7rem;color:#625d56}
 .taskSettingLabel{display:flex;align-items:center;gap:.32rem;font-weight:650}
-.taskSettings input,.taskSettings select{box-sizing:border-box;width:100%;min-width:0;min-height:2.2rem;border:1px solid rgba(41,41,41,.62);border-radius:.58rem;background:rgba(255,255,255,.14);color:#292929;padding:.35rem .5rem;font:inherit}
+.taskSettings input,.taskSettings select{box-sizing:border-box;inline-size:100%;max-inline-size:100%;min-width:0;min-inline-size:0;min-height:2.2rem;border:1px solid rgba(41,41,41,.62);border-radius:.58rem;background:rgba(255,255,255,.14);color:#292929;padding:.35rem .5rem;font:inherit}
+.taskSettings input[type="date"],.taskSettings input[type="time"]{overflow:hidden;text-overflow:ellipsis}
 .settingsHint{font-family:var(--font-body);font-size:.68rem;line-height:1.35;color:#706b64}
 .needInput{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center}
 .needAddButton{width:2.35rem;min-height:2.35rem!important;display:grid!important;place-items:center;padding:0!important;border-radius:50%!important}
@@ -166,7 +167,7 @@
 .templatePicker select,.checklistField textarea{box-sizing:border-box;width:100%;min-height:2.2rem;border:1px solid rgba(41,41,41,.62);border-radius:.58rem;background:rgba(255,255,255,.14);color:#292929;padding:.35rem .5rem;font:inherit}
 .checklistField textarea{min-height:4.8rem;resize:vertical}
 .checklistField small{font:inherit;line-height:1.35;color:#625d56}
-.taskSettings>label:nth-child(3),.taskSettings>label:nth-child(5){display:none}
+.taskAudienceHelp{margin:0;font-family:var(--font-body);font-size:.68rem;line-height:1.35;color:#625d56}
 .saveSpinner{animation:operation-spin .75s linear infinite}
 @keyframes operation-spin{to{transform:rotate(360deg)}}
 .taskGroup{display:grid;gap:.35rem}
