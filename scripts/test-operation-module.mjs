@@ -24,7 +24,7 @@ const checks = [
   ["device images are resized before upload", operation.includes("async function prepareOperationImage") && operation.includes('canvas.toBlob(resolve, "image/webp", 0.82)') && operation.includes("imageUploadMaxDimension = 2048")],
   ["owner article management reuses Handbook cards", !operation.includes("function AdminPanel") && operation.includes("canManageContent={state.canManageContent}") && operation.includes("onEdit={canManageContent ? () => editArticle(article) : undefined}")],
   ["article editor header is compact and supports existing or new categories", operation.includes("categories={editorCategories}") && operation.includes('className={styles.editorTopSelect}') && operation.includes('Add new category…') && operationStyles.includes("grid-template-columns:2.25rem minmax(0,1fr) minmax(0,1fr) 2.25rem")],
-  ["format controls have an equal-width visible dock", operationStyles.includes("grid-template-columns:repeat(8,minmax(0,1fr))") && operationStyles.includes("border-radius:999px;background:rgba(233,229,221,.96)")],
+  ["format controls have an equal-width visible dock", operationStyles.includes("grid-template-columns:repeat(8,minmax(0,1fr))") && operationStyles.includes("border-radius:999px;background:color-mix(in srgb,var(--op-canvas) 96%,transparent)")],
   ["article editor metadata does not inherit full-size form controls", operationStyles.includes(".editorTitleInput{box-sizing:border-box;display:block;min-height:1.55rem;margin:0;padding:0}") && operationStyles.includes(".editorDescriptionInput{box-sizing:border-box;display:block;min-height:1.4rem;margin:.1rem 0 .28rem;padding:0}")],
   ["format controls sit close to the visual viewport edge", operationStyles.includes("var(--editor-vv-height,100dvh) - 2.95rem")],
   ["format controls expose compact style and numbered-list buttons", operation.includes('aria-label="Text style"') && operation.includes('aria-label="Numbered list"')],
@@ -36,6 +36,7 @@ const checks = [
   ["task audience is composed beside repeat", operation.includes('<Repeat2 size={15} />Repeat') && operation.includes('<label className={styles.taskAudienceField}><span className={styles.taskSettingLabel}><UserRound size={15} />Task audience')],
   ["task settings constrain native date and time controls", operationStyles.includes("contain:inline-size") && operationStyles.includes("max-inline-size:100%")],
   ["Operations keeps iPad touch inputs and the editor viewport safe", operation.includes("window.visualViewport") && operation.includes('visualViewport?.addEventListener("resize", syncViewport)') && operationStyles.includes("@media (hover:none) and (pointer:coarse)") && operationStyles.includes("font-size:16px")],
+  ["Operations uses only saved Canvas and Ink derivatives", !/#(?:[0-9a-f]{3,8})\b|rgba\(/i.test(operationStyles) && operationStyles.includes("--op-canvas") && operationStyles.includes("--op-ink") && operationStyles.includes("--op-accent:color-mix") && operationStyles.includes(".taskRow,.needRow{display:grid") && operationStyles.includes("border-radius:.68rem;background:var(--op-canvas)}") && operationStyles.includes(".uiStudioPanel{") && operationStyles.includes(".articleEditorFrame{")],
 ];
 
 for (const [name, ok] of checks) {

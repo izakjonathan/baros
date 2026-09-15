@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.19.0-rc.95
+
+- Removed the final fixed Operation accent and success colors. Every Operations color now derives from the saved Canvas/Ink pair.
+- Open public read-only Operations pages now refresh the same organization palette as authenticated Operations sessions.
+- Added regression coverage covering cards, controls, task/Needs views, reader, editor, popovers, UI Studio and safe-area canvas.
+
 ## v0.19.0-rc.94
 
 - Added an owner-only UI Studio directly to Operation. It persists each organization’s canvas and ink colors, applies them to Operation, its editor and reader, and keeps the shared manager, employee, scheduling and settings surfaces unchanged.

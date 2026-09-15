@@ -1,17 +1,15 @@
-# v0.19.0-rc.94 Validation
+# v0.19.0-rc.95 Validation
 
 ## Confirmed baseline
 
-The v0.19.0-rc.93 release source was used as the baseline for the Operation UI Studio, Work Sans, and public reading release.
+The supplied `baros-main-updated.zip` v0.19.0-rc.94 source was used as the baseline for the Operation palette coverage release.
 
-- Rollback checkpoint: v0.19.0-rc.93
+- Rollback checkpoint: v0.19.0-rc.94
 
 ## Implementation
 
-- Added an owner-only, organization-persistent Canvas/Ink UI Studio inside Operation and scoped it to Operation screens only.
-- Added read-only public handbook/news access at `/operation/public/<organization-slug>` with published-image authorization.
-- Loaded Work Sans through `next/font/google` and split the pure browser theme helper from server database access.
-- Added migration `020_organization_ui_theme.sql`.
+- Removed the last fixed Operations accent and success colors so the entire Operation surface derives from Canvas and Ink.
+- Added static coverage that fails if a fixed hex or RGBA color reappears in the Operation stylesheet, and added the public palette refresh route used by open read-only sessions.
 
 ## Validation status
 

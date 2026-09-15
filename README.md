@@ -1,8 +1,13 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.94**
+Current release: **v0.19.0-rc.95**
 
-Rollback checkpoint: **v0.19.0-rc.70**.
+Rollback checkpoint: **v0.19.0-rc.94**.
+
+## RC.95 — Operation palette coverage
+
+- Corrected the Operation palette so every card, control, task/Needs view, reader, editor, popover, modal and safe-area canvas derives from the saved Canvas and Ink colors.
+- The saved palette is read by every authenticated Operation login and the public read-only route; open Operation pages refresh the shared setting automatically.
 
 ## RC.94 — UI Studio and Work Sans
 

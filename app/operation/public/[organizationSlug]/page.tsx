@@ -40,5 +40,5 @@ export default async function PublicOperationPage({ params }: PageProps) {
     metrics: { completionRate: 0, completedCount: 0, dueCount: 0, overdueCount: 0, openNeedsCount: 0, overdueNeedsCount: 0 },
   };
 
-  return <OperationModule initialState={initialState} initialTheme={initialTheme} devMode={false} publicMode />;
+  return <OperationModule initialState={initialState} initialTheme={initialTheme} devMode={false} publicMode themeRefreshUrl={`/api/operation-public-theme/${encodeURIComponent(organizationSlug)}`} />;
 }

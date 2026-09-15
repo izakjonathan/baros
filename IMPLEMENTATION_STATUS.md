@@ -1,10 +1,16 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.94**
+Version: **v0.19.0-rc.95**
 
 ## Current focus
 
-Operation-scoped owner UI Studio, Work Sans, and read-only public handbook/news from the verified rc.93 baseline.
+Operation palette coverage from the verified rc.94 baseline.
+
+## rc.95
+
+- All Operations colors, including accents and status treatments, now derive from the persisted Canvas/Ink pair.
+- Applies to authenticated Operations roles and the public read-only handbook/news route, including open sessions after the palette refresh interval.
+- Rollback checkpoint: v0.19.0-rc.94.
 
 ## rc.94
 

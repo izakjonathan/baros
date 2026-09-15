@@ -76,7 +76,7 @@ async function responseMessage(response: Response, fallback: string) {
   return typeof failure === "object" && failure !== null && "error" in failure && typeof failure.error === "string" ? failure.error : fallback;
 }
 
-export function OperationModule({ initialState, initialTheme, devMode, publicMode = false, publicUrl }: { initialState: OperationModuleState; initialTheme: UiTheme; devMode: boolean; publicMode?: boolean; publicUrl?: string }) {
+export function OperationModule({ initialState, initialTheme, devMode, publicMode = false, publicUrl, themeRefreshUrl }: { initialState: OperationModuleState; initialTheme: UiTheme; devMode: boolean; publicMode?: boolean; publicUrl?: string; themeRefreshUrl?: string }) {
   const [state, setState] = useState(initialState);
   const [view, setView] = useState<View>("home");
   const [query, setQuery] = useState("");
@@ -150,10 +150,12 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   }, [refresh, selectedTaskDate]);
 
   useEffect(() => {
-    if (devMode || publicMode) return;
+    if (devMode) return;
+    const url = themeRefreshUrl || (publicMode ? null : "/api/settings/ui-theme");
+    if (!url) return;
     const refreshTheme = async () => {
       try {
-        const response = await fetch("/api/settings/ui-theme", { cache: "no-store" });
+        const response = await fetch(url, { cache: "no-store" });
         if (!response.ok) return;
         const next = await response.json() as UiTheme;
         if (next.canvasColor && next.inkColor && next.accentColor && next.positiveColor) {
@@ -166,7 +168,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     };
     const interval = window.setInterval(() => { void refreshTheme(); }, 30_000);
     return () => window.clearInterval(interval);
-  }, [devMode, publicMode]);
+  }, [devMode, publicMode, themeRefreshUrl]);
 
   useEffect(() => {
     document.documentElement.style.setProperty("--operation-canvas", uiTheme.canvasColor);
