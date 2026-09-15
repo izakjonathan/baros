@@ -1,10 +1,17 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.87**
+Version: **v0.19.0-rc.88**
 
 ## Current focus
 
-Minimal article-editor controls from the verified rc.86 baseline.
+Compact article-editor spacing from the verified rc.87 baseline.
+
+## rc.88
+
+- Removed generic input/textarea sizing from article-editor metadata only.
+- Tightened the editor canvas rhythm and moved the format bar closer to the visual-viewport edge.
+- No database migration is required.
+- Rollback checkpoint: v0.19.0-rc.87.
 
 ## rc.87
 

@@ -1,6 +1,6 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.87**
+Current release: **v0.19.0-rc.88**
 
 Rollback checkpoint: **v0.19.0-rc.70**.
 

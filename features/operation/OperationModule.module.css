@@ -73,7 +73,7 @@
 .adminPanel textarea{grid-column:1/-1;min-height:7rem;resize:vertical}
 .editorMeta input:nth-of-type(2){grid-column:1/-1}
 .articleEditor{position:fixed;inset:0;z-index:70;display:grid;grid-template-rows:auto minmax(0,1fr);background:#e9e5dd;color:#292929;padding:max(.78rem,env(safe-area-inset-top)) max(.85rem,env(safe-area-inset-right)) calc(5.9rem + var(--editor-keyboard-offset,0px)) max(.85rem,env(safe-area-inset-left))}
-.articleEditorTop{display:grid;grid-template-columns:2.25rem minmax(0,1fr) minmax(0,1fr) 2.25rem;align-items:center;gap:.35rem;padding:.05rem 0 .35rem}
+.articleEditorTop{display:grid;grid-template-columns:2.25rem minmax(0,1fr) minmax(0,1fr) 2.25rem;align-items:center;gap:.35rem;padding:.05rem 0 .15rem}
 .editorIconButton,.editorDoneButton{display:inline-grid;place-items:center;border:1px solid rgba(41,41,41,.68);border-radius:999px;background:rgba(255,255,255,.16);color:#292929}
 .editorIconButton,.editorDoneButton{width:2.25rem;height:2.25rem}
 .editorDoneButton{background:#292929;color:#e9e5dd;border-color:#292929}
@@ -94,9 +94,11 @@
 .imageInput{display:none}
 .articleEditor{z-index:80;padding:0;background:#e9e5dd;overscroll-behavior:none}
 .articleEditorFrame{position:fixed;top:var(--editor-vv-top,0px);left:0;right:0;height:var(--editor-vv-height,100dvh);box-sizing:border-box;display:grid;grid-template-rows:auto minmax(0,1fr);overflow:visible;background:#e9e5dd;color:#292929;padding:max(.78rem,env(safe-area-inset-top)) max(.85rem,env(safe-area-inset-right)) max(.72rem,env(safe-area-inset-bottom)) max(.85rem,env(safe-area-inset-left))}
-.articleEditorCanvas{display:block;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:1.05rem .25rem 4.35rem}
-.tiptapEditor{display:block;min-height:20rem}
-.tiptapSurface{min-height:20rem;overflow:visible;padding:0 .1rem 4.45rem;font-family:var(--font-body);font-size:1rem;line-height:1.55;color:#292929}
+.articleEditorCanvas{display:block;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:.38rem .25rem 3.55rem}
+.editorTitleInput{box-sizing:border-box;display:block;min-height:1.55rem;margin:0;padding:0}
+.editorDescriptionInput{box-sizing:border-box;display:block;min-height:1.4rem;margin:.1rem 0 .28rem;padding:0}
+.tiptapEditor{display:block;min-height:16rem}
+.tiptapSurface{min-height:16rem;overflow:visible;padding:0 .1rem 3.65rem;font-family:var(--font-body);font-size:1rem;line-height:1.55;color:#292929}
 .tiptapSurface :global(.tiptap){min-height:100%;outline:0}
 .tiptapSurface :global(.tiptap p.is-editor-empty:first-child::before){float:left;height:0;color:#817c75;content:attr(data-placeholder);pointer-events:none}
 .tiptapSurface :global(.tiptap h2){margin:1.15rem 0 .45rem;font-family:var(--font-display);font-size:clamp(1.55rem,6vw,2.15rem);line-height:1.05;letter-spacing:-.035em;font-weight:760}
@@ -107,7 +109,7 @@
 .tiptapSurface :global(.tiptap li p){margin-bottom:.22rem}
 .tiptapSurface :global(.tiptap a){color:inherit;text-decoration:underline;text-underline-offset:.16em}
 .tiptapSurface :global(.tiptap img){display:block;max-width:100%;height:auto;margin:.85rem 0;border:1px solid rgba(41,41,41,.5);border-radius:.85rem}
-.tiptapToolbar{position:fixed;z-index:90;top:calc(var(--editor-vv-top,0px) + var(--editor-vv-height,100dvh) - 3.65rem);left:max(.85rem,env(safe-area-inset-left));right:max(.85rem,env(safe-area-inset-right));box-sizing:border-box;display:grid;grid-template-columns:minmax(4.25rem,1fr) repeat(6,2.2rem);align-items:center;gap:.12rem;margin:0;padding:0;border:0;background:transparent;box-shadow:none}
+.tiptapToolbar{position:fixed;z-index:90;top:calc(var(--editor-vv-top,0px) + var(--editor-vv-height,100dvh) - 2.85rem);left:max(.85rem,env(safe-area-inset-left));right:max(.85rem,env(safe-area-inset-right));box-sizing:border-box;display:grid;grid-template-columns:minmax(4.25rem,1fr) repeat(6,2.2rem);align-items:center;gap:.12rem;margin:0;padding:0;border:0;background:transparent;box-shadow:none}
 .tiptapToolbar button{display:grid;place-items:center;width:100%;min-width:0;min-height:2.14rem;border:0;border-radius:999px;background:transparent;color:#292929;padding:.2rem}
 .tiptapToolbar button[aria-pressed="true"],.tiptapToolbar button:hover:not(:disabled){background:#292929;color:#e9e5dd}
 .tiptapToolbar button:disabled{opacity:.36}

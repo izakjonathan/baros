@@ -21,6 +21,8 @@ const checks = [
   ["private image uploads have an authenticated delivery route", imageRoute.includes('access: "private"') && imageDeliveryRoute.includes('access: "private"') && imageDeliveryRoute.includes("getSessionUser")],
   ["article editor header is compact and supports existing or new categories", operation.includes("categories={editorCategories}") && operation.includes('className={styles.editorTopSelect}') && operation.includes('Add new category…') && operationStyles.includes("grid-template-columns:2.25rem minmax(0,1fr) minmax(0,1fr) 2.25rem")],
   ["format controls have no enclosing dock surface", operationStyles.includes("padding:0;border:0;background:transparent;box-shadow:none")],
+  ["article editor metadata does not inherit full-size form controls", operationStyles.includes(".editorTitleInput{box-sizing:border-box;display:block;min-height:1.55rem;margin:0;padding:0}") && operationStyles.includes(".editorDescriptionInput{box-sizing:border-box;display:block;min-height:1.4rem;margin:.1rem 0 .28rem;padding:0}")],
+  ["format controls sit close to the visual viewport edge", operationStyles.includes("var(--editor-vv-height,100dvh) - 2.85rem")],
   ["task instructions are genuinely optional", route.includes('optionalString(body, "description", 300) || ""')],
   ["task audiences are explicit and persisted", taskAudienceMigration.includes("assignment_scope") && route.includes('"ON_SHIFT", "EVERYONE"')],
 ];

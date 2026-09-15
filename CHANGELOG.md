@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.19.0-rc.88
+
+- Removed inherited full-size control padding from the article title and description fields, then tightened the editor canvas spacing between the header, title, description and article body.
+- Moved the borderless formatting controls closer to the bottom of the live visual viewport, keeping a deliberate small gap above Safari browser chrome.
+
 ## v0.19.0-rc.87
 
 - Reduced the visual size of the Handbook/News and category selectors without reducing the new-category text input below Safari’s no-zoom size.
