@@ -46,6 +46,7 @@
 .articleCardActions button:disabled{opacity:.5;cursor:not-allowed}
 .toolbar{display:grid;grid-template-columns:minmax(0,1fr);gap:.5rem}
 .search{height:2.32rem;border:1px solid color-mix(in srgb,var(--op-ink) 62%,transparent);border-radius:999px;background:color-mix(in srgb,var(--op-canvas) 86%,transparent);color:inherit;padding:0 .82rem;font-family:var(--op-font-body);font-size:var(--op-type-body);line-height:1.2}
+.operationShell input::placeholder,.operationShell textarea::placeholder{color:var(--op-muted);opacity:1}
 .pills{display:flex;gap:.28rem;overflow-x:auto;padding-bottom:.05rem}
 .pill{min-height:1.7rem;padding:0 .6rem;border:1px solid color-mix(in srgb,var(--op-ink) 62%,transparent);border-radius:999px;background:color-mix(in srgb,var(--op-canvas) 88%,transparent);color:inherit;font-family:var(--op-font-display);font-size:var(--op-type-label);font-weight:700;line-height:1;letter-spacing:.085em;text-transform:uppercase;white-space:nowrap}
 .pill[aria-pressed="true"]{background:var(--op-ink);color:var(--op-canvas)}
@@ -134,7 +135,7 @@
 .adminActions button:disabled,.needInput button:disabled,.taskRow button:disabled,.needRow button:disabled,.adminPanel input:disabled,.needInput input:disabled{opacity:.5;cursor:not-allowed}
 .taskRow,.needRow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.58rem;align-items:center;padding:.62rem .72rem;border:1px solid color-mix(in srgb,var(--op-ink) 68%,transparent);border-radius:.68rem;background:color-mix(in srgb,var(--op-canvas) 88%,var(--op-ink) 12%)}
 .rowDelete{width:2rem;min-height:2rem!important;display:grid!important;place-items:center;padding:0!important;background:transparent!important;color:var(--op-ink)!important}
-.taskRow input{width:1.12rem;height:1.12rem;accent-color:var(--op-ink)}
+.taskRow input{width:1.12rem;height:1.12rem;accent-color:var(--op-ink);border:1.5px solid var(--op-ink);border-radius:.3rem;background:var(--op-canvas)}
 .taskRow h3,.needRow h3{font-size:.92rem;line-height:1.12;letter-spacing:-.006em}
 .taskRow p,.needRow p{font-family:var(--font-body);font-size:.72rem;line-height:1.35;color:var(--op-muted)}
 .taskSettings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.48rem;margin-top:.52rem;min-width:0;inline-size:100%}
@@ -185,7 +186,7 @@
 .taskMeta span{display:inline-flex;align-items:center;gap:.2rem}
 .taskChecklist{display:grid;gap:.22rem;margin-top:.45rem;padding:.4rem .5rem;border-left:2px solid color-mix(in srgb,var(--op-ink) 30%,transparent);font-family:var(--font-body);font-size:.72rem}
 .taskChecklist label{display:flex;align-items:center;gap:.4rem}
-.taskChecklist input{width:.9rem;height:.9rem;accent-color:var(--op-ink)}
+.taskChecklist input{width:.9rem;height:.9rem;accent-color:var(--op-ink);border:1.5px solid var(--op-ink);border-radius:.25rem;background:var(--op-canvas)}
 .uiStudioBackdrop{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:max(.85rem,env(safe-area-inset-top)) max(.85rem,env(safe-area-inset-right)) max(.85rem,env(safe-area-inset-bottom)) max(.85rem,env(safe-area-inset-left));background:color-mix(in srgb,var(--op-ink) 42%,transparent)}
 .uiStudioPanel{width:min(29rem,100%);display:grid;gap:.75rem;max-height:calc(100dvh - 1.7rem);overflow:auto;padding:.85rem;border:1px solid color-mix(in srgb,var(--op-ink) 60%,transparent);border-radius:.85rem;background:var(--op-canvas);color:var(--op-ink);box-shadow:0 .8rem 2.4rem color-mix(in srgb,var(--op-ink) 30%,transparent)}
 .uiStudioHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem}.uiStudioHeader p{margin:0 0 .08rem;font-family:var(--op-font-body);font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--op-muted)}.uiStudioHeader h2{margin:0;font-size:1.15rem;line-height:1}.uiStudioHeader button{width:2rem;min-height:2rem;display:grid;place-items:center;padding:0;border:1px solid var(--op-ink);border-radius:50%;background:transparent;color:inherit}
