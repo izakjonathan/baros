@@ -1,8 +1,14 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.100**
+Current release: **v0.19.0-rc.101**
 
-Rollback checkpoint: **v0.19.0-rc.99**.
+Rollback checkpoint: **v0.19.0-rc.100**.
+
+## RC.101 — Readable News & article links
+
+- Today News cards preserve a compact heading/subheading/body/list hierarchy without altering the editor.
+- Type `>>` while writing to link another Handbook or News article; links open with a bottom circular back control beside Close.
+- No migration is required.
 
 ## RC.100 — Owner News controls
 

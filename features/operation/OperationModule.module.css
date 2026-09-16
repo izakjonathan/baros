@@ -43,7 +43,12 @@
 .operationCard p{max-width:28rem;margin-top:.16rem;font-family:var(--op-font-body);font-size:var(--op-type-meta);line-height:1.38;color:var(--op-muted)}
 .newsCard{align-items:start}
 .newsCard .articleCardOpen{align-items:start}
-.newsCard .articleCardOpen p{max-width:none;white-space:pre-line}
+.newsCardBody{display:grid;gap:.38rem;max-width:31rem;margin-top:.36rem;white-space:pre-line}
+.newsCardBody>span{display:block}
+.newsCardHeading{font-family:var(--op-font-display);font-size:clamp(.98rem,4.4vw,1.18rem);font-weight:700;line-height:1.13;letter-spacing:-.018em}
+.newsCardSubheading{font-family:var(--op-font-display);font-size:clamp(.83rem,3.7vw,.98rem);font-weight:680;line-height:1.2;letter-spacing:-.01em}
+.newsCardBody,.newsCardList{font-family:var(--op-font-body);font-size:clamp(.79rem,3.4vw,.88rem);line-height:1.46;color:var(--op-muted)}
+.newsCardList{padding-left:.06rem}
 .operationCard small{display:inline-flex;align-items:center;justify-content:center;min-height:1.32rem;padding:.12rem .46rem;border:1px solid var(--op-positive);border-radius:999px;font-family:var(--op-font-display);font-size:.625rem;font-weight:700;line-height:1;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
 .operationCard svg{flex:none}
 .articleCardActions{display:flex;gap:.35rem}
@@ -64,24 +69,24 @@
 .duePrompt strong{font-size:.74rem;letter-spacing:.055em;text-transform:uppercase}
 .duePrompt p{margin-top:.08rem;font-family:var(--font-body);font-size:.72rem;line-height:1.35;color:var(--op-muted)}
 .reader{position:fixed;inset:0;z-index:60;display:grid;grid-template-rows:minmax(0,1fr) auto;background:var(--op-canvas);color:var(--op-ink);padding:max(.72rem,env(safe-area-inset-top)) max(1.2rem,env(safe-area-inset-right)) max(1rem,env(safe-area-inset-bottom)) max(1.2rem,env(safe-area-inset-left))}
-.readerTop{position:absolute;left:max(1.2rem,env(safe-area-inset-left));top:max(.72rem,env(safe-area-inset-top));z-index:1}
-.readerTop button,.readerBottom button,.textButton{border:0;background:transparent;color:inherit;font-weight:760;text-transform:uppercase;letter-spacing:.075em}
+.readerBottom button,.textButton{border:0;background:transparent;color:inherit;font-weight:760;text-transform:uppercase;letter-spacing:.075em}
 .readerArticle{width:min(34rem,100%);margin:0 auto;overflow:auto;padding:.25rem 0 5.9rem}
 .readerArticle h1{font-size:clamp(1.72rem,7vw,2.65rem);line-height:1;letter-spacing:-.035em;font-weight:720}
 .readerArticle h2{margin-top:1rem;font-size:clamp(1.18rem,4.6vw,1.62rem);line-height:1.08;letter-spacing:-.025em;font-weight:720}
 .readerArticle h3{margin-top:.85rem;font-size:clamp(1rem,3.8vw,1.22rem);line-height:1.14;letter-spacing:-.012em}
 .readerArticle h4{margin-top:.9rem;font-size:clamp(.95rem,3.6vw,1.2rem);line-height:1.15;letter-spacing:-.01em}
 .readerArticle p,.readerArticle li{font-family:var(--font-body);font-size:.9rem;line-height:1.56}
-.readerArticle a{color:inherit;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:.18em}
+.readerArticle a,.readerArticleLink{color:inherit;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:.18em}
+.readerArticleLink{border:0;background:transparent;padding:0;font:inherit;cursor:pointer}
 .readerArticle ul,.readerArticle ol{display:grid;gap:.5rem;padding-left:1.25rem}
 .readerImageButton{display:block;width:100%;margin:.85rem 0;padding:0;border:0;border-radius:.9rem;background:transparent;cursor:zoom-in;overflow:hidden}
 .readerImage{display:block;width:100%;height:auto;border:0;border-radius:.9rem}
 .imageViewer{position:fixed;inset:0;z-index:110;display:grid;place-items:center;padding:max(1rem,env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) max(1rem,env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-left));background:color-mix(in srgb,var(--op-ink) 84%,transparent);cursor:zoom-out}
 .imageViewerImage{display:block;max-width:100%;max-height:100%;width:auto;height:auto;border:0;border-radius:.65rem;object-fit:contain;cursor:default}
 .imageViewerClose{position:absolute;top:max(1rem,env(safe-area-inset-top));right:max(1rem,env(safe-area-inset-right));z-index:1;display:grid;place-items:center;width:2.6rem;height:2.6rem;border:1px solid color-mix(in srgb,var(--op-canvas) 70%,transparent);border-radius:50%;background:color-mix(in srgb,var(--op-ink) 72%,transparent);color:var(--op-canvas)}
-.readerBottom{position:absolute;left:0;right:0;bottom:max(1.2rem,env(safe-area-inset-bottom));display:grid;place-items:center;pointer-events:none}
-.closeCircle{width:3.5rem;height:3.5rem;display:grid!important;place-items:center;border:1.5px solid var(--op-ink)!important;border-radius:50%;background:transparent!important;color:var(--op-ink)!important;padding:0!important;pointer-events:auto}
-.closeCircle svg{width:1.35rem;height:1.35rem}
+.readerBottom{position:absolute;left:0;right:0;bottom:max(1.2rem,env(safe-area-inset-bottom));display:flex;justify-content:center;gap:.62rem;pointer-events:none}
+.closeCircle,.readerBackCircle{width:3.5rem;height:3.5rem;display:grid!important;place-items:center;border:1.5px solid var(--op-ink)!important;border-radius:50%;background:transparent!important;color:var(--op-ink)!important;padding:0!important;pointer-events:auto}
+.closeCircle svg,.readerBackCircle svg{width:1.35rem;height:1.35rem}
 .adminPanel{display:grid;gap:.62rem;padding:.72rem;border:1px solid color-mix(in srgb,var(--op-ink) 68%,transparent);border-radius:.72rem;background:color-mix(in srgb,var(--op-canvas) 90%,var(--op-ink) 10%)}
 .adminPanel h3{font-size:.9rem;letter-spacing:-.005em}
 .adminPanelHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem}
@@ -131,6 +136,13 @@
 .tiptapToolbar button{display:grid;place-items:center;width:100%;min-width:0;min-height:2.14rem;border:0;border-radius:999px;background:transparent;color:var(--op-ink);padding:.2rem}
 .tiptapToolbar button[aria-pressed="true"],.tiptapToolbar button:hover:not(:disabled){background:var(--op-ink);color:var(--op-canvas)}
 .tiptapToolbar button:disabled{opacity:.36}
+.articleLinkPicker{position:fixed;z-index:95;left:max(.85rem,env(safe-area-inset-left));right:max(.85rem,env(safe-area-inset-right));bottom:calc(var(--editor-vv-height,100dvh) - 6.25rem);display:grid;gap:.28rem;max-width:38rem;margin-inline:auto;padding:.5rem;border:1px solid color-mix(in srgb,var(--op-ink) 36%,transparent);border-radius:.75rem;background:var(--op-canvas);box-shadow:0 .35rem 1.2rem color-mix(in srgb,var(--op-ink) 18%,transparent)}
+.articleLinkPicker>p{font-family:var(--op-font-display);font-size:.64rem;font-weight:720;letter-spacing:.07em;text-transform:uppercase;color:var(--op-muted)}
+.articleLinkPicker>div{display:grid;gap:.18rem;max-height:12.5rem;overflow:auto}
+.articleLinkPicker button{display:grid;gap:.06rem;border:0;border-radius:.48rem;background:transparent;color:inherit;padding:.44rem .5rem;text-align:left}
+.articleLinkPicker button:hover{background:color-mix(in srgb,var(--op-ink) 8%,transparent)}
+.articleLinkPicker strong{font-family:var(--op-font-display);font-size:.78rem;line-height:1.18}
+.articleLinkPicker small,.articleLinkPicker span{font-family:var(--op-font-body);font-size:.68rem;line-height:1.25;color:var(--op-muted)}
 .editorIconButton,.editorDoneButton{background:transparent;color:var(--op-ink);border-color:color-mix(in srgb,var(--op-ink) 68%,transparent)}
 .styleControl{position:relative}
 .moreControl{position:relative}

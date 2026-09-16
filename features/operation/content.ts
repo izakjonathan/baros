@@ -51,6 +51,7 @@ export function parseOperationBlocks(value: unknown): OperationContentBlock[] {
 
 const tiptapNodes = new Set(["paragraph", "heading", "bulletList", "orderedList", "listItem", "image", "hardBreak", "text"]);
 const tiptapMarks = new Set(["bold", "italic", "underline", "link"]);
+const operationArticleHref = /^operation:\/\/article\/[0-9a-f-]{36}$/i;
 const operationImagePath = /^\/api\/operation-images\/operation\/[0-9a-f-]+\/[0-9a-f-]+(?:-(?:preview|detail))?\.(?:avif|gif|jpe?g|png|webp)$/i;
 
 function isArticleImageSource(value: string) {
@@ -117,7 +118,7 @@ function parseTiptapMarks(value: unknown): OperationTiptapNode["marks"] {
     if (type !== "link") return [{ type }];
     const attrs = record.attrs && typeof record.attrs === "object" && !Array.isArray(record.attrs) ? record.attrs as Record<string, unknown> : {};
     const href = String(attrs.href || "").trim();
-    if (!/^(https?:|mailto:|tel:)/.test(href) || href.length > 1200) return [];
+    if (!(/^(https?:|mailto:|tel:)/.test(href) || operationArticleHref.test(href)) || href.length > 1200) return [];
     return [{ type, attrs: { href } }];
   });
   return marks.length ? marks : undefined;

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowLeft, Bold, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, Clock3, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Palette, Plus, Redo2, Repeat2, ShoppingBasket, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
+import { ArrowLeft, Bold, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, Clock3, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Palette, Plus, Redo2, Repeat2, ShoppingBasket, Square, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -30,6 +30,11 @@ const OperationImageExtension = ImageExtension.extend({
 });
 
 const migrationMessage = "Operation storage is not ready yet. Run the database migration action, then reload this page.";
+const operationArticleHref = (articleId: string) => `operation://article/${articleId}`;
+
+function operationArticleIdFromHref(href: string) {
+  return /^operation:\/\/article\/([0-9a-f-]{36})$/i.exec(href)?.[1] || null;
+}
 
 function draftFromArticle(article?: OperationArticle, kind: OperationArticleKind = "HANDBOOK"): DraftArticle {
   return { id: article?.id, kind, category: article?.category || "General", title: article?.title || "", description: article?.description || "", document: documentFromBlocks(article?.content || []) };
@@ -351,8 +356,8 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
       {!publicMode && view === "tasks" && <TasksView tasks={state.dailyTasks} taskTemplates={state.taskTemplates} assignees={state.assignees} selectedDate={selectedTaskDate} setSelectedDate={selectTaskDate} canManage={state.canManageTasks} taskTitle={taskTitle} taskDescription={taskDescription} taskDueDate={taskDueDate} taskRepeatUnit={taskRepeatUnit} taskRepeatInterval={taskRepeatInterval} taskRepeatEndDate={taskRepeatEndDate} taskPriority={taskPriority} taskDueTime={taskDueTime} taskReminderMinutes={taskReminderMinutes} taskAssignmentScope={taskAssignmentScope} taskAssigneeId={taskAssigneeId} taskChecklistText={taskChecklistText} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} setTaskDueDate={setTaskDueDate} setTaskRepeatUnit={setTaskRepeatUnit} setTaskRepeatInterval={setTaskRepeatInterval} setTaskRepeatEndDate={setTaskRepeatEndDate} setTaskType={setTaskType} setTaskPriority={setTaskPriority} setTaskDueTime={setTaskDueTime} setTaskReminderMinutes={setTaskReminderMinutes} setTaskAssignmentScope={setTaskAssignmentScope} setTaskAssigneeId={setTaskAssigneeId} setTaskChecklistText={setTaskChecklistText} saveTaskTemplate={saveTaskTemplate} addTask={addTask} toggleTask={toggleTask} toggleTaskChecklist={toggleTaskChecklist} deleteTask={deleteTask} disabled={storageUnavailable} message={taskMessage} />}
       {!publicMode && view === "needs" && <NeedsView needs={state.needs} needTitle={needTitle} needQuantity={needQuantity} needSupplier={needSupplier} needPriority={needPriority} needNote={needNote} setNeedTitle={setNeedTitle} setNeedQuantity={setNeedQuantity} setNeedSupplier={setNeedSupplier} setNeedPriority={setNeedPriority} setNeedNote={setNeedNote} addNeed={addNeed} markNeedOrdered={markNeedOrdered} disabled={storageUnavailable} message={needMessage} />}
     </main>
-    {currentArticle && <Reader article={currentArticle} canGoBack={readerStack.length > 1} goBack={() => setReaderStack(stack => stack.slice(0, -1))} close={() => setReaderStack([])} />}
-    {editorOpen && <ArticleEditor draft={draft} categories={editorCategories} setDraft={setDraft} saveArticle={saveArticle} saving={saving} message={editorMessage} close={() => { setEditorOpen(false); setEditorMessage(""); }} />}
+    {currentArticle && <Reader article={currentArticle} articles={allArticles} canGoBack={readerStack.length > 1} goBack={() => setReaderStack(stack => stack.slice(0, -1))} openArticle={(article) => setReaderStack(stack => [...stack, article])} close={() => setReaderStack([])} />}
+    {editorOpen && <ArticleEditor draft={draft} categories={editorCategories} linkableArticles={allArticles} setDraft={setDraft} saveArticle={saveArticle} saving={saving} message={editorMessage} close={() => { setEditorOpen(false); setEditorMessage(""); }} />}
     {studioOpen && <OperationUiStudio theme={uiTheme} saving={studioSaving} close={() => { setUiTheme(savedUiTheme); setStudioOpen(false); }} preview={setUiTheme} save={saveUiTheme} publicUrl={publicUrl} />}
   </div>;
 }
@@ -408,7 +413,7 @@ function HomeView({ news, tasks, needs, openArticle, openView, canManageContent,
       <button type="button" onClick={() => openView("tasks")}>All tasks <ChevronRight size={17} /></button>
     </section>
     {nextTask ? <button type="button" className={styles.nextAction} onClick={() => openView("tasks")}>
-      <span className={styles.nextActionIcon} data-priority={nextTask.priority}><CheckSquare size={19} /></span>
+      <span className={styles.nextActionIcon} data-priority={nextTask.priority}><Square size={19} strokeWidth={1.8} /></span>
       <span><small>{nextTask.taskType.toLowerCase()}</small><strong>{nextTask.title}</strong>{nextTask.description && <em>{nextTask.description}</em>}{nextTask.dueTime && <em><Clock3 size={13} />{nextTask.dueTime}</em>}</span>
       <ChevronRight size={20} aria-hidden="true" />
     </button> : <div className={styles.nextActionEmpty}><Check size={19} /><p>{tasks.length ? "No tasks left for today." : "No tasks have been scheduled for today."}</p></div>}
@@ -475,7 +480,7 @@ function NeedsView({ needs, needTitle, needQuantity, needSupplier, needPriority,
   return <><details className={styles.taskComposer}><summary><span><Plus size={17} />Add to order list</span><small>Quantity and supplier</small></summary><div className={styles.taskComposerBody}><div className={styles.adminGrid}><input value={needTitle} onChange={event => setNeedTitle(event.target.value)} placeholder="What is needed?" disabled={disabled} /><input value={needSupplier} onChange={event => setNeedSupplier(event.target.value)} placeholder="Supplier (optional)" disabled={disabled} /></div><div className={styles.taskSettings}><label><span className={styles.taskSettingLabel}>Quantity</span><input type="number" min="0" inputMode="decimal" value={needQuantity} onChange={event => setNeedQuantity(event.target.value)} disabled={disabled} /></label><label><span className={styles.taskSettingLabel}>Status</span><select value={needPriority} onChange={event => setNeedPriority(event.target.value as OperationTaskPriority)} disabled={disabled}><option value="LOW">Low</option><option value="NORMAL">Missing</option><option value="HIGH">New product/item</option></select></label></div><textarea className={styles.needNoteInput} value={needNote} onChange={event => setNeedNote(event.target.value)} placeholder="Ordering note (optional)" disabled={disabled} /><div className={styles.adminActions}><button className={styles.composerSubmit} type="button" onClick={addNeed} disabled={disabled}>Add needed item</button></div></div></details>{message && <p className={styles.editorMessage} role="status">{message}</p>}<SectionHeader title="To order" detail={`${open.length} open`} />{rows(open)}<details className={styles.orderHistory}><summary>Order history ({ordered.length})</summary>{rows(ordered, true)}</details></>;
 }
 
-function ArticleEditor({ draft, categories, setDraft, saveArticle, saving, message, close }: { draft: DraftArticle; categories: string[]; setDraft: (draft: DraftArticle) => void; saveArticle: () => Promise<boolean>; saving: boolean; message: string; close: () => void }) {
+function ArticleEditor({ draft, categories, linkableArticles, setDraft, saveArticle, saving, message, close }: { draft: DraftArticle; categories: string[]; linkableArticles: OperationArticle[]; setDraft: (draft: DraftArticle) => void; saveArticle: () => Promise<boolean>; saving: boolean; message: string; close: () => void }) {
   const editorRef = useRef<HTMLElement | null>(null);
   const categoryIsNew = !categories.includes(draft.category);
 
@@ -503,17 +508,19 @@ function ArticleEditor({ draft, categories, setDraft, saveArticle, saving, messa
     };
   }, []);
 
-  return <aside ref={editorRef} className={styles.articleEditor} aria-modal="true" role="dialog" aria-label={draft.id ? "Edit article" : "Add article"}><div className={styles.articleEditorFrame}><div className={styles.articleEditorTop}><button type="button" className={styles.editorIconButton} onClick={close} aria-label="Close editor"><ArrowLeft size={18} /></button><label className={styles.editorTopSelect}><span className="sr-only">Article type</span><select value={draft.kind} onChange={event => setDraft({ ...draft, kind: event.target.value as OperationArticleKind })}><option value="HANDBOOK">Handbook</option><option value="NEWS">News</option></select></label><label className={styles.editorTopSelect}><span className="sr-only">Existing category</span><select value={categoryIsNew ? "" : draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })}><option value="">Add new category…</option>{categories.map(categoryName => <option key={categoryName} value={categoryName}>{categoryName}</option>)}</select></label><button type="button" className={styles.editorDoneButton} disabled={saving} onClick={saveArticle} aria-label={saving ? "Saving article" : "Save article"}>{saving ? <LoaderCircle className={styles.saveSpinner} size={18} /> : <Check size={19} />}</button></div><div className={styles.articleEditorCanvas}>{categoryIsNew && <label className={styles.editorNewCategory}><span>New category</span><input value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })} placeholder="Category name" /></label>}<input className={styles.editorTitleInput} value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} placeholder="Title" /><textarea className={styles.editorDescriptionInput} value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} placeholder="Short card description" /><TiptapArticleEditor value={draft.document} onChange={(document) => setDraft({ ...draft, document })} />{message && <p className={styles.editorMessage} role="status">{message}</p>}</div></div></aside>;
+  return <aside ref={editorRef} className={styles.articleEditor} aria-modal="true" role="dialog" aria-label={draft.id ? "Edit article" : "Add article"}><div className={styles.articleEditorFrame}><div className={styles.articleEditorTop}><button type="button" className={styles.editorIconButton} onClick={close} aria-label="Close editor"><ArrowLeft size={18} /></button><label className={styles.editorTopSelect}><span className="sr-only">Article type</span><select value={draft.kind} onChange={event => setDraft({ ...draft, kind: event.target.value as OperationArticleKind })}><option value="HANDBOOK">Handbook</option><option value="NEWS">News</option></select></label><label className={styles.editorTopSelect}><span className="sr-only">Existing category</span><select value={categoryIsNew ? "" : draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })}><option value="">Add new category…</option>{categories.map(categoryName => <option key={categoryName} value={categoryName}>{categoryName}</option>)}</select></label><button type="button" className={styles.editorDoneButton} disabled={saving} onClick={saveArticle} aria-label={saving ? "Saving article" : "Save article"}>{saving ? <LoaderCircle className={styles.saveSpinner} size={18} /> : <Check size={19} />}</button></div><div className={styles.articleEditorCanvas}>{categoryIsNew && <label className={styles.editorNewCategory}><span>New category</span><input value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })} placeholder="Category name" /></label>}<input className={styles.editorTitleInput} value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} placeholder="Title" /><textarea className={styles.editorDescriptionInput} value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} placeholder="Short card description" /><TiptapArticleEditor value={draft.document} linkableArticles={linkableArticles.filter(article => article.id !== draft.id)} onChange={(document) => setDraft({ ...draft, document })} />{message && <p className={styles.editorMessage} role="status">{message}</p>}</div></div></aside>;
 }
 
-function TiptapArticleEditor({ value, onChange }: { value: OperationTiptapDocument; onChange: (document: OperationTiptapDocument) => void }) {
+function TiptapArticleEditor({ value, linkableArticles, onChange }: { value: OperationTiptapDocument; linkableArticles: OperationArticle[]; onChange: (document: OperationTiptapDocument) => void }) {
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const styleControlRef = useRef<HTMLDivElement | null>(null);
   const moreControlRef = useRef<HTMLDivElement | null>(null);
   const onChangeRef = useRef(onChange);
   const [styleMenuOpen, setStyleMenuOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const [articlePickerOpen, setArticlePickerOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const articlePickerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
   useEffect(() => {
@@ -521,6 +528,7 @@ function TiptapArticleEditor({ value, onChange }: { value: OperationTiptapDocume
       const target = event.target as Node;
       if (styleControlRef.current && !styleControlRef.current.contains(target)) setStyleMenuOpen(false);
       if (moreControlRef.current && !moreControlRef.current.contains(target)) setMoreMenuOpen(false);
+      if (articlePickerRef.current && !articlePickerRef.current.contains(target)) setArticlePickerOpen(false);
     }
     document.addEventListener("pointerdown", closePopovers);
     return () => document.removeEventListener("pointerdown", closePopovers);
@@ -530,12 +538,16 @@ function TiptapArticleEditor({ value, onChange }: { value: OperationTiptapDocume
     extensions: [
       StarterKit.configure({ heading: { levels: [2, 3] } }),
       UnderlineExtension,
-      Link.configure({ openOnClick: false, autolink: true, linkOnPaste: true, protocols: ["http", "https", "mailto", "tel"] }),
+      Link.configure({ openOnClick: false, autolink: true, linkOnPaste: true, protocols: ["http", "https", "mailto", "tel", "operation"] }),
       OperationImageExtension.configure({ allowBase64: false, inline: false }),
       Placeholder.configure({ placeholder: "Write the article..." }),
     ],
     content: value,
-    onUpdate: ({ editor: current }) => onChangeRef.current(current.getJSON() as OperationTiptapDocument),
+    onUpdate: ({ editor: current }) => {
+      onChangeRef.current(current.getJSON() as OperationTiptapDocument);
+      const { from } = current.state.selection;
+      if (current.state.doc.textBetween(Math.max(0, from - 2), from, "", "") === ">>") setArticlePickerOpen(true);
+    },
   }, []);
 
   async function uploadImage(file: File) {
@@ -576,7 +588,14 @@ function TiptapArticleEditor({ value, onChange }: { value: OperationTiptapDocume
     else editor.chain().focus().extendMarkRange("link").setLink({ href: href.trim() }).run();
   }
 
-  return <div className={styles.tiptapEditor}><input ref={imageInputRef} className={styles.imageInput} type="file" accept="image/*" onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void uploadImage(file); }} /><EditorContent editor={editor} className={styles.tiptapSurface} /><div className={styles.tiptapToolbar} role="toolbar" aria-label="Article formatting tools"><div ref={styleControlRef} className={styles.styleControl}><button type="button" className={styles.styleTrigger} aria-label="Text style" onMouseDown={event => event.preventDefault()} onClick={() => { setStyleMenuOpen(open => !open); setMoreMenuOpen(false); }} aria-expanded={styleMenuOpen}><span aria-hidden="true">Aa</span></button>{styleMenuOpen && <div className={styles.styleMenu}><button type="button" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle("heading")}>Heading</button><button type="button" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle("subheading")}>Subheading</button><button type="button" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle("body")}>Body</button></div>}</div><button type="button" aria-label="Bold" aria-pressed={editor?.isActive("bold") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleBold().run()}><Bold size={19} /></button><button type="button" aria-label="Italic" aria-pressed={editor?.isActive("italic") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleItalic().run()}><Italic size={19} /></button><button type="button" aria-label="Underline" aria-pressed={editor?.isActive("underline") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleUnderline().run()}><Underline size={19} /></button><button type="button" aria-label="Bullet list" aria-pressed={editor?.isActive("bulletList") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleBulletList().run()}><List size={20} /></button><button type="button" aria-label="Numbered list" aria-pressed={editor?.isActive("orderedList") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleOrderedList().run()}><ListOrdered size={20} /></button><button type="button" aria-label="Add image from device" disabled={uploading} onMouseDown={event => event.preventDefault()} onClick={() => imageInputRef.current?.click()}><ImagePlus size={20} /></button><div ref={moreControlRef} className={styles.moreControl}><button type="button" aria-label="More formatting tools" onMouseDown={event => event.preventDefault()} onClick={() => { setMoreMenuOpen(open => !open); setStyleMenuOpen(false); }} aria-expanded={moreMenuOpen}><MoreHorizontal size={21} /></button>{moreMenuOpen && <div className={styles.moreMenu}><button type="button" onClick={() => { setLink(); setMoreMenuOpen(false); }}><Link2 size={18} />Link</button><button type="button" disabled={!editor?.can().undo()} onClick={() => { editor?.chain().focus().undo().run(); setMoreMenuOpen(false); }}><Undo2 size={18} />Undo</button><button type="button" disabled={!editor?.can().redo()} onClick={() => { editor?.chain().focus().redo().run(); setMoreMenuOpen(false); }}><Redo2 size={18} />Redo</button></div>}</div></div></div>;
+  function insertArticleLink(article: OperationArticle) {
+    if (!editor) return;
+    const { from } = editor.state.selection;
+    editor.chain().focus().deleteRange({ from: Math.max(1, from - 2), to: from }).insertContent({ type: "text", text: article.title, marks: [{ type: "link", attrs: { href: operationArticleHref(article.id) } }] }).insertContent(" ").run();
+    setArticlePickerOpen(false);
+  }
+
+  return <div className={styles.tiptapEditor}><input ref={imageInputRef} className={styles.imageInput} type="file" accept="image/*" onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void uploadImage(file); }} /><EditorContent editor={editor} className={styles.tiptapSurface} />{articlePickerOpen && <div ref={articlePickerRef} className={styles.articleLinkPicker} role="dialog" aria-label="Link to an existing article"><p>Link to article</p><div>{linkableArticles.map(article => <button key={article.id} type="button" onMouseDown={event => event.preventDefault()} onClick={() => insertArticleLink(article)}><strong>{article.title}</strong><small>{article.kind.toLowerCase()} · {article.category}</small></button>)}{!linkableArticles.length && <span>No published articles to link yet.</span>}</div></div>}<div className={styles.tiptapToolbar} role="toolbar" aria-label="Article formatting tools"><div ref={styleControlRef} className={styles.styleControl}><button type="button" className={styles.styleTrigger} aria-label="Text style" onMouseDown={event => event.preventDefault()} onClick={() => { setStyleMenuOpen(open => !open); setMoreMenuOpen(false); }} aria-expanded={styleMenuOpen}><span aria-hidden="true">Aa</span></button>{styleMenuOpen && <div className={styles.styleMenu}><button type="button" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle("heading")}>Heading</button><button type="button" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle("subheading")}>Subheading</button><button type="button" onMouseDown={event => event.preventDefault()} onClick={() => applyStyle("body")}>Body</button></div>}</div><button type="button" aria-label="Bold" aria-pressed={editor?.isActive("bold") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleBold().run()}><Bold size={19} /></button><button type="button" aria-label="Italic" aria-pressed={editor?.isActive("italic") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleItalic().run()}><Italic size={19} /></button><button type="button" aria-label="Underline" aria-pressed={editor?.isActive("underline") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleUnderline().run()}><Underline size={19} /></button><button type="button" aria-label="Bullet list" aria-pressed={editor?.isActive("bulletList") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleBulletList().run()}><List size={20} /></button><button type="button" aria-label="Numbered list" aria-pressed={editor?.isActive("orderedList") || false} onMouseDown={event => event.preventDefault()} onClick={() => editor?.chain().focus().toggleOrderedList().run()}><ListOrdered size={20} /></button><button type="button" aria-label="Add image from device" disabled={uploading} onMouseDown={event => event.preventDefault()} onClick={() => imageInputRef.current?.click()}><ImagePlus size={20} /></button><div ref={moreControlRef} className={styles.moreControl}><button type="button" aria-label="More formatting tools" onMouseDown={event => event.preventDefault()} onClick={() => { setMoreMenuOpen(open => !open); setStyleMenuOpen(false); }} aria-expanded={moreMenuOpen}><MoreHorizontal size={21} /></button>{moreMenuOpen && <div className={styles.moreMenu}><button type="button" onClick={() => { setLink(); setMoreMenuOpen(false); }}><Link2 size={18} />Link</button><button type="button" disabled={!editor?.can().undo()} onClick={() => { editor?.chain().focus().undo().run(); setMoreMenuOpen(false); }}><Undo2 size={18} />Undo</button><button type="button" disabled={!editor?.can().redo()} onClick={() => { editor?.chain().focus().redo().run(); setMoreMenuOpen(false); }}><Redo2 size={18} />Redo</button></div>}</div></div></div>;
 }
 
 function SectionHeader({ title, detail }: { title: string; detail: string }) {
@@ -584,27 +603,47 @@ function SectionHeader({ title, detail }: { title: string; detail: string }) {
 }
 
 function ArticleCard({ article, onClick, onEdit, onDelete, disabled = false, showBody = false }: { article: OperationArticle; onClick: () => void; onEdit?: () => void; onDelete?: () => void; disabled?: boolean; showBody?: boolean }) {
-  const body = showBody ? articleCardBody(article) : article.description;
-  return <article className={`${styles.operationCard}${showBody ? ` ${styles.newsCard}` : ""}`}><button type="button" className={styles.articleCardOpen} onClick={onClick}><div><h3>{article.title}</h3>{body && <p>{body}</p>}</div><small>{article.category}</small></button>{onEdit && onDelete && <div className={styles.articleCardActions}><button type="button" onClick={onEdit} disabled={disabled}>Edit</button><button type="button" onClick={onDelete} aria-label={`Delete ${article.title}`} disabled={disabled}><Trash2 size={16} /></button></div>}</article>;
+  return <article className={`${styles.operationCard}${showBody ? ` ${styles.newsCard}` : ""}`}><button type="button" className={styles.articleCardOpen} onClick={onClick}><div><h3>{article.title}</h3>{showBody ? <NewsCardBody article={article} /> : article.description && <p>{article.description}</p>}</div><small>{article.category}</small></button>{onEdit && onDelete && <div className={styles.articleCardActions}><button type="button" onClick={onEdit} disabled={disabled}>Edit</button><button type="button" onClick={onDelete} aria-label={`Delete ${article.title}`} disabled={disabled}><Trash2 size={16} /></button></div>}</article>;
 }
 
-function articleCardBody(article: OperationArticle) {
-  const text = article.content.flatMap(contentBlockText).filter(Boolean).join("\n\n").trim();
-  return text || article.description;
+type NewsCardTextBlock = { type: "heading" | "subheading" | "body" | "list"; text: string };
+
+function NewsCardBody({ article }: { article: OperationArticle }) {
+  const blocks = article.content.flatMap(newsCardBlocksFromContent).filter(block => block.text.trim());
+  const content = blocks.length ? blocks : article.description ? [{ type: "body" as const, text: article.description }] : [];
+  return <span className={styles.newsCardBody}>{content.map((block, index) => <span className={styles[`newsCard${block.type[0].toUpperCase()}${block.type.slice(1)}`]} key={`${block.type}-${index}`}>{block.text}</span>)}</span>;
 }
 
-function contentBlockText(block: OperationContentBlock): string[] {
+function newsCardBlocksFromContent(block: OperationContentBlock): NewsCardTextBlock[] {
   if (block.type === "title" || block.type === "image" || block.type === "articleLink") return [];
-  if (block.type === "body" || block.type === "h1" || block.type === "h2") return [block.text];
-  if (block.type === "bullets" || block.type === "numbered") return block.items;
-  if (block.type === "richText") return deltaToLines(block.delta).map(line => line.segments.map(segment => segment.text).join(""));
-  if (block.type === "tiptap") return block.document.content.map(tiptapNodeText).filter(Boolean);
+  if (block.type === "h1") return [{ type: "heading", text: block.text }];
+  if (block.type === "h2") return [{ type: "subheading", text: block.text }];
+  if (block.type === "body") return [{ type: "body", text: block.text }];
+  if (block.type === "bullets" || block.type === "numbered") return block.items.map((item, index) => ({ type: "list" as const, text: `${block.type === "bullets" ? "•" : `${index + 1}.`} ${item}` }));
+  if (block.type === "richText") return deltaToLines(block.delta).flatMap((line): NewsCardTextBlock[] => {
+    const text = line.segments.map(segment => segment.text).join("");
+    const header = normalizeHeader(line.attributes?.header);
+    return text ? [{ type: header === 1 ? "heading" : header === 2 ? "subheading" : "body", text }] : [];
+  });
+  if (block.type === "tiptap") return block.document.content.flatMap(newsCardBlocksFromTiptapNode);
   return [];
 }
 
 function tiptapNodeText(node: OperationTiptapNode): string {
   if (node.type === "image") return "";
+  if (node.type === "hardBreak") return "\n";
   return [node.text || "", ...(node.content || []).map(tiptapNodeText)].join("");
+}
+
+function newsCardBlocksFromTiptapNode(node: OperationTiptapNode): NewsCardTextBlock[] {
+  if (node.type === "image" || node.type === "hardBreak" || node.type === "text") return [];
+  if (node.type === "heading") return [{ type: node.attrs?.level === 3 ? "subheading" : "heading", text: tiptapNodeText(node) }];
+  if (node.type === "paragraph") return tiptapNodeText(node).trim() ? [{ type: "body", text: tiptapNodeText(node) }] : [];
+  if (node.type === "bulletList" || node.type === "orderedList") return (node.content || []).flatMap((item, index) => {
+    const text = tiptapNodeText(item).trim();
+    return text ? [{ type: "list" as const, text: `${node.type === "bulletList" ? "•" : `${index + 1}.`} ${text}` }] : [];
+  });
+  return (node.content || []).flatMap(newsCardBlocksFromTiptapNode);
 }
 
 const previewImageMaxDimension = 960;
@@ -652,21 +691,26 @@ async function imageFileFromCanvas(image: HTMLImageElement, file: File, maxDimen
   return { file: new File([output], `${stem}.webp`, { type: output.type, lastModified: file.lastModified }), width, height };
 }
 
-function Reader({ article, canGoBack, goBack, close }: { article: OperationArticle; canGoBack: boolean; goBack: () => void; close: () => void }) {
+function Reader({ article, articles, canGoBack, goBack, openArticle, close }: { article: OperationArticle; articles: OperationArticle[]; canGoBack: boolean; goBack: () => void; openArticle: (article: OperationArticle) => void; close: () => void }) {
   const content = article.content.length ? article.content : [{ type: "title" as const, text: article.title }, { type: "body" as const, text: article.description || "No article content has been added yet." }];
-  return <aside className={styles.reader} aria-modal="true" role="dialog" aria-label={article.title}>{canGoBack && <div className={styles.readerTop}><button type="button" onClick={goBack}><ArrowLeft size={17} />Back</button></div>}<article className={styles.readerArticle}>{content.map((block, index) => <RenderBlock key={`${block.type}-${index}`} block={block} />)}</article><div className={styles.readerBottom}><button type="button" className={styles.closeCircle} onClick={close} aria-label="Close article"><X /></button></div></aside>;
+  const openLinkedArticle = (articleId: string) => {
+    const linkedArticle = articles.find(item => item.id === articleId);
+    if (linkedArticle) openArticle(linkedArticle);
+  };
+  return <aside className={styles.reader} aria-modal="true" role="dialog" aria-label={article.title}><article className={styles.readerArticle}>{content.map((block, index) => <RenderBlock key={`${block.type}-${index}`} block={block} openArticle={openLinkedArticle} />)}</article><div className={styles.readerBottom}>{canGoBack && <button type="button" className={styles.readerBackCircle} onClick={goBack} aria-label="Back to previous article"><ArrowLeft /></button>}<button type="button" className={styles.closeCircle} onClick={close} aria-label="Close article"><X /></button></div></aside>;
 }
 
-function RenderBlock({ block }: { block: OperationContentBlock }) {
+function RenderBlock({ block, openArticle }: { block: OperationContentBlock; openArticle: (articleId: string) => void }) {
   if (block.type === "title") return <h1>{block.text}</h1>;
   if (block.type === "richText") return <RichTextArticle delta={block.delta} />;
-  if (block.type === "tiptap") return <TiptapArticle document={block.document} />;
+  if (block.type === "tiptap") return <TiptapArticle document={block.document} openArticle={openArticle} />;
   if (block.type === "h1") return <h2>{block.text}</h2>;
   if (block.type === "h2") return <h3>{block.text}</h3>;
   if (block.type === "body") return <p>{block.text}</p>;
   if (block.type === "bullets") return <ul>{block.items.map(item => <li key={item}>{item}</li>)}</ul>;
   if (block.type === "numbered") return <ol>{block.items.map(item => <li key={item}>{item}</li>)}</ol>;
   if (block.type === "image") return <ArticleImage src={block.src} alt={block.alt} />;
+  if (block.type === "articleLink") return <button type="button" className={styles.readerArticleLink} onClick={() => openArticle(block.articleId)}>{block.label}</button>;
   return null;
 }
 
@@ -684,13 +728,13 @@ function ArticleImage({ src, fullSrc, alt, width = 1200, height = 800 }: { src: 
   </>;
 }
 
-function TiptapArticle({ document }: { document: OperationTiptapDocument }) {
-  return <>{document.content.map((node, index) => <TiptapNode key={index} node={node} />)}</>;
+function TiptapArticle({ document, openArticle }: { document: OperationTiptapDocument; openArticle: (articleId: string) => void }) {
+  return <>{document.content.map((node, index) => <TiptapNode key={index} node={node} openArticle={openArticle} />)}</>;
 }
 
-function TiptapNode({ node }: { node: OperationTiptapNode }) {
-  const content = node.content?.map((child, index) => <TiptapNode key={index} node={child} />);
-  if (node.type === "text") return <TiptapText node={node} />;
+function TiptapNode({ node, openArticle }: { node: OperationTiptapNode; openArticle: (articleId: string) => void }) {
+  const content = node.content?.map((child, index) => <TiptapNode key={index} node={child} openArticle={openArticle} />);
+  if (node.type === "text") return <TiptapText node={node} openArticle={openArticle} />;
   if (node.type === "paragraph") return <p>{content}</p>;
   if (node.type === "heading") return node.attrs?.level === 3 ? <h3>{content}</h3> : <h2>{content}</h2>;
   if (node.type === "bulletList") return <ul>{content}</ul>;
@@ -701,13 +745,16 @@ function TiptapNode({ node }: { node: OperationTiptapNode }) {
   return null;
 }
 
-function TiptapText({ node }: { node: OperationTiptapNode }) {
+function TiptapText({ node, openArticle }: { node: OperationTiptapNode; openArticle: (articleId: string) => void }) {
   let content: ReactNode = node.text || "";
   node.marks?.forEach(mark => {
     if (mark.type === "bold") content = <strong>{content}</strong>;
     if (mark.type === "italic") content = <em>{content}</em>;
     if (mark.type === "underline") content = <u>{content}</u>;
-    if (mark.type === "link" && typeof mark.attrs?.href === "string") content = <a href={mark.attrs.href} target="_blank" rel="noreferrer">{content}</a>;
+    if (mark.type === "link" && typeof mark.attrs?.href === "string") {
+      const articleId = operationArticleIdFromHref(mark.attrs.href);
+      content = articleId ? <button type="button" className={styles.readerArticleLink} onClick={() => openArticle(articleId)}>{content}</button> : <a href={mark.attrs.href} target="_blank" rel="noreferrer">{content}</a>;
+    }
   });
   return <>{content}</>;
 }

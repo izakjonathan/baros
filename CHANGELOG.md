@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.19.0-rc.101
+
+- Reworked Today news cards to preserve a compact published hierarchy for headings, subheadings, body copy and lists without changing the editor typography.
+- Added Apple Notes-style internal article links: type `>>`, choose any existing Handbook or News article, and the selected title becomes an in-app link.
+- Linked articles open in a reader stack with a bottom circular Back control beside Close. Close always returns to the underlying Operations page.
+- Replaced the completed task glyph in Home’s black next-action card with an unchecked box.
+
 ## v0.19.0-rc.100
 
 - Restored owner-only Edit and Delete controls on Today news cards.

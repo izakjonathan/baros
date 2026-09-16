@@ -1,10 +1,16 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.100**
+Version: **v0.19.0-rc.101**
 
 ## Current focus
 
-Making owner News management reliable in the Today flow.
+Improving operational reading and cross-referencing without adding editor complexity.
+
+## rc.101
+
+- Today News cards render headings, subheadings, body copy and lists in a compact card-specific hierarchy; editor typography remains unchanged.
+- `>>` opens an article picker in both editors; selected articles become reader links with bottom back navigation.
+- No migration is required. Rollback checkpoint: v0.19.0-rc.100.
 
 ## rc.100
 

@@ -1,15 +1,16 @@
-# v0.19.0-rc.100 Validation
+# v0.19.0-rc.101 Validation
 
 ## Confirmed baseline
 
-The verified rc.99 Readable Today News release was used as the baseline.
+The verified rc.100 Owner News Controls release was used as the baseline.
 
-- Rollback checkpoint: v0.19.0-rc.99
+- Rollback checkpoint: v0.19.0-rc.100
 
 ## Implementation
 
-- Restored owner edit/delete controls on Today news and made save state update immediately from the confirmed API response.
-- Added a network-error path that restores the save control and presents retry feedback.
+- Added compact structured published-text rendering for Today news cards without changing editor styles.
+- Added validated internal article links, reader-stack navigation and a bottom back circle for linked articles.
+- Replaced Home’s completed task icon with an unchecked box.
 
 ## Validation status
 

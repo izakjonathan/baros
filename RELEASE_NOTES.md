@@ -1,14 +1,16 @@
-# v0.19.0-rc.100 — Owner News Controls
+# v0.19.0-rc.101 — Readable News & Article Links
 
 ## Baseline
 
-- Continued from v0.19.0-rc.99. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.100. That release is the rollback checkpoint.
 
 ## Included
 
-- Owner Today news cards again expose their Edit and Delete controls; employee and shared staff views remain read/action-only according to existing permissions.
-- Saving a News article immediately adds or updates the card before a background refresh completes. Network failures leave the editor open and show a retry message.
+- Today news uses a compact published-text renderer, retaining distinct heading, subheading, body and list roles inside each card without touching editor formatting.
+- Typing `>>` in a Handbook or News article opens an article picker. A selection inserts its title as an in-app link.
+- Reader links push the selected article onto a navigation stack. A circular back control appears beside Close only when there is a previous article.
+- Home’s next task uses an unchecked box, matching its incomplete status.
 
-No database migration is required. Existing owner, employee and shared-staff permissions remain unchanged.
+No database migration is required. Owner, employee and shared-staff permissions remain unchanged; each sees only the articles their existing access grants.
 
-Rollback checkpoint: **v0.19.0-rc.99**.
+Rollback checkpoint: **v0.19.0-rc.100**.
