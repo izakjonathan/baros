@@ -1,8 +1,13 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.99**
+Current release: **v0.19.0-rc.100**
 
-Rollback checkpoint: **v0.19.0-rc.98**.
+Rollback checkpoint: **v0.19.0-rc.99**.
+
+## RC.100 — Owner News controls
+
+- Owners can edit/delete Today news directly, and saved news appears immediately with visible connection-failure feedback when needed.
+- No migration is required.
 
 ## RC.99 — Readable Today news
 

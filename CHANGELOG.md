@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.19.0-rc.100
+
+- Restored owner-only Edit and Delete controls on Today news cards.
+- Saved articles now update the local Operations state immediately; a background refresh no longer controls whether the saved News card appears.
+- Added explicit save-failure feedback and guaranteed release of the save control after a network failure.
+
 ## v0.19.0-rc.99
 
 - Expanded the Operations Today news feed so each card shows the published title and readable article body in place.

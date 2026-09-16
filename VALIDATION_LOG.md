@@ -1,15 +1,15 @@
-# v0.19.0-rc.99 Validation
+# v0.19.0-rc.100 Validation
 
 ## Confirmed baseline
 
-The verified rc.98 Today-first Home release was used as the baseline.
+The verified rc.99 Readable Today News release was used as the baseline.
 
-- Rollback checkpoint: v0.19.0-rc.98
+- Rollback checkpoint: v0.19.0-rc.99
 
 ## Implementation
 
-- Expanded Today news cards with the readable body extracted from published article content.
-- Removed the three-item rendering limit so the feed remains scrollable when several updates are published.
+- Restored owner edit/delete controls on Today news and made save state update immediately from the confirmed API response.
+- Added a network-error path that restores the save control and presents retry feedback.
 
 ## Validation status
 

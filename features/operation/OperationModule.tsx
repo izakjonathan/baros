@@ -215,12 +215,22 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
       return true;
     }
     setSaving(true);
-    const response = await fetch(operationEndpoint, { method: draft.id ? "PATCH" : "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "article", id: draft.id, kind: article.kind, category: article.category, title: article.title, description: article.description, content: article.content }) });
-    setSaving(false);
-    if (response.ok) { setDraft(draftFromArticle(undefined, draft.kind)); setEditorMessage("Article saved."); setEditorOpen(false); await refresh(selectedTaskDate); return true; }
-    else {
-      setEditorMessage(await responseMessage(response, "Could not save article."));
+    try {
+      const response = await fetch(operationEndpoint, { method: draft.id ? "PATCH" : "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "article", id: draft.id, kind: article.kind, category: article.category, title: article.title, description: article.description, content: article.content }) });
+      if (!response.ok) { setEditorMessage(await responseMessage(response, "Could not save article.")); return false; }
+      const saved = await response.json().catch(() => article) as OperationArticle;
+      const savedArticle = saved.id && saved.kind ? saved : article;
+      setState(current => ({ ...current, handbook: savedArticle.kind === "HANDBOOK" ? upsertArticle(current.handbook, savedArticle) : current.handbook, news: savedArticle.kind === "NEWS" ? upsertArticle(current.news, savedArticle) : current.news }));
+      setDraft(draftFromArticle(undefined, draft.kind));
+      setEditorMessage("Article saved.");
+      setEditorOpen(false);
+      void refresh(selectedTaskDate).catch(() => undefined);
+      return true;
+    } catch {
+      setEditorMessage("Could not save article. Check your connection and try again.");
       return false;
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -335,7 +345,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     <main className={styles.operationMain}>
       {storageUnavailable && <StorageNotice />}
       {dueSoonTasks.length > 0 && <section className={styles.duePrompt} role="status"><Clock3 size={18} /><div><strong>{dueSoonTasks.length === 1 ? "Task due soon" : `${dueSoonTasks.length} tasks due soon`}</strong><p>{dueSoonTasks.map(task => `${task.title} · ${task.dueTime}`).join(" · ")}</p></div></section>}
-      {view === "home" && (publicMode ? <PublicHomeView news={state.news} openArticle={(article) => setReaderStack([article])} openHandbook={() => setView("handbook")} /> : <HomeView news={state.news} tasks={state.dailyTasks} needs={state.needs} openArticle={(article) => setReaderStack([article])} openView={setView} />)}
+      {view === "home" && (publicMode ? <PublicHomeView news={state.news} openArticle={(article) => setReaderStack([article])} openHandbook={() => setView("handbook")} /> : <HomeView news={state.news} tasks={state.dailyTasks} needs={state.needs} openArticle={(article) => setReaderStack([article])} openView={setView} canManageContent={state.canManageContent} disabled={storageUnavailable} editArticle={(article) => { setDraft(draftFromArticle(article, article.kind)); setEditorMessage(storageUnavailable ? migrationMessage : ""); setEditorOpen(!storageUnavailable); }} deleteArticle={deleteArticle} />)}
       {editorMessage && !editorOpen && <p className={styles.editorMessage} role="status">{editorMessage}</p>}
       {view === "handbook" && <HandbookView articles={filteredHandbook} categories={handbookCategories} query={query} category={category} setQuery={setQuery} setCategory={setCategory} openArticle={(article) => setReaderStack([article])} canManageContent={state.canManageContent} disabled={storageUnavailable} editArticle={(article) => { setDraft(draftFromArticle(article, article.kind)); setEditorMessage(storageUnavailable ? migrationMessage : ""); setEditorOpen(!storageUnavailable); }} deleteArticle={deleteArticle} />}
       {!publicMode && view === "tasks" && <TasksView tasks={state.dailyTasks} taskTemplates={state.taskTemplates} assignees={state.assignees} selectedDate={selectedTaskDate} setSelectedDate={selectTaskDate} canManage={state.canManageTasks} taskTitle={taskTitle} taskDescription={taskDescription} taskDueDate={taskDueDate} taskRepeatUnit={taskRepeatUnit} taskRepeatInterval={taskRepeatInterval} taskRepeatEndDate={taskRepeatEndDate} taskPriority={taskPriority} taskDueTime={taskDueTime} taskReminderMinutes={taskReminderMinutes} taskAssignmentScope={taskAssignmentScope} taskAssigneeId={taskAssigneeId} taskChecklistText={taskChecklistText} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} setTaskDueDate={setTaskDueDate} setTaskRepeatUnit={setTaskRepeatUnit} setTaskRepeatInterval={setTaskRepeatInterval} setTaskRepeatEndDate={setTaskRepeatEndDate} setTaskType={setTaskType} setTaskPriority={setTaskPriority} setTaskDueTime={setTaskDueTime} setTaskReminderMinutes={setTaskReminderMinutes} setTaskAssignmentScope={setTaskAssignmentScope} setTaskAssigneeId={setTaskAssigneeId} setTaskChecklistText={setTaskChecklistText} saveTaskTemplate={saveTaskTemplate} addTask={addTask} toggleTask={toggleTask} toggleTaskChecklist={toggleTaskChecklist} deleteTask={deleteTask} disabled={storageUnavailable} message={taskMessage} />}
@@ -387,7 +397,7 @@ function OperationUiStudio({ theme, saving, close, preview, save, publicUrl }: {
   </div>;
 }
 
-function HomeView({ news, tasks, needs, openArticle, openView }: { news: OperationArticle[]; tasks: OperationDailyTask[]; needs: OperationNeed[]; openArticle: (article: OperationArticle) => void; openView: (view: View) => void }) {
+function HomeView({ news, tasks, needs, openArticle, openView, canManageContent, disabled, editArticle, deleteArticle }: { news: OperationArticle[]; tasks: OperationDailyTask[]; needs: OperationNeed[]; openArticle: (article: OperationArticle) => void; openView: (view: View) => void; canManageContent: boolean; disabled: boolean; editArticle: (article: OperationArticle) => void; deleteArticle: (article: OperationArticle) => void }) {
   const outstanding = tasks.filter(task => !task.completed).sort((left, right) => taskPriorityRank(left.priority) - taskPriorityRank(right.priority) || (left.dueTime || "99:99").localeCompare(right.dueTime || "99:99"));
   const nextTask = outstanding[0];
   const openNeeds = needs.filter(need => need.status === "NEEDED");
@@ -406,7 +416,7 @@ function HomeView({ news, tasks, needs, openArticle, openView }: { news: Operati
       <button type="button" onClick={() => openView("tasks")}><CheckSquare size={18} /><span><strong>{outstanding.length}</strong><small>{outstanding.length === 1 ? "task left" : "tasks left"}</small></span><ChevronRight size={17} /></button>
       <button type="button" onClick={() => openView("needs")}><ShoppingBasket size={18} /><span><strong>{openNeeds.length}</strong><small>{openNeeds.length === 1 ? "item to order" : "items to order"}</small></span><ChevronRight size={17} /></button>
     </section>
-    <NewsFeed news={news} openArticle={openArticle} />
+    <NewsFeed news={news} openArticle={openArticle} canManageContent={canManageContent} disabled={disabled} editArticle={editArticle} deleteArticle={deleteArticle} />
   </>;
 }
 
@@ -418,8 +428,8 @@ function PublicHomeView({ news, openArticle, openHandbook }: { news: OperationAr
   return <><section className={styles.todayPanel}><div><p className={styles.eyebrow}>Bar Ops</p><h1>Handbook & news</h1><p>Read the latest published routines and updates.</p></div><button type="button" onClick={openHandbook}>Open handbook <ChevronRight size={17} /></button></section><NewsFeed news={news} openArticle={openArticle} /></>;
 }
 
-function NewsFeed({ news, openArticle }: { news: OperationArticle[]; openArticle: (article: OperationArticle) => void }) {
-  return <><SectionHeader title="News" detail="Latest updates" /><div className={styles.cardGrid}>{news.map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} showBody />)}{!news.length && <div className={styles.empty}>No news yet.</div>}</div></>;
+function NewsFeed({ news, openArticle, canManageContent = false, disabled = false, editArticle, deleteArticle }: { news: OperationArticle[]; openArticle: (article: OperationArticle) => void; canManageContent?: boolean; disabled?: boolean; editArticle?: (article: OperationArticle) => void; deleteArticle?: (article: OperationArticle) => void }) {
+  return <><SectionHeader title="News" detail="Latest updates" /><div className={styles.cardGrid}>{news.map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} onEdit={canManageContent && editArticle ? () => editArticle(article) : undefined} onDelete={canManageContent && deleteArticle ? () => deleteArticle(article) : undefined} disabled={disabled} showBody />)}{!news.length && <div className={styles.empty}>No news yet.</div>}</div></>;
 }
 
 function StorageNotice() {

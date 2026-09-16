@@ -1,10 +1,16 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.99**
+Version: **v0.19.0-rc.100**
 
 ## Current focus
 
-Reducing the number of taps needed to read operational updates.
+Making owner News management reliable in the Today flow.
+
+## rc.100
+
+- Owners can Edit and Delete News directly from Today again; employee and shared staff surfaces do not receive those controls.
+- News saves update the visible feed immediately and report connection failures instead of leaving the save action stuck.
+- No migration is required. Rollback checkpoint: v0.19.0-rc.99.
 
 ## rc.99
 
