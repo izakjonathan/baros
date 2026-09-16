@@ -68,7 +68,11 @@
 .readerArticle p,.readerArticle li{font-family:var(--font-body);font-size:.9rem;line-height:1.56}
 .readerArticle a{color:inherit;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:.18em}
 .readerArticle ul,.readerArticle ol{display:grid;gap:.5rem;padding-left:1.25rem}
-.readerImage{width:100%;height:auto;border:0;border-radius:.9rem}
+.readerImageButton{display:block;width:100%;margin:.85rem 0;padding:0;border:0;border-radius:.9rem;background:transparent;cursor:zoom-in;overflow:hidden}
+.readerImage{display:block;width:100%;height:auto;border:0;border-radius:.9rem}
+.imageViewer{position:fixed;inset:0;z-index:110;display:grid;place-items:center;padding:max(1rem,env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) max(1rem,env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-left));background:color-mix(in srgb,var(--op-ink) 84%,transparent);cursor:zoom-out}
+.imageViewerImage{display:block;max-width:100%;max-height:100%;width:auto;height:auto;border:0;border-radius:.65rem;object-fit:contain;cursor:default}
+.imageViewerClose{position:absolute;top:max(1rem,env(safe-area-inset-top));right:max(1rem,env(safe-area-inset-right));z-index:1;display:grid;place-items:center;width:2.6rem;height:2.6rem;border:1px solid color-mix(in srgb,var(--op-canvas) 70%,transparent);border-radius:50%;background:color-mix(in srgb,var(--op-ink) 72%,transparent);color:var(--op-canvas)}
 .readerBottom{position:absolute;left:0;right:0;bottom:max(1.2rem,env(safe-area-inset-bottom));display:grid;place-items:center;pointer-events:none}
 .closeCircle{width:3.5rem;height:3.5rem;display:grid!important;place-items:center;border:1.5px solid var(--op-ink)!important;border-radius:50%;background:transparent!important;color:var(--op-ink)!important;padding:0!important;pointer-events:auto}
 .closeCircle svg{width:1.35rem;height:1.35rem}

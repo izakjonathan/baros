@@ -1,8 +1,14 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.96**
+Current release: **v0.19.0-rc.97**
 
-Rollback checkpoint: **v0.19.0-rc.95**.
+Rollback checkpoint: **v0.19.0-rc.96**.
+
+## RC.97 — Operations image performance
+
+- Operations article uploads automatically generate a compact 960px WebP preview and a detailed reading image.
+- The article loads the compact image first; tapping it opens the detailed version.
+- No migration is required.
 
 ## RC.96 — Shared staff Operations link
 

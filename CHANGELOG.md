@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.19.0-rc.97
+
+- Replaced the single 2048px image upload with an automatic two-version Operations image pipeline.
+- Photos now create a 960px inline WebP preview and a 1600px detailed WebP image; PNG screenshots retain a 2048px detailed version for readable small text.
+- Preview images open the detailed version only when tapped, preserving the existing private/shared-link access rules.
+- Reduced the Operations server upload limit to Vercel's 4 MB-safe range and allow private browser caching for one hour.
+
 ## v0.19.0-rc.96
 
 - Replaced the handbook/news-only public page with an unguessable shared staff Operations link.

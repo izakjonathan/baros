@@ -35,7 +35,7 @@ export async function GET(request: Request, { params }: RouteContext) {
     ifNoneMatch: request.headers.get("if-none-match") || undefined,
   });
   if (!blob) return NextResponse.json({ error: "Image not found" }, { status: 404 });
-  const cacheControl = isPublicArticleImage ? "public, max-age=300" : "private, no-cache";
+  const cacheControl = isPublicArticleImage ? "public, max-age=300" : "private, max-age=3600";
   if (blob.statusCode === 304) return new NextResponse(null, { status: 304, headers: { ETag: blob.blob.etag, "Cache-Control": cacheControl } });
 
   return new NextResponse(blob.stream, {

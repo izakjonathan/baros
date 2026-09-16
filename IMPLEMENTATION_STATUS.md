@@ -1,10 +1,16 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.96**
+Version: **v0.19.0-rc.97**
 
 ## Current focus
 
-Shared staff Operations link from the verified rc.95 baseline.
+Operations image upload and reading performance.
+
+## rc.97
+
+- Article images are automatically converted into a compact inline preview and a detailed tap-to-open image.
+- Photos use 1600px WebP at 0.78 quality; PNG screenshots use 2048px WebP at 0.84 quality to preserve instruction text.
+- Upload payloads are capped within Vercel's server-safe range. No migration is required. Rollback checkpoint: v0.19.0-rc.96.
 
 ## rc.96
 

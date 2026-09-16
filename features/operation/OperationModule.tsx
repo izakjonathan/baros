@@ -16,6 +16,18 @@ import type { OperationArticle, OperationArticleKind, OperationContentBlock, Ope
 
 type View = "home" | "handbook" | "tasks" | "needs";
 type DraftArticle = { id?: string; kind: OperationArticleKind; category: string; title: string; description: string; document: OperationTiptapDocument };
+type PreparedOperationImages = { preview: File; detail: File; width: number; height: number };
+
+const OperationImageExtension = ImageExtension.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      fullSrc: { default: null },
+      width: { default: null },
+      height: { default: null },
+    };
+  },
+});
 
 const migrationMessage = "Operation storage is not ready yet. Run the database migration action, then reload this page.";
 
@@ -483,7 +495,7 @@ function TiptapArticleEditor({ value, onChange }: { value: OperationTiptapDocume
       StarterKit.configure({ heading: { levels: [2, 3] } }),
       UnderlineExtension,
       Link.configure({ openOnClick: false, autolink: true, linkOnPaste: true, protocols: ["http", "https", "mailto", "tel"] }),
-      ImageExtension.configure({ allowBase64: false, inline: false }),
+      OperationImageExtension.configure({ allowBase64: false, inline: false }),
       Placeholder.configure({ placeholder: "Write the article..." }),
     ],
     content: value,
@@ -494,15 +506,16 @@ function TiptapArticleEditor({ value, onChange }: { value: OperationTiptapDocume
     if (!editor) return;
     setUploading(true);
     try {
-      const image = await prepareOperationImage(file);
+      const images = await prepareOperationImages(file);
       const form = new FormData();
-      form.append("image", image);
+      form.append("preview", images.preview);
+      form.append("detail", images.detail);
       const response = await fetch("/api/operation-images", { method: "POST", body: form });
       const payload: unknown = await response.json().catch(() => null);
-      if (!response.ok || !payload || typeof payload !== "object" || !("url" in payload) || typeof payload.url !== "string") {
+      if (!response.ok || !payload || typeof payload !== "object" || !("url" in payload) || typeof payload.url !== "string" || !("fullUrl" in payload) || typeof payload.fullUrl !== "string") {
         throw new Error(payload && typeof payload === "object" && "error" in payload && typeof payload.error === "string" ? payload.error : "Could not upload image.");
       }
-      editor.chain().focus().setImage({ src: payload.url, alt: "Operation article image" }).run();
+      editor.chain().focus().setImage({ src: payload.url, alt: "Operation article image" }).updateAttributes("image", { fullSrc: payload.fullUrl, width: images.width, height: images.height }).run();
     } catch (error) {
       alert(error instanceof Error ? error.message : "Could not upload image.");
     } finally {
@@ -538,10 +551,12 @@ function ArticleCard({ article, onClick, onEdit, onDelete, disabled = false }: {
   return <article className={styles.operationCard}><button type="button" className={styles.articleCardOpen} onClick={onClick}><div><h3>{article.title}</h3><p>{article.description}</p></div><small>{article.category}</small></button>{onEdit && onDelete && <div className={styles.articleCardActions}><button type="button" onClick={onEdit} disabled={disabled}>Edit</button><button type="button" onClick={onDelete} aria-label={`Delete ${article.title}`} disabled={disabled}><Trash2 size={16} /></button></div>}</article>;
 }
 
-const imageUploadMaxDimension = 2048;
+const previewImageMaxDimension = 960;
+const photoImageMaxDimension = 1600;
+const screenshotImageMaxDimension = 2048;
 
-async function prepareOperationImage(file: File) {
-  if (!file.type.startsWith("image/") || file.type === "image/gif") return file;
+async function prepareOperationImages(file: File): Promise<PreparedOperationImages> {
+  if (!file.type.startsWith("image/") || file.type === "image/gif") throw new Error("Choose a JPG, PNG or WebP image.");
   const sourceUrl = URL.createObjectURL(file);
   try {
     const image = await new Promise<HTMLImageElement>((resolve, reject) => {
@@ -550,21 +565,35 @@ async function prepareOperationImage(file: File) {
       element.onerror = () => reject(new Error("This image could not be prepared. Choose a JPG, PNG or WebP image."));
       element.src = sourceUrl;
     });
-    const scale = Math.min(1, imageUploadMaxDimension / Math.max(image.naturalWidth, image.naturalHeight));
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
-    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
-    const context = canvas.getContext("2d");
-    if (!context) return file;
-    context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    const output = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/webp", 0.82));
-    if (!output || output.size >= file.size) return file;
-    const stem = file.name.replace(/\.[^.]+$/, "") || "operation-image";
-    const extension = output.type === "image/png" ? "png" : output.type === "image/jpeg" ? "jpg" : "webp";
-    return new File([output], `${stem}.${extension}`, { type: output.type, lastModified: file.lastModified });
+    const isScreenshot = file.type === "image/png";
+    const detailMaxDimension = isScreenshot ? screenshotImageMaxDimension : photoImageMaxDimension;
+    const detailQuality = isScreenshot ? 0.84 : 0.78;
+    const previewQuality = isScreenshot ? 0.78 : 0.72;
+    const detail = await imageFileFromCanvas(image, file, detailMaxDimension, detailQuality);
+    const preview = Math.max(detail.width, detail.height) <= previewImageMaxDimension
+      ? detail
+      : await imageFileFromCanvas(image, file, previewImageMaxDimension, previewQuality);
+    if (preview.file.size + detail.file.size > 4 * 1024 * 1024) throw new Error("This image is still too large after preparation. Choose a smaller image.");
+    return { preview: preview.file, detail: detail.file, width: preview.width, height: preview.height };
   } finally {
     URL.revokeObjectURL(sourceUrl);
   }
+}
+
+async function imageFileFromCanvas(image: HTMLImageElement, file: File, maxDimension: number, quality: number) {
+  const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+  const width = Math.max(1, Math.round(image.naturalWidth * scale));
+  const height = Math.max(1, Math.round(image.naturalHeight * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("This image could not be prepared.");
+  context.drawImage(image, 0, 0, width, height);
+  const output = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/webp", quality));
+  if (!output) throw new Error("This image could not be prepared.");
+    const stem = file.name.replace(/\.[^.]+$/, "") || "operation-image";
+  return { file: new File([output], `${stem}.webp`, { type: output.type, lastModified: file.lastModified }), width, height };
 }
 
 function ModuleCard({ title, description, icon: Icon, onClick }: { title: string; description: string; icon: typeof BookOpen; onClick: () => void }) {
@@ -585,8 +614,22 @@ function RenderBlock({ block }: { block: OperationContentBlock }) {
   if (block.type === "body") return <p>{block.text}</p>;
   if (block.type === "bullets") return <ul>{block.items.map(item => <li key={item}>{item}</li>)}</ul>;
   if (block.type === "numbered") return <ol>{block.items.map(item => <li key={item}>{item}</li>)}</ol>;
-  if (block.type === "image") return <Image className={styles.readerImage} src={block.src} alt={block.alt} width={1200} height={800} unoptimized />;
+  if (block.type === "image") return <ArticleImage src={block.src} alt={block.alt} />;
   return null;
+}
+
+function ArticleImage({ src, fullSrc, alt, width = 1200, height = 800 }: { src: string; fullSrc?: string; alt: string; width?: number; height?: number }) {
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const detailSrc = fullSrc || src;
+  return <>
+    <button type="button" className={styles.readerImageButton} onClick={() => setViewerOpen(true)} aria-label={`Open image${alt ? `: ${alt}` : ""}`}>
+      <Image className={styles.readerImage} src={src} alt={alt} width={width} height={height} unoptimized sizes="(max-width: 48rem) 100vw, 38rem" />
+    </button>
+    {viewerOpen && <aside className={styles.imageViewer} role="dialog" aria-modal="true" aria-label={alt || "Article image"} onClick={() => setViewerOpen(false)}>
+      <button type="button" className={styles.imageViewerClose} onClick={() => setViewerOpen(false)} aria-label="Close image"><X size={20} /></button>
+      <Image className={styles.imageViewerImage} src={detailSrc} alt={alt} width={width} height={height} unoptimized sizes="100vw" onClick={event => event.stopPropagation()} />
+    </aside>}
+  </>;
 }
 
 function TiptapArticle({ document }: { document: OperationTiptapDocument }) {
@@ -601,7 +644,7 @@ function TiptapNode({ node }: { node: OperationTiptapNode }) {
   if (node.type === "bulletList") return <ul>{content}</ul>;
   if (node.type === "orderedList") return <ol>{content}</ol>;
   if (node.type === "listItem") return <li>{content}</li>;
-  if (node.type === "image" && typeof node.attrs?.src === "string") return <Image className={styles.readerImage} src={node.attrs.src} alt={typeof node.attrs.alt === "string" ? node.attrs.alt : ""} width={1200} height={800} unoptimized />;
+  if (node.type === "image" && typeof node.attrs?.src === "string") return <ArticleImage src={node.attrs.src} fullSrc={typeof node.attrs.fullSrc === "string" ? node.attrs.fullSrc : undefined} alt={typeof node.attrs.alt === "string" ? node.attrs.alt : ""} width={typeof node.attrs.width === "number" ? node.attrs.width : undefined} height={typeof node.attrs.height === "number" ? node.attrs.height : undefined} />;
   if (node.type === "hardBreak") return <br />;
   return null;
 }
@@ -646,7 +689,7 @@ function deltaToLines(delta: OperationRichTextDelta): RichTextLine[] {
 }
 
 function RichTextLine({ line }: { line: RichTextLine }) {
-  if (line.image) return <Image className={styles.readerImage} src={line.image} alt="" width={1200} height={800} unoptimized />;
+  if (line.image) return <ArticleImage src={line.image} alt="" />;
   const content = line.segments.map((segment, index) => <RichTextSegment key={index} segment={segment} />);
   if (line.attributes?.list === "bullet") return <ul><li>{content}</li></ul>;
   if (line.attributes?.list === "ordered") return <ol><li>{content}</li></ol>;

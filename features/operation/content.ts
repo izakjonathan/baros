@@ -51,7 +51,7 @@ export function parseOperationBlocks(value: unknown): OperationContentBlock[] {
 
 const tiptapNodes = new Set(["paragraph", "heading", "bulletList", "orderedList", "listItem", "image", "hardBreak", "text"]);
 const tiptapMarks = new Set(["bold", "italic", "underline", "link"]);
-const operationImagePath = /^\/api\/operation-images\/operation\/[0-9a-f-]+\/[0-9a-f-]+\.(?:avif|gif|jpe?g|png|webp)$/i;
+const operationImagePath = /^\/api\/operation-images\/operation\/[0-9a-f-]+\/[0-9a-f-]+(?:-(?:preview|detail))?\.(?:avif|gif|jpe?g|png|webp)$/i;
 
 function isArticleImageSource(value: string) {
   return /^https:\/\//.test(value) || operationImagePath.test(value);
@@ -82,7 +82,19 @@ function parseTiptapNode(value: unknown, depth: number, root = false): Operation
     const attrs = record.attrs && typeof record.attrs === "object" && !Array.isArray(record.attrs) ? record.attrs as Record<string, unknown> : {};
     const src = String(attrs.src || "").trim();
     if (!isArticleImageSource(src) || src.length > 2000) return null;
-    return { type, attrs: { src, alt: String(attrs.alt || "").slice(0, 180) || "Operation article image" } };
+    const fullSrc = String(attrs.fullSrc || "").trim();
+    const width = Number(attrs.width);
+    const height = Number(attrs.height);
+    return {
+      type,
+      attrs: {
+        src,
+        alt: String(attrs.alt || "").slice(0, 180) || "Operation article image",
+        ...(isArticleImageSource(fullSrc) && fullSrc.length <= 2000 ? { fullSrc } : {}),
+        ...(Number.isInteger(width) && width > 0 && width <= 4096 ? { width } : {}),
+        ...(Number.isInteger(height) && height > 0 && height <= 4096 ? { height } : {}),
+      },
+    };
   }
   if (type === "heading") {
     const attrs = record.attrs && typeof record.attrs === "object" && !Array.isArray(record.attrs) ? record.attrs as Record<string, unknown> : {};

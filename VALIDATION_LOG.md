@@ -1,24 +1,23 @@
-# v0.19.0-rc.96 Validation
+# v0.19.0-rc.97 Validation
 
 ## Confirmed baseline
 
-The supplied `baros-main-updated.zip` v0.19.0-rc.95 source was used as the baseline for the shared staff Operations link release.
+The supplied rc.96 Operations baseline was used for the image performance release.
 
-- Rollback checkpoint: v0.19.0-rc.95
+- Rollback checkpoint: v0.19.0-rc.96
 
 ## Implementation
 
-- Replaced the slug-based handbook/news-only route with a token-based shared Operations route and public mutation boundary.
-- Shared task and need actions retain audit history without fabricating an employee identity.
+- Replaced the single uploaded image with generated inline-preview and detail image variants.
+- Kept owner, employee, shared staff-link and public article image access within the established private delivery route.
 
 ## Validation status
 
 - ESLint: passed.
 - TypeScript (`tsc --noEmit`): passed.
-- Full regression suite (`npm run test:all`): passed.
+- Operations regression suite (`npm run test:operation`): passed.
 - Next.js 16.2.12 Turbopack production build: passed.
-- Release artifact and stabilization preflight: passed.
 
 ## Scope
 
-Apply migration `022_operation_public_staff_link.sql` before the shared link is enabled. Production iPad Safari visual confirmation is still required after deployment.
+No database migration is required. Production iPhone/iPad Safari upload and visual confirmation remains required after deployment.
