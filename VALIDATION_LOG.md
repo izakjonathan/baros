@@ -1,22 +1,21 @@
-# v0.19.0-rc.102 Validation
+# v0.19.0-rc.103 Validation
 
 ## Confirmed baseline
 
-The verified rc.101 Readable News & Article Links release was used as the baseline.
+The verified rc.102 Full-width Today News release was used as the baseline.
 
-- Rollback checkpoint: v0.19.0-rc.101
+- Rollback checkpoint: v0.19.0-rc.102
 
 ## Implementation
 
-- Reflowed Today news cards so content uses the full width below the compact owner/action header.
-- Preserved the existing editor styles and all prior article-link behaviour.
+- Increased Today news copy contrast, size, and paragraph rhythm for quicker in-card reading.
+- Preserved the existing full-width card layout, editor styles, and article-link behaviour.
 
 ## Validation status
 
 - ESLint: passed.
 - TypeScript (`tsc --noEmit`): passed.
 - Operations regression suite (`npm run test:operation`): passed.
-- TypeScript and ESLint: passed.
 - Next.js 16.2.12 Turbopack production build: passed.
 
 ## Scope

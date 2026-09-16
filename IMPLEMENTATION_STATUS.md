@@ -1,10 +1,16 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.102**
+Version: **v0.19.0-rc.103**
 
 ## Current focus
 
 Making the Today news feed readable at a glance.
+
+## rc.103
+
+- Today news now uses larger, ink-coloured reading copy with compact line-height and distinct paragraph spacing, while preserving its heading/subheading hierarchy.
+- The editor and full article reader remain unchanged.
+- No migration is required. Rollback checkpoint: v0.19.0-rc.102.
 
 ## rc.102
 
@@ -215,3 +221,6 @@ Making the Today news feed readable at a glance.
 - Added a shared We Need list for bar items that employees can add and mark ordered.
 - Added migration `014_operation_module.sql` and `/api/operation-module` for durable production data.
 - Rollback checkpoint: v0.19.0-rc.57.
+## rc.103
+
+- Home news cards now use a larger, ink-coloured reading style with clear heading, subheading, and paragraph hierarchy.

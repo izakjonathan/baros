@@ -367,3 +367,6 @@
 - Kept existing application routes, APIs, permissions, database behavior, and business workflows unchanged.
 ## v0.19.0-rc.45
 - Decomposed manager workspace implementations into feature/domain modules; no behavior or CSS changes.
+## v0.19.0-rc.103
+
+- Increased published Home news typography, contrast, and paragraph rhythm without changing the editor or full-article reader.
