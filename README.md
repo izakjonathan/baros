@@ -1,8 +1,13 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.98**
+Current release: **v0.19.0-rc.99**
 
-Rollback checkpoint: **v0.19.0-rc.97**.
+Rollback checkpoint: **v0.19.0-rc.98**.
+
+## RC.99 — Readable Today news
+
+- Today news cards include the article’s readable body and render every published update in a naturally scrollable feed.
+- No migration is required.
 
 ## RC.98 — Today-first Home
 

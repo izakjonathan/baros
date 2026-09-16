@@ -1,15 +1,14 @@
-# v0.19.0-rc.98 — Today-first Operations Home
+# v0.19.0-rc.99 — Readable Today News
 
 ## Baseline
 
-- Continued from v0.19.0-rc.97. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.98. That release is the rollback checkpoint.
 
 ## Included
 
-- Home now presents one priority-ranked incomplete task as the immediate next action.
-- Compact Tasks and Needs shortcuts show the live remaining counts and take one tap to their respective queues.
-- Removed duplicate tool cards and non-actionable metric panel from Home. News remains below today's actions.
+- Today news cards now show their title and readable article body without first opening the reader.
+- All news is rendered in normal page flow rather than being limited to the first three updates, so a longer feed scrolls naturally.
 
-No database migration is required. Owner, employee and shared staff links retain their existing permitted actions.
+No database migration is required. Owner, employee and shared staff links receive the same reading improvement; their existing permitted actions remain unchanged.
 
-Rollback checkpoint: **v0.19.0-rc.97**.
+Rollback checkpoint: **v0.19.0-rc.98**.

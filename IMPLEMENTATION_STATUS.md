@@ -1,10 +1,16 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.98**
+Version: **v0.19.0-rc.99**
 
 ## Current focus
 
-Today-first Operations Home.
+Reducing the number of taps needed to read operational updates.
+
+## rc.99
+
+- Today news cards show the complete readable article body in addition to the title.
+- The feed no longer truncates after three updates; additional news uses normal document scrolling.
+- No migration is required. Rollback checkpoint: v0.19.0-rc.98.
 
 ## rc.98
 

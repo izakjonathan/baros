@@ -406,8 +406,7 @@ function HomeView({ news, tasks, needs, openArticle, openView }: { news: Operati
       <button type="button" onClick={() => openView("tasks")}><CheckSquare size={18} /><span><strong>{outstanding.length}</strong><small>{outstanding.length === 1 ? "task left" : "tasks left"}</small></span><ChevronRight size={17} /></button>
       <button type="button" onClick={() => openView("needs")}><ShoppingBasket size={18} /><span><strong>{openNeeds.length}</strong><small>{openNeeds.length === 1 ? "item to order" : "items to order"}</small></span><ChevronRight size={17} /></button>
     </section>
-    <SectionHeader title="News" detail="Latest updates" />
-    <div className={styles.cardGrid}>{news.slice(0, 3).map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} />)}{!news.length && <div className={styles.empty}>No news yet.</div>}</div>
+    <NewsFeed news={news} openArticle={openArticle} />
   </>;
 }
 
@@ -416,7 +415,11 @@ function taskPriorityRank(priority: OperationTaskPriority) {
 }
 
 function PublicHomeView({ news, openArticle, openHandbook }: { news: OperationArticle[]; openArticle: (article: OperationArticle) => void; openHandbook: () => void }) {
-  return <><section className={styles.todayPanel}><div><p className={styles.eyebrow}>Bar Ops</p><h1>Handbook & news</h1><p>Read the latest published routines and updates.</p></div><button type="button" onClick={openHandbook}>Open handbook <ChevronRight size={17} /></button></section><SectionHeader title="News" detail="Latest updates" /><div className={styles.cardGrid}>{news.slice(0, 3).map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} />)}{!news.length && <div className={styles.empty}>No news yet.</div>}</div></>;
+  return <><section className={styles.todayPanel}><div><p className={styles.eyebrow}>Bar Ops</p><h1>Handbook & news</h1><p>Read the latest published routines and updates.</p></div><button type="button" onClick={openHandbook}>Open handbook <ChevronRight size={17} /></button></section><NewsFeed news={news} openArticle={openArticle} /></>;
+}
+
+function NewsFeed({ news, openArticle }: { news: OperationArticle[]; openArticle: (article: OperationArticle) => void }) {
+  return <><SectionHeader title="News" detail="Latest updates" /><div className={styles.cardGrid}>{news.map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} showBody />)}{!news.length && <div className={styles.empty}>No news yet.</div>}</div></>;
 }
 
 function StorageNotice() {
@@ -570,8 +573,28 @@ function SectionHeader({ title, detail }: { title: string; detail: string }) {
   return <div className={styles.sectionHeader}><h2>{title}</h2><div><p>{detail}</p></div></div>;
 }
 
-function ArticleCard({ article, onClick, onEdit, onDelete, disabled = false }: { article: OperationArticle; onClick: () => void; onEdit?: () => void; onDelete?: () => void; disabled?: boolean }) {
-  return <article className={styles.operationCard}><button type="button" className={styles.articleCardOpen} onClick={onClick}><div><h3>{article.title}</h3><p>{article.description}</p></div><small>{article.category}</small></button>{onEdit && onDelete && <div className={styles.articleCardActions}><button type="button" onClick={onEdit} disabled={disabled}>Edit</button><button type="button" onClick={onDelete} aria-label={`Delete ${article.title}`} disabled={disabled}><Trash2 size={16} /></button></div>}</article>;
+function ArticleCard({ article, onClick, onEdit, onDelete, disabled = false, showBody = false }: { article: OperationArticle; onClick: () => void; onEdit?: () => void; onDelete?: () => void; disabled?: boolean; showBody?: boolean }) {
+  const body = showBody ? articleCardBody(article) : article.description;
+  return <article className={`${styles.operationCard}${showBody ? ` ${styles.newsCard}` : ""}`}><button type="button" className={styles.articleCardOpen} onClick={onClick}><div><h3>{article.title}</h3>{body && <p>{body}</p>}</div><small>{article.category}</small></button>{onEdit && onDelete && <div className={styles.articleCardActions}><button type="button" onClick={onEdit} disabled={disabled}>Edit</button><button type="button" onClick={onDelete} aria-label={`Delete ${article.title}`} disabled={disabled}><Trash2 size={16} /></button></div>}</article>;
+}
+
+function articleCardBody(article: OperationArticle) {
+  const text = article.content.flatMap(contentBlockText).filter(Boolean).join("\n\n").trim();
+  return text || article.description;
+}
+
+function contentBlockText(block: OperationContentBlock): string[] {
+  if (block.type === "title" || block.type === "image" || block.type === "articleLink") return [];
+  if (block.type === "body" || block.type === "h1" || block.type === "h2") return [block.text];
+  if (block.type === "bullets" || block.type === "numbered") return block.items;
+  if (block.type === "richText") return deltaToLines(block.delta).map(line => line.segments.map(segment => segment.text).join(""));
+  if (block.type === "tiptap") return block.document.content.map(tiptapNodeText).filter(Boolean);
+  return [];
+}
+
+function tiptapNodeText(node: OperationTiptapNode): string {
+  if (node.type === "image") return "";
+  return [node.text || "", ...(node.content || []).map(tiptapNodeText)].join("");
 }
 
 const previewImageMaxDimension = 960;

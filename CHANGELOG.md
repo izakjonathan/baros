@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.19.0-rc.99
+
+- Expanded the Operations Today news feed so each card shows the published title and readable article body in place.
+- Removed the three-item news limit. Multiple updates now remain in normal page flow and the page scrolls naturally.
+
 ## v0.19.0-rc.98
 
 - Reworked authenticated Operations Home into a Today-first view: one priority-ranked next task, then compact direct Task and Needs shortcuts.
