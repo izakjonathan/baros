@@ -1,8 +1,14 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.97**
+Current release: **v0.19.0-rc.98**
 
-Rollback checkpoint: **v0.19.0-rc.96**.
+Rollback checkpoint: **v0.19.0-rc.97**.
+
+## RC.98 — Today-first Home
+
+- Home puts the highest-priority incomplete task at the top, with direct shortcuts to the remaining Tasks and Needs queues.
+- Removed duplicate Home tool cards; Handbook, Tasks and Needs remain in the persistent Operation navigation.
+- No migration is required.
 
 ## RC.97 — Operations image performance
 

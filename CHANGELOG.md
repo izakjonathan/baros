@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.19.0-rc.98
+
+- Reworked authenticated Operations Home into a Today-first view: one priority-ranked next task, then compact direct Task and Needs shortcuts.
+- Removed Home’s duplicate Tools cards and metric panel; the persistent top navigation remains the route to Handbook, Tasks and Needs.
+- Preserved existing task completion, Needs ordering, owner controls and shared-link permissions.
+
 ## v0.19.0-rc.97
 
 - Replaced the single 2048px image upload with an automatic two-version Operations image pipeline.

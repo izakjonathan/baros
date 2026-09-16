@@ -1,23 +1,24 @@
-# v0.19.0-rc.97 Validation
+# v0.19.0-rc.98 Validation
 
 ## Confirmed baseline
 
-The supplied rc.96 Operations baseline was used for the image performance release.
+The verified rc.97 Operations image-performance release was used as the baseline.
 
-- Rollback checkpoint: v0.19.0-rc.96
+- Rollback checkpoint: v0.19.0-rc.97
 
 ## Implementation
 
-- Replaced the single uploaded image with generated inline-preview and detail image variants.
-- Kept owner, employee, shared staff-link and public article image access within the established private delivery route.
+- Replaced Home’s multi-panel task summary with one priority-ranked next action and direct Tasks/Needs shortcuts.
+- Kept persistent navigation, owner controls, employee actions and shared-staff permissions unchanged.
 
 ## Validation status
 
 - ESLint: passed.
 - TypeScript (`tsc --noEmit`): passed.
 - Operations regression suite (`npm run test:operation`): passed.
+- TypeScript and ESLint: passed.
 - Next.js 16.2.12 Turbopack production build: passed.
 
 ## Scope
 
-No database migration is required. Production iPhone/iPad Safari upload and visual confirmation remains required after deployment.
+No database migration is required. Production iPhone/iPad Safari visual confirmation remains required after deployment.

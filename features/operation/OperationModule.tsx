@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowLeft, Bold, BookOpen, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, Clock3, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Palette, Plus, Redo2, Repeat2, ShoppingBasket, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
+import { ArrowLeft, Bold, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, Clock3, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Palette, Plus, Redo2, Repeat2, ShoppingBasket, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -335,7 +335,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     <main className={styles.operationMain}>
       {storageUnavailable && <StorageNotice />}
       {dueSoonTasks.length > 0 && <section className={styles.duePrompt} role="status"><Clock3 size={18} /><div><strong>{dueSoonTasks.length === 1 ? "Task due soon" : `${dueSoonTasks.length} tasks due soon`}</strong><p>{dueSoonTasks.map(task => `${task.title} · ${task.dueTime}`).join(" · ")}</p></div></section>}
-      {view === "home" && (publicMode ? <PublicHomeView news={state.news} openArticle={(article) => setReaderStack([article])} openHandbook={() => setView("handbook")} /> : <HomeView news={state.news} tasks={state.dailyTasks} metrics={state.metrics} openArticle={(article) => setReaderStack([article])} openView={setView} />)}
+      {view === "home" && (publicMode ? <PublicHomeView news={state.news} openArticle={(article) => setReaderStack([article])} openHandbook={() => setView("handbook")} /> : <HomeView news={state.news} tasks={state.dailyTasks} needs={state.needs} openArticle={(article) => setReaderStack([article])} openView={setView} />)}
       {editorMessage && !editorOpen && <p className={styles.editorMessage} role="status">{editorMessage}</p>}
       {view === "handbook" && <HandbookView articles={filteredHandbook} categories={handbookCategories} query={query} category={category} setQuery={setQuery} setCategory={setCategory} openArticle={(article) => setReaderStack([article])} canManageContent={state.canManageContent} disabled={storageUnavailable} editArticle={(article) => { setDraft(draftFromArticle(article, article.kind)); setEditorMessage(storageUnavailable ? migrationMessage : ""); setEditorOpen(!storageUnavailable); }} deleteArticle={deleteArticle} />}
       {!publicMode && view === "tasks" && <TasksView tasks={state.dailyTasks} taskTemplates={state.taskTemplates} assignees={state.assignees} selectedDate={selectedTaskDate} setSelectedDate={selectTaskDate} canManage={state.canManageTasks} taskTitle={taskTitle} taskDescription={taskDescription} taskDueDate={taskDueDate} taskRepeatUnit={taskRepeatUnit} taskRepeatInterval={taskRepeatInterval} taskRepeatEndDate={taskRepeatEndDate} taskPriority={taskPriority} taskDueTime={taskDueTime} taskReminderMinutes={taskReminderMinutes} taskAssignmentScope={taskAssignmentScope} taskAssigneeId={taskAssigneeId} taskChecklistText={taskChecklistText} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} setTaskDueDate={setTaskDueDate} setTaskRepeatUnit={setTaskRepeatUnit} setTaskRepeatInterval={setTaskRepeatInterval} setTaskRepeatEndDate={setTaskRepeatEndDate} setTaskType={setTaskType} setTaskPriority={setTaskPriority} setTaskDueTime={setTaskDueTime} setTaskReminderMinutes={setTaskReminderMinutes} setTaskAssignmentScope={setTaskAssignmentScope} setTaskAssigneeId={setTaskAssigneeId} setTaskChecklistText={setTaskChecklistText} saveTaskTemplate={saveTaskTemplate} addTask={addTask} toggleTask={toggleTask} toggleTaskChecklist={toggleTaskChecklist} deleteTask={deleteTask} disabled={storageUnavailable} message={taskMessage} />}
@@ -387,9 +387,32 @@ function OperationUiStudio({ theme, saving, close, preview, save, publicUrl }: {
   </div>;
 }
 
-function HomeView({ news, tasks, metrics, openArticle, openView }: { news: OperationArticle[]; tasks: OperationDailyTask[]; metrics: OperationModuleState["metrics"]; openArticle: (article: OperationArticle) => void; openView: (view: View) => void }) {
-  const outstanding = tasks.filter(task => !task.completed);
-  return <><section className={styles.todayPanel}><div><p className={styles.eyebrow}>Today</p><h1>{outstanding.length ? `${outstanding.length} task${outstanding.length === 1 ? "" : "s"} to finish` : "Daily work is complete"}</h1><p>{tasks.length ? `${tasks.length - outstanding.length} of ${tasks.length} complete` : "No scheduled work today."}</p></div><button type="button" onClick={() => openView("tasks")}>Open tasks <ChevronRight size={17} /></button></section><div className={styles.todayTaskPreview}>{outstanding.slice(0, 3).map(task => <div key={task.id}><span data-priority={task.priority} /><strong>{task.title}</strong>{task.dueTime && <small>{task.dueTime}</small>}</div>)}</div><section className={styles.metricsPanel} aria-label="Today’s operation summary"><div><strong>{metrics.completionRate}%</strong><span>complete</span></div><div><strong>{metrics.dueCount}</strong><span>scheduled</span></div><div><strong>{metrics.openNeedsCount}</strong><span>to order</span></div></section><SectionHeader title="News" detail="Latest updates" /> <div className={styles.cardGrid}>{news.slice(0, 3).map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} />)}{!news.length && <div className={styles.empty}>No news yet.</div>}</div><SectionHeader title="Tools" detail="Daily operation" /><div className={styles.moduleGrid}><ModuleCard title="Handbook" description="Routines and procedures." icon={BookOpen} onClick={() => openView("handbook")} /><ModuleCard title="Tasks" description="Scheduled work and check-offs." icon={CheckSquare} onClick={() => openView("tasks")} /><ModuleCard title="We need" description="Shared order list." icon={ShoppingBasket} onClick={() => openView("needs")} /></div></>;
+function HomeView({ news, tasks, needs, openArticle, openView }: { news: OperationArticle[]; tasks: OperationDailyTask[]; needs: OperationNeed[]; openArticle: (article: OperationArticle) => void; openView: (view: View) => void }) {
+  const outstanding = tasks.filter(task => !task.completed).sort((left, right) => taskPriorityRank(left.priority) - taskPriorityRank(right.priority) || (left.dueTime || "99:99").localeCompare(right.dueTime || "99:99"));
+  const nextTask = outstanding[0];
+  const openNeeds = needs.filter(need => need.status === "NEEDED");
+  const completedCount = tasks.length - outstanding.length;
+  return <>
+    <section className={styles.todayPanel}>
+      <div><p className={styles.eyebrow}>Today</p><h1>{nextTask ? "Next up" : tasks.length ? "You’re up to date" : "Nothing scheduled"}</h1><p>{tasks.length ? `${completedCount} of ${tasks.length} tasks complete` : "Check the Handbook when you need a routine."}</p></div>
+      <button type="button" onClick={() => openView("tasks")}>All tasks <ChevronRight size={17} /></button>
+    </section>
+    {nextTask ? <button type="button" className={styles.nextAction} onClick={() => openView("tasks")}>
+      <span className={styles.nextActionIcon} data-priority={nextTask.priority}><CheckSquare size={19} /></span>
+      <span><small>{nextTask.taskType.toLowerCase()}</small><strong>{nextTask.title}</strong>{nextTask.description && <em>{nextTask.description}</em>}{nextTask.dueTime && <em><Clock3 size={13} />{nextTask.dueTime}</em>}</span>
+      <ChevronRight size={20} aria-hidden="true" />
+    </button> : <div className={styles.nextActionEmpty}><Check size={19} /><p>{tasks.length ? "No tasks left for today." : "No tasks have been scheduled for today."}</p></div>}
+    <section className={styles.homeShortcuts} aria-label="Today’s shortcuts">
+      <button type="button" onClick={() => openView("tasks")}><CheckSquare size={18} /><span><strong>{outstanding.length}</strong><small>{outstanding.length === 1 ? "task left" : "tasks left"}</small></span><ChevronRight size={17} /></button>
+      <button type="button" onClick={() => openView("needs")}><ShoppingBasket size={18} /><span><strong>{openNeeds.length}</strong><small>{openNeeds.length === 1 ? "item to order" : "items to order"}</small></span><ChevronRight size={17} /></button>
+    </section>
+    <SectionHeader title="News" detail="Latest updates" />
+    <div className={styles.cardGrid}>{news.slice(0, 3).map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} />)}{!news.length && <div className={styles.empty}>No news yet.</div>}</div>
+  </>;
+}
+
+function taskPriorityRank(priority: OperationTaskPriority) {
+  return priority === "HIGH" ? 0 : priority === "NORMAL" ? 1 : 2;
 }
 
 function PublicHomeView({ news, openArticle, openHandbook }: { news: OperationArticle[]; openArticle: (article: OperationArticle) => void; openHandbook: () => void }) {
@@ -594,10 +617,6 @@ async function imageFileFromCanvas(image: HTMLImageElement, file: File, maxDimen
   if (!output) throw new Error("This image could not be prepared.");
     const stem = file.name.replace(/\.[^.]+$/, "") || "operation-image";
   return { file: new File([output], `${stem}.webp`, { type: output.type, lastModified: file.lastModified }), width, height };
-}
-
-function ModuleCard({ title, description, icon: Icon, onClick }: { title: string; description: string; icon: typeof BookOpen; onClick: () => void }) {
-  return <button type="button" className={styles.operationCard} onClick={onClick}><div><h3>{title}</h3><p>{description}</p></div><Icon size={26} /></button>;
 }
 
 function Reader({ article, canGoBack, goBack, close }: { article: OperationArticle; canGoBack: boolean; goBack: () => void; close: () => void }) {

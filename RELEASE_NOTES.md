@@ -1,16 +1,15 @@
-# v0.19.0-rc.97 — Operations image performance
+# v0.19.0-rc.98 — Today-first Operations Home
 
 ## Baseline
 
-- Continued from v0.19.0-rc.96. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.97. That release is the rollback checkpoint.
 
 ## Included
 
-- Uploads now generate a compact WebP preview and a detailed WebP image from one selected photo.
-- Photos use a 1600px / 0.78 quality detailed target; PNG screenshots use 2048px / 0.84 to preserve small text. Inline previews are 960px.
-- Reader images open the detailed version only after tap. Both files remain in the existing private, organization-scoped delivery route.
-- Private image responses may be held in the user's browser cache for one hour; image paths are random and immutable.
+- Home now presents one priority-ranked incomplete task as the immediate next action.
+- Compact Tasks and Needs shortcuts show the live remaining counts and take one tap to their respective queues.
+- Removed duplicate tool cards and non-actionable metric panel from Home. News remains below today's actions.
 
-No database migration is required.
+No database migration is required. Owner, employee and shared staff links retain their existing permitted actions.
 
-Rollback checkpoint: **v0.19.0-rc.96**.
+Rollback checkpoint: **v0.19.0-rc.97**.

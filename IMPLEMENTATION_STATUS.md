@@ -1,10 +1,16 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.97**
+Version: **v0.19.0-rc.98**
 
 ## Current focus
 
-Operations image upload and reading performance.
+Today-first Operations Home.
+
+## rc.98
+
+- The authenticated Operations Home now prioritizes one next task and direct Task/Needs shortcuts over duplicate navigation and summary metrics.
+- The next task is ranked by priority, then scheduled time; News stays below the actions.
+- No migration is required. Rollback checkpoint: v0.19.0-rc.97.
 
 ## rc.97
 
