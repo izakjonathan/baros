@@ -1,16 +1,14 @@
-# v0.19.0-rc.101 — Readable News & Article Links
+# v0.19.0-rc.102 — Full-width Today News
 
 ## Baseline
 
-- Continued from v0.19.0-rc.100. That release is the rollback checkpoint.
+- Continued from v0.19.0-rc.101. That release is the rollback checkpoint.
 
 ## Included
 
-- Today news uses a compact published-text renderer, retaining distinct heading, subheading, body and list roles inside each card without touching editor formatting.
-- Typing `>>` in a Handbook or News article opens an article picker. A selection inserts its title as an in-app link.
-- Reader links push the selected article onto a navigation stack. A circular back control appears beside Close only when there is a previous article.
-- Home’s next task uses an unchecked box, matching its incomplete status.
+- Today news cards now place title, category and owner controls in a compact header while the full-width published body sits below.
+- The card renderer remains distinct from the editor; no editor formatting or sizes changed.
 
-No database migration is required. Owner, employee and shared-staff permissions remain unchanged; each sees only the articles their existing access grants.
+No database migration is required. Owner, employee and shared-staff permissions remain unchanged.
 
-Rollback checkpoint: **v0.19.0-rc.100**.
+Rollback checkpoint: **v0.19.0-rc.101**.

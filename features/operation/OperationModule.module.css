@@ -41,13 +41,16 @@
 .articleCardOpen{min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.65rem;border:0;background:transparent;color:inherit;padding:0;text-align:left}
 .operationCard h3{font-family:var(--op-font-display);font-size:var(--op-type-card);line-height:1.12;letter-spacing:-.012em;font-weight:700}
 .operationCard p{max-width:28rem;margin-top:.16rem;font-family:var(--op-font-body);font-size:var(--op-type-meta);line-height:1.38;color:var(--op-muted)}
-.newsCard{align-items:start}
-.newsCard .articleCardOpen{align-items:start}
-.newsCardBody{display:grid;gap:.38rem;max-width:31rem;margin-top:.36rem;white-space:pre-line}
+.newsCard{display:block;min-height:0}
+.newsCardHeader{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:.55rem}
+.newsCardTitleButton{min-width:0;border:0;background:transparent;color:inherit;padding:0;text-align:left}
+.newsCardTools{display:flex;align-items:center;justify-content:flex-end;gap:.35rem;min-width:0}
+.newsCardBodyButton{display:block;width:100%;border:0;background:transparent;color:inherit;padding:0;text-align:left}
+.newsCardBody{display:grid;gap:.38rem;max-width:none;margin-top:.5rem;white-space:pre-line}
 .newsCardBody>span{display:block}
 .newsCardHeading{font-family:var(--op-font-display);font-size:clamp(.98rem,4.4vw,1.18rem);font-weight:700;line-height:1.13;letter-spacing:-.018em}
 .newsCardSubheading{font-family:var(--op-font-display);font-size:clamp(.83rem,3.7vw,.98rem);font-weight:680;line-height:1.2;letter-spacing:-.01em}
-.newsCardBody,.newsCardList{font-family:var(--op-font-body);font-size:clamp(.79rem,3.4vw,.88rem);line-height:1.46;color:var(--op-muted)}
+.newsCardBody,.newsCardList{font-family:var(--op-font-body);font-size:clamp(.84rem,3.6vw,.94rem);line-height:1.46;color:var(--op-muted)}
 .newsCardList{padding-left:.06rem}
 .operationCard small{display:inline-flex;align-items:center;justify-content:center;min-height:1.32rem;padding:.12rem .46rem;border:1px solid var(--op-positive);border-radius:999px;font-family:var(--op-font-display);font-size:.625rem;font-weight:700;line-height:1;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
 .operationCard svg{flex:none}

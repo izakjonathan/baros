@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.19.0-rc.102
+
+- Reflowed Today news cards so owner metadata/actions remain in a compact header and the published body receives the full card width.
+- Increased card-body reading size slightly while retaining the separate compact heading, subheading, body and list roles. Editor typography is unchanged.
+
 ## v0.19.0-rc.101
 
 - Reworked Today news cards to preserve a compact published hierarchy for headings, subheadings, body copy and lists without changing the editor typography.

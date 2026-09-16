@@ -1,16 +1,15 @@
-# v0.19.0-rc.101 Validation
+# v0.19.0-rc.102 Validation
 
 ## Confirmed baseline
 
-The verified rc.100 Owner News Controls release was used as the baseline.
+The verified rc.101 Readable News & Article Links release was used as the baseline.
 
-- Rollback checkpoint: v0.19.0-rc.100
+- Rollback checkpoint: v0.19.0-rc.101
 
 ## Implementation
 
-- Added compact structured published-text rendering for Today news cards without changing editor styles.
-- Added validated internal article links, reader-stack navigation and a bottom back circle for linked articles.
-- Replaced Home’s completed task icon with an unchecked box.
+- Reflowed Today news cards so content uses the full width below the compact owner/action header.
+- Preserved the existing editor styles and all prior article-link behaviour.
 
 ## Validation status
 

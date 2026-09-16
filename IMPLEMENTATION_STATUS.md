@@ -1,10 +1,16 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.101**
+Version: **v0.19.0-rc.102**
 
 ## Current focus
 
-Improving operational reading and cross-referencing without adding editor complexity.
+Making the Today news feed readable at a glance.
+
+## rc.102
+
+- Today news body copy now spans the full card under a compact title/category/owner-action header.
+- Editor styles and the article-link workflow are unchanged.
+- No migration is required. Rollback checkpoint: v0.19.0-rc.101.
 
 ## rc.101
 

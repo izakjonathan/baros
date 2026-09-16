@@ -1,8 +1,13 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.101**
+Current release: **v0.19.0-rc.102**
 
-Rollback checkpoint: **v0.19.0-rc.100**.
+Rollback checkpoint: **v0.19.0-rc.101**.
+
+## RC.102 — Full-width Today News
+
+- Today News cards use a compact title/action header and a full-width readable body without changing the editor.
+- No migration is required.
 
 ## RC.101 — Readable News & article links
 
