@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Work_Sans } from "next/font/google";
 import "./globals.css";
-import "quill/dist/quill.snow.css";
 import { PwaRegister } from "./pwa-register";
 
 const workSans = Work_Sans({
