@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { ApiError, jsonError, readJsonObject } from "@/lib/http";
-import { getUiTheme, normalizeUiColor } from "@/lib/ui-theme";
+import { getUiTheme, hasReadableUiThemeContrast, normalizeUiColor } from "@/lib/ui-theme";
 
 export async function GET(request: Request) {
   try {
@@ -25,6 +25,7 @@ export async function PUT(request: Request) {
     const accentColor = normalizeUiColor(body.accentColor, "Accent color");
     const positiveColor = normalizeUiColor(body.positiveColor, "Positive color");
     if (canvasColor === inkColor) throw new ApiError(400, "Canvas and ink colors must be different");
+    if (!hasReadableUiThemeContrast(canvasColor, inkColor)) throw new ApiError(400, "Canvas and ink need at least 4.5:1 contrast for readable Operation text.");
     const before = await getUiTheme(user.organizationId);
     const [theme] = await db()<Array<{ canvas_color: string; ink_color: string; accent_color: string; positive_color: string; updated_at: Date }>>`
       insert into organization_ui_themes(organization_id, canvas_color, ink_color, accent_color, positive_color, updated_by, updated_at)

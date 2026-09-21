@@ -1,6 +1,6 @@
 import { db } from "@/lib/db/client";
 import { ApiError } from "@/lib/http";
-import { defaultTheme, type UiTheme } from "@/lib/ui-theme-shared";
+import { defaultTheme, type UiTheme, uiColorContrastRatio } from "@/lib/ui-theme-shared";
 
 const hexColor = /^#[0-9a-f]{6}$/i;
 
@@ -8,6 +8,10 @@ export function normalizeUiColor(value: unknown, field: string) {
   const color = String(value ?? "").trim();
   if (!hexColor.test(color)) throw new ApiError(400, `${field} must be a six-digit hex color`);
   return color.toLowerCase();
+}
+
+export function hasReadableUiThemeContrast(canvasColor: string, inkColor: string) {
+  return uiColorContrastRatio(canvasColor, inkColor) >= 4.5;
 }
 
 export async function getUiTheme(organizationId?: string | null): Promise<UiTheme> {

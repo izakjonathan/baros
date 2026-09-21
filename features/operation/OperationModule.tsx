@@ -11,7 +11,7 @@ import Link from "@tiptap/extension-link";
 import ImageExtension from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import styles from "./OperationModule.module.css";
-import { operationThemeCustomProperties, type UiTheme } from "@/lib/ui-theme-shared";
+import { operationThemeCustomProperties, type UiTheme, uiColorContrastRatio } from "@/lib/ui-theme-shared";
 import type { OperationArticle, OperationArticleKind, OperationContentBlock, OperationDailyTask, OperationModuleState, OperationNeed, OperationReminderStockLevel, OperationReminderType, OperationRichTextDelta, OperationRichTextOp, OperationTaskAssignmentScope, OperationTaskPriority, OperationTaskRepeatUnit, OperationTaskType, OperationTiptapDocument, OperationTiptapNode } from "./types";
 
 type View = "home" | "handbook" | "tasks" | "needs";
@@ -392,6 +392,7 @@ function OperationUiStudio({ theme, saving, close, preview, save, publicUrl }: {
   async function submit() {
     if (![draft.canvasColor, draft.inkColor, draft.accentColor, draft.positiveColor].every(value => /^#[0-9a-f]{6}$/i.test(value))) { setMessage("Use a six-digit hex color, for example #fff4c4."); return; }
     if (draft.canvasColor.toLowerCase() === draft.inkColor.toLowerCase()) { setMessage("Canvas and ink colors must be different."); return; }
+    if (uiColorContrastRatio(draft.canvasColor, draft.inkColor) < 4.5) { setMessage("Canvas and ink need at least 4.5:1 contrast for readable Operation text."); return; }
     await save(draft);
   }
   return <div className={styles.uiStudioBackdrop} onMouseDown={event => { if (event.target === event.currentTarget) close(); }}>
@@ -621,7 +622,7 @@ function ArticleCard({ article, onClick, onEdit, onDelete, disabled = false, sho
 }
 
 function ArticleCategoryPill({ article }: { article: OperationArticle }) {
-  return <small>{article.category}{isNewHandbookArticle(article) && <Star className={styles.articleCategoryNew} aria-label="New article" />}</small>;
+  return <small className={styles.articleCategoryPill}>{article.category}{isNewHandbookArticle(article) && <Star className={styles.articleCategoryNew} aria-label="New article" />}</small>;
 }
 
 type NewsCardTextBlock = { type: "heading" | "subheading" | "body" | "list"; text: string; marker?: string };

@@ -1,6 +1,14 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.110**
+Current release: **v0.19.0-rc.111**
+
+## RC.111 — Operation typography system
+
+- Consolidated conflicting editor and category-pill rules, then established semantic Operation roles for reading text, compact body text, metadata, and labels.
+- Published Handbook articles now use a 16px reading size with clearer title-to-content rhythm; list items retain compact wrapped lines while separating distinct points more clearly.
+- Task and Reminder titles use protected title columns and controlled wrapping, preserving the alignment of statuses and actions when staff enter longer names.
+- UI Studio now prevents saving Canvas/Ink pairs below 4.5:1 contrast, keeping owner-selected typography readable for every Operation audience.
+- No migration is required.
 
 ## RC.110 — Handbook New status and Operation viewport
 
