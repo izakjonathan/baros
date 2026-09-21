@@ -79,10 +79,10 @@
 .readerArticle h2{margin-top:.75rem;font-size:clamp(1.18rem,4.6vw,1.62rem);line-height:1.08;letter-spacing:-.025em;font-weight:720}
 .readerArticle h3{margin-top:.62rem;font-size:clamp(1rem,3.8vw,1.22rem);line-height:1.14;letter-spacing:-.012em}
 .readerArticle h4{margin-top:.7rem;font-size:clamp(.95rem,3.6vw,1.2rem);line-height:1.15;letter-spacing:-.01em}
-.readerArticle p,.readerArticle li{font-family:var(--font-body);font-size:.9rem;line-height:1.46}
+.readerArticle p,.readerArticle li{font-family:var(--font-body);font-size:.9rem;line-height:1.4}
 .readerArticle a,.readerArticleLink{color:inherit;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:.18em}
 .readerArticleLink{border:0;background:transparent;padding:0;font:inherit;cursor:pointer}
-.readerArticle ul,.readerArticle ol{display:grid;gap:.22rem;margin:.6rem 0;padding-left:1.25rem}
+.readerArticle ul,.readerArticle ol{display:grid;gap:.18rem;margin:.52rem 0;padding-left:1.25rem}
 .readerImageButton{display:block;width:100%;margin:.85rem 0;padding:0;border:0;border-radius:.9rem;background:transparent;cursor:zoom-in;overflow:hidden}
 .readerImage{display:block;width:100%;height:auto;border:0;border-radius:.9rem}
 .imageViewer{position:fixed;inset:0;z-index:110;display:grid;place-items:center;padding:max(1rem,env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) max(1rem,env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-left));background:color-mix(in srgb,var(--op-ink) 84%,transparent);cursor:zoom-out}
@@ -180,6 +180,7 @@
 .needRow h3{margin:0;font-family:var(--op-font-display);font-size:var(--op-type-body);line-height:1.18;letter-spacing:-.006em;font-weight:700}
 .reminderStatus{display:inline-flex;align-items:center;justify-content:center;min-width:4.2rem;border-radius:999px;background:color-mix(in srgb,var(--op-ink) 8%,transparent);padding:.1rem .38rem;font-family:var(--op-font-display);font-size:.625rem;font-weight:700;line-height:1;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;color:var(--op-muted)}
 .reminderActions{display:flex;gap:.32rem;align-items:center;justify-content:flex-end;flex-wrap:nowrap}
+.reminderActions button{display:inline-flex;align-items:center;justify-content:center;gap:.28rem}
 .reminderActions .reminderDismiss{background:transparent;color:var(--op-ink)}
 .needNoteInput{box-sizing:border-box;width:100%;min-height:3.2rem;border:1px solid color-mix(in srgb,var(--op-ink) 62%,transparent);border-radius:.58rem;background:color-mix(in srgb,var(--op-canvas) 86%,var(--op-ink) 14%);color:var(--op-ink);padding:.45rem .55rem;font-family:var(--font-body);font-size:.78rem;resize:vertical}
 .orderHistory{display:grid;gap:.55rem}
@@ -241,6 +242,11 @@
   .operationCard h3{font-size:clamp(.98rem,4.7vw,1.18rem)}
   .operationCard small{font-size:.56rem}
   .uiStudioFields{grid-template-columns:1fr}
+}
+@media(max-width:30rem){
+  .reminderActions{gap:.22rem}
+  .reminderActions button{width:2.34rem;min-height:2.34rem;padding:0}
+  .reminderActions button span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 }
 @media (hover:none) and (pointer:coarse){
   .operationShell input,.operationShell select,.operationShell textarea{font-size:16px}

@@ -1,8 +1,14 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.106**
+Current release: **v0.19.0-rc.107**
 
-Rollback checkpoint: **v0.19.0-rc.105**.
+Rollback checkpoint: **v0.19.0-rc.106**.
+
+## RC.107 — Compact reminder rows
+
+- Tightened article reader body leading and list spacing for a denser, still readable operational reading rhythm.
+- On phone widths, Reminders use labelled check and dismiss icons, reclaiming title width while retaining the full action words on iPad and desktop.
+- No migration is required.
 
 ## RC.106 — Operations reading rhythm
 
