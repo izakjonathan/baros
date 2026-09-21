@@ -48,7 +48,7 @@ function isOperationSchemaUnavailable(error: unknown) {
   const code = String(record.code || "");
   const message = String(record.message || "");
   return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|article_kind|need_status|task_templates|task_checklist_completions)/i.test(message)
-    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|assignment_scope|checklist|quantity|supplier|needed_by)/i.test(message);
+    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|assignment_scope|checklist|quantity|supplier|needed_by|reminder_type|stock_level)/i.test(message);
 }
 
 function operationMigrationRequired() {
@@ -96,12 +96,11 @@ export async function GET(request: Request) {
             )))
         order by t.sort_order,t.created_at`,
       db()<Array<Record<string, unknown>>>`
-        select n.id,n.title,n.note,n.status,n.created_at,n.quantity,n.unit,n.supplier,n.priority,n.needed_by,n.ordered_at,
-               coalesce(orderer.name,'') ordered_by_name
-        from operation_needs n left join users orderer on orderer.id=n.ordered_by
+        select n.id,n.title,n.note,n.status,n.created_at,n.reminder_type,n.stock_level
+        from operation_needs n
         where n.organization_id=${user.organizationId}
           and (${user.locationId}::uuid is null or n.location_id is null or n.location_id=${user.locationId})
-        order by (n.status='NEEDED') desc,n.priority desc,n.needed_by nulls last,n.created_at desc
+        order by (n.status='NEEDED') desc,n.reminder_type,n.created_at desc
         limit 150`,
       db()<Array<Record<string, unknown>>>`
         select e.id,e.first_name||' '||e.last_name name
@@ -145,20 +144,15 @@ export async function GET(request: Request) {
       })).filter(task => isOperationTaskDue(task, today)),
       assignees: assignees.map(assignee => ({ id: String(assignee.id), name: String(assignee.name) })),
       taskTemplates: taskTemplates.map(template => ({ id: String(template.id), title: String(template.title), description: String(template.description || ""), taskType: String(template.task_type) as OperationTaskType, priority: String(template.priority) as OperationTaskPriority, dueTime: template.due_time == null ? null : String(template.due_time).slice(0, 5), reminderMinutes: template.reminder_minutes == null ? null : Number(template.reminder_minutes), checklist: Array.isArray(template.checklist) ? template.checklist.slice(0, 30).flatMap((item): Array<{ id: string; label: string }> => item && typeof item === "object" && "id" in item && "label" in item ? [{ id: String(item.id), label: String(item.label) }] : []) : [] })),
-      metrics: (() => { const due = tasks.filter(task => isOperationTaskDue({ dueDate: String(task.due_date), repeatUnit: String(task.repeat_unit) as OperationDailyTask["repeatUnit"], repeatInterval: Number(task.repeat_interval), repeatEndDate: task.repeat_end_date == null ? null : String(task.repeat_end_date) }, today)); const completed = due.filter(task => Boolean(task.completed_at)).length; return { completionRate: due.length ? Math.round(completed / due.length * 100) : 100, completedCount: completed, dueCount: due.length, overdueCount: 0, openNeedsCount: needs.filter(need => need.status === "NEEDED").length, overdueNeedsCount: needs.filter(need => need.status === "NEEDED" && need.needed_by && String(need.needed_by) < today).length }; })(),
+      metrics: (() => { const due = tasks.filter(task => isOperationTaskDue({ dueDate: String(task.due_date), repeatUnit: String(task.repeat_unit) as OperationDailyTask["repeatUnit"], repeatInterval: Number(task.repeat_interval), repeatEndDate: task.repeat_end_date == null ? null : String(task.repeat_end_date) }, today)); const completed = due.filter(task => Boolean(task.completed_at)).length; return { completionRate: due.length ? Math.round(completed / due.length * 100) : 100, completedCount: completed, dueCount: due.length, overdueCount: 0, openNeedsCount: needs.filter(need => need.status === "NEEDED").length, overdueNeedsCount: 0 }; })(),
       needs: needs.map((need): OperationNeed => ({
         id: String(need.id),
         title: String(need.title),
         note: need.note == null ? null : String(need.note),
-        status: String(need.status) === "ORDERED" ? "ORDERED" : "NEEDED",
+        status: ["ORDERED", "RESOLVED", "DISMISSED"].includes(String(need.status)) ? String(need.status) as OperationNeed["status"] : "NEEDED",
         createdAt: String(need.created_at),
-        quantity: need.quantity == null ? null : String(need.quantity),
-        unit: need.unit == null ? null : String(need.unit),
-        supplier: need.supplier == null ? null : String(need.supplier),
-        priority: String(need.priority) as OperationDailyTask["priority"],
-        neededBy: need.needed_by == null ? null : String(need.needed_by),
-        orderedAt: need.ordered_at == null ? null : String(need.ordered_at),
-        orderedByName: String(need.ordered_by_name || "") || null,
+        type: ["NEW_ITEM", "ISSUE"].includes(String(need.reminder_type)) ? String(need.reminder_type) as OperationNeed["type"] : "RESTOCK",
+        stockLevel: ["LOW", "OUT_OF"].includes(String(need.stock_level)) ? String(need.stock_level) as OperationNeed["stockLevel"] : null,
       })),
     };
     return NextResponse.json(state, { headers: { "cache-control": "no-store" } });
@@ -248,15 +242,12 @@ export async function POST(request: Request) {
 
     const title = requiredString(body, "title", 160);
     const note = optionalString(body, "note", 400);
-    const quantity = body.quantity == null || body.quantity === "" ? null : finiteNumber(body.quantity, "quantity", { min: 0, max: 100000 });
-    const unit = optionalString(body, "unit", 40);
-    const supplier = optionalString(body, "supplier", 120);
-    const priority = enumValue(body.priority || "NORMAL", "priority", ["LOW", "NORMAL", "HIGH"] as const);
-    const neededBy = body.neededBy == null || body.neededBy === "" ? null : isoDate(body.neededBy, "neededBy");
+    const type = enumValue(body.type || "RESTOCK", "type", ["RESTOCK", "NEW_ITEM", "ISSUE"] as const);
+    const stockLevel = type === "RESTOCK" ? enumValue(body.stockLevel || "LOW", "stockLevel", ["LOW", "OUT_OF"] as const) : null;
     const [row] = await db()<Array<Record<string, unknown>>>`
-      insert into operation_needs(organization_id,location_id,title,note,quantity,unit,supplier,priority,needed_by,created_by,updated_by)
-      values(${user.organizationId},${user.locationId},${title},${note},${quantity},${unit},${supplier},${priority},${neededBy}::date,${user.userId},${user.userId})
-      returning id,title,note,status,created_at,quantity,unit,supplier,priority,needed_by,ordered_at`;
+      insert into operation_needs(organization_id,location_id,title,note,reminder_type,stock_level,created_by,updated_by)
+      values(${user.organizationId},${user.locationId},${title},${note},${type},${stockLevel},${user.userId},${user.userId})
+      returning id,title,note,status,created_at,reminder_type,stock_level`;
     return NextResponse.json(row, { status: 201 });
   } catch (error) {
     if (isOperationSchemaUnavailable(error)) return operationMigrationRequired();
@@ -368,7 +359,11 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ id, completed });
     }
 
-    const status = enumValue(body.status || "ORDERED", "status", ["NEEDED", "ORDERED"] as const);
+    const [reminder] = await db()<Array<{ reminder_type: string }>>`select reminder_type from operation_needs where id=${id} and organization_id=${user.organizationId}`;
+    if (!reminder) throw new ApiError(404, "Reminder not found");
+    const status = reminder.reminder_type === "ISSUE"
+      ? enumValue(body.status, "status", ["RESOLVED", "DISMISSED"] as const)
+      : enumValue(body.status, "status", ["ORDERED", "DISMISSED"] as const);
     const [row] = await db()<Array<Record<string, unknown>>>`
       update operation_needs
       set status=${status},
@@ -377,8 +372,8 @@ export async function PATCH(request: Request) {
           updated_at=now()
       where id=${id} and organization_id=${user.organizationId}
         and (${user.locationId}::uuid is null or location_id is null or location_id=${user.locationId})
-      returning id,title,note,status,created_at`;
-    if (!row) throw new ApiError(404, "Needed item not found");
+      returning id,title,note,status,created_at,reminder_type,stock_level`;
+    if (!row) throw new ApiError(404, "Reminder not found");
     return NextResponse.json(row);
   } catch (error) {
     if (isOperationSchemaUnavailable(error)) return operationMigrationRequired();

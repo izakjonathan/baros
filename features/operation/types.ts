@@ -1,5 +1,7 @@
 export type OperationArticleKind = "HANDBOOK" | "NEWS";
-export type OperationNeedStatus = "NEEDED" | "ORDERED";
+export type OperationNeedStatus = "NEEDED" | "ORDERED" | "RESOLVED" | "DISMISSED";
+export type OperationReminderType = "RESTOCK" | "NEW_ITEM" | "ISSUE";
+export type OperationReminderStockLevel = "LOW" | "OUT_OF" | null;
 export type OperationStorageStatus = "ready" | "migration-required";
 export type OperationTaskRepeatUnit = "NONE" | "DAY" | "WEEK" | "MONTH" | "YEAR";
 export type OperationTaskPriority = "LOW" | "NORMAL" | "HIGH";
@@ -112,13 +114,8 @@ export type OperationNeed = {
   note: string | null;
   status: OperationNeedStatus;
   createdAt: string;
-  quantity: string | null;
-  unit: string | null;
-  supplier: string | null;
-  priority: OperationTaskPriority;
-  neededBy: string | null;
-  orderedAt: string | null;
-  orderedByName: string | null;
+  type: OperationReminderType;
+  stockLevel: OperationReminderStockLevel;
 };
 
 export type OperationMetrics = {

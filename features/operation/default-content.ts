@@ -64,6 +64,6 @@ export const defaultOperationState: OperationModuleState = {
   taskTemplates: [],
   metrics: { completionRate: 0, completedCount: 0, dueCount: 0, overdueCount: 0, openNeedsCount: 1, overdueNeedsCount: 0 },
   needs: [
-    { id: "need-tonic", title: "Tonic water", note: "Low stock behind the bar", status: "NEEDED", createdAt: new Date().toISOString(), quantity: "12", unit: "bottles", supplier: null, priority: "NORMAL", neededBy: null, orderedAt: null, orderedByName: null },
+    { id: "need-tonic", title: "Tonic water", note: "Low stock behind the bar", status: "NEEDED", createdAt: new Date().toISOString(), type: "RESTOCK", stockLevel: "LOW" },
   ],
 };

@@ -156,9 +156,9 @@
 .moreMenu{position:absolute;right:0;bottom:calc(100% + .5rem);z-index:4;display:grid;gap:.16rem;width:10.7rem;padding:.35rem;border:1px solid color-mix(in srgb,var(--op-ink) 40%,transparent);border-radius:.72rem;background:var(--op-canvas);box-shadow:0 .5rem 1.5rem color-mix(in srgb,var(--op-ink) 20%,transparent)}
 .moreMenu button{display:flex;align-items:center;justify-content:flex-start;gap:.55rem;min-height:2.3rem!important;padding:.3rem .65rem!important;text-align:left;font-family:var(--font-display)!important;font-size:.74rem!important;font-weight:760!important}
 .adminActions,.needInput{display:flex;gap:.5rem;flex-wrap:wrap}
-.adminActions button,.needInput button,.taskRow button,.needRow button{min-height:2.08rem;border:1px solid var(--op-ink);border-radius:999px;background:var(--op-ink);color:var(--op-canvas);padding:.24rem .65rem;font-size:.72rem;font-weight:750}
+.adminActions button,.needInput button,.taskRow button,.needRow button,.reminderActions button{min-height:2.08rem;border:1px solid var(--op-ink);border-radius:999px;background:var(--op-ink);color:var(--op-canvas);padding:.24rem .65rem;font-size:.72rem;font-weight:750}
 .composerSubmit{display:inline-flex!important;align-items:center;justify-content:center;min-width:8.5rem}
-.adminActions button:disabled,.needInput button:disabled,.taskRow button:disabled,.needRow button:disabled,.adminPanel input:disabled,.needInput input:disabled{opacity:.5;cursor:not-allowed}
+.adminActions button:disabled,.needInput button:disabled,.taskRow button:disabled,.needRow button:disabled,.reminderActions button:disabled,.adminPanel input:disabled,.needInput input:disabled{opacity:.5;cursor:not-allowed}
 .taskRow,.needRow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.58rem;align-items:center;padding:.62rem .72rem;border:1px solid color-mix(in srgb,var(--op-ink) 68%,transparent);border-radius:.68rem;background:var(--op-canvas)}
 .rowDelete{width:2rem;min-height:2rem!important;display:grid!important;place-items:center;padding:0!important;background:transparent!important;color:var(--op-ink)!important}
 .taskRow input{width:1.12rem;height:1.12rem;accent-color:var(--op-ink);border:1.5px solid var(--op-ink);border-radius:.3rem;background:var(--op-canvas)}
@@ -173,6 +173,8 @@
 .needInput{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center}
 .needAddButton{width:2.35rem;min-height:2.35rem!important;display:grid!important;place-items:center;padding:0!important;border-radius:50%!important}
 .needRow[data-ordered="true"]{opacity:.55}
+.reminderActions{display:flex;gap:.32rem;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.reminderActions .reminderDismiss{background:transparent;color:var(--op-ink)}
 .needNoteInput{box-sizing:border-box;width:100%;min-height:3.2rem;border:1px solid color-mix(in srgb,var(--op-ink) 62%,transparent);border-radius:.58rem;background:color-mix(in srgb,var(--op-canvas) 86%,var(--op-ink) 14%);color:var(--op-ink);padding:.45rem .55rem;font-family:var(--font-body);font-size:.78rem;resize:vertical}
 .orderHistory{display:grid;gap:.55rem}
 .orderHistory summary{cursor:pointer;padding:.4rem 0;font-family:var(--font-display);font-size:.7rem;font-weight:760;letter-spacing:.08em;text-transform:uppercase;color:var(--op-muted)}

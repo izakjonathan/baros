@@ -15,7 +15,7 @@ function isOperationSchemaUnavailable(error: unknown) {
   const code = String(record.code || "");
   const message = String(record.message || "");
   return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|article_kind|need_status|task_templates|task_checklist_completions)/i.test(message)
-    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|assignment_scope)/i.test(message);
+    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|assignment_scope|reminder_type|stock_level)/i.test(message);
 }
 
 export default async function OperationPage() {
@@ -63,7 +63,7 @@ export default async function OperationPage() {
           and t.active=true
         order by t.sort_order,t.created_at`,
       db()<Array<Record<string, unknown>>>`
-        select id,title,note,status,created_at
+        select id,title,note,status,created_at,reminder_type,stock_level
         from operation_needs
         where organization_id=${user.organizationId}
           and (${user.locationId}::uuid is null or location_id is null or location_id=${user.locationId})
@@ -119,9 +119,10 @@ export default async function OperationPage() {
       id: String(need.id),
       title: String(need.title),
       note: need.note == null ? null : String(need.note),
-      status: String(need.status) === "ORDERED" ? "ORDERED" : "NEEDED",
+      status: ["ORDERED", "RESOLVED", "DISMISSED"].includes(String(need.status)) ? String(need.status) as OperationNeed["status"] : "NEEDED",
       createdAt: String(need.created_at),
-      quantity: null, unit: null, supplier: null, priority: "NORMAL", neededBy: null, orderedAt: null, orderedByName: null,
+      type: ["NEW_ITEM", "ISSUE"].includes(String(need.reminder_type)) ? String(need.reminder_type) as OperationNeed["type"] : "RESTOCK",
+      stockLevel: ["LOW", "OUT_OF"].includes(String(need.stock_level)) ? String(need.stock_level) as OperationNeed["stockLevel"] : null,
     })),
   };
 

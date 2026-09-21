@@ -10,6 +10,7 @@ const operationStyles = read("features/operation/OperationModule.module.css");
 const types = read("features/operation/types.ts");
 const migration = read("db/migrations/018_operation_integrity_cleanup.sql");
 const taskAudienceMigration = read("db/migrations/019_operation_task_assignment_scope.sql");
+const remindersMigration = read("db/migrations/021_operation_reminders.sql");
 const publicOperationLayout = read("app/operation/public/[accessToken]/layout.tsx");
 const publicOperationManifest = read("app/operation/public/[accessToken]/manifest.webmanifest/route.ts");
 
@@ -41,6 +42,9 @@ const checks = [
   ["task date and time retain a two-column mobile layout", !operationStyles.includes(".moduleGrid,.adminGrid,.editorMeta,.taskSettings{grid-template-columns:1fr}" )],
   ["task instructions are genuinely optional", route.includes('optionalString(body, "description", 300) || ""')],
   ["task audiences are explicit and persisted", taskAudienceMigration.includes("assignment_scope") && route.includes('"ON_SHIFT", "EVERYONE"')],
+  ["Reminders separates ordering from practical issues", operation.includes('title="To order"') && operation.includes('title="Issues"') && operation.includes('value="RESTOCK"') && operation.includes('value="NEW_ITEM"') && operation.includes('value="ISSUE"') && operation.includes('value="OUT_OF"')],
+  ["Reminder actions match the reminder type", operation.includes('issueList ? "RESOLVED" : "ORDERED"') && operation.includes('"DISMISSED"') && route.includes('["RESOLVED", "DISMISSED"]') && route.includes('["ORDERED", "DISMISSED"]')],
+  ["Reminders persist their simple classification", remindersMigration.includes("reminder_type") && remindersMigration.includes("stock_level") && remindersMigration.includes("'RESOLVED','DISMISSED'" )],
   ["task audience is composed beside repeat", operation.includes('<Repeat2 size={15} />Repeat') && operation.includes('<label className={styles.taskAudienceField}><span className={styles.taskSettingLabel}><UserRound size={15} />Task audience')],
   ["task settings constrain native date and time controls", operationStyles.includes("contain:inline-size") && operationStyles.includes("max-inline-size:100%")],
   ["Operations keeps iPad touch inputs and the editor viewport safe", operation.includes("window.visualViewport") && operation.includes('visualViewport?.addEventListener("resize", syncViewport)') && operationStyles.includes("@media (hover:none) and (pointer:coarse)") && operationStyles.includes("font-size:16px")],

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowLeft, Bold, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, Clock3, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Palette, Plus, Redo2, Repeat2, ShoppingBasket, Square, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
+import { ArrowLeft, Bold, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, CircleAlert, Clock3, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Palette, Plus, Redo2, Repeat2, ShoppingBasket, Square, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -12,7 +12,7 @@ import ImageExtension from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import styles from "./OperationModule.module.css";
 import { operationThemeCustomProperties, type UiTheme } from "@/lib/ui-theme-shared";
-import type { OperationArticle, OperationArticleKind, OperationContentBlock, OperationDailyTask, OperationModuleState, OperationNeed, OperationRichTextDelta, OperationRichTextOp, OperationTaskAssignmentScope, OperationTaskPriority, OperationTaskRepeatUnit, OperationTaskType, OperationTiptapDocument, OperationTiptapNode } from "./types";
+import type { OperationArticle, OperationArticleKind, OperationContentBlock, OperationDailyTask, OperationModuleState, OperationNeed, OperationReminderStockLevel, OperationReminderType, OperationRichTextDelta, OperationRichTextOp, OperationTaskAssignmentScope, OperationTaskPriority, OperationTaskRepeatUnit, OperationTaskType, OperationTiptapDocument, OperationTiptapNode } from "./types";
 
 type View = "home" | "handbook" | "tasks" | "needs";
 type DraftArticle = { id?: string; kind: OperationArticleKind; category: string; title: string; description: string; document: OperationTiptapDocument };
@@ -115,9 +115,8 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   const [taskAssignmentScope, setTaskAssignmentScope] = useState<OperationTaskAssignmentScope>("EVERYONE");
   const [taskChecklistText, setTaskChecklistText] = useState("");
   const [needTitle, setNeedTitle] = useState("");
-  const [needQuantity, setNeedQuantity] = useState("");
-  const [needSupplier, setNeedSupplier] = useState("");
-  const [needPriority, setNeedPriority] = useState<OperationTaskPriority>("NORMAL");
+  const [needType, setNeedType] = useState<OperationReminderType>("RESTOCK");
+  const [needStockLevel, setNeedStockLevel] = useState<OperationReminderStockLevel>("LOW");
   const [needNote, setNeedNote] = useState("");
   const [saving, setSaving] = useState(false);
   const [editorMessage, setEditorMessage] = useState("");
@@ -306,21 +305,21 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     setNeedMessage("");
     if (!needTitle.trim()) return;
     if (storageUnavailable) { setNeedMessage(migrationMessage); return; }
-    const need: OperationNeed = { id: crypto.randomUUID(), title: needTitle.trim(), note: needNote.trim() || null, status: "NEEDED", createdAt: new Date().toISOString(), quantity: needQuantity || null, unit: null, supplier: needSupplier.trim() || null, priority: needPriority, neededBy: null, orderedAt: null, orderedByName: null };
+    const need: OperationNeed = { id: crypto.randomUUID(), title: needTitle.trim(), note: needNote.trim() || null, status: "NEEDED", createdAt: new Date().toISOString(), type: needType, stockLevel: needType === "RESTOCK" ? needStockLevel : null };
     if (devMode) setState(current => ({ ...current, needs: [need, ...current.needs] }));
     else {
-      const response = await fetch(operationEndpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "need", title: need.title, note: need.note, quantity: need.quantity, unit: need.unit, supplier: need.supplier, priority: need.priority, neededBy: need.neededBy }) });
-      if (!response.ok) { setNeedMessage(await responseMessage(response, "Could not add needed item.")); return; }
+      const response = await fetch(operationEndpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "need", title: need.title, note: need.note, type: need.type, stockLevel: need.stockLevel }) });
+      if (!response.ok) { setNeedMessage(await responseMessage(response, "Could not add reminder.")); return; }
       await refresh(selectedTaskDate);
     }
-    setNeedTitle(""); setNeedQuantity(""); setNeedSupplier(""); setNeedPriority("NORMAL"); setNeedNote("");
+    setNeedTitle(""); setNeedType("RESTOCK"); setNeedStockLevel("LOW"); setNeedNote("");
   }
 
-  async function markNeedOrdered(need: OperationNeed) {
+  async function updateNeedStatus(need: OperationNeed, status: Extract<OperationNeed["status"], "ORDERED" | "RESOLVED" | "DISMISSED">) {
     setState(current => ({ ...current, needs: current.needs.filter(item => item.id !== need.id) }));
     if (!devMode) {
-      const response = await fetch(operationEndpoint, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "need", id: need.id, status: "ORDERED" }) });
-      if (!response.ok) { setNeedMessage(await responseMessage(response, "Could not update needed item.")); await refresh(selectedTaskDate); }
+      const response = await fetch(operationEndpoint, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "need", id: need.id, status }) });
+      if (!response.ok) { setNeedMessage(await responseMessage(response, "Could not update reminder.")); await refresh(selectedTaskDate); }
     }
   }
 
@@ -341,7 +340,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   return <div className={styles.operationShell} style={operationThemeCustomProperties(uiTheme)}>
     <header className={styles.operationHeader}>
       <nav aria-label="Operation sections">
-        {(["home", "handbook", ...(publicMode ? [] : ["tasks", "needs"])] as View[]).map(item => <button key={item} type="button" aria-pressed={view === item} onClick={() => setView(item)}>{item === "home" ? "Home" : item}</button>)}
+        {(["home", "handbook", ...(publicMode ? ["needs"] : ["tasks", "needs"])] as View[]).map(item => <button key={item} type="button" aria-pressed={view === item} onClick={() => setView(item)}>{item === "home" ? "Home" : item === "needs" ? "Reminders" : item}</button>)}
       </nav>
       {state.canManageContent && view === "home" && <button className={styles.addCircle} type="button" onClick={() => { setDraft(draftFromArticle(undefined, "NEWS")); setEditorOpen(!storageUnavailable); }} aria-label="Add news"><Plus size={20} /></button>}
       {state.canManageContent && view === "handbook" && <button className={styles.addCircle} type="button" onClick={() => { setDraft(draftFromArticle(undefined, "HANDBOOK")); setEditorOpen(!storageUnavailable); }} aria-label="Add handbook article"><Plus size={20} /></button>}
@@ -354,7 +353,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
       {editorMessage && !editorOpen && <p className={styles.editorMessage} role="status">{editorMessage}</p>}
       {view === "handbook" && <HandbookView articles={filteredHandbook} categories={handbookCategories} query={query} category={category} setQuery={setQuery} setCategory={setCategory} openArticle={(article) => setReaderStack([article])} canManageContent={state.canManageContent} disabled={storageUnavailable} editArticle={(article) => { setDraft(draftFromArticle(article, article.kind)); setEditorMessage(storageUnavailable ? migrationMessage : ""); setEditorOpen(!storageUnavailable); }} deleteArticle={deleteArticle} />}
       {!publicMode && view === "tasks" && <TasksView tasks={state.dailyTasks} taskTemplates={state.taskTemplates} assignees={state.assignees} selectedDate={selectedTaskDate} setSelectedDate={selectTaskDate} canManage={state.canManageTasks} taskTitle={taskTitle} taskDescription={taskDescription} taskDueDate={taskDueDate} taskRepeatUnit={taskRepeatUnit} taskRepeatInterval={taskRepeatInterval} taskRepeatEndDate={taskRepeatEndDate} taskPriority={taskPriority} taskDueTime={taskDueTime} taskReminderMinutes={taskReminderMinutes} taskAssignmentScope={taskAssignmentScope} taskAssigneeId={taskAssigneeId} taskChecklistText={taskChecklistText} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} setTaskDueDate={setTaskDueDate} setTaskRepeatUnit={setTaskRepeatUnit} setTaskRepeatInterval={setTaskRepeatInterval} setTaskRepeatEndDate={setTaskRepeatEndDate} setTaskType={setTaskType} setTaskPriority={setTaskPriority} setTaskDueTime={setTaskDueTime} setTaskReminderMinutes={setTaskReminderMinutes} setTaskAssignmentScope={setTaskAssignmentScope} setTaskAssigneeId={setTaskAssigneeId} setTaskChecklistText={setTaskChecklistText} saveTaskTemplate={saveTaskTemplate} addTask={addTask} toggleTask={toggleTask} toggleTaskChecklist={toggleTaskChecklist} deleteTask={deleteTask} disabled={storageUnavailable} message={taskMessage} />}
-      {!publicMode && view === "needs" && <NeedsView needs={state.needs} needTitle={needTitle} needQuantity={needQuantity} needSupplier={needSupplier} needPriority={needPriority} needNote={needNote} setNeedTitle={setNeedTitle} setNeedQuantity={setNeedQuantity} setNeedSupplier={setNeedSupplier} setNeedPriority={setNeedPriority} setNeedNote={setNeedNote} addNeed={addNeed} markNeedOrdered={markNeedOrdered} disabled={storageUnavailable} message={needMessage} />}
+      {view === "needs" && <NeedsView needs={state.needs} needTitle={needTitle} needType={needType} needStockLevel={needStockLevel} needNote={needNote} setNeedTitle={setNeedTitle} setNeedType={setNeedType} setNeedStockLevel={setNeedStockLevel} setNeedNote={setNeedNote} addNeed={addNeed} updateNeedStatus={updateNeedStatus} disabled={storageUnavailable} message={needMessage} />}
     </main>
     {currentArticle && <Reader article={currentArticle} articles={allArticles} canGoBack={readerStack.length > 1} goBack={() => setReaderStack(stack => stack.slice(0, -1))} openArticle={(article) => setReaderStack(stack => [...stack, article])} close={() => setReaderStack([])} />}
     {editorOpen && <ArticleEditor draft={draft} categories={editorCategories} linkableArticles={allArticles} setDraft={setDraft} saveArticle={saveArticle} saving={saving} message={editorMessage} close={() => { setEditorOpen(false); setEditorMessage(""); }} />}
@@ -419,7 +418,7 @@ function HomeView({ news, tasks, needs, openArticle, openView, canManageContent,
     </button> : <div className={styles.nextActionEmpty}><Check size={19} /><p>{tasks.length ? "No tasks left for today." : "No tasks have been scheduled for today."}</p></div>}
     <section className={styles.homeShortcuts} aria-label="Today’s shortcuts">
       <button type="button" onClick={() => openView("tasks")}><CheckSquare size={18} /><span><strong>{outstanding.length}</strong><small>{outstanding.length === 1 ? "task left" : "tasks left"}</small></span><ChevronRight size={17} /></button>
-      <button type="button" onClick={() => openView("needs")}><ShoppingBasket size={18} /><span><strong>{openNeeds.length}</strong><small>{openNeeds.length === 1 ? "item to order" : "items to order"}</small></span><ChevronRight size={17} /></button>
+      <button type="button" onClick={() => openView("needs")}><ShoppingBasket size={18} /><span><strong>{openNeeds.length}</strong><small>{openNeeds.length === 1 ? "reminder open" : "reminders open"}</small></span><ChevronRight size={17} /></button>
     </section>
     <NewsFeed news={news} openArticle={openArticle} canManageContent={canManageContent} disabled={disabled} editArticle={editArticle} deleteArticle={deleteArticle} />
   </>;
@@ -472,12 +471,13 @@ function TasksView({ tasks, taskTemplates, assignees, selectedDate, setSelectedD
   </>;
 }
 
-function NeedsView({ needs, needTitle, needQuantity, needSupplier, needPriority, needNote, setNeedTitle, setNeedQuantity, setNeedSupplier, setNeedPriority, setNeedNote, addNeed, markNeedOrdered, disabled, message }: { needs: OperationNeed[]; needTitle: string; needQuantity: string; needSupplier: string; needPriority: OperationTaskPriority; needNote: string; setNeedTitle: (value: string) => void; setNeedQuantity: (value: string) => void; setNeedSupplier: (value: string) => void; setNeedPriority: (value: OperationTaskPriority) => void; setNeedNote: (value: string) => void; addNeed: () => void; markNeedOrdered: (need: OperationNeed) => void; disabled: boolean; message: string }) {
+function NeedsView({ needs, needTitle, needType, needStockLevel, needNote, setNeedTitle, setNeedType, setNeedStockLevel, setNeedNote, addNeed, updateNeedStatus, disabled, message }: { needs: OperationNeed[]; needTitle: string; needType: OperationReminderType; needStockLevel: OperationReminderStockLevel; needNote: string; setNeedTitle: (value: string) => void; setNeedType: (value: OperationReminderType) => void; setNeedStockLevel: (value: OperationReminderStockLevel) => void; setNeedNote: (value: string) => void; addNeed: () => void; updateNeedStatus: (need: OperationNeed, status: "ORDERED" | "RESOLVED" | "DISMISSED") => void; disabled: boolean; message: string }) {
   const open = needs.filter(need => need.status === "NEEDED");
-  const ordered = needs.filter(need => need.status === "ORDERED");
-  const statusLabel = (priority: OperationTaskPriority) => priority === "LOW" ? "Low" : priority === "NORMAL" ? "Missing" : "New product/item";
-  const rows = (items: OperationNeed[], history = false) => <div className={styles.needList}>{items.map(need => <article className={styles.needRow} key={need.id} data-ordered={need.status === "ORDERED"}><ShoppingBasket size={22} /><div><div className={styles.taskRowTitle}><h3>{need.title}</h3><span data-priority={need.priority}>{statusLabel(need.priority)}</span></div>{need.note && <p>{need.note}</p>}<div className={styles.taskMeta}>{need.quantity && <span>{need.quantity}</span>}{need.supplier && <span>{need.supplier}</span>}{need.orderedAt && <span>Ordered {new Date(need.orderedAt).toLocaleDateString()}</span>}</div></div>{!history && <button type="button" onClick={() => markNeedOrdered(need)} disabled={disabled}>Ordered</button>}</article>)}{!items.length && <div className={styles.empty}>{history ? "No order history yet." : "Nothing needed right now."}</div>}</div>;
-  return <><details className={styles.taskComposer}><summary><span><Plus size={17} />Add to order list</span><small>Quantity and supplier</small></summary><div className={styles.taskComposerBody}><div className={styles.adminGrid}><input value={needTitle} onChange={event => setNeedTitle(event.target.value)} placeholder="What is needed?" disabled={disabled} /><input value={needSupplier} onChange={event => setNeedSupplier(event.target.value)} placeholder="Supplier (optional)" disabled={disabled} /></div><div className={styles.taskSettings}><label><span className={styles.taskSettingLabel}>Quantity</span><input type="number" min="0" inputMode="decimal" value={needQuantity} onChange={event => setNeedQuantity(event.target.value)} disabled={disabled} /></label><label><span className={styles.taskSettingLabel}>Status</span><select value={needPriority} onChange={event => setNeedPriority(event.target.value as OperationTaskPriority)} disabled={disabled}><option value="LOW">Low</option><option value="NORMAL">Missing</option><option value="HIGH">New product/item</option></select></label></div><textarea className={styles.needNoteInput} value={needNote} onChange={event => setNeedNote(event.target.value)} placeholder="Ordering note (optional)" disabled={disabled} /><div className={styles.adminActions}><button className={styles.composerSubmit} type="button" onClick={addNeed} disabled={disabled}>Add needed item</button></div></div></details>{message && <p className={styles.editorMessage} role="status">{message}</p>}<SectionHeader title="To order" detail={`${open.length} open`} />{rows(open)}<details className={styles.orderHistory}><summary>Order history ({ordered.length})</summary>{rows(ordered, true)}</details></>;
+  const toOrder = open.filter(need => need.type !== "ISSUE");
+  const issues = open.filter(need => need.type === "ISSUE");
+  const typeLabel = (need: OperationNeed) => need.type === "ISSUE" ? "Issue" : need.type === "NEW_ITEM" ? "New item" : need.stockLevel === "OUT_OF" ? "Out of" : "Low";
+  const rows = (items: OperationNeed[], issueList = false) => <div className={styles.needList}>{items.map(need => <article className={styles.needRow} key={need.id}>{need.type === "ISSUE" ? <CircleAlert size={22} /> : <ShoppingBasket size={22} />}<div><div className={styles.taskRowTitle}><h3>{need.title}</h3><span>{typeLabel(need)}</span></div>{need.note && <p>{need.note}</p>}</div><div className={styles.reminderActions}><button type="button" onClick={() => updateNeedStatus(need, issueList ? "RESOLVED" : "ORDERED")} disabled={disabled}>{issueList ? "Resolved" : "Ordered"}</button><button type="button" className={styles.reminderDismiss} onClick={() => updateNeedStatus(need, "DISMISSED")} disabled={disabled}>Dismiss</button></div></article>)}{!items.length && <div className={styles.empty}>{issueList ? "No open issues." : "Nothing to order."}</div>}</div>;
+  return <><details className={styles.taskComposer}><summary><span><Plus size={17} />Add reminder</span><small>Stock, item or issue</small></summary><div className={styles.taskComposerBody}><div className={styles.adminGrid}><input value={needTitle} onChange={event => setNeedTitle(event.target.value)} placeholder="What is needed?" disabled={disabled} /><input value={needNote} onChange={event => setNeedNote(event.target.value)} placeholder="Description (optional)" disabled={disabled} /></div><div className={styles.taskSettings}><label><span className={styles.taskSettingLabel}>Type</span><select value={needType} onChange={event => setNeedType(event.target.value as OperationReminderType)} disabled={disabled}><option value="RESTOCK">Restock</option><option value="NEW_ITEM">New item</option><option value="ISSUE">Issue</option></select></label>{needType === "RESTOCK" && <label><span className={styles.taskSettingLabel}>Stock level</span><select value={needStockLevel || "LOW"} onChange={event => setNeedStockLevel(event.target.value as OperationReminderStockLevel)} disabled={disabled}><option value="LOW">Low</option><option value="OUT_OF">Out of</option></select></label>}</div><div className={styles.adminActions}><button className={styles.composerSubmit} type="button" onClick={addNeed} disabled={disabled}>Add reminder</button></div></div></details>{message && <p className={styles.editorMessage} role="status">{message}</p>}<SectionHeader title="To order" detail={`${toOrder.length} open`} />{rows(toOrder)}<SectionHeader title="Issues" detail={`${issues.length} open`} />{rows(issues, true)}</>;
 }
 
 function ArticleEditor({ draft, categories, linkableArticles, setDraft, saveArticle, saving, message, close }: { draft: DraftArticle; categories: string[]; linkableArticles: OperationArticle[]; setDraft: (draft: DraftArticle) => void; saveArticle: () => Promise<boolean>; saving: boolean; message: string; close: () => void }) {

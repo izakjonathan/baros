@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { operationDateNow } from "@/features/operation/date";
 import { db } from "@/lib/db/client";
-import { ApiError, enumValue, finiteNumber, isoDate, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
+import { ApiError, enumValue, isoDate, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
 import { getPublicOperationAccess, loadPublicOperationState } from "@/lib/operation-public-access";
 
 type RouteContext = { params: Promise<{ accessToken: string }> };
@@ -28,12 +28,11 @@ export async function POST(request: Request, { params }: RouteContext) {
     if (enumValue(body.entity, "entity", ["need"] as const) !== "need") throw new ApiError(400, "Only needed items can be created from this link");
     const title = requiredString(body, "title", 160);
     const note = optionalString(body, "note", 400);
-    const quantity = body.quantity == null || body.quantity === "" ? null : finiteNumber(body.quantity, "quantity", { min: 0, max: 100000 });
-    const supplier = optionalString(body, "supplier", 120);
-    const priority = enumValue(body.priority || "NORMAL", "priority", ["LOW", "NORMAL", "HIGH"] as const);
+    const type = enumValue(body.type || "RESTOCK", "type", ["RESTOCK", "NEW_ITEM", "ISSUE"] as const);
+    const stockLevel = type === "RESTOCK" ? enumValue(body.stockLevel || "LOW", "stockLevel", ["LOW", "OUT_OF"] as const) : null;
     const [need] = await db()<Array<{ id: string }>>`
-      insert into operation_needs(organization_id,title,note,quantity,supplier,priority)
-      values(${access.organizationId},${title},${note},${quantity},${supplier},${priority}) returning id`;
+      insert into operation_needs(organization_id,title,note,reminder_type,stock_level)
+      values(${access.organizationId},${title},${note},${type},${stockLevel}) returning id`;
     await db()`insert into audit_logs(organization_id,action,entity_type,entity_id,metadata) values(${access.organizationId},'PUBLIC_OPERATION_NEED_CREATED','operation_need',${need.id},'{"actor":"shared_staff_link"}'::jsonb)`;
     return NextResponse.json({ id: need.id }, { status: 201 });
   } catch (error) { return jsonError(error, request); }
@@ -60,10 +59,13 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       await db()`insert into audit_logs(organization_id,action,entity_type,entity_id,metadata) values(${access.organizationId},${action === "checklist" ? 'PUBLIC_OPERATION_CHECKLIST_UPDATED' : 'PUBLIC_OPERATION_TASK_UPDATED'},'operation_daily_task',${id},'{"actor":"shared_staff_link"}'::jsonb)`;
       return NextResponse.json({ id, completed });
     }
-    const status = enumValue(body.status || "ORDERED", "status", ["ORDERED"] as const);
-    const [need] = await db()<Array<{ id: string }>>`update operation_needs set status=${status},ordered_by=null,ordered_at=now(),updated_by=null,updated_at=now() where id=${id} and organization_id=${access.organizationId} returning id`;
-    if (!need) throw new ApiError(404, "Needed item not found");
-    await db()`insert into audit_logs(organization_id,action,entity_type,entity_id,metadata) values(${access.organizationId},'PUBLIC_OPERATION_NEED_ORDERED','operation_need',${id},'{"actor":"shared_staff_link"}'::jsonb)`;
+    const [reminder] = await db()<Array<{ reminder_type: string }>>`select reminder_type from operation_needs where id=${id} and organization_id=${access.organizationId}`;
+    if (!reminder) throw new ApiError(404, "Reminder not found");
+    const status = reminder.reminder_type === "ISSUE"
+      ? enumValue(body.status, "status", ["RESOLVED", "DISMISSED"] as const)
+      : enumValue(body.status, "status", ["ORDERED", "DISMISSED"] as const);
+    await db()`update operation_needs set status=${status},ordered_by=null,ordered_at=case when ${status}='ORDERED' then now() else null end,updated_by=null,updated_at=now() where id=${id} and organization_id=${access.organizationId}`;
+    await db()`insert into audit_logs(organization_id,action,entity_type,entity_id,metadata) values(${access.organizationId},'PUBLIC_OPERATION_REMINDER_UPDATED','operation_need',${id},'{"actor":"shared_staff_link"}'::jsonb)`;
     return NextResponse.json({ id, status });
   } catch (error) { return jsonError(error, request); }
 }

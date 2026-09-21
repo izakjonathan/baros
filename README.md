@@ -1,8 +1,14 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.104**
+Current release: **v0.19.0-rc.105**
 
-Rollback checkpoint: **v0.19.0-rc.103**.
+Rollback checkpoint: **v0.19.0-rc.104**.
+
+## RC.105 — Reminders workflow
+
+- Renamed the Operations **Needs** queue to **Reminders** and reduced creation to a required “What is needed?” field, optional description, type, and a conditional Low/Out of choice for restocking.
+- Active reminders now separate into **To order** (Restock and New item) and **Issues**. Staff can mark order items Ordered or Dismissed, and issues Resolved or Dismissed.
+- The same workflow is available to authenticated staff and installable shared-staff links. Apply `db/migrations/021_operation_reminders.sql` before deploying this release.
 
 ## RC.104 — Installable shared staff links
 
@@ -77,7 +83,7 @@ Use the latest approved ZIP as the baseline. Prefer changing/replacing existing 
 - `features/inventory/` — Inventory workspace and product/stock-count dialogs
 - `features/orders/` — Orders workspace and purchase-order dialog
 - `features/operations/` — Daily Operations
-- `features/operation/` — standalone Operation module for handbook, news, daily tasks, and We Need
+- `features/operation/` — standalone Operation module for handbook, news, daily tasks, and Reminders
 - `features/employees/` — Team workspace and employee dialog
 - `features/settings/` — Settings
 - `features/control/` — Control Centre
