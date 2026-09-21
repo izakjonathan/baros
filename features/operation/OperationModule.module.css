@@ -75,14 +75,14 @@
 .reader{position:fixed;inset:0;z-index:60;display:grid;grid-template-rows:minmax(0,1fr) auto;background:var(--op-canvas);color:var(--op-ink);padding:max(.72rem,env(safe-area-inset-top)) max(1.2rem,env(safe-area-inset-right)) max(1rem,env(safe-area-inset-bottom)) max(1.2rem,env(safe-area-inset-left))}
 .readerBottom button,.textButton{border:0;background:transparent;color:inherit;font-weight:760;text-transform:uppercase;letter-spacing:.075em}
 .readerArticle{width:min(34rem,100%);margin:0 auto;overflow:auto;padding:.25rem 0 5.9rem}
-.readerArticle h1{font-size:clamp(1.72rem,7vw,2.65rem);line-height:1;letter-spacing:-.035em;font-weight:720}
+.readerArticle h1{margin:0 0 .84rem;font-size:clamp(1.72rem,7vw,2.65rem);line-height:1;letter-spacing:-.035em;font-weight:720}
 .readerArticle h2{margin-top:.75rem;font-size:clamp(1.18rem,4.6vw,1.62rem);line-height:1.08;letter-spacing:-.025em;font-weight:720}
 .readerArticle h3{margin-top:.62rem;font-size:clamp(1rem,3.8vw,1.22rem);line-height:1.14;letter-spacing:-.012em}
 .readerArticle h4{margin-top:.7rem;font-size:clamp(.95rem,3.6vw,1.2rem);line-height:1.15;letter-spacing:-.01em}
 .readerArticle p,.readerArticle li{font-family:var(--font-body);font-size:.9rem;line-height:1.4}
 .readerArticle a,.readerArticleLink{color:inherit;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:.18em}
 .readerArticleLink{border:0;background:transparent;padding:0;font:inherit;cursor:pointer}
-.readerArticle ul,.readerArticle ol{display:grid;gap:.18rem;margin:.52rem 0;padding-left:1.25rem}
+.readerArticle ul,.readerArticle ol{display:grid;gap:.4rem;margin:.64rem 0;padding-left:1.25rem}
 .readerImageButton{display:block;width:100%;margin:.85rem 0;padding:0;border:0;border-radius:.9rem;background:transparent;cursor:zoom-in;overflow:hidden}
 .readerImage{display:block;width:100%;height:auto;border:0;border-radius:.9rem}
 .imageViewer{position:fixed;inset:0;z-index:110;display:grid;place-items:center;padding:max(1rem,env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) max(1rem,env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-left));background:color-mix(in srgb,var(--op-ink) 84%,transparent);cursor:zoom-out}
@@ -182,6 +182,7 @@
 .reminderActions{display:flex;gap:.32rem;align-items:center;justify-content:flex-end;flex-wrap:nowrap}
 .reminderActions button{display:inline-flex;align-items:center;justify-content:center;gap:.28rem}
 .reminderActions .reminderDismiss{background:transparent;color:var(--op-ink)}
+.reminderActionMeta{margin:0;white-space:nowrap;font-family:var(--op-font-body);font-size:var(--op-type-meta);line-height:1.2;color:var(--op-muted)}
 .needNoteInput{box-sizing:border-box;width:100%;min-height:3.2rem;border:1px solid color-mix(in srgb,var(--op-ink) 62%,transparent);border-radius:.58rem;background:color-mix(in srgb,var(--op-canvas) 86%,var(--op-ink) 14%);color:var(--op-ink);padding:.45rem .55rem;font-family:var(--font-body);font-size:.78rem;resize:vertical}
 .orderHistory{display:grid;gap:.55rem}
 .orderHistory summary{cursor:pointer;padding:.4rem 0;font-family:var(--font-display);font-size:.7rem;font-weight:760;letter-spacing:.08em;text-transform:uppercase;color:var(--op-muted)}

@@ -114,6 +114,7 @@ export type OperationNeed = {
   note: string | null;
   status: OperationNeedStatus;
   createdAt: string;
+  updatedAt: string;
   type: OperationReminderType;
   stockLevel: OperationReminderStockLevel;
 };

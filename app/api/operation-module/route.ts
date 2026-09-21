@@ -96,7 +96,7 @@ export async function GET(request: Request) {
             )))
         order by t.sort_order,t.created_at`,
       db()<Array<Record<string, unknown>>>`
-        select n.id,n.title,n.note,n.status,n.created_at,n.reminder_type,n.stock_level
+        select n.id,n.title,n.note,n.status,n.created_at,n.updated_at,n.reminder_type,n.stock_level
         from operation_needs n
         where n.organization_id=${user.organizationId}
           and (${user.locationId}::uuid is null or n.location_id is null or n.location_id=${user.locationId})
@@ -151,6 +151,7 @@ export async function GET(request: Request) {
         note: need.note == null ? null : String(need.note),
         status: ["ORDERED", "RESOLVED", "DISMISSED"].includes(String(need.status)) ? String(need.status) as OperationNeed["status"] : "NEEDED",
         createdAt: String(need.created_at),
+        updatedAt: String(need.updated_at || need.created_at),
         type: ["NEW_ITEM", "ISSUE"].includes(String(need.reminder_type)) ? String(need.reminder_type) as OperationNeed["type"] : "RESTOCK",
         stockLevel: ["LOW", "OUT_OF"].includes(String(need.stock_level)) ? String(need.stock_level) as OperationNeed["stockLevel"] : null,
       })),

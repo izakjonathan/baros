@@ -63,7 +63,7 @@ export default async function OperationPage() {
           and t.active=true
         order by t.sort_order,t.created_at`,
       db()<Array<Record<string, unknown>>>`
-        select id,title,note,status,created_at,reminder_type,stock_level
+        select id,title,note,status,created_at,updated_at,reminder_type,stock_level
         from operation_needs
         where organization_id=${user.organizationId}
           and (${user.locationId}::uuid is null or location_id is null or location_id=${user.locationId})
@@ -121,6 +121,7 @@ export default async function OperationPage() {
       note: need.note == null ? null : String(need.note),
       status: ["ORDERED", "RESOLVED", "DISMISSED"].includes(String(need.status)) ? String(need.status) as OperationNeed["status"] : "NEEDED",
       createdAt: String(need.created_at),
+      updatedAt: String(need.updated_at || need.created_at),
       type: ["NEW_ITEM", "ISSUE"].includes(String(need.reminder_type)) ? String(need.reminder_type) as OperationNeed["type"] : "RESTOCK",
       stockLevel: ["LOW", "OUT_OF"].includes(String(need.stock_level)) ? String(need.stock_level) as OperationNeed["stockLevel"] : null,
     })),

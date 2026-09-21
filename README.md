@@ -1,8 +1,14 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.107**
+Current release: **v0.19.0-rc.108**
 
-Rollback checkpoint: **v0.19.0-rc.106**.
+Rollback checkpoint: **v0.19.0-rc.107**.
+
+## RC.108 — Reminder history and reading hierarchy
+
+- Article titles now have intentional separation from the first text block; lists retain compact wrapped lines while separating distinct points more clearly.
+- Restored collapsible Order history and added matching Issue history. Each row records Ordered, Resolved, or Dismissed with its Copenhagen action date.
+- The same history and action data is available to authenticated staff and shared-staff links. No migration is required.
 
 ## RC.107 — Compact reminder rows
 
