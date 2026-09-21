@@ -1,15 +1,15 @@
-# v0.19.0-rc.103 Validation
+# v0.19.0-rc.104 Validation
 
 ## Confirmed baseline
 
-The verified rc.102 Full-width Today News release was used as the baseline.
+The verified rc.103 Editorial Today News release was used as the baseline.
 
-- Rollback checkpoint: v0.19.0-rc.102
+- Rollback checkpoint: v0.19.0-rc.103
 
 ## Implementation
 
-- Increased Today news copy contrast, size, and paragraph rhythm for quicker in-card reading.
-- Preserved the existing full-width card layout, editor styles, and article-link behaviour.
+- Added a public-link-specific web manifest and nested metadata override for the shared staff Operations route.
+- The manifest's start URL and scope are the validated shared-link URL, avoiding the authenticated app root when launched from Home Screen.
 
 ## Validation status
 

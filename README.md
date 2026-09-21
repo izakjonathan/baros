@@ -1,8 +1,14 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.103**
+Current release: **v0.19.0-rc.104**
 
-Rollback checkpoint: **v0.19.0-rc.101**.
+Rollback checkpoint: **v0.19.0-rc.103**.
+
+## RC.104 — Installable shared staff links
+
+- Adding a shared staff Operation link to an iPhone/iPad Home Screen now reopens that same public workspace instead of the authenticated Bar Ops root.
+- The public manifest is validated against the active access token and is not cached, so revoked links cannot keep being installed or refreshed.
+- No migration is required.
 
 ## RC.102 — Full-width Today News
 

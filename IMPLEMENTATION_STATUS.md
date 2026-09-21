@@ -1,10 +1,16 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.103**
+Version: **v0.19.0-rc.104**
 
 ## Current focus
 
-Making the Today news feed readable at a glance.
+Making shared Operations access reliable and low-friction for staff.
+
+## rc.104
+
+- Shared staff public links now emit a token-specific, non-cached web manifest whose Home Screen start URL returns directly to the same public Operation workspace.
+- The manifest is available only while the shared access token is enabled; owner, employee, and shared-staff data permissions are unchanged.
+- No migration is required. Rollback checkpoint: v0.19.0-rc.103.
 
 ## rc.103
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.19.0-rc.104
+
+- Added an access-token-specific web manifest to every shared staff Operations link.
+- Home Screen installs now use the public Operation page as their start URL rather than `/`, which previously redirected into the main login flow.
+- The manifest checks the shared-link token on every request and is not cached; no permission or data scope changed.
+
 ## v0.19.0-rc.102
 
 - Reflowed Today news cards so owner metadata/actions remain in a compact header and the published body receives the full card width.
