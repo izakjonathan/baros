@@ -49,7 +49,8 @@ export default async function OperationPage() {
         where organization_id=${user.organizationId} and published=true
         order by kind,category,sort_order,updated_at desc`,
       db()<Array<Record<string, unknown>>>`
-        select t.id,t.weekday,t.title,t.description,t.due_date,t.repeat_unit,t.repeat_interval,t.repeat_end_date,t.task_type,t.priority,t.due_time,t.reminder_minutes,t.assignment_scope,t.assigned_employee_id,
+        select t.id,t.weekday,t.title,t.description,t.due_date,t.repeat_unit,t.repeat_interval,t.repeat_end_date,t.task_type,t.priority,t.due_time,t.reminder_minutes,t.assignment_scope,t.assigned_employee_id,t.checklist,
+               coalesce((select jsonb_object_agg(cc.item_id,true) from operation_task_checklist_completions cc where cc.task_id=t.id and cc.service_date=${today}::date), '{}'::jsonb) checklist_completed,
                (a.first_name||' '||a.last_name) assigned_employee_name,
                (completed_employee.first_name||' '||completed_employee.last_name) completed_by_name,
                (c.completed_at is not null) completed
@@ -67,7 +68,6 @@ export default async function OperationPage() {
         from operation_needs
         where organization_id=${user.organizationId}
           and (${user.locationId}::uuid is null or location_id is null or location_id=${user.locationId})
-          and status='NEEDED'
         order by created_at desc
         limit 100`,
       db()<Array<Record<string, unknown>>>`
@@ -109,7 +109,7 @@ export default async function OperationPage() {
       assignedEmployeeId: task.assigned_employee_id == null ? null : String(task.assigned_employee_id),
       assignedEmployeeName: task.assigned_employee_name == null ? null : String(task.assigned_employee_name),
       completedByName: task.completed_by_name == null ? null : String(task.completed_by_name),
-      checklist: [],
+      checklist: Array.isArray(task.checklist) ? task.checklist.slice(0, 30).flatMap((item): OperationDailyTask["checklist"] => item && typeof item === "object" && "id" in item && "label" in item ? [{ id: String(item.id), label: String(item.label), completed: Boolean(task.checklist_completed && typeof task.checklist_completed === "object" && String(item.id) in task.checklist_completed) }] : []) : [],
       completed: Boolean(task.completed),
     })).filter(task => isOperationTaskDue(task, today)),
     assignees: assignees.map(assignee => ({ id: String(assignee.id), name: String(assignee.name) })),

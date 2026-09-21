@@ -1,8 +1,15 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.108**
+Current release: **v0.19.0-rc.109**
 
-Rollback checkpoint: **v0.19.0-rc.107**.
+Rollback checkpoint: **v0.19.0-rc.108**.
+
+## RC.109 — Task controls and unified reminder history
+
+- Saved task steps are included in the initial Operations payload and displayed as check-off items immediately.
+- Date and time controls use a centred, bounded iOS rendering; unchecked task boxes now use the active canvas with an Ink border, while checked boxes retain the dark filled state.
+- Removed the redundant scheduling explanation and merged Order/Issue history into one collapsible, date-stamped activity list.
+- No migration is required.
 
 ## RC.108 — Reminder history and reading hierarchy
 

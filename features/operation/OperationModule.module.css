@@ -161,7 +161,10 @@
 .adminActions button:disabled,.needInput button:disabled,.taskRow button:disabled,.needRow button:disabled,.reminderActions button:disabled,.adminPanel input:disabled,.needInput input:disabled{opacity:.5;cursor:not-allowed}
 .taskRow,.needRow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.58rem;align-items:center;padding:.62rem .72rem;border:1px solid color-mix(in srgb,var(--op-ink) 68%,transparent);border-radius:.68rem;background:var(--op-canvas)}
 .rowDelete{width:2rem;min-height:2rem!important;display:grid!important;place-items:center;padding:0!important;background:transparent!important;color:var(--op-ink)!important}
-.taskRow input{width:1.12rem;height:1.12rem;accent-color:var(--op-ink);border:1.5px solid var(--op-ink);border-radius:.3rem;background:var(--op-canvas)}
+.taskRow input,.taskChecklist input{box-sizing:border-box;width:1.12rem;height:1.12rem;-webkit-appearance:none;appearance:none;display:grid;place-content:center;border:1.5px solid var(--op-ink);border-radius:.3rem;background:var(--op-canvas)}
+.taskRow input::after,.taskChecklist input::after{content:"";width:.44rem;height:.24rem;border:solid var(--op-canvas);border-width:0 .12rem .12rem 0;transform:rotate(45deg) scale(0);margin-top:-.1rem}
+.taskRow input:checked,.taskChecklist input:checked{background:var(--op-ink)}
+.taskRow input:checked::after,.taskChecklist input:checked::after{transform:rotate(45deg) scale(1)}
 .taskRow h3,.needRow h3{font-size:.92rem;line-height:1.12;letter-spacing:-.006em}
 .taskRow p,.needRow p{font-family:var(--font-body);font-size:.72rem;line-height:1.35;color:var(--op-muted)}
 .taskSettings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.48rem;margin-top:.52rem;min-width:0;inline-size:100%}
@@ -171,7 +174,9 @@
 .taskSettings label:has(select)::after{content:"⌄";position:absolute;right:.62rem;bottom:.45rem;pointer-events:none;font-family:var(--op-font-display);font-size:.95rem;line-height:1;color:var(--op-ink)}
 .taskSettings select{-webkit-appearance:none;appearance:none;padding-right:1.7rem;outline:0}
 .taskSettings select:focus-visible{box-shadow:0 0 0 2px color-mix(in srgb,var(--op-ink) 42%,transparent)}
-.taskSettings input[type="date"],.taskSettings input[type="time"]{overflow:clip;text-overflow:ellipsis}
+.taskSettings input[type="date"],.taskSettings input[type="time"]{-webkit-appearance:none;appearance:none;overflow:hidden;text-align:center;text-overflow:clip;padding-inline:.2rem}
+.taskSettings input[type="date"]::-webkit-date-and-time-value,.taskSettings input[type="time"]::-webkit-date-and-time-value{min-height:1.2em;text-align:center}
+.taskSettings input[type="date"]::-webkit-datetime-edit,.taskSettings input[type="time"]::-webkit-datetime-edit{display:flex;justify-content:center;padding:0}
 .settingsHint{font-family:var(--font-body);font-size:.68rem;line-height:1.35;color:var(--op-muted)}
 .needInput{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center}
 .needAddButton{width:2.35rem;min-height:2.35rem!important;display:grid!important;place-items:center;padding:0!important;border-radius:50%!important}
@@ -222,7 +227,7 @@
 .taskMeta span{display:inline-flex;align-items:center;gap:.2rem}
 .taskChecklist{display:grid;gap:.22rem;margin-top:.45rem;padding:.4rem .5rem;border-left:2px solid color-mix(in srgb,var(--op-ink) 30%,transparent);font-family:var(--font-body);font-size:.72rem}
 .taskChecklist label{display:flex;align-items:center;gap:.4rem}
-.taskChecklist input{width:.9rem;height:.9rem;accent-color:var(--op-ink);border:1.5px solid var(--op-ink);border-radius:.25rem;background:var(--op-canvas)}
+.taskChecklist input{width:.9rem;height:.9rem;border-radius:.25rem}
 .uiStudioBackdrop{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:max(.85rem,env(safe-area-inset-top)) max(.85rem,env(safe-area-inset-right)) max(.85rem,env(safe-area-inset-bottom)) max(.85rem,env(safe-area-inset-left));background:color-mix(in srgb,var(--op-ink) 42%,transparent)}
 .uiStudioPanel{width:min(29rem,100%);display:grid;gap:.75rem;max-height:calc(100dvh - 1.7rem);overflow:auto;padding:.85rem;border:1px solid color-mix(in srgb,var(--op-ink) 60%,transparent);border-radius:.85rem;background:var(--op-canvas);color:var(--op-ink);box-shadow:0 .8rem 2.4rem color-mix(in srgb,var(--op-ink) 30%,transparent)}
 .uiStudioHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem}.uiStudioHeader p{margin:0 0 .08rem;font-family:var(--op-font-body);font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--op-muted)}.uiStudioHeader h2{margin:0;font-size:1.15rem;line-height:1}.uiStudioHeader button{width:2rem;min-height:2rem;display:grid;place-items:center;padding:0;border:1px solid var(--op-ink);border-radius:50%;background:transparent;color:inherit}
