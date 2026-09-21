@@ -13,6 +13,7 @@ const taskAudienceMigration = read("db/migrations/019_operation_task_assignment_
 const remindersMigration = read("db/migrations/021_operation_reminders.sql");
 const publicOperationLayout = read("app/operation/public/[accessToken]/layout.tsx");
 const publicOperationManifest = read("app/operation/public/[accessToken]/manifest.webmanifest/route.ts");
+const operationLayout = read("app/operation/layout.tsx");
 
 const checks = [
   ["selected task date is persisted", operation.includes("date: selectedTaskDate, completed: !task.completed")],
@@ -55,6 +56,10 @@ const checks = [
   ["task settings constrain and center native date and time controls", operationStyles.includes("contain:inline-size") && operationStyles.includes("max-inline-size:100%") && operationStyles.includes("::-webkit-date-and-time-value") && operationStyles.includes("justify-content:center")],
   ["task checkboxes retain the Operation canvas when unchecked", operationStyles.includes(".taskRow input,.taskChecklist input{box-sizing:border-box") && operationStyles.includes(".taskRow input:checked,.taskChecklist input:checked{background:var(--op-ink)}")],
   ["Operations keeps iPad touch inputs and the editor viewport safe", operation.includes("window.visualViewport") && operation.includes('visualViewport?.addEventListener("resize", syncViewport)') && operationStyles.includes("@media (hover:none) and (pointer:coarse)") && operationStyles.includes("font-size:16px")],
+  ["Operation viewport prevents gesture and input zoom across authenticated and shared routes", operationLayout.includes("maximumScale: 1") && operationLayout.includes("userScalable: false") && operationStyles.includes(".operationShell input,.operationShell select,.operationShell textarea{font-size:16px}")],
+  ["Handbook New is derived from its immutable creation time", types.includes("createdAt: string") && operationContent.includes("createdAt: String(row.created_at") && operation.includes('const handbookCategories = ["All", "New"') && operation.includes("isNewHandbookArticle(article)") && route.includes("a.created_at,a.updated_at") && read("app/operation/page.tsx").includes("published,created_at,updated_at") && read("lib/operation-public-access.ts").includes("published,created_at,updated_at")],
+  ["New handbook cards keep their original category pill and use a small star", operation.includes("function ArticleCategoryPill") && operation.includes("articleCategoryNew") && operationStyles.includes(".articleCategoryNew{")],
+  ["Handbook reader close uses the saved Operation canvas fill", operation.includes("styles.handbookCloseCircle") && operationStyles.includes(".handbookCloseCircle{background:var(--op-canvas)!important}")],
   ["Operations uses only saved Canvas and Ink derivatives", !/#(?:[0-9a-f]{3,8})\b|rgba\(/i.test(operationStyles) && operationStyles.includes("--op-canvas") && operationStyles.includes("--op-ink") && operationStyles.includes("--op-accent:color-mix") && operationStyles.includes(".taskRow,.needRow{display:grid") && operationStyles.includes("border-radius:.68rem;background:var(--op-canvas)}") && operationStyles.includes(".uiStudioPanel{") && operationStyles.includes(".articleEditorFrame{")],
 ];
 

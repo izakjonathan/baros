@@ -185,6 +185,7 @@ export function mapOperationArticle(row: Record<string, unknown>): OperationArti
     description: String(row.description || ""),
     content: parseOperationBlocks(row.content),
     published: row.published !== false,
+    createdAt: String(row.created_at || row.createdAt || row.updated_at || row.updatedAt || new Date().toISOString()),
     updatedAt: String(row.updated_at || row.updatedAt || new Date().toISOString()),
   };
 }

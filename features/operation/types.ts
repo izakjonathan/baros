@@ -50,6 +50,7 @@ export type OperationArticle = {
   description: string;
   content: OperationContentBlock[];
   published: boolean;
+  createdAt: string;
   updatedAt: string;
 };
 

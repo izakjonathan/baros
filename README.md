@@ -1,6 +1,13 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.109**
+Current release: **v0.19.0-rc.110**
+
+## RC.110 — Handbook New status and Operation viewport
+
+- Operation locks the module viewport scale and keeps all touch form controls at 16px, preventing iPhone’s automatic input zoom across owner, employee, and shared-staff Operation routes.
+- Every Handbook article is marked **New** for seven days from its immutable creation timestamp. The Handbook filters now include New, and current articles show a small star inside their existing category pill rather than a second badge.
+- The native Task date/time values use full-width centered editing controls, and the Handbook reader close control is filled from the owner-selected Operation Canvas color.
+- No migration is required.
 
 Rollback checkpoint: **v0.19.0-rc.108**.
 

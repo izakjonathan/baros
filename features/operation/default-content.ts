@@ -17,6 +17,7 @@ export const defaultOperationState: OperationModuleState = {
       title: "Opening the bar",
       description: "Core opening routine before the first guests arrive.",
       published: true,
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       content: [
         { type: "title", text: "Opening the bar" },
@@ -33,6 +34,7 @@ export const defaultOperationState: OperationModuleState = {
       title: "Closing routine",
       description: "How to close the bar cleanly and leave a useful handover.",
       published: true,
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       content: [
         { type: "title", text: "Closing routine" },
@@ -49,6 +51,7 @@ export const defaultOperationState: OperationModuleState = {
       title: "Welcome to Operation",
       description: "A new home for bar updates, routines and daily notes.",
       published: true,
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       content: [
         { type: "title", text: "Welcome to Operation" },

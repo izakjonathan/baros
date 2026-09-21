@@ -44,7 +44,7 @@ export default async function OperationPage() {
   try {
     [articles, tasks, needs, assignees] = await Promise.all([
       db()<Array<Record<string, unknown>>>`
-        select id,kind,category,title,description,content,published,updated_at
+        select id,kind,category,title,description,content,published,created_at,updated_at
         from operation_articles
         where organization_id=${user.organizationId} and published=true
         order by kind,category,sort_order,updated_at desc`,

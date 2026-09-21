@@ -65,7 +65,7 @@ export async function GET(request: Request) {
     const today = isoDate(params.get("date") || operationDateNow(), "date");
     const [articles, tasks, needs, assignees, taskTemplates] = await Promise.all([
       db()<Array<Record<string, unknown>>>`
-        select a.id,a.kind,a.category,a.title,a.description,a.content,a.published,a.updated_at
+        select a.id,a.kind,a.category,a.title,a.description,a.content,a.published,a.created_at,a.updated_at
         from operation_articles a
         where a.organization_id=${user.organizationId} and (a.published=true or ${ownerCanManageOperation(user.role)})
         order by a.kind,a.category,a.sort_order,a.updated_at desc`,
@@ -192,7 +192,7 @@ export async function POST(request: Request) {
       const [row] = await db()<Array<Record<string, unknown>>>`
         insert into operation_articles(organization_id,kind,category,title,description,content,created_by,updated_by)
         values(${user.organizationId},${kind},${category},${title},${description},${JSON.stringify(content)}::jsonb,${user.userId},${user.userId})
-        returning id,kind,category,title,description,content,published,updated_at`;
+        returning id,kind,category,title,description,content,published,created_at,updated_at`;
       return NextResponse.json(mapOperationArticle(row), { status: 201 });
     }
 
@@ -281,7 +281,7 @@ export async function PATCH(request: Request) {
             updated_by=${user.userId},
             updated_at=now()
         where id=${id} and organization_id=${user.organizationId}
-        returning id,kind,category,title,description,content,published,updated_at`;
+        returning id,kind,category,title,description,content,published,created_at,updated_at`;
       if (!row) throw new ApiError(404, "Article not found");
       return NextResponse.json(mapOperationArticle(row));
     }

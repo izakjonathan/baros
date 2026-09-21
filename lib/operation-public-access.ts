@@ -17,7 +17,7 @@ export async function getPublicOperationAccess(token: string): Promise<PublicOpe
 export async function loadPublicOperationState(access: PublicOperationAccess, date: string): Promise<OperationModuleState> {
   const [articles, tasks, needs] = await Promise.all([
     db()<Array<Record<string, unknown>>>`
-      select id,kind,category,title,description,content,published,updated_at
+      select id,kind,category,title,description,content,published,created_at,updated_at
       from operation_articles where organization_id=${access.organizationId} and published=true
       order by kind,category,sort_order,updated_at desc`,
     db()<Array<Record<string, unknown>>>`

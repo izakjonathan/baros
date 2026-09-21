@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowLeft, Bold, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, CircleAlert, Clock3, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Palette, Plus, Redo2, Repeat2, ShoppingBasket, Square, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
+import { ArrowLeft, Bold, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, CircleAlert, Clock3, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Palette, Plus, Redo2, Repeat2, ShoppingBasket, Square, Star, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -31,6 +31,14 @@ const OperationImageExtension = ImageExtension.extend({
 
 const migrationMessage = "Operation storage is not ready yet. Run the database migration action, then reload this page.";
 const operationArticleHref = (articleId: string) => `operation://article/${articleId}`;
+const handbookNewDurationMs = 7 * 24 * 60 * 60 * 1000;
+
+function isNewHandbookArticle(article: OperationArticle) {
+  if (article.kind !== "HANDBOOK") return false;
+  const createdAt = new Date(article.createdAt).valueOf();
+  const age = Date.now() - createdAt;
+  return Number.isFinite(createdAt) && age >= 0 && age < handbookNewDurationMs;
+}
 
 function operationArticleIdFromHref(href: string) {
   return /^operation:\/\/article\/([0-9a-f-]{36})$/i.exec(href)?.[1] || null;
@@ -139,9 +147,9 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   });
   const allArticles = [...state.news, ...state.handbook];
   const editorCategories = ["General", ...Array.from(new Set(allArticles.map(article => article.category).filter(categoryName => categoryName !== "General"))).sort((left, right) => left.localeCompare(right))];
-  const handbookCategories = ["All", ...Array.from(new Set(state.handbook.map(article => article.category)))];
+  const handbookCategories = ["All", "New", ...Array.from(new Set(state.handbook.map(article => article.category)))];
   const filteredHandbook = state.handbook.filter(article => {
-    const categoryMatch = category === "All" || article.category === category;
+    const categoryMatch = category === "All" || (category === "New" ? isNewHandbookArticle(article) : article.category === category);
     const text = `${article.title} ${article.description} ${article.category}`.toLowerCase();
     return categoryMatch && text.includes(query.toLowerCase());
   });
@@ -209,6 +217,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
       description: draft.description.trim(),
       content,
       published: true,
+      createdAt: draft.id ? allArticles.find(existing => existing.id === draft.id)?.createdAt || new Date().toISOString() : new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
     if (devMode) {
@@ -608,7 +617,11 @@ function SectionHeader({ title, detail }: { title: string; detail: string }) {
 
 function ArticleCard({ article, onClick, onEdit, onDelete, disabled = false, showBody = false }: { article: OperationArticle; onClick: () => void; onEdit?: () => void; onDelete?: () => void; disabled?: boolean; showBody?: boolean }) {
   if (showBody) return <article className={`${styles.operationCard} ${styles.newsCard}`}><div className={styles.newsCardHeader}><button type="button" className={styles.newsCardTitleButton} onClick={onClick}><h3>{article.title}</h3></button><div className={styles.newsCardTools}><small>{article.category}</small>{onEdit && onDelete && <div className={styles.articleCardActions}><button type="button" onClick={onEdit} disabled={disabled}>Edit</button><button type="button" onClick={onDelete} aria-label={`Delete ${article.title}`} disabled={disabled}><Trash2 size={16} /></button></div>}</div></div><button type="button" className={styles.newsCardBodyButton} onClick={onClick}><NewsCardBody article={article} /></button></article>;
-  return <article className={`${styles.operationCard}${showBody ? ` ${styles.newsCard}` : ""}`}><button type="button" className={styles.articleCardOpen} onClick={onClick}><div><h3>{article.title}</h3>{showBody ? <NewsCardBody article={article} /> : article.description && <p>{article.description}</p>}</div><small>{article.category}</small></button>{onEdit && onDelete && <div className={styles.articleCardActions}><button type="button" onClick={onEdit} disabled={disabled}>Edit</button><button type="button" onClick={onDelete} aria-label={`Delete ${article.title}`} disabled={disabled}><Trash2 size={16} /></button></div>}</article>;
+  return <article className={`${styles.operationCard}${showBody ? ` ${styles.newsCard}` : ""}`}><button type="button" className={styles.articleCardOpen} onClick={onClick}><div><h3>{article.title}</h3>{showBody ? <NewsCardBody article={article} /> : article.description && <p>{article.description}</p>}</div><ArticleCategoryPill article={article} /></button>{onEdit && onDelete && <div className={styles.articleCardActions}><button type="button" onClick={onEdit} disabled={disabled}>Edit</button><button type="button" onClick={onDelete} aria-label={`Delete ${article.title}`} disabled={disabled}><Trash2 size={16} /></button></div>}</article>;
+}
+
+function ArticleCategoryPill({ article }: { article: OperationArticle }) {
+  return <small>{article.category}{isNewHandbookArticle(article) && <Star className={styles.articleCategoryNew} aria-label="New article" />}</small>;
 }
 
 type NewsCardTextBlock = { type: "heading" | "subheading" | "body" | "list"; text: string; marker?: string };
@@ -702,7 +715,7 @@ function Reader({ article, articles, canGoBack, goBack, openArticle, close }: { 
     const linkedArticle = articles.find(item => item.id === articleId);
     if (linkedArticle) openArticle(linkedArticle);
   };
-  return <aside className={styles.reader} aria-modal="true" role="dialog" aria-label={article.title}><article className={styles.readerArticle}>{content.map((block, index) => <RenderBlock key={`${block.type}-${index}`} block={block} openArticle={openLinkedArticle} />)}</article><div className={styles.readerBottom}>{canGoBack && <button type="button" className={styles.readerBackCircle} onClick={goBack} aria-label="Back to previous article"><ArrowLeft /></button>}<button type="button" className={styles.closeCircle} onClick={close} aria-label="Close article"><X /></button></div></aside>;
+  return <aside className={styles.reader} aria-modal="true" role="dialog" aria-label={article.title}><article className={styles.readerArticle}>{content.map((block, index) => <RenderBlock key={`${block.type}-${index}`} block={block} openArticle={openLinkedArticle} />)}</article><div className={styles.readerBottom}>{canGoBack && <button type="button" className={styles.readerBackCircle} onClick={goBack} aria-label="Back to previous article"><ArrowLeft /></button>}<button type="button" className={`${styles.closeCircle}${article.kind === "HANDBOOK" ? ` ${styles.handbookCloseCircle}` : ""}`} onClick={close} aria-label="Close article"><X /></button></div></aside>;
 }
 
 function RenderBlock({ block, openArticle }: { block: OperationContentBlock; openArticle: (articleId: string) => void }) {
