@@ -1,6 +1,11 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.113**
+Current release: **v0.19.0-rc.114**
+
+## RC.114 — Count canvas fields
+
+- Count now uses the saved Operation canvas without an ink tint.
+- Removed Safari's white input focus and autofill outline; Count fields retain only the normal Operation border.
 
 ## RC.113 — Operation Count
 
