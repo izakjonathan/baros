@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowLeft, Bold, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, CircleAlert, Clock3, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Palette, Plus, Redo2, Repeat2, ShoppingBasket, Square, Star, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
+import { ArrowLeft, Banknote, Bold, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, CircleAlert, Clock3, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Palette, Plus, Redo2, Repeat2, ShoppingBasket, Square, Star, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -12,9 +12,9 @@ import ImageExtension from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import styles from "./OperationModule.module.css";
 import { operationThemeCustomProperties, type UiTheme, uiColorContrastRatio } from "@/lib/ui-theme-shared";
-import type { OperationArticle, OperationArticleKind, OperationContentBlock, OperationDailyTask, OperationModuleState, OperationNeed, OperationReminderStockLevel, OperationReminderType, OperationRichTextDelta, OperationRichTextOp, OperationTaskAssignmentScope, OperationTaskPriority, OperationTaskRepeatUnit, OperationTaskType, OperationTiptapDocument, OperationTiptapNode } from "./types";
+import type { OperationArticle, OperationArticleKind, OperationCashCount, OperationContentBlock, OperationDailyTask, OperationModuleState, OperationNeed, OperationReminderStockLevel, OperationReminderType, OperationRichTextDelta, OperationRichTextOp, OperationTaskAssignmentScope, OperationTaskPriority, OperationTaskRepeatUnit, OperationTaskType, OperationTiptapDocument, OperationTiptapNode } from "./types";
 
-type View = "home" | "handbook" | "tasks" | "needs";
+type View = "home" | "handbook" | "tasks" | "needs" | "count";
 type DraftArticle = { id?: string; kind: OperationArticleKind; category: string; title: string; description: string; document: OperationTiptapDocument };
 type PreparedOperationImages = { preview: File; detail: File; width: number; height: number };
 
@@ -42,6 +42,16 @@ function isNewHandbookArticle(article: OperationArticle) {
 
 function operationArticleIdFromHref(href: string) {
   return /^operation:\/\/article\/([0-9a-f-]{36})$/i.exec(href)?.[1] || null;
+}
+
+function localCountOperationalDate(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Copenhagen", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23" }).formatToParts(date);
+  const value = (type: Intl.DateTimeFormatPartTypes) => parts.find(part => part.type === type)?.value || "";
+  const year = Number(value("year"));
+  const month = Number(value("month"));
+  const day = Number(value("day"));
+  const hour = Number(value("hour"));
+  return new Date(Date.UTC(year, month - 1, day) - (hour < 2 ? 86_400_000 : 0)).toISOString().slice(0, 10);
 }
 
 function draftFromArticle(article?: OperationArticle, kind: OperationArticleKind = "HANDBOOK"): DraftArticle {
@@ -126,10 +136,15 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   const [needType, setNeedType] = useState<OperationReminderType>("RESTOCK");
   const [needStockLevel, setNeedStockLevel] = useState<OperationReminderStockLevel>("LOW");
   const [needNote, setNeedNote] = useState("");
+  const [countedByName, setCountedByName] = useState("");
+  const [tillAmount, setTillAmount] = useState("");
+  const [changeBoxAmount, setChangeBoxAmount] = useState("");
   const [saving, setSaving] = useState(false);
   const [editorMessage, setEditorMessage] = useState("");
   const [taskMessage, setTaskMessage] = useState("");
   const [needMessage, setNeedMessage] = useState("");
+  const [countMessage, setCountMessage] = useState("");
+  const [countSaving, setCountSaving] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [uiTheme, setUiTheme] = useState<UiTheme>(initialTheme);
   const [savedUiTheme, setSavedUiTheme] = useState<UiTheme>(initialTheme);
@@ -334,6 +349,34 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     }
   }
 
+  async function addCashCount() {
+    setCountMessage("");
+    const name = countedByName.trim();
+    if (!name) { setCountMessage("Add the name of the person making the count."); return; }
+    if (tillAmount === "" && changeBoxAmount === "") { setCountMessage("Enter a till amount, a change-box amount, or both."); return; }
+    const parsedTill = tillAmount === "" ? null : Number(tillAmount);
+    const parsedChangeBox = changeBoxAmount === "" ? null : Number(changeBoxAmount);
+    if ((parsedTill != null && (!Number.isFinite(parsedTill) || parsedTill < 0)) || (parsedChangeBox != null && (!Number.isFinite(parsedChangeBox) || parsedChangeBox < 0))) { setCountMessage("Amounts must be zero or a positive number."); return; }
+    const createdAt = new Date().toISOString();
+    const count: OperationCashCount = { id: crypto.randomUUID(), operationalDate: localCountOperationalDate(), tillAmount: parsedTill, changeBoxAmount: parsedChangeBox, countedByName: name, createdAt };
+    if (devMode) {
+      setState(current => ({ ...current, cashCounts: [count, ...current.cashCounts] }));
+      setCountedByName(""); setTillAmount(""); setChangeBoxAmount(""); setCountMessage("Count saved.");
+      return;
+    }
+    setCountSaving(true);
+    try {
+      const response = await fetch(operationEndpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "cashCount", countedByName: name, tillAmount: parsedTill, changeBoxAmount: parsedChangeBox }) });
+      if (!response.ok) { setCountMessage(await responseMessage(response, "Could not save count.")); return; }
+      setCountedByName(""); setTillAmount(""); setChangeBoxAmount(""); setCountMessage("Count saved.");
+      await refresh(selectedTaskDate);
+    } catch {
+      setCountMessage("Could not save count. Check your connection and try again.");
+    } finally {
+      setCountSaving(false);
+    }
+  }
+
   async function saveUiTheme(next: UiTheme) {
     setStudioSaving(true);
     try {
@@ -351,7 +394,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   return <div className={styles.operationShell} style={operationThemeCustomProperties(uiTheme)}>
     <header className={styles.operationHeader}>
       <nav aria-label="Operation sections">
-        {(["home", "handbook", ...(publicMode ? ["needs"] : ["tasks", "needs"])] as View[]).map(item => <button key={item} type="button" aria-pressed={view === item} onClick={() => setView(item)}>{item === "home" ? "Home" : item === "needs" ? "Reminders" : item}</button>)}
+        {(["home", "handbook", ...(publicMode ? ["needs", "count"] : ["tasks", "needs", "count"])] as View[]).map(item => <button key={item} type="button" aria-pressed={view === item} onClick={() => setView(item)}>{item === "home" ? "Home" : item === "needs" ? "Reminders" : item === "count" ? "Count" : item}</button>)}
       </nav>
       {state.canManageContent && view === "home" && <button className={styles.addCircle} type="button" onClick={() => { setDraft(draftFromArticle(undefined, "NEWS")); setEditorOpen(!storageUnavailable); }} aria-label="Add news"><Plus size={20} /></button>}
       {state.canManageContent && view === "handbook" && <button className={styles.addCircle} type="button" onClick={() => { setDraft(draftFromArticle(undefined, "HANDBOOK")); setEditorOpen(!storageUnavailable); }} aria-label="Add handbook article"><Plus size={20} /></button>}
@@ -365,6 +408,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
       {view === "handbook" && <HandbookView articles={filteredHandbook} categories={handbookCategories} query={query} category={category} setQuery={setQuery} setCategory={setCategory} openArticle={(article) => setReaderStack([article])} canManageContent={state.canManageContent} disabled={storageUnavailable} editArticle={(article) => { setDraft(draftFromArticle(article, article.kind)); setEditorMessage(storageUnavailable ? migrationMessage : ""); setEditorOpen(!storageUnavailable); }} deleteArticle={deleteArticle} />}
       {!publicMode && view === "tasks" && <TasksView tasks={state.dailyTasks} taskTemplates={state.taskTemplates} assignees={state.assignees} selectedDate={selectedTaskDate} setSelectedDate={selectTaskDate} canManage={state.canManageTasks} taskTitle={taskTitle} taskDescription={taskDescription} taskDueDate={taskDueDate} taskRepeatUnit={taskRepeatUnit} taskRepeatInterval={taskRepeatInterval} taskRepeatEndDate={taskRepeatEndDate} taskPriority={taskPriority} taskDueTime={taskDueTime} taskReminderMinutes={taskReminderMinutes} taskAssignmentScope={taskAssignmentScope} taskAssigneeId={taskAssigneeId} taskChecklistText={taskChecklistText} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} setTaskDueDate={setTaskDueDate} setTaskRepeatUnit={setTaskRepeatUnit} setTaskRepeatInterval={setTaskRepeatInterval} setTaskRepeatEndDate={setTaskRepeatEndDate} setTaskType={setTaskType} setTaskPriority={setTaskPriority} setTaskDueTime={setTaskDueTime} setTaskReminderMinutes={setTaskReminderMinutes} setTaskAssignmentScope={setTaskAssignmentScope} setTaskAssigneeId={setTaskAssigneeId} setTaskChecklistText={setTaskChecklistText} saveTaskTemplate={saveTaskTemplate} addTask={addTask} toggleTask={toggleTask} toggleTaskChecklist={toggleTaskChecklist} deleteTask={deleteTask} disabled={storageUnavailable} message={taskMessage} />}
       {view === "needs" && <NeedsView needs={state.needs} needTitle={needTitle} needType={needType} needStockLevel={needStockLevel} needNote={needNote} setNeedTitle={setNeedTitle} setNeedType={setNeedType} setNeedStockLevel={setNeedStockLevel} setNeedNote={setNeedNote} addNeed={addNeed} updateNeedStatus={updateNeedStatus} disabled={storageUnavailable} message={needMessage} />}
+      {view === "count" && <CashCountView counts={state.cashCounts} countedByName={countedByName} tillAmount={tillAmount} changeBoxAmount={changeBoxAmount} setCountedByName={setCountedByName} setTillAmount={setTillAmount} setChangeBoxAmount={setChangeBoxAmount} addCount={addCashCount} disabled={storageUnavailable || countSaving} message={countMessage} />}
     </main>
     {currentArticle && <Reader article={currentArticle} articles={allArticles} canGoBack={readerStack.length > 1} goBack={() => setReaderStack(stack => stack.slice(0, -1))} openArticle={(article) => setReaderStack(stack => [...stack, article])} close={() => setReaderStack([])} />}
     {editorOpen && <ArticleEditor draft={draft} categories={editorCategories} linkableArticles={allArticles} setDraft={setDraft} saveArticle={saveArticle} saving={saving} message={editorMessage} close={() => { setEditorOpen(false); setEditorMessage(""); }} />}
@@ -492,6 +536,45 @@ function NeedsView({ needs, needTitle, needType, needStockLevel, needNote, setNe
   const actionDate = (need: OperationNeed) => new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "2-digit", year: "2-digit", timeZone: "Europe/Copenhagen" }).format(new Date(need.updatedAt)).replaceAll("/", ".");
   const rows = (items: OperationNeed[], issueList = false, history = false) => <div className={styles.needList}>{items.map(need => <article className={styles.needRow} key={need.id}>{need.type === "ISSUE" ? <CircleAlert size={22} /> : <ShoppingBasket size={22} />}<div><h3>{need.title}</h3>{need.note && <p>{need.note}</p>}</div><span className={styles.reminderStatus}>{typeLabel(need)}</span>{history ? <p className={styles.reminderActionMeta}>{actionLabel(need)} · {actionDate(need)}</p> : <div className={styles.reminderActions}><button type="button" onClick={() => updateNeedStatus(need, issueList ? "RESOLVED" : "ORDERED")} disabled={disabled} aria-label={`Mark ${need.title} ${issueList ? "resolved" : "ordered"}`}><Check size={16} aria-hidden="true" /><span>{issueList ? "Resolved" : "Ordered"}</span></button><button type="button" className={styles.reminderDismiss} onClick={() => updateNeedStatus(need, "DISMISSED")} disabled={disabled} aria-label={`Dismiss ${need.title}`}><X size={16} aria-hidden="true" /><span>Dismiss</span></button></div>}</article>)}{!items.length && <div className={styles.empty}>{issueList ? "No open issues." : "Nothing to order."}</div>}</div>;
   return <><details className={styles.taskComposer}><summary><span><Plus size={17} />Add reminder</span><small>Stock, item or issue</small></summary><div className={styles.taskComposerBody}><div className={styles.adminGrid}><input value={needTitle} onChange={event => setNeedTitle(event.target.value)} placeholder="What is needed?" disabled={disabled} /><input value={needNote} onChange={event => setNeedNote(event.target.value)} placeholder="Description (optional)" disabled={disabled} /></div><div className={styles.taskSettings}><label><span className={styles.taskSettingLabel}>Type</span><select value={needType} onChange={event => setNeedType(event.target.value as OperationReminderType)} disabled={disabled}><option value="RESTOCK">Restock</option><option value="NEW_ITEM">New item</option><option value="ISSUE">Issue</option></select></label>{needType === "RESTOCK" && <label><span className={styles.taskSettingLabel}>Stock level</span><select value={needStockLevel || "LOW"} onChange={event => setNeedStockLevel(event.target.value as OperationReminderStockLevel)} disabled={disabled}><option value="LOW">Low</option><option value="OUT_OF">Out of</option></select></label>}</div><div className={styles.adminActions}><button className={styles.composerSubmit} type="button" onClick={addNeed} disabled={disabled}>Add reminder</button></div></div></details>{message && <p className={styles.editorMessage} role="status">{message}</p>}<SectionHeader title="To order" detail={`${toOrder.length} open`} />{rows(toOrder)}<SectionHeader title="Issues" detail={`${issues.length} open`} />{rows(issues, true)}<details className={styles.orderHistory}><summary>History ({history.length})</summary>{rows(history, false, true)}</details></>;
+}
+
+function formatCountAmount(amount: number) {
+  return new Intl.NumberFormat("da-DK", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+}
+
+function formatCountDate(date: string) {
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Copenhagen", day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(date));
+  const value = (type: Intl.DateTimeFormatPartTypes) => parts.find(part => part.type === type)?.value || "";
+  return `${value("day")}.${value("month")}.${value("year")} ${value("hour")}.${value("minute")}`;
+}
+
+function formatOperationalDate(date: string) {
+  const [year, month, day] = date.split("-");
+  return year && month && day ? `${day}.${month}.${year.slice(-2)}` : date;
+}
+
+function CashCountView({ counts, countedByName, tillAmount, changeBoxAmount, setCountedByName, setTillAmount, setChangeBoxAmount, addCount, disabled, message }: { counts: OperationCashCount[]; countedByName: string; tillAmount: string; changeBoxAmount: string; setCountedByName: (value: string) => void; setTillAmount: (value: string) => void; setChangeBoxAmount: (value: string) => void; addCount: () => void; disabled: boolean; message: string }) {
+  const grouped = counts.reduce<Array<[string, OperationCashCount[]]>>((groups, count) => {
+    const existing = groups.find(([date]) => date === count.operationalDate);
+    if (existing) existing[1].push(count);
+    else groups.push([count.operationalDate, [count]]);
+    return groups;
+  }, []);
+  return <>
+    <section className={styles.countComposer} aria-labelledby="count-heading">
+      <div><p className={styles.eyebrow}>Daily cash</p><h1 id="count-heading">Count</h1><p>Save the till, change box, or both.</p></div>
+      <div className={styles.countFields}>
+        <label><span>Name</span><input value={countedByName} onChange={event => setCountedByName(event.target.value)} placeholder="Your name" autoComplete="name" disabled={disabled} /></label>
+        <label><span>Till (kr)</span><input type="number" min="0" step="0.01" inputMode="decimal" value={tillAmount} onChange={event => setTillAmount(event.target.value)} placeholder="0" disabled={disabled} /></label>
+        <label><span>Change box (kr)</span><input type="number" min="0" step="0.01" inputMode="decimal" value={changeBoxAmount} onChange={event => setChangeBoxAmount(event.target.value)} placeholder="0" disabled={disabled} /></label>
+      </div>
+      <p className={styles.countHint}>Counts made between 00:00 and 01:59 are saved under the previous bar date.</p>
+      <button className={styles.composerSubmit} type="button" onClick={addCount} disabled={disabled}><Banknote size={17} />Save count</button>
+      {message && <p className={styles.editorMessage} role="status">{message}</p>}
+    </section>
+    <SectionHeader title="Saved counts" detail={`${counts.length} total`} />
+    <div className={styles.countGroups}>{grouped.map(([date, dateCounts]) => <section className={styles.countGroup} key={date}><h2>{formatOperationalDate(date)}</h2><div className={styles.countList}>{dateCounts.map(count => <article className={styles.countRow} key={count.id}><Banknote size={20} /><div><h3>{count.countedByName}</h3><p>{formatCountDate(count.createdAt)}</p></div><div className={styles.countAmounts}>{count.tillAmount != null && <span>Till <strong>{formatCountAmount(count.tillAmount)} kr</strong></span>}{count.changeBoxAmount != null && <span>Change box <strong>{formatCountAmount(count.changeBoxAmount)} kr</strong></span>}</div></article>)}</div></section>)}{!counts.length && <div className={styles.empty}>No saved counts yet.</div>}</div>
+  </>;
 }
 
 function ArticleEditor({ draft, categories, linkableArticles, setDraft, saveArticle, saving, message, close }: { draft: DraftArticle; categories: string[]; linkableArticles: OperationArticle[]; setDraft: (draft: DraftArticle) => void; saveArticle: () => Promise<boolean>; saving: boolean; message: string; close: () => void }) {

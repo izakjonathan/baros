@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { operationDateNow } from "@/features/operation/date";
+import { operationCountDateNow, operationDateNow } from "@/features/operation/date";
 import { db } from "@/lib/db/client";
-import { ApiError, enumValue, isoDate, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
+import { ApiError, enumValue, finiteNumber, isoDate, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
 import { getPublicOperationAccess, loadPublicOperationState } from "@/lib/operation-public-access";
 
 type RouteContext = { params: Promise<{ accessToken: string }> };
@@ -25,7 +25,18 @@ export async function POST(request: Request, { params }: RouteContext) {
   try {
     const access = await accessFor(params);
     const body = await readJsonObject(request);
-    if (enumValue(body.entity, "entity", ["need"] as const) !== "need") throw new ApiError(400, "Only needed items can be created from this link");
+    const entity = enumValue(body.entity, "entity", ["need", "cashCount"] as const);
+    if (entity === "cashCount") {
+      const countedByName = requiredString(body, "countedByName", 100);
+      const tillAmount = body.tillAmount == null || body.tillAmount === "" ? null : finiteNumber(body.tillAmount, "tillAmount", { min: 0, max: 1_000_000 });
+      const changeBoxAmount = body.changeBoxAmount == null || body.changeBoxAmount === "" ? null : finiteNumber(body.changeBoxAmount, "changeBoxAmount", { min: 0, max: 1_000_000 });
+      if (tillAmount == null && changeBoxAmount == null) throw new ApiError(400, "Enter a till amount, a change-box amount, or both.");
+      const [count] = await db()<Array<{ id: string }>>`
+        insert into operation_cash_counts(organization_id,operational_date,till_amount,change_box_amount,counted_by_name)
+        values(${access.organizationId},${operationCountDateNow()}::date,${tillAmount},${changeBoxAmount},${countedByName}) returning id`;
+      await db()`insert into audit_logs(organization_id,action,entity_type,entity_id,metadata) values(${access.organizationId},'PUBLIC_OPERATION_CASH_COUNT_CREATED','operation_cash_count',${count.id},'{"actor":"shared_staff_link"}'::jsonb)`;
+      return NextResponse.json({ id: count.id }, { status: 201 });
+    }
     const title = requiredString(body, "title", 160);
     const note = optionalString(body, "note", 400);
     const type = enumValue(body.type || "RESTOCK", "type", ["RESTOCK", "NEW_ITEM", "ISSUE"] as const);

@@ -1,6 +1,12 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.112**
+Current release: **v0.19.0-rc.113**
+
+## RC.113 — Operation Count
+
+- Added Count for authenticated staff and shared staff links: each entry stores the counter name, till and/or change-box amount, exact submission time, and operational bar date.
+- Counts made from 00:00 through 01:59 Copenhagen time are assigned to the previous bar date; multiple counts are preserved rather than overwritten.
+- Added migration `020_operation_cash_counts.sql`. Run the normal database migration workflow before using Count in production.
 
 ## RC.112 — BarOs homescreen icon
 

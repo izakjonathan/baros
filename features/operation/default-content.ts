@@ -69,4 +69,5 @@ export const defaultOperationState: OperationModuleState = {
   needs: [
     { id: "need-tonic", title: "Tonic water", note: "Low stock behind the bar", status: "NEEDED", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), type: "RESTOCK", stockLevel: "LOW" },
   ],
+  cashCounts: [],
 };

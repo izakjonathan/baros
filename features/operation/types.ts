@@ -120,6 +120,15 @@ export type OperationNeed = {
   stockLevel: OperationReminderStockLevel;
 };
 
+export type OperationCashCount = {
+  id: string;
+  operationalDate: string;
+  tillAmount: number | null;
+  changeBoxAmount: number | null;
+  countedByName: string;
+  createdAt: string;
+};
+
 export type OperationMetrics = {
   completionRate: number;
   completedCount: number;
@@ -142,4 +151,5 @@ export type OperationModuleState = {
   taskTemplates: OperationTaskTemplate[];
   metrics: OperationMetrics;
   needs: OperationNeed[];
+  cashCounts: OperationCashCount[];
 };

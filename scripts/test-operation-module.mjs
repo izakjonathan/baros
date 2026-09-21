@@ -11,6 +11,8 @@ const types = read("features/operation/types.ts");
 const migration = read("db/migrations/018_operation_integrity_cleanup.sql");
 const taskAudienceMigration = read("db/migrations/019_operation_task_assignment_scope.sql");
 const remindersMigration = read("db/migrations/021_operation_reminders.sql");
+const cashCountsMigration = read("db/migrations/020_operation_cash_counts.sql");
+const publicOperationRoute = read("app/api/operation-public/[accessToken]/route.ts");
 const publicOperationLayout = read("app/operation/public/[accessToken]/layout.tsx");
 const publicOperationManifest = read("app/operation/public/[accessToken]/manifest.webmanifest/route.ts");
 const operationLayout = read("app/operation/layout.tsx");
@@ -50,6 +52,10 @@ const checks = [
   ["Reminders persist their simple classification", remindersMigration.includes("reminder_type") && remindersMigration.includes("stock_level") && remindersMigration.includes("'RESOLVED','DISMISSED'" )],
   ["Reminder labels remain compact and dropdowns use Operation focus styling", operation.includes('className={styles.reminderStatus}') && operationStyles.includes("white-space:nowrap") && operationStyles.includes(".taskSettings select{-webkit-appearance:none")],
   ["Reminder history preserves the action and date for every audience", operation.includes("History ({history.length})") && operation.includes("actionLabel(need)") && operation.includes("actionDate(need)") && route.includes("n.updated_at") && read("lib/operation-public-access.ts").includes("updatedAt: String(need.updated_at || need.created_at)" )],
+  ["Count stores multiple named operational cash entries", cashCountsMigration.includes("create table if not exists operation_cash_counts") && cashCountsMigration.includes("till_amount is not null or change_box_amount is not null") && cashCountsMigration.includes("operational_date") && types.includes("export type OperationCashCount") && operation.includes("function CashCountView")],
+  ["Count rolls the bar day back until 02:00 Copenhagen time", read("features/operation/date.ts").includes("operationCountDateNow") && read("features/operation/date.ts").includes("hour < 2") && route.includes("operationCountDateNow()")],
+  ["Count accepts either till or change box across staff access", route.includes('entity === "cashCount"') && route.includes("Enter a till amount, a change-box amount, or both.") && publicOperationRoute.includes('entity === "cashCount"') && read("lib/operation-public-access.ts").includes("operation_cash_counts")],
+  ["Count presents exact date and time plus optional money fields", operation.includes("formatCountDate") && operation.includes("formatCountAmount") && operation.includes("Change box (kr)") && operationStyles.includes(".countComposer{") && operationStyles.includes(".countRow{")],
   ["Initial Operations data includes task checklists and reminder history", read("app/operation/page.tsx").includes("t.checklist,") && read("app/operation/page.tsx").includes("checklist_completed") && read("app/operation/page.tsx").includes('checklist: Array.isArray(task.checklist)') && !read("app/operation/page.tsx").includes("and status='NEEDED'")],
   ["Phone reminder cards preserve title width with accessible compact actions", operation.includes('aria-label={`Mark ${need.title}') && operationStyles.includes("@media(max-width:30rem)") && operationStyles.includes(".reminderActions button span{position:absolute")],
   ["task audience is composed beside repeat", operation.includes('<Repeat2 size={15} />Repeat') && operation.includes('<label className={styles.taskAudienceField}><span className={styles.taskSettingLabel}><UserRound size={15} />Task audience')],

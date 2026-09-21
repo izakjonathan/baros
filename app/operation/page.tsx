@@ -1,7 +1,7 @@
 import { OperationModule } from "@/features/operation/OperationModule";
 import { defaultOperationState } from "@/features/operation/default-content";
 import { mapOperationArticle, ownerCanManageOperation } from "@/features/operation/content";
-import { isOperationTaskDue, type OperationDailyTask, type OperationModuleState, type OperationNeed } from "@/features/operation/types";
+import { isOperationTaskDue, type OperationCashCount, type OperationDailyTask, type OperationModuleState, type OperationNeed } from "@/features/operation/types";
 import { isDevAuthEnabled } from "@/lib/auth/dev-auth";
 import { requireUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
@@ -14,7 +14,7 @@ function isOperationSchemaUnavailable(error: unknown) {
   const record = error as { code?: unknown; message?: unknown };
   const code = String(record.code || "");
   const message = String(record.message || "");
-  return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|article_kind|need_status|task_templates|task_checklist_completions)/i.test(message)
+  return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|cash_counts|article_kind|need_status|task_templates|task_checklist_completions)/i.test(message)
     || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|assignment_scope|reminder_type|stock_level)/i.test(message);
 }
 
@@ -40,9 +40,10 @@ export default async function OperationPage() {
   let articles: Array<Record<string, unknown>>;
   let tasks: Array<Record<string, unknown>>;
   let needs: Array<Record<string, unknown>>;
+  let cashCounts: Array<Record<string, unknown>>;
   let assignees: Array<Record<string, unknown>>;
   try {
-    [articles, tasks, needs, assignees] = await Promise.all([
+    [articles, tasks, needs, assignees, cashCounts] = await Promise.all([
       db()<Array<Record<string, unknown>>>`
         select id,kind,category,title,description,content,published,created_at,updated_at
         from operation_articles
@@ -76,6 +77,12 @@ export default async function OperationPage() {
         where e.organization_id=${user.organizationId} and e.active=true
           and (${user.locationId}::uuid is null or exists(select 1 from employee_locations el where el.employee_id=e.id and el.location_id=${user.locationId}))
         order by e.first_name,e.last_name`,
+      db()<Array<Record<string, unknown>>>`
+        select id,operational_date::text operational_date,till_amount,change_box_amount,counted_by_name,created_at
+        from operation_cash_counts
+        where organization_id=${user.organizationId}
+          and (${user.locationId}::uuid is null or location_id is null or location_id=${user.locationId})
+        order by operational_date desc,created_at desc limit 100`,
     ]);
   } catch (error) {
     if (isOperationSchemaUnavailable(error)) return <OperationModule initialState={{ ...fallbackState, storageStatus: "migration-required" }} initialTheme={initialTheme} devMode={false} publicUrl={publicUrl} />;
@@ -124,6 +131,14 @@ export default async function OperationPage() {
       updatedAt: String(need.updated_at || need.created_at),
       type: ["NEW_ITEM", "ISSUE"].includes(String(need.reminder_type)) ? String(need.reminder_type) as OperationNeed["type"] : "RESTOCK",
       stockLevel: ["LOW", "OUT_OF"].includes(String(need.stock_level)) ? String(need.stock_level) as OperationNeed["stockLevel"] : null,
+    })),
+    cashCounts: cashCounts.map((count): OperationCashCount => ({
+      id: String(count.id),
+      operationalDate: String(count.operational_date),
+      tillAmount: count.till_amount == null ? null : Number(count.till_amount),
+      changeBoxAmount: count.change_box_amount == null ? null : Number(count.change_box_amount),
+      countedByName: String(count.counted_by_name),
+      createdAt: String(count.created_at),
     })),
   };
 

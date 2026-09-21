@@ -1,6 +1,6 @@
 import { defaultOperationState } from "@/features/operation/default-content";
 import { mapOperationArticle } from "@/features/operation/content";
-import { isOperationTaskDue, type OperationDailyTask, type OperationModuleState, type OperationNeed } from "@/features/operation/types";
+import { isOperationTaskDue, type OperationCashCount, type OperationDailyTask, type OperationModuleState, type OperationNeed } from "@/features/operation/types";
 import { db } from "@/lib/db/client";
 
 export type PublicOperationAccess = { organizationId: string; token: string };
@@ -15,7 +15,7 @@ export async function getPublicOperationAccess(token: string): Promise<PublicOpe
 }
 
 export async function loadPublicOperationState(access: PublicOperationAccess, date: string): Promise<OperationModuleState> {
-  const [articles, tasks, needs] = await Promise.all([
+  const [articles, tasks, needs, cashCounts] = await Promise.all([
     db()<Array<Record<string, unknown>>>`
       select id,kind,category,title,description,content,published,created_at,updated_at
       from operation_articles where organization_id=${access.organizationId} and published=true
@@ -32,6 +32,10 @@ export async function loadPublicOperationState(access: PublicOperationAccess, da
       select id,title,note,status,created_at,updated_at,reminder_type,stock_level
       from operation_needs where organization_id=${access.organizationId}
       order by (status='NEEDED') desc,reminder_type,created_at desc limit 150`,
+    db()<Array<Record<string, unknown>>>`
+      select id,operational_date::text operational_date,till_amount,change_box_amount,counted_by_name,created_at
+      from operation_cash_counts where organization_id=${access.organizationId}
+      order by operational_date desc,created_at desc limit 100`,
   ]);
   const dailyTasks = tasks.map((task): OperationDailyTask => ({
     id: String(task.id), weekday: Number(task.weekday), title: String(task.title), description: String(task.description || ""),
@@ -39,5 +43,6 @@ export async function loadPublicOperationState(access: PublicOperationAccess, da
     checklist: Array.isArray(task.checklist) ? task.checklist.flatMap((item): OperationDailyTask["checklist"] => item && typeof item === "object" && "id" in item && "label" in item ? [{ id: String(item.id), label: String(item.label), completed: Boolean(task.checklist_completed && typeof task.checklist_completed === "object" && String(item.id) in task.checklist_completed) }] : []) : [], completed: Boolean(task.completed),
   })).filter(task => isOperationTaskDue(task, date));
   const mappedNeeds = needs.map((need): OperationNeed => ({ id: String(need.id), title: String(need.title), note: need.note == null ? null : String(need.note), status: ["ORDERED", "RESOLVED", "DISMISSED"].includes(String(need.status)) ? String(need.status) as OperationNeed["status"] : "NEEDED", createdAt: String(need.created_at), updatedAt: String(need.updated_at || need.created_at), type: ["NEW_ITEM", "ISSUE"].includes(String(need.reminder_type)) ? String(need.reminder_type) as OperationNeed["type"] : "RESTOCK", stockLevel: ["LOW", "OUT_OF"].includes(String(need.stock_level)) ? String(need.stock_level) as OperationNeed["stockLevel"] : null }));
-  return { ...defaultOperationState, userRole: "EMPLOYEE", canManageContent: false, canManageTasks: false, storageStatus: "ready", today: date, handbook: articles.filter(article => article.kind === "HANDBOOK").map(mapOperationArticle), news: articles.filter(article => article.kind === "NEWS").map(mapOperationArticle), dailyTasks, assignees: [], taskTemplates: [], needs: mappedNeeds, metrics: { completionRate: dailyTasks.length ? Math.round(dailyTasks.filter(task => task.completed).length / dailyTasks.length * 100) : 100, completedCount: dailyTasks.filter(task => task.completed).length, dueCount: dailyTasks.length, overdueCount: 0, openNeedsCount: mappedNeeds.filter(need => need.status === "NEEDED").length, overdueNeedsCount: 0 } };
+  const mappedCashCounts = cashCounts.map((count): OperationCashCount => ({ id: String(count.id), operationalDate: String(count.operational_date), tillAmount: count.till_amount == null ? null : Number(count.till_amount), changeBoxAmount: count.change_box_amount == null ? null : Number(count.change_box_amount), countedByName: String(count.counted_by_name), createdAt: String(count.created_at) }));
+  return { ...defaultOperationState, userRole: "EMPLOYEE", canManageContent: false, canManageTasks: false, storageStatus: "ready", today: date, handbook: articles.filter(article => article.kind === "HANDBOOK").map(mapOperationArticle), news: articles.filter(article => article.kind === "NEWS").map(mapOperationArticle), dailyTasks, assignees: [], taskTemplates: [], needs: mappedNeeds, cashCounts: mappedCashCounts, metrics: { completionRate: dailyTasks.length ? Math.round(dailyTasks.filter(task => task.completed).length / dailyTasks.length * 100) : 100, completedCount: dailyTasks.filter(task => task.completed).length, dueCount: dailyTasks.length, overdueCount: 0, openNeedsCount: mappedNeeds.filter(need => need.status === "NEEDED").length, overdueNeedsCount: 0 } };
 }

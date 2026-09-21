@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { defaultOperationState } from "@/features/operation/default-content";
 import { mapOperationArticle, ownerCanManageOperation, parseOperationBlocks } from "@/features/operation/content";
-import { isOperationTaskDue, type OperationDailyTask, type OperationModuleState, type OperationNeed, type OperationTaskAssignmentScope, type OperationTaskPriority, type OperationTaskType } from "@/features/operation/types";
+import { isOperationTaskDue, type OperationCashCount, type OperationDailyTask, type OperationModuleState, type OperationNeed, type OperationTaskAssignmentScope, type OperationTaskPriority, type OperationTaskType } from "@/features/operation/types";
 import { db } from "@/lib/db/client";
 import { ApiError, enumValue, finiteNumber, isoDate, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
 import { getSessionUser } from "@/lib/auth/session";
 import { hasCapability } from "@/lib/auth/capabilities";
-import { operationDateNow } from "@/features/operation/date";
+import { operationCountDateNow, operationDateNow } from "@/features/operation/date";
 
 function requireOwner(role: string) {
   if (!ownerCanManageOperation(role)) throw new ApiError(403, "Owner or Admin permission is required");
@@ -47,7 +47,7 @@ function isOperationSchemaUnavailable(error: unknown) {
   const record = error as { code?: unknown; message?: unknown };
   const code = String(record.code || "");
   const message = String(record.message || "");
-  return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|article_kind|need_status|task_templates|task_checklist_completions)/i.test(message)
+  return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|cash_counts|article_kind|need_status|task_templates|task_checklist_completions)/i.test(message)
     || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|assignment_scope|checklist|quantity|supplier|needed_by|reminder_type|stock_level)/i.test(message);
 }
 
@@ -58,12 +58,17 @@ function operationMigrationRequired() {
   );
 }
 
+function optionalCashAmount(body: Record<string, unknown>, key: string) {
+  if (body[key] == null || body[key] === "") return null;
+  return finiteNumber(body[key], key, { min: 0, max: 1_000_000 });
+}
+
 export async function GET(request: Request) {
   try {
     const user = await requireApiUser();
     const params = new URL(request.url).searchParams;
     const today = isoDate(params.get("date") || operationDateNow(), "date");
-    const [articles, tasks, needs, assignees, taskTemplates] = await Promise.all([
+    const [articles, tasks, needs, assignees, taskTemplates, cashCounts] = await Promise.all([
       db()<Array<Record<string, unknown>>>`
         select a.id,a.kind,a.category,a.title,a.description,a.content,a.published,a.created_at,a.updated_at
         from operation_articles a
@@ -113,6 +118,13 @@ export async function GET(request: Request) {
         from operation_task_templates
         where organization_id=${user.organizationId} and (${user.locationId}::uuid is null or location_id is null or location_id=${user.locationId})
         order by task_type,title`,
+      db()<Array<Record<string, unknown>>>`
+        select id,operational_date::text operational_date,till_amount,change_box_amount,counted_by_name,created_at
+        from operation_cash_counts
+        where organization_id=${user.organizationId}
+          and (${user.locationId}::uuid is null or location_id is null or location_id=${user.locationId})
+        order by operational_date desc,created_at desc
+        limit 100`,
     ]);
     const state: OperationModuleState = {
       userRole: user.role,
@@ -155,6 +167,14 @@ export async function GET(request: Request) {
         type: ["NEW_ITEM", "ISSUE"].includes(String(need.reminder_type)) ? String(need.reminder_type) as OperationNeed["type"] : "RESTOCK",
         stockLevel: ["LOW", "OUT_OF"].includes(String(need.stock_level)) ? String(need.stock_level) as OperationNeed["stockLevel"] : null,
       })),
+      cashCounts: cashCounts.map((count): OperationCashCount => ({
+        id: String(count.id),
+        operationalDate: String(count.operational_date),
+        tillAmount: count.till_amount == null ? null : Number(count.till_amount),
+        changeBoxAmount: count.change_box_amount == null ? null : Number(count.change_box_amount),
+        countedByName: String(count.counted_by_name),
+        createdAt: String(count.created_at),
+      })),
     };
     return NextResponse.json(state, { headers: { "cache-control": "no-store" } });
   } catch (error) {
@@ -179,7 +199,7 @@ export async function POST(request: Request) {
   try {
     const user = await requireApiUser();
     const body = await readJsonObject(request, 128_000);
-    const entity = enumValue(body.entity, "entity", ["article", "dailyTask", "need", "taskTemplate"] as const);
+    const entity = enumValue(body.entity, "entity", ["article", "dailyTask", "need", "taskTemplate", "cashCount"] as const);
 
     if (entity === "article") {
       requireOwner(user.role);
@@ -238,6 +258,18 @@ export async function POST(request: Request) {
         insert into operation_task_templates(organization_id,location_id,title,description,task_type,priority,due_time,reminder_minutes,checklist,created_by,updated_by)
         values(${user.organizationId},${user.locationId},${title},${description},${taskType},${priority},${dueTime}::time,${reminderMinutes},${JSON.stringify(checklist)}::jsonb,${user.userId},${user.userId})
         returning id,title,description,task_type,priority,due_time,reminder_minutes,checklist`;
+      return NextResponse.json(row, { status: 201 });
+    }
+
+    if (entity === "cashCount") {
+      const countedByName = requiredString(body, "countedByName", 100);
+      const tillAmount = optionalCashAmount(body, "tillAmount");
+      const changeBoxAmount = optionalCashAmount(body, "changeBoxAmount");
+      if (tillAmount == null && changeBoxAmount == null) throw new ApiError(400, "Enter a till amount, a change-box amount, or both.");
+      const [row] = await db()<Array<Record<string, unknown>>>`
+        insert into operation_cash_counts(organization_id,location_id,operational_date,till_amount,change_box_amount,counted_by_name,created_by)
+        values(${user.organizationId},${user.locationId},${operationCountDateNow()}::date,${tillAmount},${changeBoxAmount},${countedByName},${user.userId})
+        returning id,operational_date::text operational_date,till_amount,change_box_amount,counted_by_name,created_at`;
       return NextResponse.json(row, { status: 201 });
     }
 
