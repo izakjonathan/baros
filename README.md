@@ -1,6 +1,11 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.111**
+Current release: **v0.19.0-rc.112**
+
+## RC.112 — BarOs homescreen icon
+
+- Added a purpose-built orange `BarOs` icon with regular `Bar` and bold `Os` wordmark styling.
+- Replaced the Apple touch, standard PWA, and maskable PWA PNG assets, so both authenticated and shared Operation installations use the same homescreen identity.
 
 ## RC.111 — Operation typography system
 
