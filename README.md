@@ -1,8 +1,14 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.105**
+Current release: **v0.19.0-rc.106**
 
-Rollback checkpoint: **v0.19.0-rc.104**.
+Rollback checkpoint: **v0.19.0-rc.105**.
+
+## RC.106 — Operations reading rhythm
+
+- Corrected legacy ordered and bullet lists so contiguous items render as one semantic list, preserving numbering and removing the accidental large gap between every item.
+- Home news cards now use hanging-indent bullets, so wrapped lines align with the bullet text instead of the marker.
+- Tightened article reader rhythm while retaining readable Work Sans text leading; Reminders labels stay on one centered line and custom Operation select styling avoids the native white focus artefact.
 
 ## RC.105 — Reminders workflow
 

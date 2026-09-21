@@ -476,7 +476,7 @@ function NeedsView({ needs, needTitle, needType, needStockLevel, needNote, setNe
   const toOrder = open.filter(need => need.type !== "ISSUE");
   const issues = open.filter(need => need.type === "ISSUE");
   const typeLabel = (need: OperationNeed) => need.type === "ISSUE" ? "Issue" : need.type === "NEW_ITEM" ? "New item" : need.stockLevel === "OUT_OF" ? "Out of" : "Low";
-  const rows = (items: OperationNeed[], issueList = false) => <div className={styles.needList}>{items.map(need => <article className={styles.needRow} key={need.id}>{need.type === "ISSUE" ? <CircleAlert size={22} /> : <ShoppingBasket size={22} />}<div><div className={styles.taskRowTitle}><h3>{need.title}</h3><span>{typeLabel(need)}</span></div>{need.note && <p>{need.note}</p>}</div><div className={styles.reminderActions}><button type="button" onClick={() => updateNeedStatus(need, issueList ? "RESOLVED" : "ORDERED")} disabled={disabled}>{issueList ? "Resolved" : "Ordered"}</button><button type="button" className={styles.reminderDismiss} onClick={() => updateNeedStatus(need, "DISMISSED")} disabled={disabled}>Dismiss</button></div></article>)}{!items.length && <div className={styles.empty}>{issueList ? "No open issues." : "Nothing to order."}</div>}</div>;
+  const rows = (items: OperationNeed[], issueList = false) => <div className={styles.needList}>{items.map(need => <article className={styles.needRow} key={need.id}>{need.type === "ISSUE" ? <CircleAlert size={22} /> : <ShoppingBasket size={22} />}<div><h3>{need.title}</h3>{need.note && <p>{need.note}</p>}</div><span className={styles.reminderStatus}>{typeLabel(need)}</span><div className={styles.reminderActions}><button type="button" onClick={() => updateNeedStatus(need, issueList ? "RESOLVED" : "ORDERED")} disabled={disabled}>{issueList ? "Resolved" : "Ordered"}</button><button type="button" className={styles.reminderDismiss} onClick={() => updateNeedStatus(need, "DISMISSED")} disabled={disabled}>Dismiss</button></div></article>)}{!items.length && <div className={styles.empty}>{issueList ? "No open issues." : "Nothing to order."}</div>}</div>;
   return <><details className={styles.taskComposer}><summary><span><Plus size={17} />Add reminder</span><small>Stock, item or issue</small></summary><div className={styles.taskComposerBody}><div className={styles.adminGrid}><input value={needTitle} onChange={event => setNeedTitle(event.target.value)} placeholder="What is needed?" disabled={disabled} /><input value={needNote} onChange={event => setNeedNote(event.target.value)} placeholder="Description (optional)" disabled={disabled} /></div><div className={styles.taskSettings}><label><span className={styles.taskSettingLabel}>Type</span><select value={needType} onChange={event => setNeedType(event.target.value as OperationReminderType)} disabled={disabled}><option value="RESTOCK">Restock</option><option value="NEW_ITEM">New item</option><option value="ISSUE">Issue</option></select></label>{needType === "RESTOCK" && <label><span className={styles.taskSettingLabel}>Stock level</span><select value={needStockLevel || "LOW"} onChange={event => setNeedStockLevel(event.target.value as OperationReminderStockLevel)} disabled={disabled}><option value="LOW">Low</option><option value="OUT_OF">Out of</option></select></label>}</div><div className={styles.adminActions}><button className={styles.composerSubmit} type="button" onClick={addNeed} disabled={disabled}>Add reminder</button></div></div></details>{message && <p className={styles.editorMessage} role="status">{message}</p>}<SectionHeader title="To order" detail={`${toOrder.length} open`} />{rows(toOrder)}<SectionHeader title="Issues" detail={`${issues.length} open`} />{rows(issues, true)}</>;
 }
 
@@ -607,12 +607,12 @@ function ArticleCard({ article, onClick, onEdit, onDelete, disabled = false, sho
   return <article className={`${styles.operationCard}${showBody ? ` ${styles.newsCard}` : ""}`}><button type="button" className={styles.articleCardOpen} onClick={onClick}><div><h3>{article.title}</h3>{showBody ? <NewsCardBody article={article} /> : article.description && <p>{article.description}</p>}</div><small>{article.category}</small></button>{onEdit && onDelete && <div className={styles.articleCardActions}><button type="button" onClick={onEdit} disabled={disabled}>Edit</button><button type="button" onClick={onDelete} aria-label={`Delete ${article.title}`} disabled={disabled}><Trash2 size={16} /></button></div>}</article>;
 }
 
-type NewsCardTextBlock = { type: "heading" | "subheading" | "body" | "list"; text: string };
+type NewsCardTextBlock = { type: "heading" | "subheading" | "body" | "list"; text: string; marker?: string };
 
 function NewsCardBody({ article }: { article: OperationArticle }) {
   const blocks = article.content.flatMap(newsCardBlocksFromContent).filter(block => block.text.trim());
   const content = blocks.length ? blocks : article.description ? [{ type: "body" as const, text: article.description }] : [];
-  return <span className={styles.newsCardBody}>{content.map((block, index) => <span className={styles[`newsCard${block.type[0].toUpperCase()}${block.type.slice(1)}`]} key={`${block.type}-${index}`}>{block.text}</span>)}</span>;
+  return <span className={styles.newsCardBody}>{content.map((block, index) => block.type === "list" ? <span className={styles.newsCardList} key={`${block.type}-${index}`}><span className={styles.newsCardListMarker}>{block.marker}</span><span>{block.text}</span></span> : <span className={styles[`newsCard${block.type[0].toUpperCase()}${block.type.slice(1)}`]} key={`${block.type}-${index}`}>{block.text}</span>)}</span>;
 }
 
 function newsCardBlocksFromContent(block: OperationContentBlock): NewsCardTextBlock[] {
@@ -620,7 +620,7 @@ function newsCardBlocksFromContent(block: OperationContentBlock): NewsCardTextBl
   if (block.type === "h1") return [{ type: "heading", text: block.text }];
   if (block.type === "h2") return [{ type: "subheading", text: block.text }];
   if (block.type === "body") return [{ type: "body", text: block.text }];
-  if (block.type === "bullets" || block.type === "numbered") return block.items.map((item, index) => ({ type: "list" as const, text: `${block.type === "bullets" ? "•" : `${index + 1}.`} ${item}` }));
+  if (block.type === "bullets" || block.type === "numbered") return block.items.map((item, index) => ({ type: "list" as const, marker: block.type === "bullets" ? "•" : `${index + 1}.`, text: item }));
   if (block.type === "richText") return deltaToLines(block.delta).flatMap((line): NewsCardTextBlock[] => {
     const text = line.segments.map(segment => segment.text).join("");
     const header = normalizeHeader(line.attributes?.header);
@@ -642,7 +642,7 @@ function newsCardBlocksFromTiptapNode(node: OperationTiptapNode): NewsCardTextBl
   if (node.type === "paragraph") return tiptapNodeText(node).trim() ? [{ type: "body", text: tiptapNodeText(node) }] : [];
   if (node.type === "bulletList" || node.type === "orderedList") return (node.content || []).flatMap((item, index) => {
     const text = tiptapNodeText(item).trim();
-    return text ? [{ type: "list" as const, text: `${node.type === "bulletList" ? "•" : `${index + 1}.`} ${text}` }] : [];
+    return text ? [{ type: "list" as const, marker: node.type === "bulletList" ? "•" : `${index + 1}.`, text }] : [];
   });
   return (node.content || []).flatMap(newsCardBlocksFromTiptapNode);
 }
@@ -761,7 +761,25 @@ function TiptapText({ node, openArticle }: { node: OperationTiptapNode; openArti
 }
 
 function RichTextArticle({ delta }: { delta: OperationRichTextDelta }) {
-  return <>{deltaToLines(delta).map((line, index) => <RichTextLine key={index} line={line} />)}</>;
+  const lines = deltaToLines(delta);
+  const blocks: ReactNode[] = [];
+  for (let index = 0; index < lines.length;) {
+    const line = lines[index];
+    const list = line.attributes?.list;
+    if (list !== "bullet" && list !== "ordered") {
+      blocks.push(<RichTextLine key={`line-${index}`} line={line} />);
+      index += 1;
+      continue;
+    }
+    const items: RichTextLine[] = [];
+    while (index < lines.length && lines[index].attributes?.list === list) {
+      items.push(lines[index]);
+      index += 1;
+    }
+    const itemsMarkup = items.map((item, itemIndex) => <li key={itemIndex}><RichTextLineContent line={item} /></li>);
+    blocks.push(list === "bullet" ? <ul key={`list-${index}`}>{itemsMarkup}</ul> : <ol key={`list-${index}`}>{itemsMarkup}</ol>);
+  }
+  return <>{blocks}</>;
 }
 
 type RichTextSegment = { text: string; attributes?: OperationRichTextOp["attributes"] };
@@ -790,12 +808,14 @@ function deltaToLines(delta: OperationRichTextDelta): RichTextLine[] {
 
 function RichTextLine({ line }: { line: RichTextLine }) {
   if (line.image) return <ArticleImage src={line.image} alt="" />;
-  const content = line.segments.map((segment, index) => <RichTextSegment key={index} segment={segment} />);
-  if (line.attributes?.list === "bullet") return <ul><li>{content}</li></ul>;
-  if (line.attributes?.list === "ordered") return <ol><li>{content}</li></ol>;
+  const content = <RichTextLineContent line={line} />;
   if (normalizeHeader(line.attributes?.header) === 1) return <h1>{content}</h1>;
   if (normalizeHeader(line.attributes?.header) === 2) return <h2>{content}</h2>;
   return <p>{content}</p>;
+}
+
+function RichTextLineContent({ line }: { line: RichTextLine }) {
+  return <>{line.segments.map((segment, index) => <RichTextSegment key={index} segment={segment} />)}</>;
 }
 
 function normalizeHeader(value: string | number | boolean | null | undefined) {
