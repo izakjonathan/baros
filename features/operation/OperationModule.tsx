@@ -562,13 +562,13 @@ function CashCountView({ counts, countedByName, tillAmount, changeBoxAmount, set
   }, []);
   return <>
     <section className={styles.countComposer} aria-labelledby="count-heading">
-      <div><p className={styles.eyebrow}>Daily cash</p><h1 id="count-heading">Count</h1><p>Save the till, change box, or both.</p></div>
+      <div><p className={styles.eyebrow}>Daily cash</p><h1 id="count-heading">Count</h1></div>
       <div className={styles.countFields}>
         <label><span>Name</span><input value={countedByName} onChange={event => setCountedByName(event.target.value)} placeholder="Your name" autoComplete="name" disabled={disabled} /></label>
         <label><span>Till (kr)</span><input type="number" min="0" step="0.01" inputMode="decimal" value={tillAmount} onChange={event => setTillAmount(event.target.value)} placeholder="0" disabled={disabled} /></label>
         <label><span>Change box (kr)</span><input type="number" min="0" step="0.01" inputMode="decimal" value={changeBoxAmount} onChange={event => setChangeBoxAmount(event.target.value)} placeholder="0" disabled={disabled} /></label>
       </div>
-      <p className={styles.countHint}>Counts made between 00:00 and 01:59 are saved under the previous bar date.</p>
+      <p className={styles.countHint}>Counts made between 00:00 and 03:59 are saved under the previous bar date.</p>
       <button className={styles.composerSubmit} type="button" onClick={addCount} disabled={disabled}><Banknote size={17} />Save count</button>
       {message && <p className={styles.editorMessage} role="status">{message}</p>}
     </section>

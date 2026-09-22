@@ -1,6 +1,12 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.114**
+Current release: **v0.19.0-rc.115**
+
+## RC.115 — Count cutoff and navigation
+
+- Operation navigation can now be swiped horizontally when the module labels exceed the available width.
+- Counts submitted between 00:00 and 03:59 Copenhagen time are assigned to the previous bar date.
+- Simplified the Count card heading and aligned its save control with the shared Operation button treatment.
 
 ## RC.114 — Count canvas fields
 
