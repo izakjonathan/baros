@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowLeft, Banknote, Bold, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, CircleAlert, Clock3, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Palette, Plus, Redo2, Repeat2, ShoppingBasket, Square, Star, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
+import { ArrowLeft, Banknote, Bold, BookOpen, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, CircleAlert, Clock3, House, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Palette, Plus, Redo2, Repeat2, ShoppingBasket, Square, Star, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -392,9 +392,13 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   }
 
   return <div className={styles.operationShell} style={operationThemeCustomProperties(uiTheme)}>
-    <header className={styles.operationHeader}>
+    <header className={`${styles.operationHeader} ${canManageUiStudio ? styles.operationHeaderOwner : ""}`}>
       <nav aria-label="Operation sections">
-        {(["home", "handbook", ...(publicMode ? ["needs", "count"] : ["tasks", "needs", "count"])] as View[]).map(item => <button key={item} type="button" aria-pressed={view === item} onClick={() => setView(item)}>{item === "home" ? "Home" : item === "needs" ? "Reminders" : item === "count" ? "Count" : item}</button>)}
+        {(["home", "handbook", ...(publicMode ? ["needs", "count"] : ["tasks", "needs", "count"])] as View[]).map(item => {
+          const label = item === "home" ? "Home" : item === "needs" ? "Reminders" : item === "count" ? "Count" : item === "handbook" ? "Handbook" : "Tasks";
+          const Icon = item === "home" ? House : item === "handbook" ? BookOpen : item === "tasks" ? CheckSquare : item === "needs" ? CircleAlert : Banknote;
+          return <button key={item} type="button" aria-pressed={view === item} aria-current={view === item ? "page" : undefined} onClick={() => setView(item)}><Icon size={18} aria-hidden="true" /><span>{label}</span></button>;
+        })}
       </nav>
       {state.canManageContent && view === "home" && <button className={styles.addCircle} type="button" onClick={() => { setDraft(draftFromArticle(undefined, "NEWS")); setEditorOpen(!storageUnavailable); }} aria-label="Add news"><Plus size={20} /></button>}
       {state.canManageContent && view === "handbook" && <button className={styles.addCircle} type="button" onClick={() => { setDraft(draftFromArticle(undefined, "HANDBOOK")); setEditorOpen(!storageUnavailable); }} aria-label="Add handbook article"><Plus size={20} /></button>}

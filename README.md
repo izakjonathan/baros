@@ -1,6 +1,18 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.115**
+Current release: **v0.19.0-rc.117**
+
+## RC.117 — Adaptive Operation navigation
+
+- Replaced the phone's top module dock with a persistent bottom dock using both icons and visible labels.
+- At iPad widths, the same destinations adapt into a left-side navigation rail without changing module order or permissions.
+- Owner UI Studio and contextual add actions remain separate at the top; readers and the full-screen editor continue to cover navigation.
+- The phone dock yields while a text field has focus so it does not compete with the software keyboard.
+
+## RC.116 — Owner navigation fit
+
+- The owner Operation dock now reserves explicit space between the UI Studio and add controls instead of rendering beneath them.
+- Removed the mobile rule that expanded the dock back to its full content width; overflow remains horizontally swipeable.
 
 ## RC.115 — Count cutoff and navigation
 

@@ -1,10 +1,11 @@
-.operationShell{--op-font-display:var(--font-display);--op-font-body:var(--font-body);--op-type-title:clamp(1.72rem,7vw,2.65rem);--op-type-section:clamp(1.06rem,3.8vw,1.18rem);--op-type-card:clamp(1rem,3.8vw,1.18rem);--op-type-reading:1rem;--op-type-body:.875rem;--op-type-meta:.8125rem;--op-type-label:.75rem;--op-leading-reading:1.45;--op-leading-body:1.42;--op-canvas:var(--cream);--op-ink:var(--ink);--op-accent:color-mix(in srgb,var(--op-ink) 74%,var(--op-canvas));--op-positive:color-mix(in srgb,var(--op-ink) 48%,var(--op-canvas));--op-muted:color-mix(in srgb,var(--op-ink) 62%,var(--op-canvas));--op-soft:color-mix(in srgb,var(--op-ink) 12%,transparent);min-height:100dvh;background:var(--op-canvas);color:var(--op-ink);padding:calc(3.65rem + env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) calc(3.75rem + env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-left));font-family:var(--op-font-display)}
+.operationShell{--op-font-display:var(--font-display);--op-font-body:var(--font-body);--op-type-title:clamp(1.72rem,7vw,2.65rem);--op-type-section:clamp(1.06rem,3.8vw,1.18rem);--op-type-card:clamp(1rem,3.8vw,1.18rem);--op-type-reading:1rem;--op-type-body:.875rem;--op-type-meta:.8125rem;--op-type-label:.75rem;--op-leading-reading:1.45;--op-leading-body:1.42;--op-canvas:var(--cream);--op-ink:var(--ink);--op-accent:color-mix(in srgb,var(--op-ink) 74%,var(--op-canvas));--op-positive:color-mix(in srgb,var(--op-ink) 48%,var(--op-canvas));--op-muted:color-mix(in srgb,var(--op-ink) 62%,var(--op-canvas));--op-soft:color-mix(in srgb,var(--op-ink) 12%,transparent);min-height:100dvh;background:var(--op-canvas);color:var(--op-ink);padding:calc(3.65rem + env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) calc(6rem + env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-left));font-family:var(--op-font-display)}
 :global(html):has(.operationShell),:global(body):has(.operationShell){background:var(--operation-canvas,var(--cream))}
 .operationHeader{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;justify-content:center;padding:max(.62rem,env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) .42rem max(1rem,env(safe-area-inset-left));background:linear-gradient(180deg,var(--op-canvas) 78%,color-mix(in srgb,var(--op-canvas) 0%,transparent))}
 .operationHeader button{min-height:1.72rem;display:inline-flex;align-items:center;justify-content:center;gap:.3rem;border:1px solid var(--op-ink);border-radius:999px;background:color-mix(in srgb,var(--op-canvas) 88%,transparent);color:inherit;padding:.15rem .54rem;text-decoration:none;font-family:var(--op-font-display);font-size:var(--op-type-label);font-weight:700;line-height:1;text-transform:uppercase;letter-spacing:.08em}
-.operationHeader nav{display:flex;justify-content:flex-start;gap:.08rem;width:calc(100vw - 2rem);max-width:35rem;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-x;padding:.14rem;border:1px solid color-mix(in srgb,var(--op-ink) 24%,transparent);border-radius:999px;background:color-mix(in srgb,var(--op-canvas) 76%,transparent);box-shadow:0 .25rem .9rem color-mix(in srgb,var(--op-ink) 6%,transparent)}
-.operationHeader nav::-webkit-scrollbar{display:none}
-.operationHeader nav button{flex:0 0 auto;border:0;background:transparent;padding:.12rem .4rem;font-size:.7rem}
+.operationHeader nav{position:fixed;z-index:50;left:max(.65rem,env(safe-area-inset-left));right:max(.65rem,env(safe-area-inset-right));bottom:calc(.58rem + env(safe-area-inset-bottom));display:flex;justify-content:space-evenly;gap:.08rem;width:auto;max-width:35rem;margin-inline:auto;padding:.2rem;border:1px solid color-mix(in srgb,var(--op-ink) 24%,transparent);border-radius:1.05rem;background:var(--op-canvas);box-shadow:0 .25rem .9rem color-mix(in srgb,var(--op-ink) 12%,transparent)}
+.operationHeader nav button{flex:1 1 0;min-width:0;min-height:3.05rem;flex-direction:column;gap:.14rem;border:0;background:transparent;padding:.26rem .12rem;font-size:.55rem;letter-spacing:.015em;text-transform:none}
+.operationHeader nav button svg{flex:none}
+.operationHeader nav button span{overflow:hidden;max-width:100%;text-overflow:ellipsis;white-space:nowrap}
 .operationHeader nav button[aria-pressed="true"]{background:var(--op-ink);color:var(--op-canvas)}
 .operationHeader .addCircle{position:absolute;top:max(.62rem,env(safe-area-inset-top));right:max(1rem,env(safe-area-inset-right));width:2.3rem;height:2.3rem;z-index:1}
 .operationHeader .studioCircle{position:absolute;top:max(.62rem,env(safe-area-inset-top));left:max(1rem,env(safe-area-inset-left));width:2.3rem;height:2.3rem;padding:0;z-index:1}
@@ -240,7 +241,6 @@
 .uiStudioActions{display:flex;justify-content:flex-end;gap:.45rem}.uiStudioActions button{min-height:2.15rem;padding:.35rem .7rem;border:1px solid var(--op-ink);border-radius:999px;background:transparent;color:inherit;font-family:var(--op-font-display);font-size:.7rem;font-weight:700}.uiStudioActions button:last-child{display:inline-flex;align-items:center;gap:.3rem;background:var(--op-ink);color:var(--op-canvas)}
 @media(max-width:42rem){
   .operationShell{padding-inline:max(.85rem,env(safe-area-inset-left));padding-right:max(.85rem,env(safe-area-inset-right))}
-  .operationHeader nav{width:max-content}
   .moduleGrid,.adminGrid,.editorMeta{grid-template-columns:1fr}
   .adminPanelHeader{display:grid}
   .editorNewCategory input,.articleEditor .editorDescriptionInput{font-size:16px}
@@ -251,6 +251,14 @@
   .operationCard h3{font-size:clamp(.98rem,4.7vw,1.18rem)}
   .articleCategoryPill,.newsCardTools small{font-size:.75rem}
   .uiStudioFields{grid-template-columns:1fr}
+}
+@media(max-width:47.99rem){
+  .operationShell:has(input:focus) .operationHeader nav,.operationShell:has(textarea:focus) .operationHeader nav{display:none}
+}
+@media(min-width:48rem){
+  .operationShell{padding-left:calc(6.25rem + env(safe-area-inset-left));padding-bottom:calc(3.75rem + env(safe-area-inset-bottom))}
+  .operationHeader nav{top:50%;right:auto;bottom:auto;left:max(.72rem,env(safe-area-inset-left));width:4.7rem;max-width:none;max-height:calc(100dvh - 7rem);margin:0;transform:translateY(-50%);flex-direction:column;border-radius:1rem;padding:.22rem}
+  .operationHeader nav button{flex:0 0 auto;width:100%;min-height:3.55rem;padding:.32rem .1rem}
 }
 @media(max-width:30rem){
   .reminderActions{gap:.22rem}
