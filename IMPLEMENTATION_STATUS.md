@@ -1,10 +1,16 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.122**
+Version: **v0.19.0-rc.123**
 
 ## Current focus
 
-Keeping Operations navigation compact and reachable on mobile screens.
+Keeping the complete Operations viewport consistent with the saved UI Studio canvas.
+
+## rc.123
+
+- The active Operations canvas now owns the document, body, and Safari theme-color surfaces rather than leaving the global black theme visible at the bottom.
+- Canvas previews and saved colors propagate across owner, employee, and shared-link Operations views.
+- Unmount cleanup restores the wider Bar Ops site theme. No migration is required. Rollback checkpoint: v0.19.0-rc.122.
 
 ## rc.122
 

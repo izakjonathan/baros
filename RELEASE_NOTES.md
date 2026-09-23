@@ -1,3 +1,19 @@
+# v0.19.0-rc.123 — Operation Canvas Browser Surface
+
+## Baseline
+
+- Continued from v0.19.0-rc.122. That release is the rollback checkpoint.
+
+## Included
+
+- The current Operations canvas now colors the document root, body, and Safari browser theme surface.
+- UI Studio changes update the lower-page/safe-area color immediately across authenticated and shared Operations sessions.
+- The original global site colors are restored when Operations unmounts.
+
+No database migration is required. Permissions, content, and navigation are unchanged.
+
+Rollback checkpoint: **v0.19.0-rc.122**.
+
 # v0.19.0-rc.122 — Mobile Dock Capsule
 
 ## Baseline

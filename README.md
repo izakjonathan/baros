@@ -1,6 +1,6 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.122**
+Current release: **v0.19.0-rc.123**
 
 ## RC.120 — Owner Operation settings
 

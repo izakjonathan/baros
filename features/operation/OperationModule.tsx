@@ -213,8 +213,28 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   }, [devMode, publicMode, themeRefreshUrl]);
 
   useEffect(() => {
-    document.documentElement.style.setProperty("--operation-canvas", uiTheme.canvasColor);
-    return () => { document.documentElement.style.removeProperty("--operation-canvas"); };
+    const root = document.documentElement;
+    const body = document.body;
+    const existingThemeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    const themeColor = existingThemeColor || document.createElement("meta");
+    const previousRootBackground = root.style.backgroundColor;
+    const previousBodyBackground = body.style.backgroundColor;
+    const previousThemeColor = existingThemeColor?.content || "";
+    root.style.setProperty("--operation-canvas", uiTheme.canvasColor);
+    root.style.backgroundColor = uiTheme.canvasColor;
+    body.style.backgroundColor = uiTheme.canvasColor;
+    if (!existingThemeColor) {
+      themeColor.name = "theme-color";
+      document.head.append(themeColor);
+    }
+    themeColor.content = uiTheme.canvasColor;
+    return () => {
+      root.style.removeProperty("--operation-canvas");
+      root.style.backgroundColor = previousRootBackground;
+      body.style.backgroundColor = previousBodyBackground;
+      if (existingThemeColor) themeColor.content = previousThemeColor;
+      else themeColor.remove();
+    };
   }, [uiTheme.canvasColor]);
 
 

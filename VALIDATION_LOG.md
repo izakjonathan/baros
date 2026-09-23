@@ -1,16 +1,16 @@
-# v0.19.0-rc.122 Validation
+# v0.19.0-rc.123 Validation
 
 ## Confirmed baseline
 
-The verified rc.121 mobile news typography release was used as the baseline.
+The verified rc.122 mobile dock capsule release was used as the baseline.
 
-- Rollback checkpoint: v0.19.0-rc.121
+- Rollback checkpoint: v0.19.0-rc.122
 
 ## Implementation
 
-- Replaced the mobile dock's fixed corner radii with full capsule radii.
-- Lowered the dock by reducing—but not removing—the iPhone safe-area offset.
-- Added Operations contract assertions for the dock geometry and vertical position.
+- Bound the document root and body backgrounds to the active Operations canvas color.
+- Updated Safari's theme-color metadata from UI Studio and restored the prior global values on unmount.
+- Added Operations contract coverage for the page and browser-surface color ownership.
 
 ## Validation status
 

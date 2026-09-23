@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.19.0-rc.123
+
+- Bound the document root, body, and Safari browser theme color to the active Operations canvas color.
+- Removed the black lower-page/browser surface that could appear below Operations content.
+- UI Studio canvas previews and saved schemes now update that surrounding surface for owner, employee, and shared-link sessions; leaving Operations restores the normal site theme.
+
 ## v0.19.0-rc.122
 
 - Changed the mobile Operations dock and its active destination to true capsule geometry.
