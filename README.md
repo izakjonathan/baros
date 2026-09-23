@@ -1,6 +1,13 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.119**
+Current release: **v0.19.0-rc.120**
+
+## RC.120 — Owner Operation settings
+
+- Replaced the owner palette shortcut with an Operation Settings control and kept UI Studio inside the same focused popup.
+- Added separate confirmed resets for the saved Count list and completed/dismissed Reminder history; active reminders are preserved.
+- Reset mutations are owner-authorized, location-scoped, transactional, and recorded in the audit log with the actor and deleted row count.
+- No migration is required.
 
 ## RC.119 — Staff content position
 

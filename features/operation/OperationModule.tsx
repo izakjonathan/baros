@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowLeft, Banknote, Bold, BookOpen, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, CircleAlert, Clock3, House, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Palette, Plus, Redo2, Repeat2, ShoppingBasket, Square, Star, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
+import { ArrowLeft, Banknote, Bold, BookOpen, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, CircleAlert, Clock3, House, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Plus, Redo2, Repeat2, Settings, ShoppingBasket, Square, Star, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -392,11 +392,28 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     finally { setStudioSaving(false); }
   }
 
+  async function resetOperationHistory(target: "cashCountHistory" | "reminderHistory") {
+    if (devMode) {
+      setState(current => target === "cashCountHistory"
+        ? { ...current, cashCounts: [] }
+        : { ...current, needs: current.needs.filter(need => need.status === "NEEDED") });
+      return target === "cashCountHistory" ? state.cashCounts.length : state.needs.filter(need => need.status !== "NEEDED").length;
+    }
+    const response = await fetch(operationUrl(`entity=${target}`), { method: "DELETE" });
+    const result: unknown = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(typeof result === "object" && result !== null && "error" in result && typeof result.error === "string" ? result.error : "Could not reset this history.");
+    const deletedCount = typeof result === "object" && result !== null && "deletedCount" in result && typeof result.deletedCount === "number" ? result.deletedCount : 0;
+    setState(current => target === "cashCountHistory"
+      ? { ...current, cashCounts: [] }
+      : { ...current, needs: current.needs.filter(need => need.status === "NEEDED") });
+    return deletedCount;
+  }
+
   return <div className={`${styles.operationShell}${showOperationHeader ? "" : ` ${styles.operationContentTop}`}`} style={operationThemeCustomProperties(uiTheme)}>
     {showOperationHeader && <header className={styles.operationHeader}>
       {state.canManageContent && view === "home" && <button className={styles.addCircle} type="button" onClick={() => { setDraft(draftFromArticle(undefined, "NEWS")); setEditorOpen(!storageUnavailable); }} aria-label="Add news"><Plus size={20} /></button>}
       {state.canManageContent && view === "handbook" && <button className={styles.addCircle} type="button" onClick={() => { setDraft(draftFromArticle(undefined, "HANDBOOK")); setEditorOpen(!storageUnavailable); }} aria-label="Add handbook article"><Plus size={20} /></button>}
-      {canManageUiStudio && <button className={styles.studioCircle} type="button" onClick={() => setStudioOpen(true)} aria-label="Open Operation UI Studio"><Palette size={18} /></button>}
+      {canManageUiStudio && <button className={styles.studioCircle} type="button" onClick={() => setStudioOpen(true)} aria-label="Open Operation settings"><Settings size={18} /></button>}
     </header>}
     {!currentArticle && !editorOpen && <nav className={styles.operationDock} aria-label="Operation sections">
         {(["home", "handbook", ...(publicMode ? ["needs", "count"] : ["tasks", "needs", "count"])] as View[]).map(item => {
@@ -417,7 +434,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     </main>
     {currentArticle && <Reader article={currentArticle} articles={allArticles} canGoBack={readerStack.length > 1} goBack={() => setReaderStack(stack => stack.slice(0, -1))} openArticle={(article) => setReaderStack(stack => [...stack, article])} close={() => setReaderStack([])} />}
     {editorOpen && <ArticleEditor draft={draft} categories={editorCategories} linkableArticles={allArticles} setDraft={setDraft} saveArticle={saveArticle} saving={saving} message={editorMessage} close={() => { setEditorOpen(false); setEditorMessage(""); }} />}
-    {studioOpen && <OperationUiStudio theme={uiTheme} saving={studioSaving} close={() => { setUiTheme(savedUiTheme); setStudioOpen(false); }} preview={setUiTheme} save={saveUiTheme} publicUrl={publicUrl} />}
+    {studioOpen && <OperationSettings theme={uiTheme} saving={studioSaving} close={() => { setUiTheme(savedUiTheme); setStudioOpen(false); }} preview={setUiTheme} save={saveUiTheme} resetHistory={resetOperationHistory} countHistoryCount={state.cashCounts.length} reminderHistoryCount={state.needs.filter(need => need.status !== "NEEDED").length} publicUrl={publicUrl} />}
   </div>;
 }
 
@@ -425,9 +442,10 @@ function upsertArticle(list: OperationArticle[], article: OperationArticle) {
   return list.some(item => item.id === article.id) ? list.map(item => item.id === article.id ? article : item) : [article, ...list];
 }
 
-function OperationUiStudio({ theme, saving, close, preview, save, publicUrl }: { theme: UiTheme; saving: boolean; close: () => void; preview: (theme: UiTheme) => void; save: (theme: UiTheme) => Promise<void>; publicUrl?: string }) {
+function OperationSettings({ theme, saving, close, preview, save, resetHistory, countHistoryCount, reminderHistoryCount, publicUrl }: { theme: UiTheme; saving: boolean; close: () => void; preview: (theme: UiTheme) => void; save: (theme: UiTheme) => Promise<void>; resetHistory: (target: "cashCountHistory" | "reminderHistory") => Promise<number>; countHistoryCount: number; reminderHistoryCount: number; publicUrl?: string }) {
   const [draft, setDraft] = useState(theme);
   const [message, setMessage] = useState("");
+  const [resetting, setResetting] = useState<"cashCountHistory" | "reminderHistory" | null>(null);
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") close(); };
     document.addEventListener("keydown", closeOnEscape);
@@ -444,20 +462,45 @@ function OperationUiStudio({ theme, saving, close, preview, save, publicUrl }: {
     if (uiColorContrastRatio(draft.canvasColor, draft.inkColor) < 4.5) { setMessage("Canvas and ink need at least 4.5:1 contrast for readable Operation text."); return; }
     await save(draft);
   }
+  async function confirmReset(target: "cashCountHistory" | "reminderHistory") {
+    const label = target === "cashCountHistory" ? "saved Count list" : "completed and dismissed Reminder history";
+    if (!window.confirm(`Reset the ${label}? This cannot be undone.`)) return;
+    setMessage("");
+    setResetting(target);
+    try {
+      const deletedCount = await resetHistory(target);
+      setMessage(`${deletedCount} ${deletedCount === 1 ? "entry" : "entries"} removed.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not reset this history.");
+    } finally {
+      setResetting(null);
+    }
+  }
   return <div className={styles.uiStudioBackdrop} onMouseDown={event => { if (event.target === event.currentTarget) close(); }}>
-    <section className={styles.uiStudioPanel} role="dialog" aria-modal="true" aria-labelledby="operation-ui-studio-title">
-      <div className={styles.uiStudioHeader}><div><p>Owner tools</p><h2 id="operation-ui-studio-title">UI Studio</h2></div><button type="button" onClick={close} aria-label="Close UI Studio"><X size={18} /></button></div>
-      <p className={styles.uiStudioIntro}>These colors apply only to Operation, its article reader, and editor for every role.</p>
-      <div className={styles.uiStudioFields}>
-        <label><span>Canvas / background</span><input type="color" aria-label="Canvas color picker" value={draft.canvasColor} onChange={event => update("canvasColor", event.target.value)} /><input aria-label="Canvas hex value" value={draft.canvasColor} onChange={event => update("canvasColor", event.target.value)} maxLength={7} /></label>
-        <label><span>Ink / text and borders</span><input type="color" aria-label="Ink color picker" value={draft.inkColor} onChange={event => update("inkColor", event.target.value)} /><input aria-label="Ink hex value" value={draft.inkColor} onChange={event => update("inkColor", event.target.value)} maxLength={7} /></label>
-        <label><span>Accent / attention</span><input type="color" aria-label="Accent color picker" value={draft.accentColor} onChange={event => update("accentColor", event.target.value)} /><input aria-label="Accent hex value" value={draft.accentColor} onChange={event => update("accentColor", event.target.value)} maxLength={7} /></label>
-        <label><span>Positive / calm</span><input type="color" aria-label="Positive color picker" value={draft.positiveColor} onChange={event => update("positiveColor", event.target.value)} /><input aria-label="Positive hex value" value={draft.positiveColor} onChange={event => update("positiveColor", event.target.value)} maxLength={7} /></label>
-      </div>
-      <div className={styles.uiStudioPreview} style={{ background: draft.canvasColor, color: draft.inkColor }}><strong>Operation preview</strong><span>Muted copy, badges and surfaces inherit this pair.</span><button type="button" style={{ background: draft.inkColor, color: draft.canvasColor }}>Example action</button><span style={{ color: draft.accentColor }}>High priority uses accent</span><span style={{ color: draft.positiveColor }}>Low priority uses positive</span></div>
+    <section className={styles.uiStudioPanel} role="dialog" aria-modal="true" aria-labelledby="operation-settings-title">
+      <div className={styles.uiStudioHeader}><div><p>Owner tools</p><h2 id="operation-settings-title">Operation settings</h2></div><button type="button" onClick={close} aria-label="Close Operation settings"><X size={18} /></button></div>
+      <section className={styles.settingsSection} aria-labelledby="operation-appearance-title">
+        <div><p>Appearance</p><h3 id="operation-appearance-title">UI Studio</h3></div>
+        <p className={styles.uiStudioIntro}>These colors apply only to Operation, its article reader, and editor for every role.</p>
+        <div className={styles.uiStudioFields}>
+          <label><span>Canvas / background</span><input type="color" aria-label="Canvas color picker" value={draft.canvasColor} onChange={event => update("canvasColor", event.target.value)} /><input aria-label="Canvas hex value" value={draft.canvasColor} onChange={event => update("canvasColor", event.target.value)} maxLength={7} /></label>
+          <label><span>Ink / text and borders</span><input type="color" aria-label="Ink color picker" value={draft.inkColor} onChange={event => update("inkColor", event.target.value)} /><input aria-label="Ink hex value" value={draft.inkColor} onChange={event => update("inkColor", event.target.value)} maxLength={7} /></label>
+          <label><span>Accent / attention</span><input type="color" aria-label="Accent color picker" value={draft.accentColor} onChange={event => update("accentColor", event.target.value)} /><input aria-label="Accent hex value" value={draft.accentColor} onChange={event => update("accentColor", event.target.value)} maxLength={7} /></label>
+          <label><span>Positive / calm</span><input type="color" aria-label="Positive color picker" value={draft.positiveColor} onChange={event => update("positiveColor", event.target.value)} /><input aria-label="Positive hex value" value={draft.positiveColor} onChange={event => update("positiveColor", event.target.value)} maxLength={7} /></label>
+        </div>
+        <div className={styles.uiStudioPreview} style={{ background: draft.canvasColor, color: draft.inkColor }}><strong>Operation preview</strong><span>Muted copy, badges and surfaces inherit this pair.</span><button type="button" style={{ background: draft.inkColor, color: draft.canvasColor }}>Example action</button><span style={{ color: draft.accentColor }}>High priority uses accent</span><span style={{ color: draft.positiveColor }}>Low priority uses positive</span></div>
+        <div className={styles.uiStudioActions}><button type="button" onClick={() => void submit()} disabled={saving}>{saving ? <LoaderCircle className={styles.saveSpinner} size={16} /> : <Check size={16} />}Save colors</button></div>
+      </section>
+      <section className={styles.settingsSection} aria-labelledby="operation-data-title">
+        <div><p>Maintenance</p><h3 id="operation-data-title">Data history</h3></div>
+        <p className={styles.uiStudioIntro}>Reset saved history independently. Active reminders stay in place.</p>
+        <div className={styles.settingsResetList}>
+          <div className={styles.settingsResetRow}><div><strong>Count list</strong><span>{countHistoryCount} saved {countHistoryCount === 1 ? "count" : "counts"}</span></div><button type="button" disabled={resetting !== null || countHistoryCount === 0} onClick={() => void confirmReset("cashCountHistory")}>{resetting === "cashCountHistory" ? <LoaderCircle className={styles.saveSpinner} size={16} /> : null}Reset</button></div>
+          <div className={styles.settingsResetRow}><div><strong>Reminder history</strong><span>{reminderHistoryCount} completed or dismissed</span></div><button type="button" disabled={resetting !== null || reminderHistoryCount === 0} onClick={() => void confirmReset("reminderHistory")}>{resetting === "reminderHistory" ? <LoaderCircle className={styles.saveSpinner} size={16} /> : null}Reset</button></div>
+        </div>
+      </section>
       {publicUrl && <p className={styles.uiStudioLink}>Shared staff Operations link: <a href={publicUrl} target="_blank" rel="noreferrer">Open direct link</a></p>}
       {message && <p className={styles.uiStudioMessage} role="status">{message}</p>}
-      <div className={styles.uiStudioActions}><button type="button" onClick={close}>Cancel</button><button type="button" onClick={() => void submit()} disabled={saving}>{saving ? <LoaderCircle className={styles.saveSpinner} size={16} /> : <Check size={16} />}Save colors</button></div>
     </section>
   </div>;
 }

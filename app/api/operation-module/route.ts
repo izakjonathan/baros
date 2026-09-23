@@ -418,7 +418,29 @@ export async function DELETE(request: Request) {
   try {
     const user = await requireApiUser();
     const params = new URL(request.url).searchParams;
-    const entity = enumValue(params.get("entity"), "entity", ["article", "dailyTask", "need", "taskTemplate"] as const);
+    const entity = enumValue(params.get("entity"), "entity", ["article", "dailyTask", "need", "taskTemplate", "cashCountHistory", "reminderHistory"] as const);
+    if (entity === "cashCountHistory" || entity === "reminderHistory") {
+      requireOwner(user.role);
+      const deletedCount = await db().begin(async tx => {
+        const rows = entity === "cashCountHistory"
+          ? await tx<Array<{ id: string }>>`
+              delete from operation_cash_counts
+              where organization_id=${user.organizationId}
+                and (${user.locationId}::uuid is null or location_id is null or location_id=${user.locationId})
+              returning id`
+          : await tx<Array<{ id: string }>>`
+              delete from operation_needs
+              where organization_id=${user.organizationId}
+                and status in ('ORDERED','RESOLVED','DISMISSED')
+                and (${user.locationId}::uuid is null or location_id is null or location_id=${user.locationId})
+              returning id`;
+        await tx`
+          insert into audit_logs (organization_id,location_id,actor_user_id,action,entity_type,before_data,after_data,metadata)
+          values (${user.organizationId},${user.locationId},${user.userId},'OPERATION_HISTORY_RESET',${entity},${JSON.stringify({ rowCount: rows.length })}::jsonb,${JSON.stringify({ rowCount: 0 })}::jsonb,${JSON.stringify({ target: entity, deletedCount: rows.length })}::jsonb)`;
+        return rows.length;
+      });
+      return NextResponse.json({ ok: true, deletedCount });
+    }
     const id = uuid(params.get("id"), "id");
     if (entity === "article") {
       requireOwner(user.role);
