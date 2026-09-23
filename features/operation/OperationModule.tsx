@@ -392,18 +392,18 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   }
 
   return <div className={styles.operationShell} style={operationThemeCustomProperties(uiTheme)}>
-    <header className={`${styles.operationHeader} ${canManageUiStudio ? styles.operationHeaderOwner : ""}`}>
-      <nav aria-label="Operation sections">
-        {(["home", "handbook", ...(publicMode ? ["needs", "count"] : ["tasks", "needs", "count"])] as View[]).map(item => {
-          const label = item === "home" ? "Home" : item === "needs" ? "Reminders" : item === "count" ? "Count" : item === "handbook" ? "Handbook" : "Tasks";
-          const Icon = item === "home" ? House : item === "handbook" ? BookOpen : item === "tasks" ? CheckSquare : item === "needs" ? CircleAlert : Banknote;
-          return <button key={item} type="button" aria-pressed={view === item} aria-current={view === item ? "page" : undefined} onClick={() => setView(item)}><Icon size={18} aria-hidden="true" /><span>{label}</span></button>;
-        })}
-      </nav>
+    <header className={styles.operationHeader}>
       {state.canManageContent && view === "home" && <button className={styles.addCircle} type="button" onClick={() => { setDraft(draftFromArticle(undefined, "NEWS")); setEditorOpen(!storageUnavailable); }} aria-label="Add news"><Plus size={20} /></button>}
       {state.canManageContent && view === "handbook" && <button className={styles.addCircle} type="button" onClick={() => { setDraft(draftFromArticle(undefined, "HANDBOOK")); setEditorOpen(!storageUnavailable); }} aria-label="Add handbook article"><Plus size={20} /></button>}
       {canManageUiStudio && <button className={styles.studioCircle} type="button" onClick={() => setStudioOpen(true)} aria-label="Open Operation UI Studio"><Palette size={18} /></button>}
     </header>
+    {!currentArticle && !editorOpen && <nav className={styles.operationDock} aria-label="Operation sections">
+        {(["home", "handbook", ...(publicMode ? ["needs", "count"] : ["tasks", "needs", "count"])] as View[]).map(item => {
+          const label = item === "home" ? "Home" : item === "needs" ? "Reminders" : item === "count" ? "Count" : item === "handbook" ? "Handbook" : "Tasks";
+          const Icon = item === "home" ? House : item === "handbook" ? BookOpen : item === "tasks" ? CheckSquare : item === "needs" ? CircleAlert : Banknote;
+          return <button key={item} type="button" aria-pressed={view === item} aria-current={view === item ? "page" : undefined} onClick={() => setView(item)}><Icon size={16} aria-hidden="true" /><span>{label}</span></button>;
+        })}
+      </nav>}
     <main className={styles.operationMain}>
       {storageUnavailable && <StorageNotice />}
       {dueSoonTasks.length > 0 && <section className={styles.duePrompt} role="status"><Clock3 size={18} /><div><strong>{dueSoonTasks.length === 1 ? "Task due soon" : `${dueSoonTasks.length} tasks due soon`}</strong><p>{dueSoonTasks.map(task => `${task.title} · ${task.dueTime}`).join(" · ")}</p></div></section>}

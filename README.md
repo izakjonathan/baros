@@ -1,6 +1,13 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.117**
+Current release: **v0.19.0-rc.118**
+
+## RC.118 — Compact independent dock
+
+- Reversed the Operation dock to an Ink background with Canvas-colored icons and labels, including the selected state.
+- Reduced the phone dock while retaining 44px-equivalent destination targets.
+- Moved navigation out of the fixed owner header into its own viewport-fixed layer so document scrolling cannot move it on mobile Safari.
+- The dock is not rendered while an article or editor is open and remains hidden while a phone text field has focus.
 
 ## RC.117 — Adaptive Operation navigation
 
