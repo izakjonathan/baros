@@ -1,16 +1,16 @@
-# v0.19.0-rc.121 Validation
+# v0.19.0-rc.122 Validation
 
 ## Confirmed baseline
 
-The verified rc.120 owner Operation settings release was used as the baseline.
+The verified rc.121 mobile news typography release was used as the baseline.
 
-- Rollback checkpoint: v0.19.0-rc.120
+- Rollback checkpoint: v0.19.0-rc.121
 
 ## Implementation
 
-- Replaced viewport-scaled, semi-bold Home news body text with a stable 16px regular reading role.
-- Rebalanced card headings, subheadings, paragraph rhythm, and maximum line length without changing the editor or full article reader.
-- Added an Operations contract assertion for the mobile news-card typography.
+- Replaced the mobile dock's fixed corner radii with full capsule radii.
+- Lowered the dock by reducing—but not removing—the iPhone safe-area offset.
+- Added Operations contract assertions for the dock geometry and vertical position.
 
 ## Validation status
 

@@ -1,10 +1,16 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.121**
+Version: **v0.19.0-rc.122**
 
 ## Current focus
 
-Keeping Operations Home news readable and compact on mobile screens.
+Keeping Operations navigation compact and reachable on mobile screens.
+
+## rc.122
+
+- The fixed mobile dock and its active destination now use capsule geometry rather than rounded-rectangle corners.
+- The dock is positioned closer to Safari's URL bar while preserving a reduced safe-area allowance in standalone mode.
+- Keyboard/article hiding and the iPad rail remain unchanged. No migration is required. Rollback checkpoint: v0.19.0-rc.121.
 
 ## rc.121
 

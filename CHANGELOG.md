@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.19.0-rc.122
+
+- Changed the mobile Operations dock and its active destination to true capsule geometry.
+- Lowered the dock toward Safari's URL bar while retaining a reduced safe-area allowance for standalone Home Screen use.
+- Preserved the fixed position, keyboard/article hiding behavior, and existing iPad navigation rail.
+
 ## v0.19.0-rc.121
 
 - Rebalanced published Home news cards for mobile reading: 16px regular body copy, a 1.5 line-height, compact heading levels, and a 44-character reading measure.

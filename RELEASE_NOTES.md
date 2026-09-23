@@ -1,3 +1,19 @@
+# v0.19.0-rc.122 — Mobile Dock Capsule
+
+## Baseline
+
+- Continued from v0.19.0-rc.121. That release is the rollback checkpoint.
+
+## Included
+
+- The mobile Operations dock and active destination now use true pill geometry.
+- The fixed dock sits closer to Safari's URL bar while retaining Home Screen safe-area protection.
+- Keyboard, article-reader, editor, and iPad rail behavior are unchanged.
+
+No database migration is required. Permissions and navigation destinations are unchanged.
+
+Rollback checkpoint: **v0.19.0-rc.121**.
+
 # v0.19.0-rc.121 — Mobile News Card Typography
 
 ## Baseline
