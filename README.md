@@ -1,6 +1,12 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.118**
+Current release: **v0.19.0-rc.119**
+
+## RC.119 — Staff content position
+
+- Removed the obsolete top-navigation clearance from employee and shared-link Operation pages after navigation moved to the bottom dock.
+- Empty staff headers are no longer rendered, so their gradient layer cannot reserve or cover the top of Home, Handbook, Tasks, Reminders, or Count.
+- Owner top clearance remains unchanged for the UI Studio and contextual add controls.
 
 ## RC.118 — Compact independent dock
 

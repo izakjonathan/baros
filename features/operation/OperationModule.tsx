@@ -170,6 +170,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   });
   const storageUnavailable = state.storageStatus === "migration-required" && !devMode;
   const canManageUiStudio = state.userRole === "OWNER";
+  const showOperationHeader = canManageUiStudio || (state.canManageContent && (view === "home" || view === "handbook"));
   const operationEndpoint = operationApiUrl || "/api/operation-module";
   const operationUrl = (query?: string) => query ? `${operationEndpoint}${operationEndpoint.includes("?") ? "&" : "?"}${query}` : operationEndpoint;
 
@@ -391,12 +392,12 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     finally { setStudioSaving(false); }
   }
 
-  return <div className={styles.operationShell} style={operationThemeCustomProperties(uiTheme)}>
-    <header className={styles.operationHeader}>
+  return <div className={`${styles.operationShell}${showOperationHeader ? "" : ` ${styles.operationContentTop}`}`} style={operationThemeCustomProperties(uiTheme)}>
+    {showOperationHeader && <header className={styles.operationHeader}>
       {state.canManageContent && view === "home" && <button className={styles.addCircle} type="button" onClick={() => { setDraft(draftFromArticle(undefined, "NEWS")); setEditorOpen(!storageUnavailable); }} aria-label="Add news"><Plus size={20} /></button>}
       {state.canManageContent && view === "handbook" && <button className={styles.addCircle} type="button" onClick={() => { setDraft(draftFromArticle(undefined, "HANDBOOK")); setEditorOpen(!storageUnavailable); }} aria-label="Add handbook article"><Plus size={20} /></button>}
       {canManageUiStudio && <button className={styles.studioCircle} type="button" onClick={() => setStudioOpen(true)} aria-label="Open Operation UI Studio"><Palette size={18} /></button>}
-    </header>
+    </header>}
     {!currentArticle && !editorOpen && <nav className={styles.operationDock} aria-label="Operation sections">
         {(["home", "handbook", ...(publicMode ? ["needs", "count"] : ["tasks", "needs", "count"])] as View[]).map(item => {
           const label = item === "home" ? "Home" : item === "needs" ? "Reminders" : item === "count" ? "Count" : item === "handbook" ? "Handbook" : "Tasks";
