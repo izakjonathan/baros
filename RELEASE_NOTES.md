@@ -1,3 +1,19 @@
+# v0.19.0-rc.121 — Mobile News Card Typography
+
+## Baseline
+
+- Continued from v0.19.0-rc.120. That release is the rollback checkpoint.
+
+## Included
+
+- Home news body copy now uses a stable 16px regular weight instead of viewport-scaled semi-bold text.
+- Headings, subheadings, paragraphs, and lists retain distinct roles with a calmer mobile reading rhythm and controlled line length.
+- The article editor and full article reader remain unchanged.
+
+No database migration is required. Permissions, workflows, and article content are unchanged.
+
+Rollback checkpoint: **v0.19.0-rc.120**.
+
 # v0.19.0-rc.104 — Installable Shared Staff Links
 
 ## Baseline

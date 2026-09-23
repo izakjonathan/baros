@@ -1,15 +1,16 @@
-# v0.19.0-rc.104 Validation
+# v0.19.0-rc.121 Validation
 
 ## Confirmed baseline
 
-The verified rc.103 Editorial Today News release was used as the baseline.
+The verified rc.120 owner Operation settings release was used as the baseline.
 
-- Rollback checkpoint: v0.19.0-rc.103
+- Rollback checkpoint: v0.19.0-rc.120
 
 ## Implementation
 
-- Added a public-link-specific web manifest and nested metadata override for the shared staff Operations route.
-- The manifest's start URL and scope are the validated shared-link URL, avoiding the authenticated app root when launched from Home Screen.
+- Replaced viewport-scaled, semi-bold Home news body text with a stable 16px regular reading role.
+- Rebalanced card headings, subheadings, paragraph rhythm, and maximum line length without changing the editor or full article reader.
+- Added an Operations contract assertion for the mobile news-card typography.
 
 ## Validation status
 

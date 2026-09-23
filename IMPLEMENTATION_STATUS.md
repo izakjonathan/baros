@@ -1,10 +1,16 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.104**
+Version: **v0.19.0-rc.121**
 
 ## Current focus
 
-Making shared Operations access reliable and low-friction for staff.
+Keeping Operations Home news readable and compact on mobile screens.
+
+## rc.121
+
+- Published Home news now uses stable 16px regular body text with a 1.5 line-height and a 44-character maximum reading measure.
+- Card headings and subheadings remain distinct without competing with the article title; full content and hanging list indents are preserved.
+- The editor and full article reader remain unchanged. No migration is required. Rollback checkpoint: v0.19.0-rc.120.
 
 ## rc.104
 

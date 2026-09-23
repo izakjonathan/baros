@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.19.0-rc.121
+
+- Rebalanced published Home news cards for mobile reading: 16px regular body copy, a 1.5 line-height, compact heading levels, and a 44-character reading measure.
+- Preserved the full news content, list hanging indents, editor typography, and full article reader styling.
+
 ## v0.19.0-rc.104
 
 - Added an access-token-specific web manifest to every shared staff Operations link.

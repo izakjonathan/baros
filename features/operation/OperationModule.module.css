@@ -51,11 +51,11 @@
 .newsCardTitleButton{min-width:0;border:0;background:transparent;color:inherit;padding:0;text-align:left}
 .newsCardTools{display:flex;align-items:center;justify-content:flex-end;gap:.35rem;min-width:0}
 .newsCardBodyButton{display:block;width:100%;border:0;background:transparent;color:inherit;padding:0;text-align:left}
-.newsCardBody{display:grid;gap:.52rem;max-width:none;margin-top:.62rem;white-space:pre-line}
+.newsCardBody{display:grid;gap:.72rem;max-width:44ch;margin-top:.72rem;white-space:pre-line}
 .newsCardBody>span{display:block}
-.newsCardHeading{font-family:var(--op-font-display);font-size:clamp(1.18rem,5.4vw,1.42rem);font-weight:700;line-height:1.1;letter-spacing:-.022em}
-.newsCardSubheading{font-family:var(--op-font-display);font-size:clamp(1.04rem,4.8vw,1.22rem);font-weight:680;line-height:1.16;letter-spacing:-.014em}
-.newsCardBody,.newsCardList{font-family:var(--op-font-body);font-size:clamp(1rem,4.6vw,1.15rem);font-weight:560;line-height:var(--op-leading-body);color:var(--op-ink);letter-spacing:-.012em}
+.newsCardHeading{font-family:var(--op-font-display);font-size:1.1875rem;font-weight:700;line-height:1.22;letter-spacing:-.012em}
+.newsCardSubheading{font-family:var(--op-font-display);font-size:1.0625rem;font-weight:600;line-height:1.3;letter-spacing:-.006em}
+.newsCardBody,.newsCardList{font-family:var(--op-font-body);font-size:1rem;font-weight:400;line-height:1.5;color:var(--op-ink);letter-spacing:0}
 .newsCardList{display:grid!important;grid-template-columns:1rem minmax(0,1fr);column-gap:.28rem}
 .newsCardListMarker{font:inherit;text-align:center}
 .operationCard svg{flex:none}
