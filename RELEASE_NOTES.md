@@ -1,3 +1,19 @@
+# v0.19.0-rc.125 — Confirmed Task Details
+
+## Baseline
+
+- Continued from v0.19.0-rc.124. That release is the rollback checkpoint.
+
+## Included
+
+- Saving a task now confirms that every checklist step and image survived database persistence.
+- The task reader opens from the exact canonical task returned by the server instead of relying on a follow-up refresh.
+- Incomplete persistence is rejected visibly and the incomplete task row is removed.
+
+Migration `023_operation_task_images.sql` remains required.
+
+Rollback checkpoint: **v0.19.0-rc.124**.
+
 # v0.19.0-rc.124 — Task Details, Checklists, and Images
 
 ## Baseline

@@ -1,18 +1,18 @@
-# v0.19.0-rc.124 Validation
+# v0.19.0-rc.125 Validation
 
 ## Confirmed baseline
 
-The verified rc.123 Operation canvas/browser-surface release was used as the baseline.
+The rc.124 task reader, checklist, and image release was used as the baseline.
 
-- Rollback checkpoint: v0.19.0-rc.123
+- Rollback checkpoint: v0.19.0-rc.124
 
 ## Implementation
 
-- Added a full-screen task reader with visible interactive checklist steps and article-style close behavior.
-- Added compact checklist/image metadata to task cards.
-- Added optimized task-image upload, persistence, private delivery, and full-size viewing.
-- Restored Tasks to shared staff navigation so the read-only link matches employee task access.
-- Added migration `023_operation_task_images.sql`.
+- Added server-side submitted/stored count validation for task checklist steps and images.
+- Added cleanup of an incomplete inserted task before returning an error.
+- Made the task API return a canonical `OperationDailyTask` response.
+- Made the client open and render that confirmed saved response immediately.
+- Added persistence-confirmation regression checks.
 
 ## Validation status
 

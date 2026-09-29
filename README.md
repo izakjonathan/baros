@@ -1,6 +1,13 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.124**
+Current release: **v0.19.0-rc.125**
+
+## RC.125 — Confirmed task details
+
+- Task creation now succeeds only after every submitted checklist step and image is confirmed in the saved database row.
+- The newly saved task opens directly from the canonical API response, so the reader cannot silently fall back to an empty task after a refresh.
+- A failed or incomplete persistence attempt now shows an actionable error instead of creating a misleading task with missing details.
+- This release continues to require `db/migrations/023_operation_task_images.sql`.
 
 ## RC.124 — Task details, checklists, and images
 

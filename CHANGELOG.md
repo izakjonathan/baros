@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.19.0-rc.125
+
+- Made task creation transactional from the user's perspective by validating submitted and stored checklist/image counts.
+- Return the canonical persisted task from the API and open that exact task immediately after creation.
+- Reject malformed task detail payloads and remove an incomplete inserted task rather than silently showing empty details.
+- Added regression coverage for task-detail persistence and client confirmation.
+
 ## v0.19.0-rc.124
 
 - Added a full-screen task reader with circular close control for owner, employee, and shared staff views.

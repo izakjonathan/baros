@@ -1,10 +1,17 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.124**
+Version: **v0.19.0-rc.125**
 
 ## Current focus
 
-Making task instructions, steps, and reference images immediately usable on mobile.
+Ensuring task steps and reference images survive the complete create, database, response, and reader path.
+
+## rc.125
+
+- The daily-task API validates all submitted checklist and image entries before insertion and re-validates the stored JSONB values after insertion.
+- An incomplete stored record is removed and reported instead of being presented as a successfully created task.
+- The client validates the canonical response, updates local state from it, and opens the exact saved task immediately.
+- Migration `023_operation_task_images.sql` remains required. Rollback checkpoint: v0.19.0-rc.124.
 
 ## rc.124
 

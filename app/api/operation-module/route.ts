@@ -233,6 +233,10 @@ export async function POST(request: Request) {
       const assignedEmployeeId = assignmentScope === "EMPLOYEE" ? uuid(body.assignedEmployeeId, "assignedEmployeeId") : null;
       const checklist = parseChecklist(body.checklist);
       const images = parseOperationTaskImages(body.images);
+      const submittedChecklistCount = Array.isArray(body.checklist) ? body.checklist.length : 0;
+      const submittedImageCount = Array.isArray(body.images) ? body.images.length : 0;
+      if (checklist.length !== submittedChecklistCount) throw new ApiError(400, "One or more checklist steps could not be saved. Review the steps and try again.");
+      if (images.length !== submittedImageCount) throw new ApiError(400, "One or more task images could not be saved. Remove and add the images again.");
       if (assignedEmployeeId) {
         const [employee] = await db()`select id from employees where id=${assignedEmployeeId} and organization_id=${user.organizationId} and active=true`;
         if (!employee) throw new ApiError(400, "Assigned employee is not active in this organization");
@@ -244,7 +248,20 @@ export async function POST(request: Request) {
         insert into operation_daily_tasks(organization_id,location_id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assignment_scope,assigned_employee_id,checklist,images,created_by,updated_by)
         values(${user.organizationId},${user.locationId},${weekday},${title},${description},${dueDate}::date,${repeatUnit},${repeatInterval},${repeatEndDate}::date,${taskType},${priority},${dueTime}::time,${reminderMinutes},${assignmentScope},${assignedEmployeeId},${JSON.stringify(checklist)}::jsonb,${JSON.stringify(images)}::jsonb,${user.userId},${user.userId})
         returning id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assignment_scope,assigned_employee_id,checklist,images,false completed`;
-      return NextResponse.json(row, { status: 201 });
+      const storedChecklist = parseChecklist(row.checklist);
+      const storedImages = parseOperationTaskImages(row.images);
+      const savedTaskId = String(row.id);
+      if (storedChecklist.length !== checklist.length || storedImages.length !== images.length) {
+        await db()`delete from operation_daily_tasks where id=${savedTaskId} and organization_id=${user.organizationId}`;
+        throw new ApiError(500, "The task was not created because its steps or images could not be confirmed. Try again.");
+      }
+      return NextResponse.json({
+        id: savedTaskId, weekday: Number(row.weekday), title: String(row.title), description: String(row.description || ""),
+        dueDate: String(row.due_date), repeatUnit: String(row.repeat_unit) as OperationDailyTask["repeatUnit"], repeatInterval: Number(row.repeat_interval), repeatEndDate: row.repeat_end_date == null ? null : String(row.repeat_end_date),
+        dueTime: row.due_time == null ? null : String(row.due_time).slice(0, 5), reminderMinutes: row.reminder_minutes == null ? null : Number(row.reminder_minutes),
+        priority: String(row.priority) as OperationDailyTask["priority"], taskType: String(row.task_type) as OperationDailyTask["taskType"], assignmentScope: String(row.assignment_scope) as OperationDailyTask["assignmentScope"], assignedEmployeeId: row.assigned_employee_id == null ? null : String(row.assigned_employee_id), assignedEmployeeName: null, completedByName: null,
+        checklist: storedChecklist.map(item => ({ ...item, completed: false })), images: storedImages, completed: false,
+      } satisfies OperationDailyTask, { status: 201 });
     }
 
     if (entity === "taskTemplate") {

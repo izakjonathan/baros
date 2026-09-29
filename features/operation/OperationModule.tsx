@@ -323,11 +323,26 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     if (taskAssignmentScope === "EMPLOYEE" && !assignee) { setTaskMessage("Choose the employee responsible for this task."); return; }
     const checklist = taskChecklistText.split("\n").map(label => label.trim()).filter(Boolean).slice(0, 30).map((label, index) => ({ id: `item-${index + 1}`, label, completed: false }));
     const task: OperationDailyTask = { id: crypto.randomUUID(), weekday: new Date(`${taskDueDate}T00:00:00Z`).getUTCDay(), title: taskTitle.trim(), description: taskDescription.trim(), dueDate: taskDueDate, repeatUnit: taskRepeatUnit, repeatInterval: taskRepeatInterval, repeatEndDate: taskRepeatEndDate || null, dueTime: taskDueTime || null, reminderMinutes: taskReminderMinutes === "" ? null : Math.max(0, Number(taskReminderMinutes) || 0), priority: taskPriority, taskType, assignmentScope: taskAssignmentScope, assignedEmployeeId: assignee?.id || null, assignedEmployeeName: assignee?.name || null, completedByName: null, checklist, images: taskImages, completed: false };
-    if (devMode) setState(current => ({ ...current, dailyTasks: [...current.dailyTasks, task] }));
-    else {
+    if (devMode) {
+      setState(current => ({ ...current, dailyTasks: [...current.dailyTasks, task] }));
+      setSelectedTaskId(task.id);
+    } else {
       const response = await fetch(operationEndpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", title: task.title, description: task.description, dueDate: task.dueDate, repeatUnit: task.repeatUnit, repeatInterval: task.repeatInterval, repeatEndDate: task.repeatEndDate, dueTime: task.dueTime, reminderMinutes: task.reminderMinutes, priority: task.priority, taskType: task.taskType, assignmentScope: task.assignmentScope, assignedEmployeeId: task.assignedEmployeeId, checklist: task.checklist, images: task.images }) });
       if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not add daily task.")); return; }
-      await refresh(selectedTaskDate);
+      const saved: unknown = await response.json().catch(() => null);
+      if (!saved || typeof saved !== "object" || !("id" in saved) || typeof saved.id !== "string" || !("checklist" in saved) || !Array.isArray(saved.checklist) || !("images" in saved) || !Array.isArray(saved.images)) {
+        setTaskMessage("The task was saved, but its details could not be confirmed. Reload Tasks before trying again.");
+        await refresh(selectedTaskDate);
+        return;
+      }
+      const savedTask = saved as OperationDailyTask;
+      if (savedTask.checklist.length !== checklist.length || savedTask.images.length !== taskImages.length) {
+        setTaskMessage("The task was not accepted because every step and image could not be confirmed. Try again.");
+        await refresh(selectedTaskDate);
+        return;
+      }
+      setState(current => ({ ...current, dailyTasks: [...current.dailyTasks.filter(item => item.id !== savedTask.id), { ...savedTask, assignedEmployeeName: assignee?.name || savedTask.assignedEmployeeName }] }));
+      setSelectedTaskId(savedTask.id);
     }
     setTaskTitle(""); setTaskDescription(""); setTaskDueDate(selectedTaskDate); setTaskRepeatUnit("NONE"); setTaskRepeatInterval(1); setTaskRepeatEndDate(""); setTaskType("SERVICE"); setTaskPriority("NORMAL"); setTaskDueTime(""); setTaskReminderMinutes(""); setTaskAssignmentScope("EVERYONE"); setTaskAssigneeId(""); setTaskChecklistText(""); setTaskImages([]);
   }
