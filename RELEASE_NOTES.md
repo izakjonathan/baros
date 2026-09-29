@@ -1,3 +1,20 @@
+# v0.19.0-rc.124 — Task Details, Checklists, and Images
+
+## Baseline
+
+- Continued from v0.19.0-rc.123. That release is the rollback checkpoint.
+
+## Included
+
+- Task cards open a focused full-screen reader with the same circular close behavior as articles and news.
+- Checklist steps are clearly visible and interactive in the reader; summary cards show completed-step progress.
+- Task creators can attach up to six iPhone-optimized preview/detail images, which open full-size on demand.
+- Owner, employee, and shared staff-link task views use the same reader and completion data.
+
+Apply `db/migrations/023_operation_task_images.sql` before deploying the application.
+
+Rollback checkpoint: **v0.19.0-rc.123**.
+
 # v0.19.0-rc.123 — Operation Canvas Browser Surface
 
 ## Baseline

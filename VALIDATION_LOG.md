@@ -1,16 +1,18 @@
-# v0.19.0-rc.123 Validation
+# v0.19.0-rc.124 Validation
 
 ## Confirmed baseline
 
-The verified rc.122 mobile dock capsule release was used as the baseline.
+The verified rc.123 Operation canvas/browser-surface release was used as the baseline.
 
-- Rollback checkpoint: v0.19.0-rc.122
+- Rollback checkpoint: v0.19.0-rc.123
 
 ## Implementation
 
-- Bound the document root and body backgrounds to the active Operations canvas color.
-- Updated Safari's theme-color metadata from UI Studio and restored the prior global values on unmount.
-- Added Operations contract coverage for the page and browser-surface color ownership.
+- Added a full-screen task reader with visible interactive checklist steps and article-style close behavior.
+- Added compact checklist/image metadata to task cards.
+- Added optimized task-image upload, persistence, private delivery, and full-size viewing.
+- Restored Tasks to shared staff navigation so the read-only link matches employee task access.
+- Added migration `023_operation_task_images.sql`.
 
 ## Validation status
 
@@ -21,4 +23,4 @@ The verified rc.122 mobile dock capsule release was used as the baseline.
 
 ## Scope
 
-No database migration is required. Production iPhone/iPad Safari visual confirmation remains required after deployment.
+Database migration `023_operation_task_images.sql` is required. Production iPhone/iPad Safari visual confirmation remains required after deployment.

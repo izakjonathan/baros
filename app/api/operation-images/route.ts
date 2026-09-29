@@ -1,7 +1,7 @@
 import { del, put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
-import { ownerCanManageOperation } from "@/features/operation/content";
+import { hasCapability } from "@/lib/auth/capabilities";
 import { ApiError, jsonError } from "@/lib/http";
 import { logServerError } from "@/lib/observability";
 
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   try {
     const user = await getSessionUser();
     if (!user) throw new ApiError(401, "Authentication required");
-    if (!ownerCanManageOperation(user.role)) throw new ApiError(403, "Owner or Admin permission is required");
+    if (!hasCapability(user.role, "operations.manage")) throw new ApiError(403, "Operation management permission is required");
     if (!process.env.BLOB_READ_WRITE_TOKEN) throw new ApiError(503, "Image storage has not been configured yet.");
 
     const form = await request.formData();

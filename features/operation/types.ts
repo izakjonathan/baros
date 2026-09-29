@@ -72,8 +72,37 @@ export type OperationDailyTask = {
   assignedEmployeeName: string | null;
   completedByName: string | null;
   checklist: Array<{ id: string; label: string; completed: boolean }>;
+  images: OperationTaskImage[];
   completed: boolean;
 };
+
+export type OperationTaskImage = {
+  src: string;
+  fullSrc: string;
+  width: number;
+  height: number;
+  alt: string;
+};
+
+const operationTaskImagePath = /^\/api\/operation-images\/operation\/[0-9a-f-]+\/[0-9a-f-]+-(?:preview|detail)\.(?:avif|jpe?g|png|webp)$/i;
+
+export function parseOperationTaskImages(value: unknown): OperationTaskImage[] {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, 6).flatMap((item): OperationTaskImage[] => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const record = item as Record<string, unknown>;
+    const src = typeof record.src === "string" ? record.src : "";
+    const fullSrc = typeof record.fullSrc === "string" ? record.fullSrc : "";
+    if (!operationTaskImagePath.test(src) || !operationTaskImagePath.test(fullSrc)) return [];
+    return [{
+      src,
+      fullSrc,
+      width: Math.max(1, Math.min(4096, Number(record.width) || 1200)),
+      height: Math.max(1, Math.min(4096, Number(record.height) || 800)),
+      alt: typeof record.alt === "string" ? record.alt.trim().slice(0, 160) : "Task image",
+    }];
+  });
+}
 
 export type OperationTaskTemplate = {
   id: string;

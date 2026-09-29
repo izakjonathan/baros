@@ -1,7 +1,7 @@
 import { OperationModule } from "@/features/operation/OperationModule";
 import { defaultOperationState } from "@/features/operation/default-content";
 import { mapOperationArticle, ownerCanManageOperation } from "@/features/operation/content";
-import { isOperationTaskDue, type OperationCashCount, type OperationDailyTask, type OperationModuleState, type OperationNeed } from "@/features/operation/types";
+import { isOperationTaskDue, parseOperationTaskImages, type OperationCashCount, type OperationDailyTask, type OperationModuleState, type OperationNeed } from "@/features/operation/types";
 import { isDevAuthEnabled } from "@/lib/auth/dev-auth";
 import { requireUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
@@ -15,7 +15,7 @@ function isOperationSchemaUnavailable(error: unknown) {
   const code = String(record.code || "");
   const message = String(record.message || "");
   return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|cash_counts|article_kind|need_status|task_templates|task_checklist_completions)/i.test(message)
-    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|assignment_scope|reminder_type|stock_level)/i.test(message);
+    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|assignment_scope|images|reminder_type|stock_level)/i.test(message);
 }
 
 export default async function OperationPage() {
@@ -50,7 +50,7 @@ export default async function OperationPage() {
         where organization_id=${user.organizationId} and published=true
         order by kind,category,sort_order,updated_at desc`,
       db()<Array<Record<string, unknown>>>`
-        select t.id,t.weekday,t.title,t.description,t.due_date,t.repeat_unit,t.repeat_interval,t.repeat_end_date,t.task_type,t.priority,t.due_time,t.reminder_minutes,t.assignment_scope,t.assigned_employee_id,t.checklist,
+        select t.id,t.weekday,t.title,t.description,t.due_date,t.repeat_unit,t.repeat_interval,t.repeat_end_date,t.task_type,t.priority,t.due_time,t.reminder_minutes,t.assignment_scope,t.assigned_employee_id,t.checklist,t.images,
                coalesce((select jsonb_object_agg(cc.item_id,true) from operation_task_checklist_completions cc where cc.task_id=t.id and cc.service_date=${today}::date), '{}'::jsonb) checklist_completed,
                (a.first_name||' '||a.last_name) assigned_employee_name,
                (completed_employee.first_name||' '||completed_employee.last_name) completed_by_name,
@@ -116,7 +116,8 @@ export default async function OperationPage() {
       assignedEmployeeId: task.assigned_employee_id == null ? null : String(task.assigned_employee_id),
       assignedEmployeeName: task.assigned_employee_name == null ? null : String(task.assigned_employee_name),
       completedByName: task.completed_by_name == null ? null : String(task.completed_by_name),
-      checklist: Array.isArray(task.checklist) ? task.checklist.slice(0, 30).flatMap((item): OperationDailyTask["checklist"] => item && typeof item === "object" && "id" in item && "label" in item ? [{ id: String(item.id), label: String(item.label), completed: Boolean(task.checklist_completed && typeof task.checklist_completed === "object" && String(item.id) in task.checklist_completed) }] : []) : [],
+        checklist: Array.isArray(task.checklist) ? task.checklist.slice(0, 30).flatMap((item): OperationDailyTask["checklist"] => item && typeof item === "object" && "id" in item && "label" in item ? [{ id: String(item.id), label: String(item.label), completed: Boolean(task.checklist_completed && typeof task.checklist_completed === "object" && String(item.id) in task.checklist_completed) }] : []) : [],
+        images: parseOperationTaskImages(task.images),
       completed: Boolean(task.completed),
     })).filter(task => isOperationTaskDue(task, today)),
     assignees: assignees.map(assignee => ({ id: String(assignee.id), name: String(assignee.name) })),

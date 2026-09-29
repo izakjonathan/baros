@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.124
+
+- Added a full-screen task reader with circular close control for owner, employee, and shared staff views.
+- Moved interactive checklist presentation into the task reader and added a compact step-progress summary to task cards.
+- Added up to six optimized preview/detail images to task creation and task reading.
+- Extended private image delivery authorization to task images and task-management upload permissions.
+- Added migration `023_operation_task_images.sql`.
+
 ## v0.19.0-rc.123
 
 - Bound the document root, body, and Safari browser theme color to the active Operations canvas color.

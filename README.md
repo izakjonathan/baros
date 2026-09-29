@@ -1,6 +1,14 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.123**
+Current release: **v0.19.0-rc.124**
+
+## RC.124 — Task details, checklists, and images
+
+- Tasks now open in a focused full-screen reader with the same circular close pattern as Handbook and News.
+- Checklist steps are always visible and interactive in the task reader; task cards show a compact completion count.
+- Task creators can attach up to six optimized images using the existing preview/detail upload pipeline.
+- Shared staff links now expose the Tasks destination and the same task-detail/checklist workflow as employee sessions.
+- Apply `db/migrations/023_operation_task_images.sql` before deploying this release.
 
 ## RC.120 — Owner Operation settings
 

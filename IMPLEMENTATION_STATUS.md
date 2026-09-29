@@ -1,10 +1,18 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.123**
+Version: **v0.19.0-rc.124**
 
 ## Current focus
 
-Keeping the complete Operations viewport consistent with the saved UI Studio canvas.
+Making task instructions, steps, and reference images immediately usable on mobile.
+
+## rc.124
+
+- Task rows now open a full-screen detail reader; the dock yields until the task is closed.
+- Checklist steps are persisted as before but are now presented in the reader, eliminating clipping inside compact rows.
+- Task images reuse the optimized WebP preview/detail pipeline and private organization-scoped delivery route.
+- Owner/manager creation, employee viewing/completion, and shared staff-link viewing/completion use the same task data.
+- Migration required: `023_operation_task_images.sql`. Rollback checkpoint: v0.19.0-rc.123.
 
 ## rc.123
 

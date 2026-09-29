@@ -12,7 +12,7 @@ export async function GET(request: Request, { params }: RouteContext) {
   if (!matchedPath) return NextResponse.json({ error: "Image not found" }, { status: 404 });
   const organizationId = matchedPath[1];
 
-  let isPublicArticleImage = false;
+  let isPublicOperationImage = false;
   if (user) {
     if (organizationId !== user.organizationId) return NextResponse.json({ error: "Image not found" }, { status: 404 });
   } else {
@@ -21,13 +21,19 @@ export async function GET(request: Request, { params }: RouteContext) {
       const [article] = await db()<Array<{ id: string }>>`
         select id from operation_articles
         where organization_id=${organizationId} and published=true and content::text like ${`%${pathname}%`}
-        limit 1
-      `;
-      isPublicArticleImage = Boolean(article);
+        limit 1`;
+      isPublicOperationImage = Boolean(article);
+      if (!isPublicOperationImage) {
+        const [task] = await db()<Array<{ id: string }>>`
+          select id from operation_daily_tasks
+          where organization_id=${organizationId} and active=true and images::text like ${`%${pathname}%`}
+          limit 1`;
+        isPublicOperationImage = Boolean(task);
+      }
     } catch {
-      isPublicArticleImage = false;
+      isPublicOperationImage = false;
     }
-    if (!isPublicArticleImage) return NextResponse.json({ error: "Image not found" }, { status: 404 });
+    if (!isPublicOperationImage) return NextResponse.json({ error: "Image not found" }, { status: 404 });
   }
 
   const blob = await get(pathname, {
@@ -35,7 +41,7 @@ export async function GET(request: Request, { params }: RouteContext) {
     ifNoneMatch: request.headers.get("if-none-match") || undefined,
   });
   if (!blob) return NextResponse.json({ error: "Image not found" }, { status: 404 });
-  const cacheControl = isPublicArticleImage ? "public, max-age=300" : "private, max-age=3600";
+  const cacheControl = isPublicOperationImage ? "public, max-age=300" : "private, max-age=3600";
   if (blob.statusCode === 304) return new NextResponse(null, { status: 304, headers: { ETag: blob.blob.etag, "Cache-Control": cacheControl } });
 
   return new NextResponse(blob.stream, {
