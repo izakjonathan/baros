@@ -1,18 +1,17 @@
-# v0.19.0-rc.125 Validation
+# v0.19.0-rc.126 Validation
 
 ## Confirmed baseline
 
-The rc.124 task reader, checklist, and image release was used as the baseline.
+The rc.125 confirmed task-details release was used as the baseline.
 
-- Rollback checkpoint: v0.19.0-rc.124
+- Rollback checkpoint: v0.19.0-rc.125
 
 ## Implementation
 
-- Added server-side submitted/stored count validation for task checklist steps and images.
-- Added cleanup of an incomplete inserted task before returning an error.
-- Made the task API return a canonical `OperationDailyTask` response.
-- Made the client open and render that confirmed saved response immediately.
-- Added persistence-confirmation regression checks.
+- Added tolerant JSON decoding for task checklist, checklist-completion, and image values.
+- Applied one decoder across server-rendered, refreshed API, and shared-link task states.
+- Preserved strict task creation confirmation and incomplete-row cleanup.
+- Added structured mismatch diagnostics and compatibility regression coverage.
 
 ## Validation status
 

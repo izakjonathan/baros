@@ -1,6 +1,13 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.125**
+Current release: **v0.19.0-rc.126**
+
+## RC.126 — Task JSON compatibility
+
+- Task checklists and image metadata now decode consistently whether PostgreSQL returns JSON as native arrays or serialized JSON strings.
+- The compatibility decoder is shared by the initial owner/employee page, API refreshes, task creation confirmation, and shared staff links.
+- Persistence mismatches now emit safe structured count/type diagnostics in Vercel runtime logs.
+- Migration `023_operation_task_images.sql` remains required.
 
 ## RC.125 — Confirmed task details
 

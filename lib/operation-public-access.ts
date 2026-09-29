@@ -1,6 +1,6 @@
 import { defaultOperationState } from "@/features/operation/default-content";
 import { mapOperationArticle } from "@/features/operation/content";
-import { isOperationTaskDue, parseOperationTaskImages, type OperationCashCount, type OperationDailyTask, type OperationModuleState, type OperationNeed } from "@/features/operation/types";
+import { isOperationTaskDue, parseOperationTaskChecklist, parseOperationTaskImages, type OperationCashCount, type OperationDailyTask, type OperationModuleState, type OperationNeed } from "@/features/operation/types";
 import { db } from "@/lib/db/client";
 
 export type PublicOperationAccess = { organizationId: string; token: string };
@@ -40,7 +40,7 @@ export async function loadPublicOperationState(access: PublicOperationAccess, da
   const dailyTasks = tasks.map((task): OperationDailyTask => ({
     id: String(task.id), weekday: Number(task.weekday), title: String(task.title), description: String(task.description || ""),
     dueDate: String(task.due_date), repeatUnit: String(task.repeat_unit) as OperationDailyTask["repeatUnit"], repeatInterval: Number(task.repeat_interval), repeatEndDate: task.repeat_end_date == null ? null : String(task.repeat_end_date), dueTime: task.due_time == null ? null : String(task.due_time).slice(0, 5), reminderMinutes: task.reminder_minutes == null ? null : Number(task.reminder_minutes), priority: String(task.priority) as OperationDailyTask["priority"], taskType: String(task.task_type) as OperationDailyTask["taskType"], assignmentScope: "EVERYONE", assignedEmployeeId: null, assignedEmployeeName: null, completedByName: null,
-    checklist: Array.isArray(task.checklist) ? task.checklist.flatMap((item): OperationDailyTask["checklist"] => item && typeof item === "object" && "id" in item && "label" in item ? [{ id: String(item.id), label: String(item.label), completed: Boolean(task.checklist_completed && typeof task.checklist_completed === "object" && String(item.id) in task.checklist_completed) }] : []) : [], images: parseOperationTaskImages(task.images), completed: Boolean(task.completed),
+    checklist: parseOperationTaskChecklist(task.checklist, task.checklist_completed), images: parseOperationTaskImages(task.images), completed: Boolean(task.completed),
   })).filter(task => isOperationTaskDue(task, date));
   const mappedNeeds = needs.map((need): OperationNeed => ({ id: String(need.id), title: String(need.title), note: need.note == null ? null : String(need.note), status: ["ORDERED", "RESOLVED", "DISMISSED"].includes(String(need.status)) ? String(need.status) as OperationNeed["status"] : "NEEDED", createdAt: String(need.created_at), updatedAt: String(need.updated_at || need.created_at), type: ["NEW_ITEM", "ISSUE"].includes(String(need.reminder_type)) ? String(need.reminder_type) as OperationNeed["type"] : "RESTOCK", stockLevel: ["LOW", "OUT_OF"].includes(String(need.stock_level)) ? String(need.stock_level) as OperationNeed["stockLevel"] : null }));
   const mappedCashCounts = cashCounts.map((count): OperationCashCount => ({ id: String(count.id), operationalDate: String(count.operational_date), tillAmount: count.till_amount == null ? null : Number(count.till_amount), changeBoxAmount: count.change_box_amount == null ? null : Number(count.change_box_amount), countedByName: String(count.counted_by_name), createdAt: String(count.created_at) }));

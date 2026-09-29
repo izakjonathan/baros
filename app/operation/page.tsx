@@ -1,7 +1,7 @@
 import { OperationModule } from "@/features/operation/OperationModule";
 import { defaultOperationState } from "@/features/operation/default-content";
 import { mapOperationArticle, ownerCanManageOperation } from "@/features/operation/content";
-import { isOperationTaskDue, parseOperationTaskImages, type OperationCashCount, type OperationDailyTask, type OperationModuleState, type OperationNeed } from "@/features/operation/types";
+import { isOperationTaskDue, parseOperationTaskChecklist, parseOperationTaskImages, type OperationCashCount, type OperationDailyTask, type OperationModuleState, type OperationNeed } from "@/features/operation/types";
 import { isDevAuthEnabled } from "@/lib/auth/dev-auth";
 import { requireUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
@@ -116,7 +116,7 @@ export default async function OperationPage() {
       assignedEmployeeId: task.assigned_employee_id == null ? null : String(task.assigned_employee_id),
       assignedEmployeeName: task.assigned_employee_name == null ? null : String(task.assigned_employee_name),
       completedByName: task.completed_by_name == null ? null : String(task.completed_by_name),
-        checklist: Array.isArray(task.checklist) ? task.checklist.slice(0, 30).flatMap((item): OperationDailyTask["checklist"] => item && typeof item === "object" && "id" in item && "label" in item ? [{ id: String(item.id), label: String(item.label), completed: Boolean(task.checklist_completed && typeof task.checklist_completed === "object" && String(item.id) in task.checklist_completed) }] : []) : [],
+        checklist: parseOperationTaskChecklist(task.checklist, task.checklist_completed),
         images: parseOperationTaskImages(task.images),
       completed: Boolean(task.completed),
     })).filter(task => isOperationTaskDue(task, today)),

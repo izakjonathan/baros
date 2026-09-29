@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.19.0-rc.126
+
+- Added a shared task JSON compatibility decoder for database-native arrays and serialized JSON values.
+- Applied the decoder to owner, employee, refreshed API, and shared staff-link task reads.
+- Preserved strict task creation confirmation while preventing valid serialized checklists/images from being treated as empty.
+- Added safe persistence-mismatch diagnostics to production runtime logs.
+
 ## v0.19.0-rc.125
 
 - Made task creation transactional from the user's perspective by validating submitted and stored checklist/image counts.

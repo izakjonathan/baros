@@ -1,3 +1,19 @@
+# v0.19.0-rc.126 — Task JSON Compatibility
+
+## Baseline
+
+- Continued from v0.19.0-rc.125. That release is the rollback checkpoint.
+
+## Included
+
+- Task steps and image metadata now load from both native PostgreSQL JSON arrays and serialized JSON values.
+- Owner, employee, API-refresh, and shared staff-link views use the same decoder.
+- Strict save confirmation remains in place and now provides safe Vercel diagnostics if persistence ever differs again.
+
+Migration `023_operation_task_images.sql` remains required.
+
+Rollback checkpoint: **v0.19.0-rc.125**.
+
 # v0.19.0-rc.125 — Confirmed Task Details
 
 ## Baseline

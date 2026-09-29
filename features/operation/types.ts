@@ -86,9 +86,36 @@ export type OperationTaskImage = {
 
 const operationTaskImagePath = /^\/api\/operation-images\/operation\/[0-9a-f-]+\/[0-9a-f-]+-(?:preview|detail)\.(?:avif|jpe?g|png|webp)$/i;
 
+function operationJsonValue(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  try {
+    return JSON.parse(value) as unknown;
+  } catch {
+    return value;
+  }
+}
+
+export function parseOperationTaskChecklist(value: unknown, completedValue?: unknown): OperationDailyTask["checklist"] {
+  const decoded = operationJsonValue(value);
+  const decodedCompleted = operationJsonValue(completedValue);
+  const completed = decodedCompleted && typeof decodedCompleted === "object" && !Array.isArray(decodedCompleted)
+    ? decodedCompleted as Record<string, unknown>
+    : {};
+  if (!Array.isArray(decoded)) return [];
+  return decoded.slice(0, 30).flatMap((item, index): OperationDailyTask["checklist"] => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const record = item as Record<string, unknown>;
+    const label = String(record.label || "").trim().slice(0, 180);
+    if (!label) return [];
+    const id = String(record.id || `item-${index + 1}`).replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 48) || `item-${index + 1}`;
+    return [{ id, label, completed: Boolean(completed[id]) }];
+  });
+}
+
 export function parseOperationTaskImages(value: unknown): OperationTaskImage[] {
-  if (!Array.isArray(value)) return [];
-  return value.slice(0, 6).flatMap((item): OperationTaskImage[] => {
+  const decoded = operationJsonValue(value);
+  if (!Array.isArray(decoded)) return [];
+  return decoded.slice(0, 6).flatMap((item): OperationTaskImage[] => {
     if (!item || typeof item !== "object" || Array.isArray(item)) return [];
     const record = item as Record<string, unknown>;
     const src = typeof record.src === "string" ? record.src : "";

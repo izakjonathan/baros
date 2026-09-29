@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { defaultOperationState } from "@/features/operation/default-content";
 import { mapOperationArticle, ownerCanManageOperation, parseOperationBlocks } from "@/features/operation/content";
-import { isOperationTaskDue, parseOperationTaskImages, type OperationCashCount, type OperationDailyTask, type OperationModuleState, type OperationNeed, type OperationTaskAssignmentScope, type OperationTaskPriority, type OperationTaskType } from "@/features/operation/types";
+import { isOperationTaskDue, parseOperationTaskChecklist, parseOperationTaskImages, type OperationCashCount, type OperationDailyTask, type OperationModuleState, type OperationNeed, type OperationTaskAssignmentScope, type OperationTaskPriority, type OperationTaskType } from "@/features/operation/types";
 import { db } from "@/lib/db/client";
 import { ApiError, enumValue, finiteNumber, isoDate, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
 import { getSessionUser } from "@/lib/auth/session";
 import { hasCapability } from "@/lib/auth/capabilities";
 import { operationCountDateNow, operationDateNow } from "@/features/operation/date";
+import { logServerError } from "@/lib/observability";
 
 function requireOwner(role: string) {
   if (!ownerCanManageOperation(role)) throw new ApiError(403, "Owner or Admin permission is required");
@@ -31,15 +32,7 @@ function weekdayFromDate(date: string) {
 }
 
 function parseChecklist(value: unknown) {
-  if (!Array.isArray(value)) return [] as Array<{ id: string; label: string }>;
-  return value.slice(0, 30).flatMap((item, index): Array<{ id: string; label: string }> => {
-    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
-    const record = item as Record<string, unknown>;
-    const label = String(record.label || "").trim().slice(0, 180);
-    if (!label) return [];
-    const id = String(record.id || `item-${index + 1}`).replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 48) || `item-${index + 1}`;
-    return [{ id, label }];
-  });
+  return parseOperationTaskChecklist(value).map(({ id, label }) => ({ id, label }));
 }
 
 function isOperationSchemaUnavailable(error: unknown) {
@@ -151,7 +144,7 @@ export async function GET(request: Request) {
         assignedEmployeeId: task.assigned_employee_id == null ? null : String(task.assigned_employee_id),
         assignedEmployeeName: task.assigned_employee_name == null ? null : String(task.assigned_employee_name),
         completedByName: task.completed_by_name == null ? null : String(task.completed_by_name),
-        checklist: Array.isArray(task.checklist) ? task.checklist.slice(0, 30).flatMap((item): OperationDailyTask["checklist"] => item && typeof item === "object" && "id" in item && "label" in item ? [{ id: String(item.id), label: String(item.label), completed: Boolean(task.checklist_completed && typeof task.checklist_completed === "object" && String(item.id) in task.checklist_completed) }] : []) : [],
+        checklist: parseOperationTaskChecklist(task.checklist, task.checklist_completed),
         images: parseOperationTaskImages(task.images),
         completed: Boolean(task.completed),
       })).filter(task => isOperationTaskDue(task, today)),
@@ -252,6 +245,17 @@ export async function POST(request: Request) {
       const storedImages = parseOperationTaskImages(row.images);
       const savedTaskId = String(row.id);
       if (storedChecklist.length !== checklist.length || storedImages.length !== images.length) {
+        logServerError(new Error("Persisted task detail count mismatch"), {
+          route: "/api/operation-module",
+          entity: "dailyTask",
+          taskId: savedTaskId,
+          submittedChecklistCount: checklist.length,
+          storedChecklistCount: storedChecklist.length,
+          submittedImageCount: images.length,
+          storedImageCount: storedImages.length,
+          checklistStorageType: Array.isArray(row.checklist) ? "array" : typeof row.checklist,
+          imageStorageType: Array.isArray(row.images) ? "array" : typeof row.images,
+        });
         await db()`delete from operation_daily_tasks where id=${savedTaskId} and organization_id=${user.organizationId}`;
         throw new ApiError(500, "The task was not created because its steps or images could not be confirmed. Try again.");
       }

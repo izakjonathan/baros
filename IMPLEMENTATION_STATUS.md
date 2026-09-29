@@ -1,10 +1,17 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.125**
+Version: **v0.19.0-rc.126**
 
 ## Current focus
 
-Ensuring task steps and reference images survive the complete create, database, response, and reader path.
+Normalizing task detail JSON across the production database, authenticated sessions, and shared staff links.
+
+## rc.126
+
+- Checklist and image JSON accepts both native arrays and serialized values returned by compatible PostgreSQL schemas/drivers.
+- All task-loading paths use the same normalization instead of independent `Array.isArray` fallbacks.
+- The rc.125 confirmation safeguard remains active and now logs safe mismatch counts/types for diagnosis.
+- Migration `023_operation_task_images.sql` remains required. Rollback checkpoint: v0.19.0-rc.125.
 
 ## rc.125
 
