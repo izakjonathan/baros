@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.19.0-rc.129
+
+- Redesigned sign-in to match Operation and apply the latest saved UI Studio canvas, ink, accent and positive colors.
+- Added owner controls to edit a user's name, email, access level and location.
+- Added protected account-access deletion that preserves historical records, signs the removed user out, and prevents self-deletion or removal of the last owner.
+- Removed obsolete shared-link guidance from account settings and added regression coverage for the new login and user controls.
+
 ## v0.19.0-rc.128
 
 - Reduced the deployed product to login, account activation, authenticated Operation, and shared-staff Operation routes.

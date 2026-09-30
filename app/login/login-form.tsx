@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Crown, UserCog, UserRound, Wine } from "lucide-react";
+import { Crown, LoaderCircle, UserCog, UserRound } from "lucide-react";
+import { operationThemeCustomProperties, type UiTheme } from "@/lib/ui-theme-shared";
 
-export function LoginForm({ devMode }: { devMode: boolean }) {
+export function LoginForm({ devMode, theme }: { devMode: boolean; theme: UiTheme }) {
   const [email, setEmail] = useState(devMode ? "dev@barops.local" : "");
   const [password, setPassword] = useState(devMode ? "dev" : "");
   const [error, setError] = useState("");
@@ -29,10 +30,10 @@ export function LoginForm({ devMode }: { devMode: boolean }) {
   }
 
   return (
-    <main className="login-page">
-      <section className="card login-card">
-        <div className="login-brand"><span><Wine size={22} /></span><strong>Bar Ops</strong></div>
-        <div><p className="eyebrow">Hospitality operating system</p><h1>Welcome back</h1><p>Sign in to manage today’s operation.</p></div>
+    <main className="login-page" style={operationThemeCustomProperties(theme)}>
+      <section className="login-card">
+        <div className="login-brand" aria-label="BarOs"><span>Bar</span><b>Os</b></div>
+        <header className="login-heading"><p>Operation</p><h1>Welcome back</h1><span>Sign in to open today’s operation.</span></header>
 
         {devMode && (
           <section className="card card-compact dev-access-panel" aria-labelledby="dev-access-title">
@@ -58,14 +59,12 @@ export function LoginForm({ devMode }: { devMode: boolean }) {
           </section>
         )}
 
-        <div className="login-divider"><span>{devMode ? "Database sign-in" : "Sign in"}</span></div>
-        <form onSubmit={submit}>
-          <label>Email<input type="email" value={email} onChange={event => setEmail(event.target.value)} required autoComplete="email" /></label>
-          <label>Password<input type="password" value={password} onChange={event => setPassword(event.target.value)} required autoComplete="current-password" /></label>
+        <form className="login-form" onSubmit={submit}>
+          <label><span>Email</span><input type="email" value={email} onChange={event => setEmail(event.target.value)} required autoComplete="email" /></label>
+          <label><span>Password</span><input type="password" value={password} onChange={event => setPassword(event.target.value)} required autoComplete="current-password" /></label>
           {error && <p className="form-error">{error}</p>}
-          <button className="primary full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
+          <button className="login-submit" disabled={busy}>{busy ? <><LoaderCircle size={18} />Signing in…</> : "Sign in"}</button>
         </form>
-        <small>{devMode ? "The one-click development login is handled entirely by the server and does not require a database. Add DATABASE_URL and disable DEV_AUTH_ENABLED when PostgreSQL is ready." : "Use the account created in your PostgreSQL database."}</small>
       </section>
     </main>
   );

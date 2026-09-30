@@ -1,6 +1,6 @@
 # Bar Ops — Operation
 
-Current release: **v0.19.0-rc.128**
+Current release: **v0.19.0-rc.129**
 
 This repository now contains only the focused Operation product:
 
@@ -17,6 +17,8 @@ Owners can open Operation Settings to:
 
 - manage the Operation color system;
 - create Owner, Manager or Employee invitations;
+- edit account names, email addresses, access levels and assigned locations;
+- delete account access while preserving historical records;
 - copy or revoke pending activation links;
 - enable, disable or rotate the shared staff link;
 - reset Count or Reminder history independently;
@@ -49,4 +51,4 @@ npm run validate:env
 npm run build
 ```
 
-Rollback checkpoint: **v0.19.0-rc.127**.
+Rollback checkpoint: **v0.19.0-rc.128**.

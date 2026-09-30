@@ -32,4 +32,21 @@ export async function getUiTheme(organizationId?: string | null): Promise<UiThem
   }
 }
 
+export async function getLoginUiTheme(): Promise<UiTheme> {
+  try {
+    const [row] = await db()<Array<{ canvas_color: string; ink_color: string; accent_color: string; positive_color: string; updated_at: Date }>>`
+      select canvas_color, ink_color, accent_color, positive_color, updated_at
+      from organization_ui_themes
+      order by updated_at desc
+      limit 1
+    `;
+    return row
+      ? { canvasColor: row.canvas_color, inkColor: row.ink_color, accentColor: row.accent_color, positiveColor: row.positive_color, updatedAt: row.updated_at.toISOString() }
+      : defaultTheme;
+  } catch (error) {
+    if (typeof error === "object" && error !== null && "code" in error && ["42P01", "ECONNREFUSED", "ENOTFOUND"].includes(String(error.code))) return defaultTheme;
+    return defaultTheme;
+  }
+}
+
 export { defaultTheme, type UiTheme } from "@/lib/ui-theme-shared";

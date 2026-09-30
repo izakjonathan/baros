@@ -22,6 +22,9 @@ const login = read("app/api/auth/login/route.ts");
 const users = read("app/api/operation-users/route.ts");
 const activation = read("app/api/auth/activate/route.ts");
 const userPanel = read("features/operation/OperationUserManagement.tsx");
+const loginPage = read("app/login/page.tsx");
+const loginForm = read("app/login/login-form.tsx");
+const globalStyles = read("app/globals.css");
 const migration = read("db/migrations/025_operation_user_invitations.sql");
 
 const checks = [
@@ -32,6 +35,11 @@ const checks = [
   ["activation is single-use", activation.includes("status='PENDING'") && activation.includes("status='ACCEPTED'")],
   ["invitation secrets are stored as hashes", users.includes('createHash("sha256")') && migration.includes("token_hash")],
   ["owner settings can create and revoke invites", userPanel.includes("Add user") && userPanel.includes("Revoke")],
+  ["owner settings can edit and delete users", userPanel.includes("updateUser") && userPanel.includes("removeUser") && users.includes("export async function DELETE")],
+  ["user removal preserves history", users.includes("OPERATION_USER_ACCESS_REMOVED") && users.includes("delete from memberships") && !users.includes("delete from users")],
+  ["owner safety guards are present", users.includes("You cannot delete your own access") && users.includes("The last owner cannot be deleted")],
+  ["login loads the Operation UI theme", loginPage.includes("getLoginUiTheme") && loginForm.includes("operationThemeCustomProperties(theme)") && globalStyles.includes("background:var(--op-canvas)")],
+  ["obsolete account guidance is removed", !userPanel.includes("The shared staff link remains the simplest employee access")],
   ["invitation schema is organization-scoped", migration.includes("organization_id") && migration.includes("enable row level security")],
 ];
 
