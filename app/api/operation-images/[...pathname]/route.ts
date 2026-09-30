@@ -18,6 +18,10 @@ export async function GET(request: Request, { params }: RouteContext) {
   } else {
     try {
       const { db } = await import("@/lib/db/client");
+      const [publicAccess] = await db()<Array<{ organization_id: string }>>`
+        select organization_id from operation_public_access
+        where organization_id=${organizationId} and enabled=true and (expires_at is null or expires_at>now()) limit 1`;
+      if (!publicAccess) return NextResponse.json({ error: "Image not found" }, { status: 404 });
       const [article] = await db()<Array<{ id: string }>>`
         select id from operation_articles
         where organization_id=${organizationId} and published=true and content::text like ${`%${pathname}%`}

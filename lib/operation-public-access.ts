@@ -9,7 +9,7 @@ export async function getPublicOperationAccess(token: string): Promise<PublicOpe
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(token)) return null;
   const [access] = await db()<Array<{ organization_id: string; access_token: string }>>`
     select organization_id,access_token from operation_public_access
-    where access_token=${token}::uuid and enabled=true limit 1
+    where access_token=${token}::uuid and enabled=true and (expires_at is null or expires_at>now()) limit 1
   `;
   return access ? { organizationId: access.organization_id, token: access.access_token } : null;
 }
@@ -18,8 +18,8 @@ export async function loadPublicOperationState(access: PublicOperationAccess, da
   const [articles, tasks, needs, cashCounts] = await Promise.all([
     db()<Array<Record<string, unknown>>>`
       select id,kind,category,title,description,content,published,created_at,updated_at
-      from operation_articles where organization_id=${access.organizationId} and published=true
-      order by kind,category,sort_order,updated_at desc`,
+      from operation_articles where organization_id=${access.organizationId} and published=true and archived_at is null
+      order by case when kind='NEWS' then updated_at end desc,kind,category,sort_order,updated_at desc`,
     db()<Array<Record<string, unknown>>>`
       select t.id,t.weekday,t.title,t.description,t.due_date::text due_date,t.repeat_unit,t.repeat_interval,t.repeat_end_date::text repeat_end_date,t.task_type,t.priority,t.due_time,t.reminder_minutes,t.assignment_scope,t.assigned_employee_id,t.checklist,t.images,
              coalesce((select jsonb_object_agg(cc.item_id,true) from operation_task_checklist_completions cc where cc.task_id=t.id and cc.service_date=${date}::date), '{}'::jsonb) checklist_completed,
@@ -44,5 +44,5 @@ export async function loadPublicOperationState(access: PublicOperationAccess, da
   })).filter(task => isOperationTaskDue(task, date));
   const mappedNeeds = needs.map((need): OperationNeed => ({ id: String(need.id), title: String(need.title), note: need.note == null ? null : String(need.note), status: ["ORDERED", "RESOLVED", "DISMISSED"].includes(String(need.status)) ? String(need.status) as OperationNeed["status"] : "NEEDED", createdAt: String(need.created_at), updatedAt: String(need.updated_at || need.created_at), type: ["NEW_ITEM", "ISSUE"].includes(String(need.reminder_type)) ? String(need.reminder_type) as OperationNeed["type"] : "RESTOCK", stockLevel: ["LOW", "OUT_OF"].includes(String(need.stock_level)) ? String(need.stock_level) as OperationNeed["stockLevel"] : null }));
   const mappedCashCounts = cashCounts.map((count): OperationCashCount => ({ id: String(count.id), operationalDate: String(count.operational_date), tillAmount: count.till_amount == null ? null : Number(count.till_amount), changeBoxAmount: count.change_box_amount == null ? null : Number(count.change_box_amount), countedByName: String(count.counted_by_name), createdAt: String(count.created_at) }));
-  return { ...defaultOperationState, userRole: "EMPLOYEE", canManageContent: false, canManageTasks: false, storageStatus: "ready", today: date, handbook: articles.filter(article => article.kind === "HANDBOOK").map(mapOperationArticle), news: articles.filter(article => article.kind === "NEWS").map(mapOperationArticle), dailyTasks, assignees: [], taskTemplates: [], needs: mappedNeeds, cashCounts: mappedCashCounts, metrics: { completionRate: dailyTasks.length ? Math.round(dailyTasks.filter(task => task.completed).length / dailyTasks.length * 100) : 100, completedCount: dailyTasks.filter(task => task.completed).length, dueCount: dailyTasks.length, overdueCount: 0, openNeedsCount: mappedNeeds.filter(need => need.status === "NEEDED").length, overdueNeedsCount: 0 } };
+  return { ...defaultOperationState, userRole: "EMPLOYEE", canManageContent: false, canManageTasks: false, storageStatus: "ready", today: date, handbook: articles.filter(article => article.kind === "HANDBOOK").map(mapOperationArticle), news: articles.filter(article => article.kind === "NEWS").map(mapOperationArticle).sort((left, right) => new Date(right.updatedAt).valueOf() - new Date(left.updatedAt).valueOf()), dailyTasks, assignees: [], taskTemplates: [], needs: mappedNeeds, cashCounts: mappedCashCounts, metrics: { completionRate: dailyTasks.length ? Math.round(dailyTasks.filter(task => task.completed).length / dailyTasks.length * 100) : 100, completedCount: dailyTasks.filter(task => task.completed).length, dueCount: dailyTasks.length, overdueCount: 0, openNeedsCount: mappedNeeds.filter(need => need.status === "NEEDED").length, overdueNeedsCount: 0 } };
 }

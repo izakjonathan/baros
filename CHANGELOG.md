@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.19.0-rc.127
+
+- Centralized authenticated Operation state loading and added task-date-only refreshes to reduce repeated database and network work.
+- Added local owner drafts, connection/sync feedback, focus/visibility refresh, retry-safe article/task/reminder/count creation, and Reminder undo.
+- Added task editing with persisted steps and images, simpler progressive task options, body-aware Handbook search, and true newest-first News ordering.
+- Archived deleted articles, added owner controls to enable/disable/rotate shared staff links, and protected public data/images with expiry and rate-limit checks.
+- Added accessible focus-trapped dialogs, in-app destructive confirmations, visible focus states, reduced-motion handling, and mobile UI refinements.
+- Added migration `024_operation_reliability.sql`.
+
 ## v0.19.0-rc.126
 
 - Added a shared task JSON compatibility decoder for database-native arrays and serialized JSON values.

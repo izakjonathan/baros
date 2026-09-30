@@ -1,6 +1,6 @@
 # Bar Ops
 
-Current release: **v0.19.0-rc.126**
+Current release: **v0.19.0-rc.127**
 
 ## RC.126 — Task JSON compatibility
 

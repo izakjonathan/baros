@@ -3,6 +3,7 @@ import { operationCountDateNow, operationDateNow } from "@/features/operation/da
 import { db } from "@/lib/db/client";
 import { ApiError, enumValue, finiteNumber, isoDate, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
 import { getPublicOperationAccess, loadPublicOperationState } from "@/lib/operation-public-access";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 type RouteContext = { params: Promise<{ accessToken: string }> };
 
@@ -24,7 +25,10 @@ export async function GET(request: Request, { params }: RouteContext) {
 export async function POST(request: Request, { params }: RouteContext) {
   try {
     const access = await accessFor(params);
+    const client = request.headers.get("x-forwarded-for")?.split(",", 1)[0]?.trim() || "unknown";
+    await enforceRateLimit(`operation-public:${access.organizationId}:${client}:create`, 20, 60);
     const body = await readJsonObject(request);
+    const idempotencyKey = body.idempotencyKey ? uuid(body.idempotencyKey, "idempotencyKey") : crypto.randomUUID();
     const entity = enumValue(body.entity, "entity", ["need", "cashCount"] as const);
     if (entity === "cashCount") {
       const countedByName = requiredString(body, "countedByName", 100);
@@ -32,8 +36,9 @@ export async function POST(request: Request, { params }: RouteContext) {
       const changeBoxAmount = body.changeBoxAmount == null || body.changeBoxAmount === "" ? null : finiteNumber(body.changeBoxAmount, "changeBoxAmount", { min: 0, max: 1_000_000 });
       if (tillAmount == null && changeBoxAmount == null) throw new ApiError(400, "Enter a till amount, a change-box amount, or both.");
       const [count] = await db()<Array<{ id: string }>>`
-        insert into operation_cash_counts(organization_id,operational_date,till_amount,change_box_amount,counted_by_name)
-        values(${access.organizationId},${operationCountDateNow()}::date,${tillAmount},${changeBoxAmount},${countedByName}) returning id`;
+        insert into operation_cash_counts(organization_id,operational_date,till_amount,change_box_amount,counted_by_name,idempotency_key)
+        values(${access.organizationId},${operationCountDateNow()}::date,${tillAmount},${changeBoxAmount},${countedByName},${idempotencyKey})
+        on conflict (organization_id,idempotency_key) where idempotency_key is not null do update set idempotency_key=excluded.idempotency_key returning id`;
       await db()`insert into audit_logs(organization_id,action,entity_type,entity_id,metadata) values(${access.organizationId},'PUBLIC_OPERATION_CASH_COUNT_CREATED','operation_cash_count',${count.id},'{"actor":"shared_staff_link"}'::jsonb)`;
       return NextResponse.json({ id: count.id }, { status: 201 });
     }
@@ -42,8 +47,9 @@ export async function POST(request: Request, { params }: RouteContext) {
     const type = enumValue(body.type || "RESTOCK", "type", ["RESTOCK", "NEW_ITEM", "ISSUE"] as const);
     const stockLevel = type === "RESTOCK" ? enumValue(body.stockLevel || "LOW", "stockLevel", ["LOW", "OUT_OF"] as const) : null;
     const [need] = await db()<Array<{ id: string }>>`
-      insert into operation_needs(organization_id,title,note,reminder_type,stock_level)
-      values(${access.organizationId},${title},${note},${type},${stockLevel}) returning id`;
+      insert into operation_needs(organization_id,title,note,reminder_type,stock_level,idempotency_key)
+      values(${access.organizationId},${title},${note},${type},${stockLevel},${idempotencyKey})
+      on conflict (organization_id,idempotency_key) where idempotency_key is not null do update set idempotency_key=excluded.idempotency_key returning id`;
     await db()`insert into audit_logs(organization_id,action,entity_type,entity_id,metadata) values(${access.organizationId},'PUBLIC_OPERATION_NEED_CREATED','operation_need',${need.id},'{"actor":"shared_staff_link"}'::jsonb)`;
     return NextResponse.json({ id: need.id }, { status: 201 });
   } catch (error) { return jsonError(error, request); }
@@ -52,6 +58,8 @@ export async function POST(request: Request, { params }: RouteContext) {
 export async function PATCH(request: Request, { params }: RouteContext) {
   try {
     const access = await accessFor(params);
+    const client = request.headers.get("x-forwarded-for")?.split(",", 1)[0]?.trim() || "unknown";
+    await enforceRateLimit(`operation-public:${access.organizationId}:${client}:update`, 60, 60);
     const body = await readJsonObject(request);
     const entity = enumValue(body.entity, "entity", ["dailyTask", "need"] as const);
     const id = uuid(body.id, "id");

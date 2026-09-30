@@ -1,12 +1,13 @@
 import { OperationModule } from "@/features/operation/OperationModule";
 import { defaultOperationState } from "@/features/operation/default-content";
-import { mapOperationArticle, ownerCanManageOperation } from "@/features/operation/content";
-import { isOperationTaskDue, parseOperationTaskChecklist, parseOperationTaskImages, type OperationCashCount, type OperationDailyTask, type OperationModuleState, type OperationNeed } from "@/features/operation/types";
+import { ownerCanManageOperation } from "@/features/operation/content";
+import type { OperationModuleState } from "@/features/operation/types";
+import { operationDateNow } from "@/features/operation/date";
 import { isDevAuthEnabled } from "@/lib/auth/dev-auth";
+import { hasCapability } from "@/lib/auth/capabilities";
 import { requireUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
-import { operationDateNow } from "@/features/operation/date";
-import { hasCapability } from "@/lib/auth/capabilities";
+import { loadOperationState } from "@/lib/operation-state";
 import { defaultTheme, getUiTheme } from "@/lib/ui-theme";
 
 function isOperationSchemaUnavailable(error: unknown) {
@@ -15,133 +16,38 @@ function isOperationSchemaUnavailable(error: unknown) {
   const code = String(record.code || "");
   const message = String(record.message || "");
   return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|cash_counts|article_kind|need_status|task_templates|task_checklist_completions)/i.test(message)
-    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|assignment_scope|images|reminder_type|stock_level)/i.test(message);
+    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|assignment_scope|checklist|images|reminder_type|stock_level|archived_at|idempotency_key|expires_at|rotated_at)/i.test(message);
 }
 
 export default async function OperationPage() {
   const user = await requireUser();
   const devMode = isDevAuthEnabled();
+  const today = operationDateNow();
   const initialTheme = await getUiTheme(user.organizationId).catch(() => defaultTheme);
-  const [publicAccess] = devMode ? [] : await db()<Array<{ access_token: string }>>`select access_token from operation_public_access where organization_id=${user.organizationId} and enabled=true limit 1`;
-  const publicUrl = publicAccess ? `/operation/public/${publicAccess.access_token}` : undefined;
+  let publicUrl: string | undefined;
   const fallbackState: OperationModuleState = {
     ...defaultOperationState,
     userRole: user.role,
     canManageContent: ownerCanManageOperation(user.role),
     canManageTasks: hasCapability(user.role, "operations.manage"),
     storageStatus: "ready",
-    today: operationDateNow(),
-  };
-  if (devMode) {
-    return <OperationModule initialState={fallbackState} initialTheme={initialTheme} devMode publicUrl={publicUrl} />;
-  }
-
-  const today = operationDateNow();
-  let articles: Array<Record<string, unknown>>;
-  let tasks: Array<Record<string, unknown>>;
-  let needs: Array<Record<string, unknown>>;
-  let cashCounts: Array<Record<string, unknown>>;
-  let assignees: Array<Record<string, unknown>>;
-  try {
-    [articles, tasks, needs, assignees, cashCounts] = await Promise.all([
-      db()<Array<Record<string, unknown>>>`
-        select id,kind,category,title,description,content,published,created_at,updated_at
-        from operation_articles
-        where organization_id=${user.organizationId} and published=true
-        order by kind,category,sort_order,updated_at desc`,
-      db()<Array<Record<string, unknown>>>`
-        select t.id,t.weekday,t.title,t.description,t.due_date,t.repeat_unit,t.repeat_interval,t.repeat_end_date,t.task_type,t.priority,t.due_time,t.reminder_minutes,t.assignment_scope,t.assigned_employee_id,t.checklist,t.images,
-               coalesce((select jsonb_object_agg(cc.item_id,true) from operation_task_checklist_completions cc where cc.task_id=t.id and cc.service_date=${today}::date), '{}'::jsonb) checklist_completed,
-               (a.first_name||' '||a.last_name) assigned_employee_name,
-               (completed_employee.first_name||' '||completed_employee.last_name) completed_by_name,
-               (c.completed_at is not null) completed
-        from operation_daily_tasks t
-        left join operation_daily_task_completions c
-          on c.task_id=t.id and c.service_date=${today}::date and c.organization_id=t.organization_id
-        left join employees a on a.id=t.assigned_employee_id and a.organization_id=t.organization_id
-        left join employees completed_employee on completed_employee.user_id=c.completed_by and completed_employee.organization_id=t.organization_id
-        where t.organization_id=${user.organizationId}
-          and (${user.locationId}::uuid is null or t.location_id is null or t.location_id=${user.locationId})
-          and t.active=true
-        order by t.sort_order,t.created_at`,
-      db()<Array<Record<string, unknown>>>`
-        select id,title,note,status,created_at,updated_at,reminder_type,stock_level
-        from operation_needs
-        where organization_id=${user.organizationId}
-          and (${user.locationId}::uuid is null or location_id is null or location_id=${user.locationId})
-        order by created_at desc
-        limit 100`,
-      db()<Array<Record<string, unknown>>>`
-        select e.id,e.first_name||' '||e.last_name name
-        from employees e
-        where e.organization_id=${user.organizationId} and e.active=true
-          and (${user.locationId}::uuid is null or exists(select 1 from employee_locations el where el.employee_id=e.id and el.location_id=${user.locationId}))
-        order by e.first_name,e.last_name`,
-      db()<Array<Record<string, unknown>>>`
-        select id,operational_date::text operational_date,till_amount,change_box_amount,counted_by_name,created_at
-        from operation_cash_counts
-        where organization_id=${user.organizationId}
-          and (${user.locationId}::uuid is null or location_id is null or location_id=${user.locationId})
-        order by operational_date desc,created_at desc limit 100`,
-    ]);
-  } catch (error) {
-    if (isOperationSchemaUnavailable(error)) return <OperationModule initialState={{ ...fallbackState, storageStatus: "migration-required" }} initialTheme={initialTheme} devMode={false} publicUrl={publicUrl} />;
-    throw error;
-  }
-
-  const handbook = articles.filter(article => article.kind === "HANDBOOK").map(mapOperationArticle);
-  const news = articles.filter(article => article.kind === "NEWS").map(mapOperationArticle);
-  const initialState: OperationModuleState = {
-    userRole: user.role,
-    canManageContent: ownerCanManageOperation(user.role),
-    canManageTasks: hasCapability(user.role, "operations.manage"),
-    storageStatus: "ready",
     today,
-    handbook,
-    news,
-    dailyTasks: tasks.map((task): OperationDailyTask => ({
-      id: String(task.id),
-      weekday: Number(task.weekday),
-      title: String(task.title),
-      description: String(task.description || ""),
-      dueDate: String(task.due_date),
-      repeatUnit: String(task.repeat_unit) as OperationDailyTask["repeatUnit"],
-      repeatInterval: Number(task.repeat_interval),
-      repeatEndDate: task.repeat_end_date == null ? null : String(task.repeat_end_date),
-      dueTime: task.due_time == null ? null : String(task.due_time).slice(0, 5),
-      reminderMinutes: task.reminder_minutes == null ? null : Number(task.reminder_minutes),
-      priority: String(task.priority) as OperationDailyTask["priority"],
-      taskType: String(task.task_type) as OperationDailyTask["taskType"],
-      assignmentScope: String(task.assignment_scope) as OperationDailyTask["assignmentScope"],
-      assignedEmployeeId: task.assigned_employee_id == null ? null : String(task.assigned_employee_id),
-      assignedEmployeeName: task.assigned_employee_name == null ? null : String(task.assigned_employee_name),
-      completedByName: task.completed_by_name == null ? null : String(task.completed_by_name),
-        checklist: parseOperationTaskChecklist(task.checklist, task.checklist_completed),
-        images: parseOperationTaskImages(task.images),
-      completed: Boolean(task.completed),
-    })).filter(task => isOperationTaskDue(task, today)),
-    assignees: assignees.map(assignee => ({ id: String(assignee.id), name: String(assignee.name) })),
-    taskTemplates: [],
-    metrics: { completionRate: 0, completedCount: 0, dueCount: 0, overdueCount: 0, openNeedsCount: needs.filter(need => need.status === "NEEDED").length, overdueNeedsCount: 0 },
-    needs: needs.map((need): OperationNeed => ({
-      id: String(need.id),
-      title: String(need.title),
-      note: need.note == null ? null : String(need.note),
-      status: ["ORDERED", "RESOLVED", "DISMISSED"].includes(String(need.status)) ? String(need.status) as OperationNeed["status"] : "NEEDED",
-      createdAt: String(need.created_at),
-      updatedAt: String(need.updated_at || need.created_at),
-      type: ["NEW_ITEM", "ISSUE"].includes(String(need.reminder_type)) ? String(need.reminder_type) as OperationNeed["type"] : "RESTOCK",
-      stockLevel: ["LOW", "OUT_OF"].includes(String(need.stock_level)) ? String(need.stock_level) as OperationNeed["stockLevel"] : null,
-    })),
-    cashCounts: cashCounts.map((count): OperationCashCount => ({
-      id: String(count.id),
-      operationalDate: String(count.operational_date),
-      tillAmount: count.till_amount == null ? null : Number(count.till_amount),
-      changeBoxAmount: count.change_box_amount == null ? null : Number(count.change_box_amount),
-      countedByName: String(count.counted_by_name),
-      createdAt: String(count.created_at),
-    })),
   };
+  if (devMode) return <OperationModule initialState={fallbackState} initialTheme={initialTheme} devMode publicUrl={publicUrl} />;
 
+  let initialState: OperationModuleState;
+  try {
+    const [publicAccess] = await db()<Array<{ access_token: string }>>`
+      select access_token from operation_public_access
+      where organization_id=${user.organizationId} and enabled=true and (expires_at is null or expires_at>now()) limit 1`;
+    publicUrl = publicAccess ? `/operation/public/${publicAccess.access_token}` : undefined;
+    initialState = await loadOperationState(user, today);
+  } catch (error) {
+    if (isOperationSchemaUnavailable(error)) {
+      initialState = { ...fallbackState, storageStatus: "migration-required" };
+    } else {
+      throw error;
+    }
+  }
   return <OperationModule initialState={initialState} initialTheme={initialTheme} devMode={false} publicUrl={publicUrl} />;
 }

@@ -1,10 +1,20 @@
 # Implementation Status
 
-Version: **v0.19.0-rc.126**
+Version: **v0.19.0-rc.127**
 
 ## Current focus
 
-Normalizing task detail JSON across the production database, authenticated sessions, and shared staff links.
+Preparing Operation for real-bar end-to-end testing with resilient mobile writes, focused data refreshes, and simpler owner workflows.
+
+## rc.127
+
+- Operation uses a shared server loader and task-date-only refreshes instead of reloading every module for routine task navigation.
+- Owner drafts survive accidental closure or a temporary connection loss; retry-safe identifiers prevent duplicate creates.
+- Tasks can be edited with their persisted steps and images, Handbook search includes article bodies, and News is ordered by actual recency.
+- Reminder actions offer Undo, Count remembers the operator name, and connection/sync state is visible without interrupting staff.
+- Owner settings manage the shared staff link; public access and private image delivery respect active/expiry state and request limits.
+- Article deletion is archival, dialogs trap focus and restore it, and destructive actions use consistent in-app confirmation.
+- Migration required: `024_operation_reliability.sql`. Rollback checkpoint: v0.19.0-rc.126.
 
 ## rc.126
 

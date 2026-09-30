@@ -8,6 +8,7 @@ import { getSessionUser } from "@/lib/auth/session";
 import { hasCapability } from "@/lib/auth/capabilities";
 import { operationCountDateNow, operationDateNow } from "@/features/operation/date";
 import { logServerError } from "@/lib/observability";
+import { loadOperationTasks } from "@/lib/operation-state";
 
 function requireOwner(role: string) {
   if (!ownerCanManageOperation(role)) throw new ApiError(403, "Owner or Admin permission is required");
@@ -41,7 +42,7 @@ function isOperationSchemaUnavailable(error: unknown) {
   const code = String(record.code || "");
   const message = String(record.message || "");
   return (code === "42P01" || code === "42704") && /operation_(articles|daily_tasks|daily_task_completions|needs|cash_counts|article_kind|need_status|task_templates|task_checklist_completions)/i.test(message)
-    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|assignment_scope|checklist|images|quantity|supplier|needed_by|reminder_type|stock_level)/i.test(message);
+    || code === "42703" && /(task_type|priority|due_time|reminder_minutes|assigned_employee_id|assignment_scope|checklist|images|quantity|supplier|needed_by|reminder_type|stock_level|archived_at|idempotency_key|expires_at|rotated_at)/i.test(message);
 }
 
 function operationMigrationRequired() {
@@ -61,12 +62,15 @@ export async function GET(request: Request) {
     const user = await requireApiUser();
     const params = new URL(request.url).searchParams;
     const today = isoDate(params.get("date") || operationDateNow(), "date");
+    if (params.get("scope") === "tasks") {
+      return NextResponse.json({ today, dailyTasks: await loadOperationTasks(user, today) }, { headers: { "cache-control": "no-store" } });
+    }
     const [articles, tasks, needs, assignees, taskTemplates, cashCounts] = await Promise.all([
       db()<Array<Record<string, unknown>>>`
         select a.id,a.kind,a.category,a.title,a.description,a.content,a.published,a.created_at,a.updated_at
         from operation_articles a
-        where a.organization_id=${user.organizationId} and (a.published=true or ${ownerCanManageOperation(user.role)})
-        order by a.kind,a.category,a.sort_order,a.updated_at desc`,
+        where a.organization_id=${user.organizationId} and a.archived_at is null and (a.published=true or ${ownerCanManageOperation(user.role)})
+        order by case when a.kind='NEWS' then a.updated_at end desc,a.kind,a.category,a.sort_order,a.updated_at desc`,
       db()<Array<Record<string, unknown>>>`
         select t.id,t.weekday,t.title,t.description,t.due_date::text due_date,t.repeat_unit,t.repeat_interval,t.repeat_end_date::text repeat_end_date,t.task_type,t.priority,t.due_time,t.reminder_minutes,t.assignment_scope,t.assigned_employee_id,t.checklist,t.images,
                coalesce((select jsonb_object_agg(cc.item_id,true) from operation_task_checklist_completions cc where cc.task_id=t.id and cc.service_date=${today}::date), '{}'::jsonb) checklist_completed,
@@ -197,21 +201,24 @@ export async function POST(request: Request) {
 
     if (entity === "article") {
       requireOwner(user.role);
+      const idempotencyKey = body.idempotencyKey ? uuid(body.idempotencyKey, "idempotencyKey") : crypto.randomUUID();
       const kind = enumValue(body.kind, "kind", ["HANDBOOK", "NEWS"] as const);
       const category = requiredString(body, "category", 80);
       const title = requiredString(body, "title", 160);
-      const description = requiredString(body, "description", 300);
+      const description = optionalString(body, "description", 300) || "";
       const content = parseOperationBlocks(body.content);
       if (!content.length) throw new ApiError(400, "content must contain at least one block");
       const [row] = await db()<Array<Record<string, unknown>>>`
-        insert into operation_articles(organization_id,kind,category,title,description,content,created_by,updated_by)
-        values(${user.organizationId},${kind},${category},${title},${description},${JSON.stringify(content)}::jsonb,${user.userId},${user.userId})
+        insert into operation_articles(organization_id,kind,category,title,description,content,created_by,updated_by,idempotency_key)
+        values(${user.organizationId},${kind},${category},${title},${description},${JSON.stringify(content)}::jsonb,${user.userId},${user.userId},${idempotencyKey})
+        on conflict (organization_id,idempotency_key) where idempotency_key is not null do update set idempotency_key=excluded.idempotency_key
         returning id,kind,category,title,description,content,published,created_at,updated_at`;
       return NextResponse.json(mapOperationArticle(row), { status: 201 });
     }
 
     if (entity === "dailyTask") {
       requireTaskManager(user.role);
+      const idempotencyKey = body.idempotencyKey ? uuid(body.idempotencyKey, "idempotencyKey") : crypto.randomUUID();
       const dueDate = isoDate(body.dueDate || operationDateNow(), "dueDate");
       const weekday = weekdayFromDate(dueDate);
       const repeatUnit = enumValue(body.repeatUnit || "NONE", "repeatUnit", ["NONE", "DAY", "WEEK", "MONTH", "YEAR"] as const);
@@ -238,8 +245,9 @@ export async function POST(request: Request) {
       const title = requiredString(body, "title", 160);
       const description = optionalString(body, "description", 300) || "";
       const [row] = await db()<Array<Record<string, unknown>>>`
-        insert into operation_daily_tasks(organization_id,location_id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assignment_scope,assigned_employee_id,checklist,images,created_by,updated_by)
-        values(${user.organizationId},${user.locationId},${weekday},${title},${description},${dueDate}::date,${repeatUnit},${repeatInterval},${repeatEndDate}::date,${taskType},${priority},${dueTime}::time,${reminderMinutes},${assignmentScope},${assignedEmployeeId},${JSON.stringify(checklist)}::jsonb,${JSON.stringify(images)}::jsonb,${user.userId},${user.userId})
+        insert into operation_daily_tasks(organization_id,location_id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assignment_scope,assigned_employee_id,checklist,images,created_by,updated_by,idempotency_key)
+        values(${user.organizationId},${user.locationId},${weekday},${title},${description},${dueDate}::date,${repeatUnit},${repeatInterval},${repeatEndDate}::date,${taskType},${priority},${dueTime}::time,${reminderMinutes},${assignmentScope},${assignedEmployeeId},${JSON.stringify(checklist)}::jsonb,${JSON.stringify(images)}::jsonb,${user.userId},${user.userId},${idempotencyKey})
+        on conflict (organization_id,idempotency_key) where idempotency_key is not null do update set idempotency_key=excluded.idempotency_key
         returning id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assignment_scope,assigned_employee_id,checklist,images,false completed`;
       const storedChecklist = parseChecklist(row.checklist);
       const storedImages = parseOperationTaskImages(row.images);
@@ -285,24 +293,28 @@ export async function POST(request: Request) {
     }
 
     if (entity === "cashCount") {
+      const idempotencyKey = body.idempotencyKey ? uuid(body.idempotencyKey, "idempotencyKey") : crypto.randomUUID();
       const countedByName = requiredString(body, "countedByName", 100);
       const tillAmount = optionalCashAmount(body, "tillAmount");
       const changeBoxAmount = optionalCashAmount(body, "changeBoxAmount");
       if (tillAmount == null && changeBoxAmount == null) throw new ApiError(400, "Enter a till amount, a change-box amount, or both.");
       const [row] = await db()<Array<Record<string, unknown>>>`
-        insert into operation_cash_counts(organization_id,location_id,operational_date,till_amount,change_box_amount,counted_by_name,created_by)
-        values(${user.organizationId},${user.locationId},${operationCountDateNow()}::date,${tillAmount},${changeBoxAmount},${countedByName},${user.userId})
+        insert into operation_cash_counts(organization_id,location_id,operational_date,till_amount,change_box_amount,counted_by_name,created_by,idempotency_key)
+        values(${user.organizationId},${user.locationId},${operationCountDateNow()}::date,${tillAmount},${changeBoxAmount},${countedByName},${user.userId},${idempotencyKey})
+        on conflict (organization_id,idempotency_key) where idempotency_key is not null do update set idempotency_key=excluded.idempotency_key
         returning id,operational_date::text operational_date,till_amount,change_box_amount,counted_by_name,created_at`;
       return NextResponse.json(row, { status: 201 });
     }
 
+    const idempotencyKey = body.idempotencyKey ? uuid(body.idempotencyKey, "idempotencyKey") : crypto.randomUUID();
     const title = requiredString(body, "title", 160);
     const note = optionalString(body, "note", 400);
     const type = enumValue(body.type || "RESTOCK", "type", ["RESTOCK", "NEW_ITEM", "ISSUE"] as const);
     const stockLevel = type === "RESTOCK" ? enumValue(body.stockLevel || "LOW", "stockLevel", ["LOW", "OUT_OF"] as const) : null;
     const [row] = await db()<Array<Record<string, unknown>>>`
-      insert into operation_needs(organization_id,location_id,title,note,reminder_type,stock_level,created_by,updated_by)
-      values(${user.organizationId},${user.locationId},${title},${note},${type},${stockLevel},${user.userId},${user.userId})
+      insert into operation_needs(organization_id,location_id,title,note,reminder_type,stock_level,created_by,updated_by,idempotency_key)
+      values(${user.organizationId},${user.locationId},${title},${note},${type},${stockLevel},${user.userId},${user.userId},${idempotencyKey})
+      on conflict (organization_id,idempotency_key) where idempotency_key is not null do update set idempotency_key=excluded.idempotency_key
       returning id,title,note,status,created_at,reminder_type,stock_level`;
     return NextResponse.json(row, { status: 201 });
   } catch (error) {
@@ -323,7 +335,7 @@ export async function PATCH(request: Request) {
       const kind = body.kind == null ? null : enumValue(body.kind, "kind", ["HANDBOOK", "NEWS"] as const);
       const category = optionalString(body, "category", 80);
       const title = optionalString(body, "title", 160);
-      const description = optionalString(body, "description", 300);
+      const description = body.description === "" ? "" : optionalString(body, "description", 300);
       const content = body.content == null ? null : parseOperationBlocks(body.content);
       if (body.content != null && !content?.length) throw new ApiError(400, "content must contain at least one block");
       const [row] = await db()<Array<Record<string, unknown>>>`
@@ -374,6 +386,12 @@ export async function PATCH(request: Request) {
         const repeatEndDate = !updateRepeatEndDate || body.repeatEndDate === "" || body.repeatEndDate === null ? null : isoDate(body.repeatEndDate, "repeatEndDate");
         const title = optionalString(body, "title", 160);
         const description = optionalString(body, "description", 300);
+        const updateChecklist = body.checklist !== undefined;
+        const checklist = updateChecklist ? parseChecklist(body.checklist) : null;
+        const updateImages = body.images !== undefined;
+        const images = updateImages ? parseOperationTaskImages(body.images) : null;
+        if (updateChecklist && checklist?.length !== (Array.isArray(body.checklist) ? body.checklist.length : 0)) throw new ApiError(400, "One or more checklist steps could not be saved.");
+        if (updateImages && images?.length !== (Array.isArray(body.images) ? body.images.length : 0)) throw new ApiError(400, "One or more task images could not be saved.");
         const [row] = await db()<Array<Record<string, unknown>>>`
           update operation_daily_tasks
           set weekday=coalesce(${weekday},weekday),
@@ -389,10 +407,12 @@ export async function PATCH(request: Request) {
               task_type=coalesce(${taskType},task_type),
               assignment_scope=coalesce(${assignmentScope},assignment_scope),
               assigned_employee_id=case when ${assignmentScope !== null} then ${assignedEmployeeId}::uuid else assigned_employee_id end,
+              checklist=case when ${updateChecklist} then ${checklist == null ? null : JSON.stringify(checklist)}::jsonb else checklist end,
+              images=case when ${updateImages} then ${images == null ? null : JSON.stringify(images)}::jsonb else images end,
               updated_by=${user.userId},
               updated_at=now()
           where id=${id} and organization_id=${user.organizationId}
-          returning id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assignment_scope,assigned_employee_id`;
+          returning id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assignment_scope,assigned_employee_id,checklist,images`;
         if (!row) throw new ApiError(404, "Daily task not found");
         return NextResponse.json({ ...row, completed: false });
       }
@@ -417,7 +437,8 @@ export async function PATCH(request: Request) {
 
     const [reminder] = await db()<Array<{ reminder_type: string }>>`select reminder_type from operation_needs where id=${id} and organization_id=${user.organizationId}`;
     if (!reminder) throw new ApiError(404, "Reminder not found");
-    const status = reminder.reminder_type === "ISSUE"
+    const undo = body.action === "undo";
+    const status = undo ? enumValue(body.status, "status", ["NEEDED"] as const) : reminder.reminder_type === "ISSUE"
       ? enumValue(body.status, "status", ["RESOLVED", "DISMISSED"] as const)
       : enumValue(body.status, "status", ["ORDERED", "DISMISSED"] as const);
     const [row] = await db()<Array<Record<string, unknown>>>`
@@ -467,7 +488,7 @@ export async function DELETE(request: Request) {
     const id = uuid(params.get("id"), "id");
     if (entity === "article") {
       requireOwner(user.role);
-      const [row] = await db()`delete from operation_articles where id=${id} and organization_id=${user.organizationId} returning id`;
+      const [row] = await db()`update operation_articles set archived_at=now(),updated_by=${user.userId},updated_at=now() where id=${id} and organization_id=${user.organizationId} and archived_at is null returning id`;
       if (!row) throw new ApiError(404, "Article not found");
     } else if (entity === "dailyTask") {
       requireTaskManager(user.role);

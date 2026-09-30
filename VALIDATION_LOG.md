@@ -1,25 +1,27 @@
-# v0.19.0-rc.126 Validation
+# v0.19.0-rc.127 Validation
 
 ## Confirmed baseline
 
-The rc.125 confirmed task-details release was used as the baseline.
+The rc.126 task JSON compatibility release was used as the baseline.
 
-- Rollback checkpoint: v0.19.0-rc.125
+- Rollback checkpoint: v0.19.0-rc.126
 
 ## Implementation
 
-- Added tolerant JSON decoding for task checklist, checklist-completion, and image values.
-- Applied one decoder across server-rendered, refreshed API, and shared-link task states.
-- Preserved strict task creation confirmation and incomplete-row cleanup.
-- Added structured mismatch diagnostics and compatibility regression coverage.
+- Centralized Operation server state and narrowed date changes to task-only refreshes.
+- Added drafts, synchronization feedback, idempotent writes, Reminder undo, task editing, shared-link lifecycle controls, and article archival.
+- Added focus-trapped dialogs, in-app confirmations, keyboard/focus refinements, and simplified progressive task creation.
+- Added migration `024_operation_reliability.sql` and updated Operation/UI/API contract coverage.
 
 ## Validation status
 
 - ESLint: passed.
 - TypeScript (`tsc --noEmit`): passed.
 - Operations regression suite (`npm run test:operation`): passed.
+- UI contract suite (`npm run test:ui`): passed.
+- API boundary suite (`npm run test:boundaries`): passed.
 - Next.js 16.2.12 Turbopack production build: passed.
 
 ## Scope
 
-Database migration `023_operation_task_images.sql` is required. Production iPhone/iPad Safari visual confirmation remains required after deployment.
+Database migration `024_operation_reliability.sql` is required. Production iPhone/iPad Safari and full owner/employee/shared-link end-to-end confirmation remain the next phase after deployment.

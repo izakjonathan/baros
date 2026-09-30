@@ -1,3 +1,21 @@
+# v0.19.0-rc.127 — Operation Reliability and Usability
+
+## Baseline
+
+- Continued from v0.19.0-rc.126. That release is the rollback checkpoint.
+
+## Included
+
+- Faster focused task-date refreshes and one shared server loader for owner and employee Operation state.
+- Device-local drafts, live connection/sync status, refresh on return, retry-safe creates, and a short Undo action for Reminder changes.
+- Owner task editing, simpler progressive task creation, full-content Handbook search, and newest-first News.
+- Recoverable article archival plus owner controls for shared-link enable, disable, and immediate rotation.
+- Focus-trapped in-app dialogs, keyboard-safe controls, visible focus states, reduced-motion support, and coherent no-shadow Operation surfaces.
+
+Apply `db/migrations/024_operation_reliability.sql` before deploying the application. Migration `023_operation_task_images.sql` remains required on databases that have not already applied it.
+
+Rollback checkpoint: **v0.19.0-rc.126**.
+
 # v0.19.0-rc.126 — Task JSON Compatibility
 
 ## Baseline
