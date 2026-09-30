@@ -5,6 +5,6 @@ import { LoginForm } from "./login-form";
 
 export default async function LoginPage() {
   const user = await getSessionUser();
-  if (user) redirect(user.role === "EMPLOYEE" ? "/employee" : "/");
+  if (user) redirect("/operation");
   return <LoginForm devMode={isDevAuthEnabled()} />;
 }

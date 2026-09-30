@@ -1,30 +1,28 @@
-# Bar Ops Architecture
+# Operation architecture
 
-Bar Ops is a Next.js App Router application with PostgreSQL-backed operational data.
+## Reachable product surfaces
 
-## Operation module
+| Surface | Purpose | Access |
+| --- | --- | --- |
+| `/login` | Account sign-in | Public |
+| `/activate/[token]` | Single-use invitation acceptance | Invitation token |
+| `/operation` | Home, Handbook, Tasks, Reminders, Count and owner settings | Authenticated account |
+| `/operation/public/[accessToken]` | Staff Operation workspace | Active shared token |
+| `/api/health/*` | Deployment health | Public, no business data |
 
-`features/operation/` owns the standalone handbook, news, task, and shared-needs workflow. It uses Europe/Copenhagen service dates, bounded rich-text content, and date-specific completion records for recurring tasks. OWNER and ADMIN manage handbook/news; task configuration follows the shared `operations.manage` capability. Database migration `018_operation_integrity_cleanup.sql` deliberately removes the unshipped governance, reminder, and audit structures from the earlier experimental schema.
+The root redirects to `/operation`; authentication redirects unauthenticated users to `/login`.
 
-## Dependency architecture
+## Roles
 
-The repository targets Node 24 and npm 10.9.2. Production and development dependency versions are exact in `package.json`, and `package-lock.json` is the authoritative transitive dependency graph. Local and CI installation must use `npm ci`; changing dependency resolution requires an intentional package and lockfile update in the same release.
+- **Owner**: full Operation content, tasks, UI Studio, shared-link, history and user management.
+- **Manager**: authenticated operational task/reminder/count permissions without owner settings.
+- **Employee**: authenticated staff access.
+- **Shared link**: employee-equivalent Operation access without an individual identity; audit entries remain attributed to the shared link.
 
-## Styling architecture
+## Data boundary
 
-The current CSS contract is intentionally small and single-owner:
+All Operation queries are scoped by organization and, where the current model provides one, location. Legacy migrations remain in sequence because deleting them would not remove existing database objects safely and would prevent clean migration of established environments.
 
-1. `styles/tokens.css` — global design tokens only.
-2. `app/globals.css` — all shared/global visual rules, including shell, typography, controls, surfaces, forms, dialogs, employee UI, and non-schedule workspace layouts.
-3. `features/scheduling/ScheduleWorkspace.module.css` — custom schedule stylesheet, used solely by the Shift Plan workspace and editor dialogs.
-4. `features/operation/OperationModule.module.css` — custom standalone module stylesheet for the explicitly different Operation design.
+## Account invitations
 
-No other feature or route may introduce CSS without an explicit architecture decision. New shared visual behavior belongs in the global system. Shift Plan keeps custom CSS only for schedule-specific grid/card/layout behavior; Operation keeps custom CSS only for its separate no-side-menu module shell and article/task/card experience.
-
-Inter and Space Grotesk are repository-owned variable webfont assets loaded once by the root layout through `next/font/local`. Production builds must not depend on Google font downloads; the existing `--font-inter` and `--font-space-grotesk` variables remain the typography contract.
-
-Card fundamentals are deliberately limited to `.card` (base surface), `.card-compact` (density), and `.card-flush` (structured panel with child-owned padding). Feature hooks may change tone or composition but not redefine global card geometry. Shift Plan `.shiftCard` and the standalone Operation bordered cards are the explicit custom card exceptions.
-
-Shared outer page spacing is owned only by `.page-wrap`; workspace-specific wrappers may not redefine gutters or safe-area padding. The shared single-column shell uses explicit zero-minimum grid tracks so feature min-content cannot widen the document. Shift Plan clips horizontal overflow at its page/workspace boundaries, and only its calendar scroller owns horizontal scrolling. Shared headers use `WorkspaceHeader`, and shared dialogs own their own body/actions structure. Bar Ops is dark-only until a real light theme is implemented globally.
-
-Application behavior remains in the existing React/server/API/database code. The CSS rebuild, rc.41 contract repair, and rc.42 card consolidation do not change business logic.
+Owners create an invitation in Operation Settings. The server stores a SHA-256 token hash, role, organization, optional location and seven-day expiry. Activation runs in one transaction, creates or links the account, creates membership and employee/location records where needed, marks the invitation accepted, writes an audit record and starts the session.

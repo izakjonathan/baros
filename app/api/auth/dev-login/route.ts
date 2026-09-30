@@ -15,8 +15,7 @@ export async function POST(request: Request) {
 
   const form = await request.formData();
   const role = normalizeDevRole(form.get("role"));
-  const destination = role === "EMPLOYEE" ? "/employee" : "/";
-  const response = NextResponse.redirect(new URL(destination, request.url), 303);
+  const response = NextResponse.redirect(new URL("/operation", request.url), 303);
   response.cookies.set(sessionCookieName(), createDevSessionToken(role), sessionCookieOptions(sessionExpiry()));
   response.headers.set("cache-control", "no-store");
   response.headers.set("x-request-id", requestId);

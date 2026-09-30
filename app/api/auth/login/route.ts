@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       const credentials = getDevCredentials();
       if (email !== credentials.email.toLowerCase() || password !== credentials.password) return NextResponse.json({ error: "Invalid email or password", requestId }, { status: 401, headers: responseHeaders });
       await createSession("dev-user", "dev-organization", "dev-location");
-      return NextResponse.json({ ok: true, redirect: "/", mode: "development", requestId }, { headers: responseHeaders });
+      return NextResponse.json({ ok: true, redirect: "/operation", mode: "development", requestId }, { headers: responseHeaders });
     }
     const rows = await db()<Array<{id:string;password_hash:string;organization_id:string;location_id:string|null;role:string}>>`
       select u.id,u.password_hash,m.organization_id,(select el.location_id from employees e join employee_locations el on el.employee_id=e.id where e.user_id=u.id and e.organization_id=m.organization_id order by el.primary_location desc limit 1) location_id,m.role
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const passwordValid = await verifyPasswordOrDummy(password, user?.password_hash);
     if(!user || !passwordValid) return NextResponse.json({error:"Invalid email or password",requestId},{status:401,headers:responseHeaders});
     await createSession(user.id,user.organization_id,user.location_id);
-    return NextResponse.json({ok:true,redirect:user.role==='EMPLOYEE'?'/employee':'/',requestId},{headers:responseHeaders});
+    return NextResponse.json({ok:true,redirect:"/operation",requestId},{headers:responseHeaders});
   } catch (error) {
     return jsonError(error, request);
   }

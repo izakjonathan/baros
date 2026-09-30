@@ -40,12 +40,6 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Run final stabilization preflight
-        run: npm run audit:preflight
-
-      - name: Validate release contract
-        run: npm run validate:release
-
       - name: Run current regression suites
         run: npm run test:all
 

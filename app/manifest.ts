@@ -5,8 +5,8 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     name: "Bar Ops",
     short_name: "Bar Ops",
-    description: "Shift planning, attendance, inventory and ordering for modern bars.",
-    start_url: "/",
+    description: "Handbook, tasks, reminders and daily cash counts for bar teams.",
+    start_url: "/operation",
     scope: "/",
     display: "standalone",
     display_override: ["standalone", "minimal-ui"],
@@ -34,21 +34,12 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "maskable",
       },
     ],
-    shortcuts: [
-      {
-        name: "Shift plan",
-        short_name: "Schedule",
-        description: "Open the manager shift plan",
-        url: "/?module=schedule",
-        icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
-      },
-      {
-        name: "Employee clock",
-        short_name: "Clock",
-        description: "Open employee hours and clock controls",
-        url: "/employee/hours",
-        icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
-      },
-    ],
+    shortcuts: [{
+      name: "Open Operation",
+      short_name: "Operation",
+      description: "Open the bar operations workspace",
+      url: "/operation",
+      icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+    }],
   };
 }

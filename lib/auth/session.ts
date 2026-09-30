@@ -120,7 +120,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 export async function requireUser(roles?: readonly AppRole[]) {
   const user = await getSessionUser();
   if (!user) redirect("/login");
-  if (roles && !roles.includes(user.role)) redirect("/employee");
+  if (roles && !roles.includes(user.role)) redirect("/operation");
   return user;
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Crown, Shield, UserCog, Wine } from "lucide-react";
+import { Crown, UserCog, UserRound, Wine } from "lucide-react";
 
 export function LoginForm({ devMode }: { devMode: boolean }) {
   const [email, setEmail] = useState(devMode ? "dev@barops.local" : "");
@@ -21,7 +21,7 @@ export function LoginForm({ devMode }: { devMode: boolean }) {
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || "Unable to sign in");
-      window.location.assign(body.redirect || "/");
+      window.location.assign(body.redirect || "/operation");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to sign in");
       setBusy(false);
@@ -51,8 +51,8 @@ export function LoginForm({ devMode }: { devMode: boolean }) {
                 <button type="submit"><UserCog size={19} /><span><strong>Manager</strong><small>Operations access</small></span></button>
               </form>
               <form action="/api/auth/dev-login" method="post">
-                <input type="hidden" name="role" value="SHIFT_MANAGER" />
-                <button type="submit"><Shield size={19} /><span><strong>Shift manager</strong><small>Scheduling access</small></span></button>
+                <input type="hidden" name="role" value="EMPLOYEE" />
+                <button type="submit"><UserRound size={19} /><span><strong>Employee</strong><small>Staff access</small></span></button>
               </form>
             </div>
           </section>

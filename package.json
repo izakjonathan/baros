@@ -1,6 +1,6 @@
 {
   "name": "bar-ops",
-  "version": "0.19.0-rc.127",
+  "version": "0.19.0-rc.128",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -12,21 +12,10 @@
     "db:seed": "node scripts/seed.mjs",
     "db:verify": "node scripts/verify-database.mjs",
     "validate:env": "node scripts/validate-environment.mjs",
-    "validate:release": "node scripts/validate-release.mjs",
     "audit:artifacts": "node scripts/check-release-artifacts.mjs",
-    "audit:preflight": "node scripts/preflight-stabilization.mjs",
-    "test:logic": "node scripts/test-shift-logic.mjs",
-    "test:payroll": "node scripts/test-payroll-export.mjs",
-    "test:integrity": "node scripts/test-integrity.mjs",
-    "test:production": "node scripts/test-production-foundation.mjs",
-    "test:inventory": "node scripts/test-inventory-operations.mjs",
-    "test:remediation": "node scripts/test-remediation.mjs",
-    "test:auth": "node scripts/test-auth-contract.mjs",
-    "test:boundaries": "node scripts/test-api-integrity.mjs",
-    "test:release-contract": "node scripts/test-release-contract.mjs",
-    "test:ui": "node scripts/test-ui-contract.mjs",
     "test:operation": "node scripts/test-operation-module.mjs",
-    "test:current": "npm run test:logic && npm run test:payroll && npm run test:integrity && npm run test:production && npm run test:inventory && npm run test:remediation && npm run test:auth && npm run test:boundaries && npm run test:operation && npm run test:release-contract && npm run test:ui",
+    "test:operation-only": "node scripts/test-operation-only.mjs",
+    "test:current": "npm run test:operation && npm run test:operation-only",
     "test:all": "npm run test:current"
   },
   "dependencies": {

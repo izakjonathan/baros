@@ -1,3 +1,5 @@
 import Link from "next/link";
-import { ErrorState, WorkspacePage } from "@/components/ui/workspace-ui";
-export default function NotFound(){return <WorkspacePage><ErrorState title="Page not found" description="This workspace address does not exist or is no longer available." action={<Link className="primary" href="/">Return to Bar Ops</Link>} /></WorkspacePage>}
+
+export default function NotFound() {
+  return <main className="login-page"><section className="card login-card"><div className="login-brand"><span>Bar</span><b>Os</b></div><h1>Page not found</h1><p>This address is not part of Operation.</p><Link className="primary full" href="/operation">Open Operation</Link></section></main>;
+}

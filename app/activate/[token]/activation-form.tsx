@@ -1,10 +1,45 @@
 "use client";
+
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export function ActivationForm({ token, employeeName, email, existingAccount }: { token:string; employeeName:string; email:string; existingAccount:boolean }) {
+export function ActivationForm({ token, userName, email, role, existingAccount }: { token: string; userName: string; email: string; role: string; existingAccount: boolean }) {
   const router = useRouter();
-  const [password,setPassword]=useState(""); const [confirm,setConfirm]=useState(""); const [error,setError]=useState(""); const [busy,setBusy]=useState(false);
-  async function submit(event:FormEvent){event.preventDefault();setError("");if(password.length<12){setError("Use at least 12 characters.");return;}if(!existingAccount&&password!==confirm){setError("Passwords do not match.");return;}setBusy(true);try{const response=await fetch("/api/auth/activate",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({token,password})});const data=await response.json();if(!response.ok)throw new Error(data.error||"Activation failed");router.replace(data.redirect||"/employee");router.refresh();}catch(e){setError(e instanceof Error?e.message:"Activation failed");setBusy(false);}}
-  return <main className="login-page"><section className="card login-card"><div className="login-brand"><span>BAR</span><b>OPS</b></div><p className="eyebrow">Employee portal invitation</p><h1>Welcome, {employeeName}</h1><p>{existingAccount ? <>This email already has a Bar Ops account. Enter its existing password to accept access for this organization.</> : <>Create a password for <strong>{email}</strong>. You will use this email on the normal Bar Ops login page.</>}</p><form onSubmit={submit} className="login-form"><label>{existingAccount ? "Existing Bar Ops password" : "New password"}<input type="password" autoComplete="new-password" minLength={12} value={password} onChange={e=>setPassword(e.target.value)} required/></label>{!existingAccount&&<label>Confirm password<input type="password" autoComplete="new-password" minLength={12} value={confirm} onChange={e=>setConfirm(e.target.value)} required/></label>}{error&&<p className="form-error" role="alert">{error}</p>}<button className="primary" disabled={busy}>{busy?"Activating…":existingAccount?"Accept invitation":"Activate employee account"}</button></form><small>This invitation is single-use and expires after seven days.</small></section></main>;
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    setError("");
+    if (password.length < 12) { setError("Use at least 12 characters."); return; }
+    if (!existingAccount && password !== confirm) { setError("Passwords do not match."); return; }
+    setBusy(true);
+    try {
+      const response = await fetch("/api/auth/activate", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token, password }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Activation failed");
+      router.replace(data.redirect || "/operation");
+      router.refresh();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Activation failed");
+      setBusy(false);
+    }
+  }
+
+  const roleLabel = role === "OWNER" ? "Owner" : role === "MANAGER" ? "Manager" : "Employee";
+  return <main className="login-page"><section className="card login-card">
+    <div className="login-brand"><span>Bar</span><b>Os</b></div>
+    <p className="eyebrow">Operation invitation · {roleLabel}</p>
+    <h1>Welcome, {userName}</h1>
+    <p>{existingAccount ? <>Enter the existing password for <strong>{email}</strong> to add Operation access.</> : <>Create a password for <strong>{email}</strong>.</>}</p>
+    <form onSubmit={submit} className="login-form">
+      <label>{existingAccount ? "Existing password" : "New password"}<input type="password" autoComplete={existingAccount ? "current-password" : "new-password"} minLength={12} value={password} onChange={event => setPassword(event.target.value)} required /></label>
+      {!existingAccount && <label>Confirm password<input type="password" autoComplete="new-password" minLength={12} value={confirm} onChange={event => setConfirm(event.target.value)} required /></label>}
+      {error && <p className="form-error" role="alert">{error}</p>}
+      <button className="primary full" disabled={busy}>{busy ? "Activating…" : existingAccount ? "Accept invitation" : "Activate account"}</button>
+    </form>
+    <small>This invitation is single-use and expires after seven days.</small>
+  </section></main>;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowLeft, Banknote, Bold, BookOpen, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, CircleAlert, Clock3, House, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, MoreHorizontal, Plus, Redo2, Repeat2, Settings, ShoppingBasket, Square, Star, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
+import { ArrowLeft, Banknote, Bold, BookOpen, CalendarDays, Check, CheckSquare, ChevronLeft, ChevronRight, CircleAlert, Clock3, House, ImagePlus, Italic, Link2, List, ListOrdered, LoaderCircle, LogOut, MoreHorizontal, Plus, Redo2, Repeat2, Settings, ShoppingBasket, Square, Star, Trash2, Underline, Undo2, UserRound, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -11,6 +11,7 @@ import Link from "@tiptap/extension-link";
 import ImageExtension from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import styles from "./OperationModule.module.css";
+import { OperationUserManagement } from "./OperationUserManagement";
 import { operationThemeCustomProperties, type UiTheme, uiColorContrastRatio } from "@/lib/ui-theme-shared";
 import type { OperationArticle, OperationArticleKind, OperationCashCount, OperationContentBlock, OperationDailyTask, OperationModuleState, OperationNeed, OperationReminderStockLevel, OperationReminderType, OperationRichTextDelta, OperationRichTextOp, OperationTaskAssignmentScope, OperationTaskImage, OperationTaskPriority, OperationTaskRepeatUnit, OperationTaskType, OperationTiptapDocument, OperationTiptapNode } from "./types";
 
@@ -227,7 +228,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     return categoryMatch && articleSearchText(article).includes(query.trim().toLocaleLowerCase());
   });
   const storageUnavailable = state.storageStatus === "migration-required" && !devMode;
-  const canManageUiStudio = state.userRole === "OWNER";
+  const canManageUiStudio = state.userRole === "OWNER" || state.userRole === "ADMIN";
   const showOperationHeader = canManageUiStudio || (state.canManageContent && (view === "home" || view === "handbook"));
   const operationEndpoint = operationApiUrl || "/api/operation-module";
   const operationUrl = (query?: string) => query ? `${operationEndpoint}${operationEndpoint.includes("?") ? "&" : "?"}${query}` : operationEndpoint;
@@ -706,6 +707,14 @@ function OperationSettings({ theme, saving, close, preview, save, resetHistory, 
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not update the shared staff link."); }
     finally { setPublicAccessSaving(false); }
   }
+  async function signOut() {
+    setMessage("");
+    try {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (!response.ok) throw new Error("Could not sign out.");
+      window.location.assign("/login");
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Could not sign out."); }
+  }
   return <><div className={styles.uiStudioBackdrop} onMouseDown={event => { if (event.target === event.currentTarget) close(); }}>
     <section ref={panelRef} className={styles.uiStudioPanel} role="dialog" aria-modal="true" aria-labelledby="operation-settings-title">
       <div className={styles.uiStudioHeader}><div><p>Owner tools</p><h2 id="operation-settings-title">Operation settings</h2></div><button type="button" onClick={close} aria-label="Close Operation settings"><X size={18} /></button></div>
@@ -721,6 +730,7 @@ function OperationSettings({ theme, saving, close, preview, save, resetHistory, 
         <div className={styles.uiStudioPreview} style={{ background: draft.canvasColor, color: draft.inkColor }}><strong>Operation preview</strong><span>Muted copy, badges and surfaces inherit this pair.</span><button type="button" style={{ background: draft.inkColor, color: draft.canvasColor }}>Example action</button><span style={{ color: draft.accentColor }}>High priority uses accent</span><span style={{ color: draft.positiveColor }}>Low priority uses positive</span></div>
         <div className={styles.uiStudioActions}><button type="button" onClick={() => void submit()} disabled={saving}>{saving ? <LoaderCircle className={styles.saveSpinner} size={16} /> : <Check size={16} />}Save colors</button></div>
       </section>
+      <OperationUserManagement />
       <section className={styles.settingsSection} aria-labelledby="operation-data-title">
         <div><p>Maintenance</p><h3 id="operation-data-title">Data history</h3></div>
         <p className={styles.uiStudioIntro}>Reset saved history independently. Active reminders stay in place.</p>
@@ -730,6 +740,7 @@ function OperationSettings({ theme, saving, close, preview, save, resetHistory, 
         </div>
       </section>
       <section className={styles.settingsSection} aria-labelledby="operation-access-title"><div><p>Access</p><h3 id="operation-access-title">Shared staff link</h3></div><p className={styles.uiStudioIntro}>The link has employee permissions. Disable or rotate it immediately if it is shared outside the team.</p><div className={styles.settingsResetList}><div className={styles.settingsResetRow}><div><strong>{publicAccess.enabled ? "Link enabled" : "Link disabled"}</strong><span>{publicAccess.enabled ? "Staff can open Operation without signing in." : "The direct link currently refuses access."}</span></div><button type="button" disabled={publicAccessSaving} onClick={() => void updatePublicAccess(publicAccess.enabled ? "disable" : "enable")}>{publicAccess.enabled ? "Disable" : "Enable"}</button></div></div>{publicAccess.url && <p className={styles.uiStudioLink}><a href={publicAccess.url} target="_blank" rel="noreferrer">Open direct link</a><button type="button" disabled={publicAccessSaving} onClick={() => setPendingAction({ title: "Create a new staff link?", message: "The current link will stop working immediately on every device.", label: "Create link", run: () => updatePublicAccess("rotate") })}>Create new link</button></p>}</section>
+      <section className={styles.settingsSection} aria-labelledby="operation-account-title"><div><p>Account</p><h3 id="operation-account-title">Owner session</h3></div><div className={styles.settingsResetList}><div className={styles.settingsResetRow}><div><strong>Sign out</strong><span>Return this device to the login page.</span></div><button type="button" onClick={() => void signOut()}><LogOut size={15} />Sign out</button></div></div></section>
       {message && <p className={styles.uiStudioMessage} role="status">{message}</p>}
     </section>
   </div>{pendingAction && <ConfirmDialog title={pendingAction.title} message={pendingAction.message} confirmLabel={pendingAction.label} close={() => setPendingAction(null)} confirm={async () => { const run = pendingAction.run; setPendingAction(null); await run(); }} />}</>;

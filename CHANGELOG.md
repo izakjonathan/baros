@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.128
+
+- Reduced the deployed product to login, account activation, authenticated Operation, and shared-staff Operation routes.
+- Removed the legacy scheduling, attendance, inventory, ordering, payroll, manager and employee interfaces and APIs while preserving historical database migrations for later extraction.
+- Added owner-only user management in Operation Settings with single-use seven-day invitations for Owner, Manager and Employee accounts.
+- Redirected every authenticated login and the application root to `/operation`, added a settings sign-out action, and updated the installable app manifest for Operation.
+- Added migration `025_operation_user_invitations.sql` and Operation-only route/invitation regression coverage.
+
 ## v0.19.0-rc.127
 
 - Centralized authenticated Operation state loading and added task-date-only refreshes to reduce repeated database and network work.

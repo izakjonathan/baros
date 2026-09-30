@@ -1,10 +1,12 @@
-# Development Workflow
+# Development workflow
 
-1. Start from the latest approved technical ZIP.
-2. Inspect the implementation and identify the true owner of the change. Replace/merge/extend that existing owner first; add a new selector/component only when the existing owner cannot represent the required behavior.
-3. Keep business behavior unchanged unless the release explicitly changes it.
-4. For visual changes, prefer tokens/global primitives. Do not create feature CSS except for Shift Plan without explicit approval.
-5. For dependency-backed work, activate the declared npm version with `corepack enable npm` and install the committed graph with `npm ci`; do not use `npm install` unless intentionally changing dependencies and the lockfile together.
-6. Run the focused test, current regression suite, release validation, artifact audit, lint, typecheck, and production build when available.
-7. Record any unavailable or external gate honestly; never treat lockfile generation alone as a successful clean install.
-8. Review the final diff for unrelated changes and package a recoverable ZIP.
+Operation is the only product scope in this repository. Unless explicitly requested, changes belong only to login, activation, `/operation`, its shared staff route, and their APIs.
+
+1. Start from the latest approved release.
+2. Preserve organization/location authorization and the Owner/Manager/Employee/shared-link distinctions.
+3. Keep employee workflows simpler than common single-purpose apps.
+4. Add or update regression checks for every behavior change.
+5. Run the full commands in `docs/testing.md`.
+6. Package source only; exclude `.next`, `node_modules`, `.env*`, `.vercel`, and local logs.
+
+Historical legacy database migrations remain until the old product is extracted to another repository. Do not reintroduce legacy pages or APIs here.

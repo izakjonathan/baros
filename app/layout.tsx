@@ -12,7 +12,7 @@ const workSans = Work_Sans({
 
 export const metadata: Metadata = {
   title: "Bar Ops",
-  description: "Shift planning and goods ordering for modern bars.",
+  description: "A simple handbook, task, reminder and cash-count workspace for bar teams.",
   applicationName: "Bar Ops",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
