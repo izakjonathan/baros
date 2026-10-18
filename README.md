@@ -1,6 +1,6 @@
 # Bar Ops — Operation
 
-Current release: **v0.19.0-rc.129**
+Current release: **v0.19.0-rc.130**
 
 This repository now contains only the focused Operation product:
 
@@ -51,4 +51,4 @@ npm run validate:env
 npm run build
 ```
 
-Rollback checkpoint: **v0.19.0-rc.128**.
+Rollback checkpoint: **v0.19.0-rc.129**.

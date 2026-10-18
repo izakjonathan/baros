@@ -75,8 +75,15 @@ function articleSummary(document: OperationTiptapDocument) {
   return operationDocumentText(document).slice(0, 300).trim();
 }
 
+function handbookCardDescription(article: OperationArticle) {
+  const description = article.description.trim();
+  if (!description) return "";
+  const legacyGeneratedSummary = articleSummary(documentFromBlocks(article.content));
+  return description === legacyGeneratedSummary ? "" : description;
+}
+
 function draftFromArticle(article?: OperationArticle, kind: OperationArticleKind = "HANDBOOK"): DraftArticle {
-  return { id: article?.id, kind, category: article?.category || "General", title: article?.title || "", description: article?.description || "", document: documentFromBlocks(article?.content || []) };
+  return { id: article?.id, kind, category: article?.category || "General", title: article?.title || "", description: article ? (article.kind === "HANDBOOK" ? handbookCardDescription(article) : article.description) : "", document: documentFromBlocks(article?.content || []) };
 }
 
 function blocksFromDraft(draft: DraftArticle): OperationContentBlock[] {
@@ -371,7 +378,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
       kind: draft.kind,
       category: draft.category.trim() || "General",
       title: draft.title.trim(),
-      description: draft.description.trim() || articleSummary(draft.document),
+      description: draft.description.trim(),
       content,
       published: true,
       createdAt: draft.id ? allArticles.find(existing => existing.id === draft.id)?.createdAt || new Date().toISOString() : new Date().toISOString(),
@@ -1006,7 +1013,8 @@ function SectionHeader({ title, detail }: { title: string; detail: string }) {
 
 function ArticleCard({ article, onClick, onEdit, onDelete, disabled = false, showBody = false }: { article: OperationArticle; onClick: () => void; onEdit?: () => void; onDelete?: () => void; disabled?: boolean; showBody?: boolean }) {
   if (showBody) return <article className={`${styles.operationCard} ${styles.newsCard}`}><div className={styles.newsCardHeader}><button type="button" className={styles.newsCardTitleButton} onClick={onClick}><h3>{article.title}</h3></button><div className={styles.newsCardTools}><small>{article.category}</small>{onEdit && onDelete && <div className={styles.articleCardActions}><button type="button" onClick={onEdit} disabled={disabled}>Edit</button><button type="button" onClick={onDelete} aria-label={`Delete ${article.title}`} disabled={disabled}><Trash2 size={16} /></button></div>}</div></div><button type="button" className={styles.newsCardBodyButton} onClick={onClick}><NewsCardBody article={article} /></button></article>;
-  return <article className={`${styles.operationCard}${showBody ? ` ${styles.newsCard}` : ""}`}><button type="button" className={styles.articleCardOpen} onClick={onClick}><div><h3>{article.title}</h3>{showBody ? <NewsCardBody article={article} /> : article.description && <p>{article.description}</p>}</div><ArticleCategoryPill article={article} /></button>{onEdit && onDelete && <div className={styles.articleCardActions}><button type="button" onClick={onEdit} disabled={disabled}>Edit</button><button type="button" onClick={onDelete} aria-label={`Delete ${article.title}`} disabled={disabled}><Trash2 size={16} /></button></div>}</article>;
+  const description = handbookCardDescription(article);
+  return <article className={styles.operationCard}><button type="button" className={styles.articleCardOpen} onClick={onClick}><div><h3>{article.title}</h3>{description && <p>{description}</p>}</div><ArticleCategoryPill article={article} /></button>{onEdit && onDelete && <div className={styles.articleCardActions}><button type="button" onClick={onEdit} disabled={disabled}>Edit</button><button type="button" onClick={onDelete} aria-label={`Delete ${article.title}`} disabled={disabled}><Trash2 size={16} /></button></div>}</article>;
 }
 
 function ArticleCategoryPill({ article }: { article: OperationArticle }) {

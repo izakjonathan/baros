@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.19.0-rc.130
+
+- Limited Handbook card previews to the explicit short-description field.
+- Removed the automatic article-body fallback when a Handbook description is empty.
+- Suppressed legacy auto-generated body summaries so existing empty-description cards become compact immediately.
+
 ## v0.19.0-rc.129
 
 - Redesigned sign-in to match Operation and apply the latest saved UI Studio canvas, ink, accent and positive colors.
