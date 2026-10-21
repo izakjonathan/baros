@@ -24,6 +24,16 @@ export type OperationUserScope = {
   role: Parameters<typeof hasCapability>[0];
 };
 
+export async function loadOperationArticles(user: Pick<OperationUserScope, "organizationId" | "role">) {
+  const rows = await db()<Array<Record<string, unknown>>>`
+    select id,kind,category,title,description,content,published,created_at,updated_at
+    from operation_articles
+    where organization_id=${user.organizationId} and archived_at is null and (published=true or ${ownerCanManageOperation(user.role)})
+    order by case when kind='NEWS' then updated_at end desc,kind,category,sort_order,updated_at desc`;
+  const articles = rows.map(mapOperationArticle);
+  return { handbook: articles.filter(article => article.kind === "HANDBOOK"), news: articles.filter(article => article.kind === "NEWS") };
+}
+
 export function canManageOperationTasks(role: OperationUserScope["role"]) {
   return hasCapability(role, "operations.manage");
 }
@@ -123,11 +133,7 @@ export async function loadOperationTasks(user: OperationUserScope, date: string)
 
 export async function loadOperationState(user: OperationUserScope, date: string): Promise<OperationModuleState> {
   const [articles, dailyTasks, needs, assignees, taskTemplates, cashCounts] = await Promise.all([
-    db()<Array<Record<string, unknown>>>`
-      select id,kind,category,title,description,content,published,created_at,updated_at
-      from operation_articles
-      where organization_id=${user.organizationId} and archived_at is null and (published=true or ${ownerCanManageOperation(user.role)})
-      order by case when kind='NEWS' then updated_at end desc,kind,category,sort_order,updated_at desc`,
+    loadOperationArticles(user),
     loadOperationTasks(user, date),
     db()<Array<Record<string, unknown>>>`
       select id,title,note,status,created_at,updated_at,reminder_type,stock_level
@@ -150,9 +156,7 @@ export async function loadOperationState(user: OperationUserScope, date: string)
         and (${user.locationId}::uuid is null or location_id is null or location_id=${user.locationId})
       order by operational_date desc,created_at desc limit 100`,
   ]);
-  const handbook = articles.filter(article => article.kind === "HANDBOOK").map(mapOperationArticle);
-  const news = articles.filter(article => article.kind === "NEWS").map(mapOperationArticle)
-    .sort((left, right) => new Date(right.updatedAt).valueOf() - new Date(left.updatedAt).valueOf());
+  const { handbook, news } = articles;
   const mappedNeeds = needs.map(mapOperationNeed);
   return {
     userRole: user.role,

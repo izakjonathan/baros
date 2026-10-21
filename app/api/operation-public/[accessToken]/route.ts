@@ -4,6 +4,7 @@ import { db } from "@/lib/db/client";
 import { ApiError, enumValue, finiteNumber, isoDate, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
 import { getPublicOperationAccess, loadPublicOperationState } from "@/lib/operation-public-access";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
+import { loadOperationArticles } from "@/lib/operation-state";
 
 type RouteContext = { params: Promise<{ accessToken: string }> };
 
@@ -17,6 +18,9 @@ async function accessFor(params: RouteContext["params"]) {
 export async function GET(request: Request, { params }: RouteContext) {
   try {
     const access = await accessFor(params);
+    if (new URL(request.url).searchParams.get("scope") === "articles") {
+      return NextResponse.json(await loadOperationArticles({ organizationId: access.organizationId, role: "EMPLOYEE" }), { headers: { "cache-control": "no-store" } });
+    }
     const date = isoDate(new URL(request.url).searchParams.get("date") || operationDateNow(), "date");
     return NextResponse.json(await loadPublicOperationState(access, date), { headers: { "cache-control": "no-store" } });
   } catch (error) { return jsonError(error, request); }

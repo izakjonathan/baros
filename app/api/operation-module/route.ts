@@ -8,7 +8,7 @@ import { getSessionUser } from "@/lib/auth/session";
 import { hasCapability } from "@/lib/auth/capabilities";
 import { operationCountDateNow, operationDateNow } from "@/features/operation/date";
 import { logServerError } from "@/lib/observability";
-import { loadOperationTasks } from "@/lib/operation-state";
+import { loadOperationArticles, loadOperationTasks } from "@/lib/operation-state";
 
 function requireOwner(role: string) {
   if (!ownerCanManageOperation(role)) throw new ApiError(403, "Owner or Admin permission is required");
@@ -61,6 +61,9 @@ export async function GET(request: Request) {
   try {
     const user = await requireApiUser();
     const params = new URL(request.url).searchParams;
+    if (params.get("scope") === "articles") {
+      return NextResponse.json(await loadOperationArticles(user), { headers: { "cache-control": "no-store" } });
+    }
     const today = isoDate(params.get("date") || operationDateNow(), "date");
     if (params.get("scope") === "tasks") {
       return NextResponse.json({ today, dailyTasks: await loadOperationTasks(user, today) }, { headers: { "cache-control": "no-store" } });

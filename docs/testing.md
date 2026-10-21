@@ -1,5 +1,15 @@
 # Operation verification
 
+## Live Handbook sync (rc.133)
+
+`npm run test:editor` now mounts two independent OperationModule instances against a mocked saved-article API. One opens the Handbook reader while the other edits and saves an article. Advancing the real subscription callbacks updates the first reader and card without remounting the reader or reloading the page. Coverage includes authenticated and shared-staff endpoint selection, immediate reader-close refresh, temporary errors/retry, pausing while editing, hidden/offline pause/resume, unmount cleanup, overlapping-request prevention and aborting late responses.
+
+Article refresh uses the existing protected GET routes with `scope=articles`, fetching only Handbook/News rather than task, reminder and cash-count data. Signed-in responses are scoped to organization and role; shared responses validate the active, unexpired link first and always use Employee publication rules.
+
+This is two-second polling, plus network time, rather than server push. Tests use jsdom and mocked API data, not physical devices or a live database. Production acceptance: leave an article open on one device, save edits with the checkmark on another, and confirm the open reader and Handbook card update without a reload; repeat through a shared staff link.
+
+rc.133 verification: `npm run test:all`, `npm run lint`, `npm run typecheck`, production-shaped `npm run validate:env`, and `npm run build` passed.
+
 Run before every release:
 
 ```bash

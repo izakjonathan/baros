@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.133
+
+- Added automatic article-only refreshes every two seconds on visible Home, Handbook and reader screens, for signed-in users and shared staff links.
+- Made open readers resolve the latest saved article instead of retaining a stale object; closing a reader also refreshes immediately.
+- Paused background/offline polling and local-editor polling, prevented overlapping sync requests, and cancelled stale responses when the subscription stops.
+- Added protected article-only API responses using the existing organization, role, publication, archive and shared-link checks.
+- Tested two independent app instances saving, reading and refreshing shared content, plus error retry, visibility/connectivity changes and request cleanup.
+
 ## v0.19.0-rc.132
 
 - Moved the article formatting toolbar and its overlays out of the note's scrolling container into a dedicated footer in the visual-viewport-sized editor frame.

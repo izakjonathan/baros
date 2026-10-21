@@ -37,7 +37,7 @@ function loadSource(filename, extraSource = "") {
 }
 
 const dom = new JSDOM('<div id="root"></div>', { url: "https://barops.example/operation", pretendToBeVisual: true });
-for (const name of ["window", "document", "navigator", "HTMLElement", "Element", "Node", "DOMParser", "MutationObserver", "getComputedStyle", "requestAnimationFrame", "cancelAnimationFrame"]) {
+for (const name of ["window", "document", "navigator", "localStorage", "HTMLElement", "Element", "Node", "DOMParser", "MutationObserver", "getComputedStyle", "requestAnimationFrame", "cancelAnimationFrame"]) {
   Object.defineProperty(globalThis, name, { value: typeof dom.window[name] === "function" && /^(getComputedStyle|requestAnimationFrame|cancelAnimationFrame)$/.test(name) ? dom.window[name].bind(dom.window) : dom.window[name], configurable: true });
 }
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -51,7 +51,7 @@ Object.defineProperty(window, "visualViewport", { value: viewport, configurable:
 const React = require("react");
 const { createRoot } = require("react-dom/client");
 const { act } = React;
-const { ArticleEditor } = loadSource("features/operation/OperationModule.tsx", "\nexport { ArticleEditor };");
+const { ArticleEditor, OperationModule } = loadSource("features/operation/OperationModule.tsx", "\nexport { ArticleEditor };");
 const root = createRoot(document.getElementById("root"));
 let draft = {
   id: "existing-note", kind: "HANDBOOK", category: "General", title: "Test note", description: "",
@@ -118,4 +118,134 @@ await act(async () => { root.unmount(); });
 assert.equal(document.body.style.overflow, "");
 viewport.dispatchEvent(new dom.window.Event("resize"));
 console.log("PASS editor closes cleanly and restores body scrolling");
+
+// Two independent app instances share a mocked saved-article API. Tick only the
+// real sync interval so this checks cross-device behavior without waiting.
+const { defaultOperationState } = loadSource("features/operation/default-content.ts");
+const { defaultTheme } = loadSource("lib/ui-theme-shared.ts");
+let serverArticle = {
+  id: "00000000-0000-4000-8000-000000000001", kind: "HANDBOOK", category: "General",
+  title: "Shared routine", description: "Original description", published: true,
+  createdAt: "2026-10-21T12:00:00Z", updatedAt: "2026-10-21T12:00:00Z",
+  content: [{ type: "body", text: "Original instructions" }],
+};
+let failReads = false;
+const requests = [];
+globalThis.fetch = async (url, options = {}) => {
+  requests.push({ url: String(url), method: options.method || "GET" });
+  if (options.method === "PATCH") {
+    const body = JSON.parse(options.body);
+    serverArticle = { ...serverArticle, ...body, updatedAt: "2026-10-21T12:00:01Z" };
+    return { ok: true, json: async () => structuredClone(serverArticle) };
+  }
+  if (failReads) return { ok: false, status: 503, json: async () => ({ error: "Temporary failure" }) };
+  const articles = { handbook: [serverArticle], news: [] };
+  return { ok: true, json: async () => structuredClone(String(url).includes("scope=articles") ? articles : { ...defaultOperationState, ...articles }) };
+};
+const nativeTimeout = window.setTimeout.bind(window);
+const nativeClearTimeout = window.clearTimeout.bind(window);
+const syncTimers = new Map();
+let timerId = -1;
+window.setTimeout = (callback, delay, ...args) => {
+  if (delay !== 2_000) return nativeTimeout(callback, delay, ...args);
+  const id = timerId--;
+  syncTimers.set(id, callback);
+  return id;
+};
+window.clearTimeout = id => { if (!syncTimers.delete(id)) nativeClearTimeout(id); };
+async function tickSync() {
+  const callbacks = [...syncTimers.values()];
+  syncTimers.clear();
+  await act(async () => { callbacks.forEach(callback => callback()); });
+}
+const hosts = [document.createElement("div"), document.createElement("div")];
+hosts.forEach(host => document.body.append(host));
+const apps = hosts.map(host => createRoot(host));
+await act(async () => {
+  apps.forEach((app, index) => app.render(React.createElement(OperationModule, {
+    initialState: { ...defaultOperationState, handbook: [structuredClone(serverArticle)], news: [], canManageContent: index === 0, userRole: index === 0 ? "OWNER" : "EMPLOYEE" },
+    initialTheme: defaultTheme, devMode: false, publicMode: index === 1,
+    operationApiUrl: index === 0 ? "/api/operation-module" : "/api/operation-public/00000000-0000-4000-8000-000000000002",
+  })));
+});
+await act(async () => {
+  hosts.forEach(host => [...host.querySelectorAll("nav button")].find(button => button.textContent === "Handbook").click());
+});
+await act(async () => { hosts[1].querySelector(".articleCardOpen").click(); });
+const openReader = hosts[1].querySelector(".reader");
+assert.ok(openReader.textContent.includes("Original instructions"));
+await act(async () => { hosts[0].querySelector(".articleCardActions button").click(); });
+await act(async () => { await new Promise(resolve => requestAnimationFrame(resolve)); });
+const activeEditor = hosts[0].querySelector(".tiptap").editor;
+await act(async () => {
+  activeEditor.commands.setContent("<p>Updated instructions from another device</p>");
+});
+await act(async () => {
+  const field = hosts[0].querySelector(".editorDescriptionInput");
+  Object.getOwnPropertyDescriptor(dom.window.HTMLTextAreaElement.prototype, "value").set.call(field, "Updated card description");
+  field.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+});
+assert.equal(syncTimers.size, 1, "the editing device pauses its article subscription");
+await act(async () => { hosts[0].querySelector('[aria-label="Save article"]').click(); });
+assert.ok(!hosts[0].querySelector(".articleEditor"));
+assert.ok(requests.some(request => request.method === "PATCH"));
+assert.ok(JSON.stringify(serverArticle.content).includes("Updated instructions from another device"), JSON.stringify(serverArticle.content));
+await tickSync();
+assert.equal(hosts[1].querySelector(".reader"), openReader, "keep the same reader open");
+assert.ok(openReader.textContent.includes("Updated instructions from another device"), JSON.stringify({ text: openReader.textContent, requests, serverArticle, timers: syncTimers.size }));
+assert.ok(hosts[1].querySelector(".articleCardOpen").textContent.includes("Updated card description"));
+assert.ok(requests.some(request => request.url.includes("/api/operation-public/") && request.url.includes("scope=articles")));
+console.log("PASS save on one device updates another open reader and Handbook card, including shared staff access");
+
+failReads = true;
+await tickSync();
+assert.ok(openReader.textContent.includes("Updated instructions from another device"));
+failReads = false;
+serverArticle = { ...serverArticle, description: "Updated again", updatedAt: "2026-10-21T12:00:02Z" };
+await tickSync();
+assert.ok(hosts[1].querySelector(".articleCardOpen").textContent.includes("Updated again"));
+const previousRequests = requests.length;
+await act(async () => { hosts[1].querySelector('[aria-label="Close article"]').click(); });
+assert.ok(requests.length > previousRequests, "closing the reader triggers a fresh request immediately");
+console.log("PASS temporary read errors retain content, retry successfully and reader close refreshes immediately");
+
+Object.defineProperty(document, "visibilityState", { value: "hidden", configurable: true });
+await act(async () => { document.dispatchEvent(new dom.window.Event("visibilitychange")); });
+assert.equal(syncTimers.size, 0);
+Object.defineProperty(document, "visibilityState", { value: "visible", configurable: true });
+await act(async () => { document.dispatchEvent(new dom.window.Event("visibilitychange")); });
+assert.equal(syncTimers.size, 2);
+Object.defineProperty(navigator, "onLine", { value: false, configurable: true });
+await act(async () => { window.dispatchEvent(new dom.window.Event("offline")); });
+assert.equal(syncTimers.size, 0);
+Object.defineProperty(navigator, "onLine", { value: true, configurable: true });
+await act(async () => { window.dispatchEvent(new dom.window.Event("online")); });
+assert.equal(syncTimers.size, 2);
+await act(async () => { apps.forEach(app => app.unmount()); });
+assert.equal(syncTimers.size, 0);
+console.log("PASS background/offline tabs pause polling, foreground/reconnected tabs resume and unmount cancels both subscriptions");
+
+const { subscribeOperationArticles } = loadSource("features/operation/article-sync.ts");
+let finishRequest;
+let readCount = 0;
+let received = 0;
+let requestSignal;
+globalThis.fetch = async (_url, options) => {
+  readCount++;
+  requestSignal = options.signal;
+  return new Promise(resolve => { finishRequest = resolve; });
+};
+const subscription = subscribeOperationArticles("/api/operation-module", () => { received++; });
+await subscription.refresh();
+await subscription.refresh();
+assert.equal(readCount, 1, "polling and manual refresh must not overlap requests");
+subscription.stop();
+assert.ok(requestSignal.aborted);
+finishRequest({ ok: true, json: async () => ({ handbook: [serverArticle], news: [] }) });
+await new Promise(resolve => setImmediate(resolve));
+assert.equal(received, 0, "stopped requests cannot overwrite a newly opened local draft");
+assert.equal(syncTimers.size, 0);
+console.log("PASS one in-flight request per subscription and no late updates after stopping");
+window.setTimeout = nativeTimeout;
+window.clearTimeout = nativeClearTimeout;
 dom.window.close();

@@ -1,6 +1,6 @@
 # Bar Ops — Operation
 
-Current release: **v0.19.0-rc.132**
+Current release: **v0.19.0-rc.133**
 
 This repository now contains only the focused Operation product:
 
@@ -51,7 +51,11 @@ npm run validate:env
 npm run build
 ```
 
-Rollback checkpoint: **v0.19.0-rc.131**.
+Rollback checkpoint: **v0.19.0-rc.132**.
+
+## Live Handbook updates
+
+Visible Home, Handbook and article readers check for saved article changes every two seconds, including shared staff links. Open readers use the latest article data; closing a reader requests a refresh immediately. Saving and closing an editor resumes checking immediately. Hidden/offline pages pause and refresh when they return. Local edits are protected by pausing article sync while the editor is open. Changes require the existing Save checkmark; closing an unsaved draft does not publish it.
 
 ## Editor controls
 

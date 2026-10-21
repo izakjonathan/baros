@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { normalizeOperationPastedHTML } from "./paste";
+import { sameOperationArticles, subscribeOperationArticles } from "./article-sync";
 import UnderlineExtension from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import ImageExtension from "@tiptap/extension-image";
@@ -218,7 +219,9 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   const [confirmation, setConfirmation] = useState<{ title: string; message: string; confirmLabel: string; action: () => Promise<void> | void } | null>(null);
   const firstTaskDateRender = useRef(true);
   const refreshAbort = useRef<AbortController | null>(null);
-  const currentArticle = readerStack.at(-1) || null;
+  const refreshArticlesRef = useRef<(() => Promise<void>) | null>(null);
+  const readerArticleId = readerStack.at(-1)?.id;
+  const currentArticle = state.handbook.find(article => article.id === readerArticleId) || state.news.find(article => article.id === readerArticleId) || null;
   const currentTask = selectedTaskId ? state.dailyTasks.find(task => task.id === selectedTaskId) || null : null;
   const dueSoonTasks = state.dailyTasks.filter(task => {
     if (selectedTaskDate !== state.today || task.completed || !task.dueTime || task.reminderMinutes == null) return false;
@@ -241,6 +244,21 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   const showOperationHeader = canManageUiStudio || (state.canManageContent && (view === "home" || view === "handbook"));
   const operationEndpoint = operationApiUrl || "/api/operation-module";
   const operationUrl = (query?: string) => query ? `${operationEndpoint}${operationEndpoint.includes("?") ? "&" : "?"}${query}` : operationEndpoint;
+  const articlesVisible = view === "home" || view === "handbook" || readerStack.length > 0;
+
+  useEffect(() => {
+    if (devMode || editorOpen || saving || !articlesVisible) return;
+    const subscription = subscribeOperationArticles(operationEndpoint, next => {
+      setState(current => sameOperationArticles(current.handbook, next.handbook) && sameOperationArticles(current.news, next.news)
+        ? current : { ...current, handbook: next.handbook, news: next.news });
+      setReaderStack(current => {
+        const remaining = current.filter(article => next.handbook.some(item => item.id === article.id) || next.news.some(item => item.id === article.id));
+        return remaining.length === current.length ? current : remaining;
+      });
+    });
+    refreshArticlesRef.current = subscription.refresh;
+    return () => { subscription.stop(); refreshArticlesRef.current = null; };
+  }, [articlesVisible, devMode, editorOpen, operationEndpoint, saving]);
 
   const refresh = useCallback(async (date: string) => {
     if (devMode) return;
@@ -651,7 +669,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
       {view === "needs" && <NeedsView needs={state.needs} needTitle={needTitle} needType={needType} needStockLevel={needStockLevel} needNote={needNote} setNeedTitle={setNeedTitle} setNeedType={setNeedType} setNeedStockLevel={setNeedStockLevel} setNeedNote={setNeedNote} addNeed={addNeed} updateNeedStatus={updateNeedStatus} disabled={storageUnavailable} message={needMessage} />}
       {view === "count" && <CashCountView counts={state.cashCounts} countedByName={countedByName} tillAmount={tillAmount} changeBoxAmount={changeBoxAmount} setCountedByName={setCountedByName} setTillAmount={setTillAmount} setChangeBoxAmount={setChangeBoxAmount} addCount={addCashCount} disabled={storageUnavailable || countSaving} message={countMessage} />}
     </main>
-    {currentArticle && <Reader article={currentArticle} articles={allArticles} canGoBack={readerStack.length > 1} goBack={() => setReaderStack(stack => stack.slice(0, -1))} openArticle={(article) => setReaderStack(stack => [...stack, article])} close={() => setReaderStack([])} />}
+    {currentArticle && <Reader article={currentArticle} articles={allArticles} canGoBack={readerStack.length > 1} goBack={() => setReaderStack(stack => stack.slice(0, -1))} openArticle={(article) => setReaderStack(stack => [...stack, article])} close={() => { setReaderStack([]); void refreshArticlesRef.current?.(); }} />}
     {currentTask && <TaskReader task={currentTask} toggleTask={toggleTask} toggleTaskChecklist={toggleTaskChecklist} edit={state.canManageTasks ? () => editTask(currentTask) : undefined} close={() => setSelectedTaskId(null)} disabled={storageUnavailable} />}
     {editorOpen && <ArticleEditor draft={draft} categories={editorCategories} linkableArticles={allArticles} setDraft={setDraft} saveArticle={saveArticle} saving={saving} message={editorMessage} close={() => { setEditorOpen(false); setEditorMessage(""); }} />}
     {studioOpen && <OperationSettings theme={uiTheme} saving={studioSaving} close={() => { setUiTheme(savedUiTheme); setStudioOpen(false); }} preview={setUiTheme} save={saveUiTheme} resetHistory={resetOperationHistory} countHistoryCount={state.cashCounts.length} reminderHistoryCount={state.needs.filter(need => need.status !== "NEEDED").length} publicUrl={publicUrl} />}
