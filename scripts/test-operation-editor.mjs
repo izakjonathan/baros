@@ -173,6 +173,10 @@ await act(async () => {
 });
 await act(async () => { hosts[1].querySelector(".articleCardOpen").click(); });
 const openReader = hosts[1].querySelector(".reader");
+const articleScroller = openReader.querySelector(".readerArticle");
+articleScroller.scrollTop = 320;
+assert.equal(document.body.style.overflow, "hidden");
+assert.equal(document.documentElement.style.overflow, "hidden");
 assert.ok(openReader.textContent.includes("Original instructions"));
 await act(async () => { hosts[0].querySelector(".articleCardActions button").click(); });
 await act(async () => { await new Promise(resolve => requestAnimationFrame(resolve)); });
@@ -188,10 +192,13 @@ await act(async () => {
 assert.equal(syncTimers.size, 1, "the editing device pauses its article subscription");
 await act(async () => { hosts[0].querySelector('[aria-label="Save article"]').click(); });
 assert.ok(!hosts[0].querySelector(".articleEditor"));
+assert.equal(document.body.style.overflow, "hidden", "closing the editor must keep the other open reader's page lock");
 assert.ok(requests.some(request => request.method === "PATCH"));
 assert.ok(JSON.stringify(serverArticle.content).includes("Updated instructions from another device"), JSON.stringify(serverArticle.content));
 await tickSync();
 assert.equal(hosts[1].querySelector(".reader"), openReader, "keep the same reader open");
+assert.equal(openReader.querySelector(".readerArticle"), articleScroller, "background updates must preserve the scroller");
+assert.equal(articleScroller.scrollTop, 320, "background updates must preserve the reading position");
 assert.ok(openReader.textContent.includes("Updated instructions from another device"), JSON.stringify({ text: openReader.textContent, requests, serverArticle, timers: syncTimers.size }));
 assert.ok(hosts[1].querySelector(".articleCardOpen").textContent.includes("Updated card description"));
 assert.ok(requests.some(request => request.url.includes("/api/operation-public/") && request.url.includes("scope=articles")));
@@ -206,8 +213,13 @@ await tickSync();
 assert.ok(hosts[1].querySelector(".articleCardOpen").textContent.includes("Updated again"));
 const previousRequests = requests.length;
 await act(async () => { hosts[1].querySelector('[aria-label="Close article"]').click(); });
+assert.equal(document.body.style.overflow, "");
+assert.equal(document.documentElement.style.overflow, "");
+assert.equal(document.body.style.overscrollBehavior, "");
+assert.equal(document.documentElement.style.overscrollBehavior, "");
 assert.ok(requests.length > previousRequests, "closing the reader triggers a fresh request immediately");
 console.log("PASS temporary read errors retain content, retry successfully and reader close refreshes immediately");
+console.log("PASS reader locks background scrolling, retains its scroll container/position during updates and restores scrolling on close");
 
 Object.defineProperty(document, "visibilityState", { value: "hidden", configurable: true });
 await act(async () => { document.dispatchEvent(new dom.window.Event("visibilitychange")); });

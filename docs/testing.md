@@ -1,5 +1,13 @@
 # Operation verification
 
+## Reader scroll containment (rc.134)
+
+Article readers lock both document and body scrolling for their lifetime. The article is the single vertical scroll area within a bounded grid row; its overscroll is contained so reaching an edge cannot scroll the background page. Editor and reader locks are reference counted and restore their previous overflow/overscroll values after the last overlay closes.
+
+`npm run test:editor` verifies page locking while a reader and editor overlap, reader scroll-container identity and scrollTop preservation across a remote save, and full scroll-style restoration on close. jsdom cannot reproduce native iPhone momentum/scroll chaining. Device acceptance: repeatedly swipe a long Handbook article in both directions, reach its top/bottom, start gestures near the side margins, allow a remote edit to arrive, and close/reopen it. Confirm the article continues scrolling and the Handbook behind it stays still.
+
+rc.134 verification: regression tests, lint, type checking, environment validation and production build passed. Native iPhone scrolling remains a device acceptance check.
+
 ## Live Handbook sync (rc.133)
 
 `npm run test:editor` now mounts two independent OperationModule instances against a mocked saved-article API. One opens the Handbook reader while the other edits and saves an article. Advancing the real subscription callbacks updates the first reader and card without remounting the reader or reloading the page. Coverage includes authenticated and shared-staff endpoint selection, immediate reader-close refresh, temporary errors/retry, pausing while editing, hidden/offline pause/resume, unmount cleanup, overlapping-request prevention and aborting late responses.

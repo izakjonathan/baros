@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.19.0-rc.134
+
+- Locked document and body scrolling while an article reader is open, preventing gestures from moving the page behind the reader.
+- Contained vertical scrolling within the reader article, constrained its grid height, and enabled touch momentum scrolling.
+- Reused the page lock for the editor with reference counting so closing one overlay cannot unlock another.
+- Verified that background article updates preserve the reader's scroll container and reading position, and that closing the last overlay restores the previous page styles.
+
 ## v0.19.0-rc.133
 
 - Added automatic article-only refreshes every two seconds on visible Home, Handbook and reader screens, for signed-in users and shared staff links.

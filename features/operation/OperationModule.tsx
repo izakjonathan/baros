@@ -142,6 +142,30 @@ async function responseMessage(response: Response, fallback: string) {
   return typeof failure === "object" && failure !== null && "error" in failure && typeof failure.error === "string" ? failure.error : fallback;
 }
 
+let pageScrollLocks = 0;
+let restorePageScroll: (() => void) | undefined;
+
+function usePageScrollLock() {
+  useEffect(() => {
+    if (pageScrollLocks++ === 0) {
+      const root = document.documentElement;
+      const body = document.body;
+      const previous = { rootOverflow: root.style.overflow, rootOverscroll: root.style.overscrollBehavior, bodyOverflow: body.style.overflow, bodyOverscroll: body.style.overscrollBehavior };
+      root.style.overflow = body.style.overflow = "hidden";
+      root.style.overscrollBehavior = body.style.overscrollBehavior = "none";
+      restorePageScroll = () => {
+        root.style.overflow = previous.rootOverflow;
+        root.style.overscrollBehavior = previous.rootOverscroll;
+        body.style.overflow = previous.bodyOverflow;
+        body.style.overscrollBehavior = previous.bodyOverscroll;
+      };
+    }
+    return () => {
+      if (--pageScrollLocks === 0) { restorePageScroll?.(); restorePageScroll = undefined; }
+    };
+  }, []);
+}
+
 function useDialogFocus(close: () => void) {
   const dialogRef = useRef<HTMLElement>(null);
   const closeRef = useRef(close);
@@ -904,6 +928,7 @@ function CashCountView({ counts, countedByName, tillAmount, changeBoxAmount, set
 
 function ArticleEditor({ draft, categories, linkableArticles, setDraft, saveArticle, saving, message, close }: { draft: DraftArticle; categories: string[]; linkableArticles: OperationArticle[]; setDraft: (draft: DraftArticle) => void; saveArticle: () => Promise<boolean>; saving: boolean; message: string; close: () => void }) {
   const editorRef = useDialogFocus(close);
+  usePageScrollLock();
   const [toolbarTarget, setToolbarTarget] = useState<HTMLDivElement | null>(null);
   const categoryIsNew = !categories.includes(draft.category);
 
@@ -919,17 +944,6 @@ function ArticleEditor({ draft, categories, linkableArticles, setDraft, saveArti
     window.addEventListener("resize", syncViewport);
     return () => { visualViewport?.removeEventListener("resize", syncViewport); visualViewport?.removeEventListener("scroll", syncViewport); window.removeEventListener("resize", syncViewport); };
   }, [editorRef]);
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    const previousOverscroll = document.documentElement.style.overscrollBehavior;
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overscrollBehavior = "none";
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.documentElement.style.overscrollBehavior = previousOverscroll;
-    };
-  }, []);
 
   return <aside ref={editorRef} className={styles.articleEditor} aria-modal="true" role="dialog" aria-label={draft.id ? "Edit article" : "Add article"}><div className={styles.articleEditorFrame}><div className={styles.articleEditorTop}><button type="button" className={styles.editorIconButton} onClick={close} aria-label="Close editor"><ArrowLeft size={18} /></button><label className={styles.editorTopSelect}><span className="sr-only">Article type</span><select value={draft.kind} onChange={event => setDraft({ ...draft, kind: event.target.value as OperationArticleKind })}><option value="HANDBOOK">Handbook</option><option value="NEWS">News</option></select></label><label className={styles.editorTopSelect}><span className="sr-only">Existing category</span><select value={categoryIsNew ? "" : draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })}><option value="">Add new category…</option>{categories.map(categoryName => <option key={categoryName} value={categoryName}>{categoryName}</option>)}</select></label><button type="button" className={styles.editorDoneButton} disabled={saving} onClick={saveArticle} aria-label={saving ? "Saving article" : "Save article"}>{saving ? <LoaderCircle className={styles.saveSpinner} size={18} /> : <Check size={19} />}</button></div><div className={styles.articleEditorCanvas}>{categoryIsNew && <label className={styles.editorNewCategory}><span>New category</span><input value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })} placeholder="Category name" /></label>}<input className={styles.editorTitleInput} value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} placeholder="Title" /><textarea className={styles.editorDescriptionInput} value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} placeholder="Short card description" /><TiptapArticleEditor value={draft.document} toolbarTarget={toolbarTarget} linkableArticles={linkableArticles.filter(article => article.id !== draft.id)} onChange={(document) => setDraft({ ...draft, document })} />{message && <p className={styles.editorMessage} role="status">{message}</p>}</div><div ref={setToolbarTarget} className={styles.articleEditorControls} /></div></aside>;
 }
@@ -1161,6 +1175,7 @@ function TaskReader({ task, toggleTask, toggleTaskChecklist, edit, close, disabl
 
 function Reader({ article, articles, canGoBack, goBack, openArticle, close }: { article: OperationArticle; articles: OperationArticle[]; canGoBack: boolean; goBack: () => void; openArticle: (article: OperationArticle) => void; close: () => void }) {
   const readerRef = useDialogFocus(close);
+  usePageScrollLock();
   const content = article.content.length ? article.content : [{ type: "title" as const, text: article.title }, { type: "body" as const, text: article.description || "No article content has been added yet." }];
   const openLinkedArticle = (articleId: string) => {
     const linkedArticle = articles.find(item => item.id === articleId);
