@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.19.0-rc.136
+
+- Reduced the large-screen content maximum from 70rem to 54rem, between the previous 35rem layout and rc.135's expanded layout.
+- Added side gutters and slightly more top spacing on large screens while preserving the two-column layout and smaller-screen behavior.
+
 ## v0.19.0-rc.135
 
 - Widened Operation at 64rem and above, using two columns for Handbook cards and multiple tasks within a group.

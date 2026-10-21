@@ -293,7 +293,8 @@
   .operationDock button{flex:0 0 auto;width:100%;min-height:3.25rem;padding:.28rem .08rem}
 }
 @media(min-width:64rem){
-  .operationMain{width:min(70rem,100%)}
+  .operationShell{padding-top:calc(4.75rem + env(safe-area-inset-top))}
+  .operationMain{width:min(54rem,calc(100% - 3rem))}
   .splitLayout{grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem}
   .articleGroups{grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem}
   .articleGroups .operationCard{grid-template-columns:minmax(0,1fr);align-items:stretch;align-content:start}

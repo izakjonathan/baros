@@ -1,5 +1,9 @@
 # Operation verification
 
+## Content spacing (rc.136)
+
+Starting from rc.135, reduced the large-screen canvas to 54rem with 3rem of additional total side gutters and increased top spacing. Repeated the 42 Chromium fixture layout checks described below: all passed, including two-column controls at 1024px and unchanged small-screen and reader widths. Reviewed landscape Handbook and Reminders screenshots. Lint, type checking, all existing tests, production-shaped environment validation and production build passed. Physical iPad Safari remains a device acceptance check.
+
 ## Responsive layout (rc.135)
 
 Rendered the actual Home, shared Home, Handbook, Tasks, Reminders, Count and Reader components with representative fixture data and the application styles in headless Chromium. All 42 combinations at widths 320, 390, 768, 1024, 1180 and 1440 passed checks for page overflow, control bounds, one/two-column breakpoints and reader width. Visually reviewed the landscape layouts and phone Handbook. Fixtures included long titles, descriptions, categories and reminder actions. This verifies browser layout with fixture data, not physical iPad Safari or a signed-in live-data flow.
