@@ -802,7 +802,7 @@ function HomeView({ news, tasks, needs, openArticle, openView, canManageContent,
   const nextTask = outstanding[0];
   const openNeeds = needs.filter(need => need.status === "NEEDED");
   const completedCount = tasks.length - outstanding.length;
-  return <>
+  return <div className={styles.splitLayout}><section className={styles.splitColumn} aria-label="Today overview">
     <section className={styles.todayPanel}>
       <div><p className={styles.eyebrow}>Today</p><h1>{nextTask ? "Next up" : tasks.length ? "You’re up to date" : "Nothing scheduled"}</h1><p>{tasks.length ? `${completedCount} of ${tasks.length} tasks complete` : "Check the Handbook when you need a routine."}</p></div>
       <button type="button" onClick={() => openView("tasks")}>All tasks <ChevronRight size={17} /></button>
@@ -816,8 +816,8 @@ function HomeView({ news, tasks, needs, openArticle, openView, canManageContent,
       <button type="button" onClick={() => openView("tasks")}><CheckSquare size={18} /><span><strong>{outstanding.length}</strong><small>{outstanding.length === 1 ? "task left" : "tasks left"}</small></span><ChevronRight size={17} /></button>
       <button type="button" onClick={() => openView("needs")}><ShoppingBasket size={18} /><span><strong>{openNeeds.length}</strong><small>{openNeeds.length === 1 ? "reminder open" : "reminders open"}</small></span><ChevronRight size={17} /></button>
     </section>
-    <NewsFeed news={news} openArticle={openArticle} canManageContent={canManageContent} disabled={disabled} editArticle={editArticle} deleteArticle={deleteArticle} />
-  </>;
+    </section><section className={styles.splitColumn} aria-label="News"><NewsFeed news={news} openArticle={openArticle} canManageContent={canManageContent} disabled={disabled} editArticle={editArticle} deleteArticle={deleteArticle} />
+  </section></div>;
 }
 
 function taskPriorityRank(priority: OperationTaskPriority) {
@@ -825,7 +825,7 @@ function taskPriorityRank(priority: OperationTaskPriority) {
 }
 
 function PublicHomeView({ news, openArticle, openHandbook }: { news: OperationArticle[]; openArticle: (article: OperationArticle) => void; openHandbook: () => void }) {
-  return <><section className={styles.todayPanel}><div><p className={styles.eyebrow}>Bar Ops</p><h1>Handbook & news</h1><p>Read the latest published routines and updates.</p></div><button type="button" onClick={openHandbook}>Open handbook <ChevronRight size={17} /></button></section><NewsFeed news={news} openArticle={openArticle} /></>;
+  return <div className={styles.splitLayout}><section className={styles.splitColumn} aria-label="Handbook overview"><section className={styles.todayPanel}><div><p className={styles.eyebrow}>Bar Ops</p><h1>Handbook & news</h1><p>Read the latest published routines and updates.</p></div><button type="button" onClick={openHandbook}>Open handbook <ChevronRight size={17} /></button></section></section><section className={styles.splitColumn} aria-label="News"><NewsFeed news={news} openArticle={openArticle} /></section></div>;
 }
 
 function NewsFeed({ news, openArticle, canManageContent = false, disabled = false, editArticle, deleteArticle }: { news: OperationArticle[]; openArticle: (article: OperationArticle) => void; canManageContent?: boolean; disabled?: boolean; editArticle?: (article: OperationArticle) => void; deleteArticle?: (article: OperationArticle) => void }) {
@@ -884,7 +884,7 @@ function NeedsView({ needs, needTitle, needType, needStockLevel, needNote, setNe
   const actionLabel = (need: OperationNeed) => need.status === "ORDERED" ? "Ordered" : need.status === "RESOLVED" ? "Resolved" : "Dismissed";
   const actionDate = (need: OperationNeed) => new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "2-digit", year: "2-digit", timeZone: "Europe/Copenhagen" }).format(new Date(need.updatedAt)).replaceAll("/", ".");
   const rows = (items: OperationNeed[], issueList = false, history = false) => <div className={styles.needList}>{items.map(need => <article className={styles.needRow} key={need.id}>{need.type === "ISSUE" ? <CircleAlert size={22} /> : <ShoppingBasket size={22} />}<div><h3>{need.title}</h3>{need.note && <p>{need.note}</p>}</div><span className={styles.reminderStatus}>{typeLabel(need)}</span>{history ? <p className={styles.reminderActionMeta}>{actionLabel(need)} · {actionDate(need)}</p> : <div className={styles.reminderActions}><button type="button" onClick={() => updateNeedStatus(need, issueList ? "RESOLVED" : "ORDERED")} disabled={disabled} aria-label={`Mark ${need.title} ${issueList ? "resolved" : "ordered"}`}><Check size={16} aria-hidden="true" /><span>{issueList ? "Resolved" : "Ordered"}</span></button><button type="button" className={styles.reminderDismiss} onClick={() => updateNeedStatus(need, "DISMISSED")} disabled={disabled} aria-label={`Dismiss ${need.title}`}><X size={16} aria-hidden="true" /><span>Dismiss</span></button></div>}</article>)}{!items.length && <div className={styles.empty}>{issueList ? "No open issues." : "Nothing to order."}</div>}</div>;
-  return <><details className={styles.taskComposer}><summary><span><Plus size={17} />Add reminder</span><small>Stock, item or issue</small></summary><div className={styles.taskComposerBody}><div className={styles.adminGrid}><input value={needTitle} onChange={event => setNeedTitle(event.target.value)} placeholder="What is needed?" disabled={disabled} /><input value={needNote} onChange={event => setNeedNote(event.target.value)} placeholder="Description (optional)" disabled={disabled} /></div><div className={styles.taskSettings}><label><span className={styles.taskSettingLabel}>Type</span><select value={needType} onChange={event => setNeedType(event.target.value as OperationReminderType)} disabled={disabled}><option value="RESTOCK">Restock</option><option value="NEW_ITEM">New item</option><option value="ISSUE">Issue</option></select></label>{needType === "RESTOCK" && <label><span className={styles.taskSettingLabel}>Stock level</span><select value={needStockLevel || "LOW"} onChange={event => setNeedStockLevel(event.target.value as OperationReminderStockLevel)} disabled={disabled}><option value="LOW">Low</option><option value="OUT_OF">Out of</option></select></label>}</div><div className={styles.adminActions}><button className={styles.composerSubmit} type="button" onClick={addNeed} disabled={disabled}>Add reminder</button></div></div></details>{message && <p className={styles.editorMessage} role="status">{message}</p>}<SectionHeader title="To order" detail={`${toOrder.length} open`} />{rows(toOrder)}<SectionHeader title="Issues" detail={`${issues.length} open`} />{rows(issues, true)}<details className={styles.orderHistory}><summary>History ({history.length})</summary>{rows(history, false, true)}</details></>;
+  return <><details className={styles.taskComposer}><summary><span><Plus size={17} />Add reminder</span><small>Stock, item or issue</small></summary><div className={styles.taskComposerBody}><div className={styles.adminGrid}><input value={needTitle} onChange={event => setNeedTitle(event.target.value)} placeholder="What is needed?" disabled={disabled} /><input value={needNote} onChange={event => setNeedNote(event.target.value)} placeholder="Description (optional)" disabled={disabled} /></div><div className={styles.taskSettings}><label><span className={styles.taskSettingLabel}>Type</span><select value={needType} onChange={event => setNeedType(event.target.value as OperationReminderType)} disabled={disabled}><option value="RESTOCK">Restock</option><option value="NEW_ITEM">New item</option><option value="ISSUE">Issue</option></select></label>{needType === "RESTOCK" && <label><span className={styles.taskSettingLabel}>Stock level</span><select value={needStockLevel || "LOW"} onChange={event => setNeedStockLevel(event.target.value as OperationReminderStockLevel)} disabled={disabled}><option value="LOW">Low</option><option value="OUT_OF">Out of</option></select></label>}</div><div className={styles.adminActions}><button className={styles.composerSubmit} type="button" onClick={addNeed} disabled={disabled}>Add reminder</button></div></div></details>{message && <p className={styles.editorMessage} role="status">{message}</p>}<div className={styles.splitLayout}><section className={styles.splitColumn} aria-label="To order"><SectionHeader title="To order" detail={`${toOrder.length} open`} />{rows(toOrder)}</section><section className={styles.splitColumn} aria-label="Issues"><SectionHeader title="Issues" detail={`${issues.length} open`} />{rows(issues, true)}</section></div><details className={styles.orderHistory}><summary>History ({history.length})</summary>{rows(history, false, true)}</details></>;
 }
 
 function formatCountAmount(amount: number) {
@@ -909,7 +909,7 @@ function CashCountView({ counts, countedByName, tillAmount, changeBoxAmount, set
     else groups.push([count.operationalDate, [count]]);
     return groups;
   }, []);
-  return <>
+  return <div className={styles.splitLayout}>
     <section className={styles.countComposer} aria-labelledby="count-heading">
       <div><p className={styles.eyebrow}>Daily cash</p><h1 id="count-heading">Count</h1></div>
       <div className={styles.countFields}>
@@ -921,9 +921,9 @@ function CashCountView({ counts, countedByName, tillAmount, changeBoxAmount, set
       <button className={styles.composerSubmit} type="button" onClick={addCount} disabled={disabled}><Banknote size={17} />Save count</button>
       {message && <p className={styles.editorMessage} role="status">{message}</p>}
     </section>
-    <SectionHeader title="Saved counts" detail={`${counts.length} total`} />
+    <section className={styles.splitColumn} aria-label="Saved counts"><SectionHeader title="Saved counts" detail={`${counts.length} total`} />
     <div className={styles.countGroups}>{grouped.map(([date, dateCounts]) => <section className={styles.countGroup} key={date}><h2>{formatOperationalDate(date)}</h2><div className={styles.countList}>{dateCounts.map(count => <article className={styles.countRow} key={count.id}><Banknote size={20} /><div><h3>{count.countedByName}</h3><p>{formatCountDate(count.createdAt)}</p></div><div className={styles.countAmounts}>{count.tillAmount != null && <span>Till <strong>{formatCountAmount(count.tillAmount)} kr</strong></span>}{count.changeBoxAmount != null && <span>Change box <strong>{formatCountAmount(count.changeBoxAmount)} kr</strong></span>}</div></article>)}</div></section>)}{!counts.length && <div className={styles.empty}>No saved counts yet.</div>}</div>
-  </>;
+  </section></div>;
 }
 
 function ArticleEditor({ draft, categories, linkableArticles, setDraft, saveArticle, saving, message, close }: { draft: DraftArticle; categories: string[]; linkableArticles: OperationArticle[]; setDraft: (draft: DraftArticle) => void; saveArticle: () => Promise<boolean>; saving: boolean; message: string; close: () => void }) {

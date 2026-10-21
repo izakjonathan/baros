@@ -1,5 +1,11 @@
 # Operation verification
 
+## Responsive layout (rc.135)
+
+Rendered the actual Home, shared Home, Handbook, Tasks, Reminders, Count and Reader components with representative fixture data and the application styles in headless Chromium. All 42 combinations at widths 320, 390, 768, 1024, 1180 and 1440 passed checks for page overflow, control bounds, one/two-column breakpoints and reader width. Visually reviewed the landscape layouts and phone Handbook. Fixtures included long titles, descriptions, categories and reminder actions. This verifies browser layout with fixture data, not physical iPad Safari or a signed-in live-data flow.
+
+Existing interaction regression tests, lint, type checking, production-shaped environment validation and the production build passed. Device acceptance: rotate an iPad between portrait and landscape, open a long article, and check card wrapping, reminder actions and unchanged reader scrolling.
+
 ## Reader scroll containment (rc.134)
 
 Article readers lock both document and body scrolling for their lifetime. The article is the single vertical scroll area within a bounded grid row; its overscroll is contained so reaching an edge cannot scroll the background page. Editor and reader locks are reference counted and restore their previous overflow/overscroll values after the last overlay closes.

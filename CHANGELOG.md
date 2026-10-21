@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.19.0-rc.135
+
+- Widened Operation at 64rem and above, using two columns for Handbook cards and multiple tasks within a group.
+- Placed Home overview beside News, To order beside Issues, and the Count form beside saved counts on wider screens.
+- Moved Handbook category labels above card titles on wider screens and allowed long labels to wrap.
+- Preserved single-column smaller screens, compact lone tasks, existing article reading width and all editing, sync and scrolling behavior.
+- Checked seven views at six viewport widths in Chromium, including long titles and crowded controls, with no horizontal page overflow.
+
 ## v0.19.0-rc.134
 
 - Locked document and body scrolling while an article reader is open, preventing gestures from moving the page behind the reader.

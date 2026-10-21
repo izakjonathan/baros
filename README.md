@@ -1,6 +1,6 @@
 # Bar Ops — Operation
 
-Current release: **v0.19.0-rc.134**
+Current release: **v0.19.0-rc.135**
 
 This repository now contains only the focused Operation product:
 
@@ -51,7 +51,11 @@ npm run validate:env
 npm run build
 ```
 
-Rollback checkpoint: **v0.19.0-rc.133**.
+Rollback checkpoint: **v0.19.0-rc.134**.
+
+## Responsive Operation layout
+
+At widths of 64rem and above, Operation uses a wider canvas with two-column Handbook cards and task groups. Home places the overview beside News, Reminders places To order beside Issues, and Count places the entry form beside saved counts. Smaller screens retain one column; open articles retain their existing reading width. A lone task remains compact.
 
 ## Live Handbook updates
 
