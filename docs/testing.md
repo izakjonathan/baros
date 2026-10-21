@@ -21,3 +21,21 @@ After migration 025 is deployed, complete these manual production checks:
 5. Shared staff link works without Vercel or application login.
 6. Disabled and rotated shared links stop working.
 7. Legacy URLs such as `/employee`, `/api/shifts`, and `/api/orders` return 404.
+
+## Apple Notes paste
+
+`npm run test:paste` tests generated clipboard fixtures through the HTML converter and actual Tiptap/ProseMirror schema. It covers semantic headings, iOS styled spans, macOS stylesheet/point sizes, Apple font hints, mixed inline formatting, lists, line breaks, repeat normalization, actual editor paste insertion, Undo/Redo and the storage-parser round trip. Fixtures model supported clipboard shapes; they are not captures from a physical Apple device.
+
+Before release acceptance, copy a real note with Title, Heading, Subheading, Body, a partly bold paragraph, links and lists into the article body on iPhone Safari and macOS Safari. Confirm the Aa menu reports Heading/Subheading, save and reopen the article, and check Undo/Redo and insertion into an existing paragraph. Test copying only one subheading as well as a full note. Plain-text paste should remain body text.
+
+rc.131 verification: `npm run test:all`, `npm run lint`, `npm run typecheck`, production-shaped `npm run validate:env`, and `npm run build` passed. The release ZIP also passed `npm run audit:artifacts`. No live database or physical Apple clipboard was used.
+
+## Editor keyboard toolbar
+
+`npm run test:editor` mounts the real ArticleEditor/Tiptap component in jsdom. It verifies that all eight toolbar controls and the link form render in the footer outside the scroll container; simulated visual viewport resize/scroll events update frame dimensions; touch preserves focus; Subheading/Bold change the selected content; closing the editor restores page scrolling.
+
+The footer is an automatically sized grid row, so article scrolling cannot clip it and the toolbar no longer estimates its top from a fixed rem offset. Existing visual viewport resize/scroll listeners position the whole frame.
+
+jsdom does not perform layout or emulate an iOS keyboard. Browser installation in this session failed with a truncated download, so pixel visibility and physical iPhone Safari behavior remain unverified. On iPhone, edit a long existing note, focus text near the bottom, scroll the note with the keyboard open, apply Heading/Subheading/Bold, open More/Link, dismiss and reopen the keyboard, then rotate the device. The complete toolbar must remain above the keyboard and selections must retain their formatting.
+
+rc.132 verification: `npm run test:all`, `npm run lint`, `npm run typecheck`, production-shaped `npm run validate:env`, and `npm run build` passed. The component mount reports the existing duplicate Link/Underline extension warning; this release does not change the extension setup.

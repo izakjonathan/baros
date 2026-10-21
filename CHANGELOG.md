@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.19.0-rc.132
+
+- Moved the article formatting toolbar and its overlays out of the note's scrolling container into a dedicated footer in the visual-viewport-sized editor frame.
+- Replaced the toolbar's fixed top-position estimate with a real grid footer row that reserves the controls' actual height.
+- Kept touch interactions from shifting focus away from the selected text, and anchored link controls above the footer.
+- Added real-component DOM regression tests for editing existing notes, keyboard-sized viewport updates, formatting, focus retention, popovers and cleanup.
+
+## v0.19.0-rc.131
+
+- Added article paste normalization for semantic headings, Apple text styles and standard iOS/macOS Notes typography.
+- Mapped pasted Title/Heading to Baros Heading and Subheading to Baros Subheading while preserving supported marks, links and lists.
+- Added executable DOM and Tiptap schema regression tests for paste conversion, stylesheet typography, partial bold text and plain-text fallback.
+
 ## v0.19.0-rc.130
 
 - Limited Handbook card previews to the explicit short-description field.

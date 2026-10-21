@@ -1,6 +1,6 @@
 # Bar Ops — Operation
 
-Current release: **v0.19.0-rc.130**
+Current release: **v0.19.0-rc.132**
 
 This repository now contains only the focused Operation product:
 
@@ -51,4 +51,14 @@ npm run validate:env
 npm run build
 ```
 
-Rollback checkpoint: **v0.19.0-rc.129**.
+Rollback checkpoint: **v0.19.0-rc.131**.
+
+## Editor controls
+
+Article formatting controls occupy a separate footer in the visible editor frame. The note body scrolls independently; the toolbar and its popovers are outside that scroller. The frame follows the visual viewport when the software keyboard opens, pans or closes.
+
+## Paste from Apple Notes
+
+Paste normally into the article body. Notes Title and Heading become Baros Heading; Notes Subheading becomes Baros Subheading. Bold, italic, underline, links and lists retain the supported editor formatting. Clipboard fonts and colors do not replace the Operation theme.
+
+Semantic headings and Apple text-style hints take priority. When Notes supplies only styled paragraphs, whole-line bold text at standard Notes sizes is mapped to Heading or Subheading; a fully bold body line of the same size can be indistinguishable from a subheading. Plain-text-only clipboard content cannot retain heading styles. Real-device Notes/Safari clipboard testing is still required.
