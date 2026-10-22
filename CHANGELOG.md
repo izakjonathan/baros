@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.19.0-rc.137
+
+- Replaced the task short-instruction input with the Handbook rich-text editor, including headings, lists, images, Apple Notes paste and Handbook article links.
+- Added compact task-card body previews, formatted task-reader bodies and return navigation from linked Handbook articles. Preserved old plain-text instructions, task templates and recurrence.
+- Simplified Home to the Blågårds Apotek heading and shortcuts; removed the featured task, completion summary, Today eyebrow, All tasks link, sync timestamp and Latest updates label.
+- Rendered News previews using the existing rich-content renderer, preserving emphasis, headings and lists with full ink colour and consistent spacing.
+- Replaced the task date pills with a single compact navigation bar, native date selection and Today shortcut; removed the redundant Tasks/date row.
+- Added interaction coverage for task body creation/editing, storage validation, templates, article navigation, date controls and formatted News.
+
 ## v0.19.0-rc.136
 
 - Reduced the large-screen content maximum from 70rem to 54rem, between the previous 35rem layout and rc.135's expanded layout.

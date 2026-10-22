@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { defaultOperationState } from "@/features/operation/default-content";
-import { mapOperationArticle, ownerCanManageOperation, parseOperationBlocks } from "@/features/operation/content";
+import { mapOperationArticle, normalizeOperationTaskBody, ownerCanManageOperation, parseOperationBlocks } from "@/features/operation/content";
 import { isOperationTaskDue, parseOperationTaskChecklist, parseOperationTaskImages, type OperationCashCount, type OperationDailyTask, type OperationModuleState, type OperationNeed, type OperationTaskAssignmentScope, type OperationTaskPriority, type OperationTaskType } from "@/features/operation/types";
 import { db } from "@/lib/db/client";
 import { ApiError, enumValue, finiteNumber, isoDate, jsonError, optionalString, readJsonObject, requiredString, uuid } from "@/lib/http";
@@ -30,6 +30,12 @@ async function requireApiUser() {
 
 function weekdayFromDate(date: string) {
   return new Date(`${date}T00:00:00Z`).getUTCDay();
+}
+
+function taskBodyInput(body: Record<string, unknown>, optional = false) {
+  const value = optionalString(body, "description", 96_000);
+  if (value === null || value === undefined) return optional ? null : "";
+  try { return normalizeOperationTaskBody(value); } catch (error) { throw new ApiError(400, error instanceof Error ? error.message : "Task body is invalid."); }
 }
 
 function parseChecklist(value: unknown) {
@@ -246,7 +252,7 @@ export async function POST(request: Request) {
       }
       if (repeatEndDate && repeatEndDate < dueDate) throw new ApiError(400, "Repeat end date must be after the first task date");
       const title = requiredString(body, "title", 160);
-      const description = optionalString(body, "description", 300) || "";
+      const description = taskBodyInput(body);
       const [row] = await db()<Array<Record<string, unknown>>>`
         insert into operation_daily_tasks(organization_id,location_id,weekday,title,description,due_date,repeat_unit,repeat_interval,repeat_end_date,task_type,priority,due_time,reminder_minutes,assignment_scope,assigned_employee_id,checklist,images,created_by,updated_by,idempotency_key)
         values(${user.organizationId},${user.locationId},${weekday},${title},${description},${dueDate}::date,${repeatUnit},${repeatInterval},${repeatEndDate}::date,${taskType},${priority},${dueTime}::time,${reminderMinutes},${assignmentScope},${assignedEmployeeId},${JSON.stringify(checklist)}::jsonb,${JSON.stringify(images)}::jsonb,${user.userId},${user.userId},${idempotencyKey})
@@ -282,7 +288,7 @@ export async function POST(request: Request) {
     if (entity === "taskTemplate") {
       requireTaskManager(user.role);
       const title = requiredString(body, "title", 160);
-      const description = optionalString(body, "description", 300) || "";
+      const description = taskBodyInput(body);
       const taskType = enumValue(body.taskType || "SERVICE", "taskType", ["OPENING", "SERVICE", "CLOSING", "MAINTENANCE", "ADMIN"] as const);
       const priority = enumValue(body.priority || "NORMAL", "priority", ["LOW", "NORMAL", "HIGH"] as const);
       const dueTime = body.dueTime == null || body.dueTime === "" ? null : requiredString(body, "dueTime", 5);
@@ -388,7 +394,7 @@ export async function PATCH(request: Request) {
         const updateRepeatEndDate = body.repeatEndDate !== undefined;
         const repeatEndDate = !updateRepeatEndDate || body.repeatEndDate === "" || body.repeatEndDate === null ? null : isoDate(body.repeatEndDate, "repeatEndDate");
         const title = optionalString(body, "title", 160);
-        const description = optionalString(body, "description", 300);
+        const description = taskBodyInput(body, true);
         const updateChecklist = body.checklist !== undefined;
         const checklist = updateChecklist ? parseChecklist(body.checklist) : null;
         const updateImages = body.images !== undefined;

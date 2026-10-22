@@ -4,6 +4,32 @@ const articleKinds: readonly OperationArticleKind[] = ["HANDBOOK", "NEWS"];
 const blockTypes = new Set(["title", "h1", "h2", "body", "bullets", "numbered", "image", "richText", "tiptap", "articleLink"]);
 const richTextAttributeTypes = new Set(["bold", "italic", "underline", "strike", "link", "header", "list", "align", "color", "background"]);
 
+// Versioned rich task bodies share the existing text storage column. Old plain
+// instructions remain readable, and recurring tasks/templates keep one format.
+const taskBodyPrefix = "baros:task-body:v1\n";
+
+export function readOperationTaskBody(value: string): OperationContentBlock[] {
+  if (!value) return [];
+  if (!value.startsWith(taskBodyPrefix)) return [{ type: "body", text: value }];
+  return parseOperationBlocks(value.slice(taskBodyPrefix.length));
+}
+
+export function writeOperationTaskBody(blocks: OperationContentBlock[]): string {
+  return taskBodyPrefix + JSON.stringify(parseOperationBlocks(blocks));
+}
+
+export function normalizeOperationTaskBody(value: string): string {
+  if (value.length > 96_000) throw new Error("Task body is too long (maximum 96,000 characters).");
+  if (!value.startsWith(taskBodyPrefix)) {
+    if (value.length > 300) throw new Error("Plain task instructions must be 300 characters or fewer.");
+    return value;
+  }
+  let parsed: unknown;
+  try { parsed = JSON.parse(value.slice(taskBodyPrefix.length)); } catch { throw new Error("Task body is invalid."); }
+  if (!Array.isArray(parsed)) throw new Error("Task body is invalid.");
+  return writeOperationTaskBody(parseOperationBlocks(parsed));
+}
+
 export function ownerCanManageOperation(role: string) {
   return role === "OWNER" || role === "ADMIN";
 }

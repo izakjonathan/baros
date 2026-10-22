@@ -1,6 +1,6 @@
 # Bar Ops — Operation
 
-Current release: **v0.19.0-rc.136**
+Current release: **v0.19.0-rc.137**
 
 This repository now contains only the focused Operation product:
 
@@ -51,11 +51,17 @@ npm run validate:env
 npm run build
 ```
 
-Rollback checkpoint: **v0.19.0-rc.135**.
+Rollback checkpoint: **v0.19.0-rc.136**.
 
 ## Responsive Operation layout
 
 At widths of 64rem and above, Operation uses a centered canvas capped at 54rem, with additional side gutters and top spacing, two-column Handbook cards and task groups. Home places the overview beside News, Reminders places To order beside Issues, and Count places the entry form beside saved counts. Smaller screens retain one column; open articles retain their existing reading width. A lone task remains compact.
+
+## Task body text
+
+Create or edit a task and choose **Add body text** / **Edit body text**. This opens the same full-screen rich-text editor used by the Handbook. Use More → Link article (or type `>>`) to insert a Handbook link. Done returns to the task form; Create task / Save changes saves the task. Cards show a two-line text preview; opening a task shows its complete formatted body above its checklist. Following a Handbook link offers Back to task. Existing instructions and saved templates remain usable.
+
+Home now starts with **Blågårds Apotek**, with task/reminder shortcuts and formatted News cards. Tasks use a compact date navigation bar with previous/next day, a native date picker and Today.
 
 ## Live Handbook updates
 

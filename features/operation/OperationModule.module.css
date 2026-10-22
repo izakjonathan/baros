@@ -21,16 +21,6 @@
 .todayPanel h1{max-width:17rem;margin:.2rem 0;font-size:clamp(1.7rem,6.3vw,2.45rem);line-height:1;letter-spacing:-.045em}
 .todayPanel p:not(.eyebrow){font-family:var(--font-body);font-size:.75rem;color:var(--op-muted)}
 .todayPanel button{display:inline-flex;align-items:center;gap:.18rem;flex:none;border:0;background:transparent;color:inherit;padding:.25rem 0;font-family:var(--font-display);font-size:.67rem;font-weight:760;letter-spacing:.06em;text-transform:uppercase}
-.nextAction{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:.62rem;width:100%;padding:.72rem;border:1px solid var(--op-ink);border-radius:.78rem;background:var(--op-ink);color:var(--op-canvas);text-align:left}
-.nextActionIcon{display:grid;place-items:center;width:2.15rem;height:2.15rem;border-radius:.58rem;background:color-mix(in srgb,var(--op-canvas) 16%,transparent)}
-.nextActionIcon[data-priority="HIGH"]{background:color-mix(in srgb,var(--op-accent) 78%,var(--op-ink))}
-.nextActionIcon[data-priority="LOW"]{background:color-mix(in srgb,var(--op-positive) 68%,var(--op-ink))}
-.nextAction>span:nth-child(2){display:grid;min-width:0;gap:.08rem}
-.nextAction small{font-family:var(--op-font-display);font-size:.6rem;font-weight:700;line-height:1;letter-spacing:.09em;text-transform:uppercase;color:color-mix(in srgb,var(--op-canvas) 70%,transparent)}
-.nextAction strong{overflow:hidden;font-family:var(--op-font-display);font-size:var(--op-type-card);line-height:1.14;text-overflow:ellipsis;white-space:nowrap}
-.nextAction em{display:flex;align-items:center;gap:.25rem;overflow:hidden;font-family:var(--op-font-body);font-size:var(--op-type-meta);font-style:normal;line-height:1.3;text-overflow:ellipsis;white-space:nowrap;color:color-mix(in srgb,var(--op-canvas) 72%,transparent)}
-.nextActionEmpty{display:flex;align-items:center;gap:.48rem;padding:.72rem;border:1px solid color-mix(in srgb,var(--op-ink) 34%,transparent);border-radius:.78rem;color:var(--op-muted)}
-.nextActionEmpty p{font-family:var(--op-font-body);font-size:var(--op-type-body)}
 .homeShortcuts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.46rem}
 .homeShortcuts button{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:.42rem;min-width:0;padding:.58rem .62rem;border:1px solid color-mix(in srgb,var(--op-ink) 48%,transparent);border-radius:.68rem;background:color-mix(in srgb,var(--op-canvas) 88%,transparent);color:inherit;text-align:left}
 .homeShortcuts span{display:grid;min-width:0;gap:.04rem}
@@ -53,13 +43,19 @@
 .newsCardTitleButton{min-width:0;border:0;background:transparent;color:inherit;padding:0;text-align:left}
 .newsCardTools{display:flex;align-items:center;justify-content:flex-end;gap:.35rem;min-width:0}
 .newsCardBodyButton{display:block;width:100%;border:0;background:transparent;color:inherit;padding:0;text-align:left}
-.newsCardBody{display:grid;gap:.72rem;max-width:44ch;margin-top:.72rem;white-space:pre-line}
-.newsCardBody>span{display:block}
-.newsCardHeading{font-family:var(--op-font-display);font-size:1.1875rem;font-weight:700;line-height:1.22;letter-spacing:-.012em}
-.newsCardSubheading{font-family:var(--op-font-display);font-size:1.0625rem;font-weight:600;line-height:1.3;letter-spacing:-.006em}
-.newsCardBody,.newsCardList{font-family:var(--op-font-body);font-size:1rem;font-weight:400;line-height:1.5;color:var(--op-ink);letter-spacing:0}
-.newsCardList{display:grid!important;grid-template-columns:1rem minmax(0,1fr);column-gap:.28rem}
-.newsCardListMarker{font:inherit;text-align:center}
+.newsCardBody{display:flow-root;margin-top:.8rem;font-family:var(--op-font-body);font-size:1rem;font-weight:500;line-height:1.45;color:var(--op-ink);letter-spacing:0;overflow-wrap:anywhere}
+.newsCardBody :where(p,ul,ol,h1,h2,h3){margin:0 0 .7rem;max-width:none;color:inherit;font:inherit}
+.newsCardBody p{margin:0 0 .7rem;max-width:none;font-size:1rem;font-weight:500;line-height:1.45;color:var(--op-ink);white-space:pre-line}
+.newsCardBody :where(h1,h2,h3){font-family:var(--op-font-display);font-weight:700;line-height:1.2;letter-spacing:-.012em}
+.newsCardBody h1,.newsCardBody h2{font-size:1.2rem}
+.newsCardBody h3{font-size:1.06rem}
+.newsCardBody :where(ul,ol){padding-left:1.3rem;list-style-position:outside}
+.newsCardBody ul{list-style-type:disc}
+.newsCardBody ol{list-style-type:decimal}
+.newsCardBody li{padding-left:.15rem;margin:.35rem 0;color:var(--op-ink)}
+.newsCardBody li p{margin:0}
+.newsCardBody strong{font-weight:750}
+.newsCardBody>:last-child,.newsCardBody>div>:last-child{margin-bottom:0}
 .operationCard svg{flex:none}
 .articleCardActions{display:flex;gap:.35rem}
 .articleCardActions button{min-height:1.92rem;border:1px solid var(--op-ink);border-radius:999px;background:transparent;color:var(--op-ink);padding:.2rem .55rem;font-size:.66rem;font-weight:750}
@@ -193,11 +189,21 @@
 .needNoteInput{box-sizing:border-box;width:100%;min-height:3.2rem;border:1px solid color-mix(in srgb,var(--op-ink) 62%,transparent);border-radius:.58rem;background:color-mix(in srgb,var(--op-canvas) 86%,var(--op-ink) 14%);color:var(--op-ink);padding:.45rem .55rem;font-family:var(--font-body);font-size:.78rem;resize:vertical}
 .orderHistory{display:grid;gap:.55rem}
 .orderHistory summary{cursor:pointer;padding:.4rem 0;font-family:var(--font-display);font-size:.7rem;font-weight:760;letter-spacing:.08em;text-transform:uppercase;color:var(--op-muted)}
-.taskDateBar{display:grid;grid-template-columns:2.25rem minmax(0,1fr) 2.25rem;align-items:center;gap:.38rem;padding:.12rem 0}
-.taskDateBar>button{display:grid;place-items:center;width:2.25rem;height:2.25rem;border:1px solid color-mix(in srgb,var(--op-ink) 60%,transparent);border-radius:50%;background:transparent;color:inherit}
-.taskDateBar label{display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:.5rem;min-height:2.35rem;border:1px solid color-mix(in srgb,var(--op-ink) 60%,transparent);border-radius:999px;padding:0 .75rem;font-family:var(--font-display);font-size:.66rem;font-weight:760;letter-spacing:.07em;text-transform:uppercase}
-.taskDateBar label span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.taskDateBar input{min-width:0;border:0;background:transparent;color:inherit;font:inherit;text-align:center;outline:0}
+.taskDateBar{display:grid;grid-template-columns:2.75rem minmax(0,1fr) 2.75rem auto;align-items:center;max-width:32rem;min-width:0;border:1px solid color-mix(in srgb,var(--op-ink) 48%,transparent);border-radius:.65rem;background:transparent;overflow:hidden}
+.taskDateBar>button{display:grid;place-items:center;min-width:2.75rem;min-height:2.75rem;border:0;border-radius:0;background:transparent;color:inherit}
+.taskDateBar>button:hover{background:var(--op-soft)}
+.taskDateBar label{position:relative;display:flex;justify-content:center;align-items:center;gap:.35rem;min-width:0;min-height:2.75rem;padding:0 .25rem;font-family:var(--op-font-display);font-size:.8125rem;font-weight:700;line-height:1.25;text-align:center;cursor:pointer}
+.taskDateBar label svg{flex:none}
+.taskDateBar input{position:absolute;inset:0;width:100%;height:100%;min-width:0;opacity:0;cursor:pointer}
+.taskDateBar input::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;cursor:pointer}
+.taskDateBar label:focus-within{outline:2px solid var(--op-ink);outline-offset:-3px}
+.taskDateBar>.taskTodayButton{border-left:1px solid color-mix(in srgb,var(--op-ink) 32%,transparent);padding:0 .65rem;font-size:.75rem;font-weight:700}
+.taskDateBar>.taskTodayButton:disabled{color:var(--op-muted)}
+.taskBodyButton{display:flex;align-items:center;gap:.55rem;min-width:0;padding:.7rem;border:1px solid color-mix(in srgb,var(--op-ink) 48%,transparent);border-radius:.6rem;background:transparent;color:inherit;text-align:left;font-weight:700}
+.taskBodyButton>span{display:grid;gap:.2rem;flex:1}
+.taskBodyButton small{font-family:var(--op-font-body);font-size:.75rem;font-weight:400;color:var(--op-muted)}
+.editorBodyHeading{grid-column:2/4;text-align:center;font-size:.9rem;font-weight:700}
+.taskReaderBody{margin:.7rem 0 1rem;overflow-wrap:anywhere}
 .taskComposer{border:1px solid color-mix(in srgb,var(--op-ink) 68%,transparent);border-radius:.72rem;background:color-mix(in srgb,var(--op-canvas) 90%,var(--op-ink) 10%)}
 .taskComposer>summary{display:flex;align-items:center;justify-content:space-between;gap:.8rem;min-height:3rem;padding:.58rem .72rem;cursor:pointer;list-style:none}
 .taskComposer>summary::-webkit-details-marker{display:none}
@@ -239,7 +245,7 @@
 .taskRowTitle{display:flex;align-items:center;gap:.35rem;min-height:1.28rem}
 .taskRowTitle h4{min-width:0;margin:0;font-family:var(--op-font-display);font-size:var(--op-type-card);line-height:1.18;letter-spacing:-.006em;font-weight:700;overflow-wrap:anywhere;text-wrap:pretty}
 .taskRowTitle span{display:inline-flex;width:auto;height:auto;margin-left:auto;border-radius:999px;background:color-mix(in srgb,var(--op-ink) 8%,transparent);padding:.1rem .38rem;font-family:var(--op-font-display);font-size:.625rem;font-weight:700;line-height:1;letter-spacing:.07em;text-transform:uppercase;color:var(--op-muted)}
-.taskRow p{margin:.12rem 0 0;font-family:var(--op-font-body);font-size:var(--op-type-meta);line-height:1.35;color:var(--op-muted)}
+.taskRow p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:.12rem 0 0;font-weight:400;font-family:var(--op-font-body);font-size:var(--op-type-meta);line-height:1.35;color:var(--op-muted)}
 .taskMeta{display:flex;flex-wrap:wrap;gap:.32rem .55rem;margin:.16rem 0 0;font-family:var(--op-font-body);font-size:var(--op-type-label);line-height:1.3;color:var(--op-muted)}
 .taskMeta span{display:inline-flex;align-items:center;gap:.2rem}
 .taskChecklist{display:grid;gap:.3rem;margin-top:.45rem;padding:.4rem .5rem;border-left:2px solid color-mix(in srgb,var(--op-ink) 30%,transparent);font-family:var(--op-font-body);font-size:var(--op-type-meta);line-height:1.35}
@@ -251,7 +257,7 @@
 .taskImagePicker:has(input:disabled)>span{opacity:.5;cursor:not-allowed}.taskImagePicker small{font-size:var(--op-type-meta);line-height:1.35}
 .taskImagePreviews{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.42rem}.taskImagePreviews>div{position:relative;aspect-ratio:1;overflow:hidden;border-radius:.62rem;background:var(--op-soft)}.taskImagePreviews img{width:100%;height:100%;display:block;object-fit:cover}.taskImagePreviews button{position:absolute;top:.25rem;right:.25rem;width:1.65rem;height:1.65rem;display:grid;place-items:center;border:1px solid var(--op-canvas);border-radius:50%;background:var(--op-ink);color:var(--op-canvas);padding:0}
 .taskReaderArticle{display:block}.taskReaderEyebrow{margin:0 0 .5rem!important;font-family:var(--op-font-display)!important;font-size:var(--op-type-label)!important;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--op-muted)}
-.taskReaderDescription{margin:0 0 .8rem;color:var(--op-muted)}.taskReaderMeta{display:flex;flex-wrap:wrap;gap:.38rem;margin-bottom:1rem}.taskReaderMeta span{display:inline-flex;align-items:center;gap:.22rem;border:1px solid color-mix(in srgb,var(--op-ink) 42%,transparent);border-radius:999px;padding:.18rem .45rem;font-family:var(--op-font-display);font-size:var(--op-type-label);font-weight:700;text-transform:capitalize}
+.taskReaderMeta{display:flex;flex-wrap:wrap;gap:.38rem;margin-bottom:1rem}.taskReaderMeta span{display:inline-flex;align-items:center;gap:.22rem;border:1px solid color-mix(in srgb,var(--op-ink) 42%,transparent);border-radius:999px;padding:.18rem .45rem;font-family:var(--op-font-display);font-size:var(--op-type-label);font-weight:700;text-transform:capitalize}
 .taskReaderImages{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin:.8rem 0 1rem}.taskReaderImages .readerImageButton{height:100%;margin:0;aspect-ratio:4/3}.taskReaderImages .readerImage{width:100%;height:100%;object-fit:cover}
 .taskReaderChecklist{display:grid;gap:.42rem;margin-top:1rem}.taskReaderChecklist>div{display:flex;align-items:end;justify-content:space-between;gap:1rem}.taskReaderChecklist h2{margin:0;font-size:var(--op-type-section)}.taskReaderChecklist>div>span{font-family:var(--op-font-body);font-size:var(--op-type-meta);color:var(--op-muted)}
 .taskReaderChecklist label,.taskReaderComplete{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:.58rem;border:1px solid color-mix(in srgb,var(--op-ink) 48%,transparent);border-radius:.68rem;padding:.65rem .72rem;font-family:var(--op-font-body);font-size:var(--op-type-body);line-height:1.3}.taskReaderChecklist label[data-complete="true"] span{text-decoration:line-through;color:var(--op-muted)}

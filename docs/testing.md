@@ -1,5 +1,11 @@
 # Operation verification
 
+## Task bodies and Home refresh (rc.137)
+
+`test:editor` exercises the real shared editor in task-body mode, inserts a Handbook article link without deleting nearby text, saves and reopens a task through a mocked persistence API, follows the link and returns to the task, applies and saves templates, and creates a task with a rich body. Codec checks cover legacy instructions, rich formatting, empty bodies, malformed envelopes and size limits. Home/News checks assert the venue heading, removal of the old featured card/status text, and semantic headings/emphasis/lists. Date controls are exercised for previous/next day and returning to Today. These replace the obsolete source assertions for the removed next-action and flattened-News designs.
+
+Headless Chromium checks covered Home, Tasks and Task Reader at 320, 390, 768, 1024, 1180 and 1440px (18 cases), with no page/control overflow. Checks verified News uses full ink colour, 500 body weight and 1.45 line height, two-line task previews and date-control height. Reviewed screenshots at phone and landscape-tablet widths. Fixture checks are not a live database or physical iOS test. Device acceptance: use the native date picker, rotate while editing a long task body, insert a real Apple Notes paste, save/reopen, and follow a Handbook link back to the task.
+
 ## Content spacing (rc.136)
 
 Starting from rc.135, reduced the large-screen canvas to 54rem with 3rem of additional total side gutters and increased top spacing. Repeated the 42 Chromium fixture layout checks described below: all passed, including two-column controls at 1024px and unchanged small-screen and reader widths. Reviewed landscape Handbook and Reminders screenshots. Lint, type checking, all existing tests, production-shaped environment validation and production build passed. Physical iPad Safari remains a device acceptance check.

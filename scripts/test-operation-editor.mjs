@@ -260,4 +260,131 @@ assert.equal(syncTimers.size, 0);
 console.log("PASS one in-flight request per subscription and no late updates after stopping");
 window.setTimeout = nativeTimeout;
 window.clearTimeout = nativeClearTimeout;
+
+// Task bodies use the same editor and renderers, preserving legacy instructions.
+const { readOperationTaskBody, writeOperationTaskBody, normalizeOperationTaskBody } = loadSource("features/operation/content.ts");
+assert.deepEqual(readOperationTaskBody("Original instruction"), [{ type: "body", text: "Original instruction" }]);
+assert.equal(normalizeOperationTaskBody("Original instruction"), "Original instruction");
+assert.throws(() => normalizeOperationTaskBody("baros:task-body:v1\nbroken"), /invalid/);
+assert.throws(() => normalizeOperationTaskBody("x".repeat(96_001)), /too long/);
+const richBody = { type: "doc", content: [
+  { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Before opening" }] },
+  { type: "paragraph", content: [{ type: "text", text: "Keep these last words", marks: [{ type: "bold" }, { type: "italic" }] }] },
+  { type: "bulletList", content: [{ type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: "Check the fridge" }] }] }] },
+] };
+const serializedBody = writeOperationTaskBody([{ type: "tiptap", document: richBody }]);
+assert.equal(JSON.stringify(readOperationTaskBody(normalizeOperationTaskBody(serializedBody))[0].document), JSON.stringify(richBody));
+assert.deepEqual(readOperationTaskBody(writeOperationTaskBody([])), []);
+console.log("PASS task storage round trip preserves rich formatting and legacy text, rejects invalid/oversized bodies");
+
+localStorage.clear();
+let savedTask = {
+  id: "00000000-0000-4000-8000-000000000004", weekday: 4, title: "Opening checks", description: "Original instruction",
+  dueDate: defaultOperationState.today, repeatUnit: "NONE", repeatInterval: 1, repeatEndDate: null,
+  dueTime: null, reminderMinutes: null, priority: "NORMAL", taskType: "SERVICE", assignmentScope: "EVERYONE",
+  assignedEmployeeId: null, assignedEmployeeName: null, completedByName: null,
+  checklist: [{ id: "item-1", label: "Switch on lights", completed: false }], images: [], completed: false,
+};
+const newsFixture = { ...serverArticle, id: "00000000-0000-4000-8000-000000000005", kind: "NEWS", title: "New beers", content: [{ type: "tiptap", document: richBody }] };
+let templates = [{ id: "template-1", title: "Saved opening", description: serializedBody, taskType: "SERVICE", priority: "NORMAL", dueTime: null, reminderMinutes: null, checklist: [] }];
+const taskRequests = [];
+function taskState() { return { ...defaultOperationState, userRole: "OWNER", canManageTasks: true, canManageContent: true, handbook: [serverArticle], news: [newsFixture], dailyTasks: [savedTask], taskTemplates: templates }; }
+globalThis.fetch = async (url, options = {}) => {
+  const body = options.body ? JSON.parse(options.body) : null;
+  if (body) taskRequests.push(body);
+  if (body?.entity === "dailyTask" && !body.action) {
+    savedTask = { ...savedTask, ...body, id: "00000000-0000-4000-8000-000000000006", description: normalizeOperationTaskBody(body.description) };
+    return { ok: true, json: async () => structuredClone(savedTask) };
+  }
+  if (body?.entity === "dailyTask" && body.action === "edit") savedTask = { ...savedTask, ...body, description: normalizeOperationTaskBody(body.description) };
+  if (body?.entity === "taskTemplate") templates = [...templates, { ...templates[0], ...body, description: normalizeOperationTaskBody(body.description), id: "template-2" }];
+  const result = String(url).includes("scope=articles") ? { handbook: [serverArticle], news: [newsFixture] } : taskState();
+  return { ok: true, json: async () => structuredClone(result) };
+};
+const taskHost = document.createElement("div");
+document.body.append(taskHost);
+const taskApp = createRoot(taskHost);
+await act(async () => { taskApp.render(React.createElement(OperationModule, { initialState: taskState(), initialTheme: defaultTheme, devMode: false })); });
+assert.equal(taskHost.querySelector("h1").textContent, "Blågårds Apotek");
+assert.ok(!taskHost.querySelector(".nextAction"));
+assert.ok(!taskHost.textContent.includes("Latest updates") && !taskHost.textContent.includes("Updated this minute"));
+assert.ok(taskHost.querySelector(".newsCardBody h2"));
+assert.equal(taskHost.querySelector(".newsCardBody em strong").textContent, "Keep these last words");
+assert.equal(taskHost.querySelectorAll(".newsCardBody li").length, 1);
+console.log("PASS Home uses the venue heading and shortcuts; News preserves real headings, inline emphasis and lists");
+async function clickWithin(selector, text) {
+  const button = [...taskHost.querySelectorAll(selector)].find(button => button.textContent.trim() === text);
+  assert.ok(button, "Missing control: " + text);
+  await act(async () => { button.click(); });
+}
+await clickWithin(".operationDock button", "Tasks");
+assert.ok(!taskHost.querySelector(".sectionHeader"), "date navigation must replace the duplicate Tasks/date header");
+const dateInput = taskHost.querySelector('[aria-label="Choose task date"]');
+const originalDate = dateInput.value;
+await act(async () => { taskHost.querySelector('[aria-label="Previous day"]').click(); });
+assert.notEqual(dateInput.value, originalDate);
+await act(async () => { taskHost.querySelector('[aria-label="Next day"]').click(); });
+assert.equal(dateInput.value, originalDate);
+const { operationDateNow } = loadSource("features/operation/date.ts");
+await act(async () => { taskHost.querySelector('[aria-label="Previous day"]').click(); });
+await clickWithin(".taskDateBar button", "Today");
+assert.equal(dateInput.value, operationDateNow());
+console.log("PASS compact task date navigation changes days and returns to Today");
+
+await act(async () => { taskHost.querySelector('[aria-label="Open task: Opening checks"]').click(); });
+assert.equal(taskHost.querySelector('[aria-label="Task body"]').textContent, "Original instruction");
+await clickWithin(".readerBottom button", "Edit");
+await clickWithin(".taskComposer button", "Edit body textFormatting, images and Handbook links");
+const bodyDialog = taskHost.querySelector('[aria-label="Task body text"]');
+assert.ok(bodyDialog);
+assert.equal(bodyDialog.querySelectorAll('[role="toolbar"]>button, [role="toolbar"]>div').length, 8);
+assert.ok(!bodyDialog.querySelector(".editorDescriptionInput"));
+const bodyEditor = bodyDialog.querySelector(".tiptap").editor;
+await act(async () => { bodyEditor.commands.setContent(richBody); bodyEditor.commands.focus("end"); });
+await act(async () => { bodyDialog.querySelector('[aria-label="More formatting tools"]').click(); });
+await clickWithin(".moreMenu button", "Link article");
+await clickWithin(".articleLinkPicker button", serverArticle.title + "handbook · General");
+assert.ok(bodyEditor.getText().includes("Keep these last words"), "menu insertion must not delete preceding characters");
+assert.ok(JSON.stringify(bodyEditor.getJSON()).includes("operation://article/" + serverArticle.id));
+await act(async () => { bodyDialog.querySelector('[aria-label="Done editing body text"]').click(); });
+await clickWithin(".adminActions button", "Save changes");
+assert.ok(taskRequests.some(body => body.action === "edit" && body.description.includes("operation://article/")));
+await act(async () => { taskHost.querySelector('[aria-label="Open task: Opening checks"]').click(); });
+assert.equal(taskHost.querySelector('[aria-label="Task body"] h2').textContent, "Before opening");
+assert.ok(taskHost.querySelector('[aria-label="Task body"] em strong'));
+assert.equal(taskHost.querySelectorAll(".taskReaderChecklist input").length, 1);
+await clickWithin('[aria-label="Task body"] button', serverArticle.title);
+assert.ok(taskHost.querySelector('[aria-label="Back to task"]'));
+assert.ok(!taskHost.querySelector('[aria-label="Opening checks"]'), "article reader must be above the task");
+await act(async () => { taskHost.querySelector('[aria-label="Back to task"]').click(); });
+assert.ok(taskHost.querySelector('[aria-label="Task body"] h2'));
+await clickWithin(".readerBottom button", "Edit");
+await clickWithin(".taskComposer button", "Edit body textFormatting, images and Handbook links");
+assert.ok(taskHost.querySelector(".tiptap").editor.getText().includes("Before opening"), "reopened task editor retains saved body");
+await act(async () => { taskHost.querySelector('[aria-label="Done editing body text"]').click(); });
+await clickWithin(".adminActions button", "Cancel");
+const templateSelect = taskHost.querySelector(".templatePicker select");
+await act(async () => {
+  Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set.call(templateSelect, "template-1");
+  templateSelect.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+});
+await clickWithin(".taskComposer button", "Edit body textFormatting, images and Handbook links");
+assert.equal(taskHost.querySelector(".tiptap").editor.getText().includes("Before opening"), true);
+await act(async () => { taskHost.querySelector('[aria-label="Done editing body text"]').click(); });
+await clickWithin(".adminActions button", "Save template");
+assert.ok(taskRequests.some(body => body.entity === "taskTemplate" && readOperationTaskBody(body.description)[0].document.content[0].type === "heading"));
+await clickWithin(".adminActions button", "Create task");
+assert.equal(taskHost.querySelector('[aria-label="Task body"] h2').textContent, "Before opening");
+assert.ok(taskRequests.some(body => body.entity === "dailyTask" && !body.action && readOperationTaskBody(body.description)[0].document));
+await clickWithin(".readerBottom button", "Edit");
+await clickWithin(".taskComposer button", "Edit body textFormatting, images and Handbook links");
+await act(async () => { taskHost.querySelector(".tiptap").editor.commands.clearContent(); });
+await act(async () => { taskHost.querySelector('[aria-label="Done editing body text"]').click(); });
+await clickWithin(".adminActions button", "Save changes");
+await act(async () => { taskHost.querySelector('[aria-label="Open task: Saved opening"]').click(); });
+assert.ok(!taskHost.querySelector('[aria-label="Task body"]'), "clearing the body removes the body section");
+await act(async () => { taskApp.unmount(); });
+assert.equal(document.body.style.overflow, "");
+console.log("PASS task body creation and edits save and reopen with formatting, Handbook links return to task, and templates preserve bodies");
+
 dom.window.close();
