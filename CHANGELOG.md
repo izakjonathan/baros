@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.19.0-rc.138
+
+- Divided Handbook cards into labelled category sections with a separate responsive grid for each category.
+- Preserved search, category filters, article order, editing and empty results.
+- Added real-component coverage for mixed categories, filtered results and empty results.
+
 ## v0.19.0-rc.137
 
 - Replaced the task short-instruction input with the Handbook rich-text editor, including headings, lists, images, Apple Notes paste and Handbook article links.

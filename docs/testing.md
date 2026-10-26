@@ -1,5 +1,9 @@
 # Operation verification
 
+## Handbook categories (rc.138)
+
+The real Handbook component is rendered with interleaved category fixtures to verify a single labelled section per category, preserved article order, filtered results without empty headings, and the existing empty state. The shared responsive article grid is reused inside each section. Physical device layout remains a manual acceptance check.
+
 ## Task bodies and Home refresh (rc.137)
 
 `test:editor` exercises the real shared editor in task-body mode, inserts a Handbook article link without deleting nearby text, saves and reopens a task through a mocked persistence API, follows the link and returns to the task, applies and saves templates, and creates a task with a rich body. Codec checks cover legacy instructions, rich formatting, empty bodies, malformed envelopes and size limits. Home/News checks assert the venue heading, removal of the old featured card/status text, and semantic headings/emphasis/lists. Date controls are exercised for previous/next day and returning to Today. These replace the obsolete source assertions for the removed next-action and flattened-News designs.

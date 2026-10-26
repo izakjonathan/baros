@@ -823,7 +823,13 @@ function StorageNotice() {
 }
 
 function HandbookView({ articles, categories, query, category, setQuery, setCategory, openArticle, canManageContent, disabled, editArticle, deleteArticle }: { articles: OperationArticle[]; categories: string[]; query: string; category: string; setQuery: (value: string) => void; setCategory: (value: string) => void; openArticle: (article: OperationArticle) => void; canManageContent: boolean; disabled: boolean; editArticle: (article: OperationArticle) => void; deleteArticle: (article: OperationArticle) => void }) {
-  return <><div className={styles.toolbar}><input className={styles.search} value={query} onChange={event => setQuery(event.target.value)} placeholder="Search handbook" aria-label="Search handbook" /><div className={styles.pills}>{categories.map(item => <button key={item} className={styles.pill} type="button" aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div></div><div className={styles.articleGroups}>{articles.map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} onEdit={canManageContent ? () => editArticle(article) : undefined} onDelete={canManageContent ? () => deleteArticle(article) : undefined} disabled={disabled} />)}{!articles.length && <div className={styles.empty}>No handbook articles found.</div>}</div></>;
+  const groups = new Map<string, OperationArticle[]>();
+  for (const article of articles) {
+    const group = groups.get(article.category) || [];
+    group.push(article);
+    groups.set(article.category, group);
+  }
+  return <><div className={styles.toolbar}><input className={styles.search} value={query} onChange={event => setQuery(event.target.value)} placeholder="Search handbook" aria-label="Search handbook" /><div className={styles.pills}>{categories.map(item => <button key={item} className={styles.pill} type="button" aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div></div><div className={styles.handbookSections}>{[...groups].map(([name, items]) => <section key={name} className={styles.splitColumn} aria-label={name}><SectionHeader title={name} /><div className={styles.articleGroups}>{items.map(article => <ArticleCard key={article.id} article={article} onClick={() => openArticle(article)} onEdit={canManageContent ? () => editArticle(article) : undefined} onDelete={canManageContent ? () => deleteArticle(article) : undefined} disabled={disabled} />)}</div></section>)}{!articles.length && <div className={styles.empty}>No handbook articles found.</div>}</div></>;
 }
 
 type TasksViewProps = {

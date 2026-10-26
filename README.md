@@ -1,6 +1,6 @@
 # Bar Ops — Operation
 
-Current release: **v0.19.0-rc.137**
+Current release: **v0.19.0-rc.138**
 
 This repository now contains only the focused Operation product:
 
@@ -51,7 +51,7 @@ npm run validate:env
 npm run build
 ```
 
-Rollback checkpoint: **v0.19.0-rc.136**.
+Rollback checkpoint: **v0.19.0-rc.137**.
 
 ## Responsive Operation layout
 
@@ -76,3 +76,5 @@ Article formatting controls occupy a separate footer in the visible editor frame
 Paste normally into the article body. Notes Title and Heading become Baros Heading; Notes Subheading becomes Baros Subheading. Bold, italic, underline, links and lists retain the supported editor formatting. Clipboard fonts and colors do not replace the Operation theme.
 
 Semantic headings and Apple text-style hints take priority. When Notes supplies only styled paragraphs, whole-line bold text at standard Notes sizes is mapped to Heading or Subheading; a fully bold body line of the same size can be indistinguishable from a subheading. Plain-text-only clipboard content cannot retain heading styles. Real-device Notes/Safari clipboard testing is still required.
+
+Handbook cards are grouped under their category headings. Search and category filters show only matching groups, with the existing responsive card grid inside each group.

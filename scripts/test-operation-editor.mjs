@@ -51,7 +51,7 @@ Object.defineProperty(window, "visualViewport", { value: viewport, configurable:
 const React = require("react");
 const { createRoot } = require("react-dom/client");
 const { act } = React;
-const { ArticleEditor, OperationModule } = loadSource("features/operation/OperationModule.tsx", "\nexport { ArticleEditor };");
+const { ArticleEditor, OperationModule, HandbookView } = loadSource("features/operation/OperationModule.tsx", "\nexport { ArticleEditor, HandbookView };");
 const root = createRoot(document.getElementById("root"));
 let draft = {
   id: "existing-note", kind: "HANDBOOK", category: "General", title: "Test note", description: "",
@@ -387,4 +387,28 @@ await act(async () => { taskApp.unmount(); });
 assert.equal(document.body.style.overflow, "");
 console.log("PASS task body creation and edits save and reopen with formatting, Handbook links return to task, and templates preserve bodies");
 
+// Group the actual Handbook view, including already-filtered search results.
+const { renderToStaticMarkup } = require("react-dom/server");
+const handbookItems = [
+  { ...serverArticle, id: "a", title: "Alarm", category: "Procedures" },
+  { ...serverArticle, id: "b", title: "Whisky", category: "Products" },
+  { ...serverArticle, id: "c", title: "Closing", category: "Procedures" },
+];
+function handbookMarkup(articles) {
+  return new JSDOM(renderToStaticMarkup(React.createElement(HandbookView, {
+    articles, categories: ["All", "Procedures", "Products"], query: "", category: "All",
+    setQuery: () => {}, setCategory: () => {}, openArticle: () => {}, canManageContent: false,
+    disabled: false, editArticle: () => {}, deleteArticle: () => {},
+  }))).window.document;
+}
+const groupedHandbook = handbookMarkup(handbookItems);
+assert.deepEqual([...groupedHandbook.querySelectorAll("section h2")].map(el => el.textContent), ["Procedures", "Products"]);
+assert.deepEqual([...groupedHandbook.querySelectorAll('section[aria-label="Procedures"] h3')].map(el => el.textContent), ["Alarm", "Closing"]);
+assert.equal(groupedHandbook.querySelectorAll(".operationCard").length, 3);
+const filteredHandbook = handbookMarkup([handbookItems[1]]);
+assert.deepEqual([...filteredHandbook.querySelectorAll("section h2")].map(el => el.textContent), ["Products"]);
+const emptyHandbook = handbookMarkup([]);
+assert.equal(emptyHandbook.querySelectorAll("section").length, 0);
+assert.ok(emptyHandbook.body.textContent.includes("No handbook articles found."));
+console.log("PASS Handbook groups interleaved categories once, preserves card order and handles filtered/empty results");
 dom.window.close();
