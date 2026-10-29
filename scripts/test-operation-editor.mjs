@@ -292,12 +292,13 @@ function taskState() { return { ...defaultOperationState, userRole: "OWNER", can
 globalThis.fetch = async (url, options = {}) => {
   const body = options.body ? JSON.parse(options.body) : null;
   if (body) taskRequests.push(body);
-  if (body?.entity === "dailyTask" && !body.action) {
+  if (body?.entity === "dailyTask" && !body.action && options.method === "POST") {
     savedTask = { ...savedTask, ...body, id: "00000000-0000-4000-8000-000000000006", description: normalizeOperationTaskBody(body.description) };
     return { ok: true, json: async () => structuredClone(savedTask) };
   }
   if (body?.entity === "dailyTask" && body.action === "edit") savedTask = { ...savedTask, ...body, description: normalizeOperationTaskBody(body.description) };
   if (body?.entity === "taskTemplate") templates = [...templates, { ...templates[0], ...body, description: normalizeOperationTaskBody(body.description), id: "template-2" }];
+  if (body?.entity === "dailyTask" && options.method === "PATCH" && !body.action) savedTask = { ...savedTask, completed: body.completed };
   const result = String(url).includes("scope=articles") ? { handbook: [serverArticle], news: [newsFixture] } : taskState();
   return { ok: true, json: async () => structuredClone(result) };
 };
@@ -306,6 +307,18 @@ document.body.append(taskHost);
 const taskApp = createRoot(taskHost);
 await act(async () => { taskApp.render(React.createElement(OperationModule, { initialState: taskState(), initialTheme: defaultTheme, devMode: false })); });
 assert.equal(taskHost.querySelector("h1").textContent, "Blågårds Apotek");
+const homeTasks = taskHost.querySelector('[aria-label="Daily tasks"]');
+assert.ok(homeTasks.querySelector('[aria-label="Open task: Opening checks"]'));
+assert.ok(!homeTasks.querySelector('input[type="date"]'));
+await act(async () => { homeTasks.querySelector('input[type="checkbox"]').click(); });
+assert.equal(homeTasks.querySelector('input[type="checkbox"]').checked, true);
+await act(async () => { homeTasks.querySelector('input[type="checkbox"]').click(); });
+assert.equal(homeTasks.querySelector('input[type="checkbox"]').checked, false);
+assert.ok(taskRequests.some(body => body.entity === "dailyTask" && body.date === defaultOperationState.today));
+await act(async () => { homeTasks.querySelector('[aria-label="Open task: Opening checks"]').click(); });
+assert.ok(taskHost.querySelector('[aria-label="Task body"]'));
+await act(async () => { taskHost.querySelector('[aria-label="Close task"]').click(); });
+console.log("PASS Home daily tasks can be opened and checked off without a date picker");
 assert.ok(!taskHost.querySelector(".nextAction"));
 assert.ok(!taskHost.textContent.includes("Latest updates") && !taskHost.textContent.includes("Updated this minute"));
 assert.ok(taskHost.querySelector(".newsCardBody h2"));
@@ -372,10 +385,10 @@ await clickWithin(".taskComposer button", "Edit body textFormatting, images and 
 assert.equal(taskHost.querySelector(".tiptap").editor.getText().includes("Before opening"), true);
 await act(async () => { taskHost.querySelector('[aria-label="Done editing body text"]').click(); });
 await clickWithin(".adminActions button", "Save template");
-assert.ok(taskRequests.some(body => body.entity === "taskTemplate" && readOperationTaskBody(body.description)[0].document.content[0].type === "heading"));
+assert.ok(taskRequests.some(body => body.entity === "taskTemplate" && readOperationTaskBody(body.description || "")[0]?.document.content[0].type === "heading"));
 await clickWithin(".adminActions button", "Create task");
 assert.equal(taskHost.querySelector('[aria-label="Task body"] h2').textContent, "Before opening");
-assert.ok(taskRequests.some(body => body.entity === "dailyTask" && !body.action && readOperationTaskBody(body.description)[0].document));
+assert.ok(taskRequests.some(body => body.entity === "dailyTask" && !body.action && readOperationTaskBody(body.description || "")[0]?.document));
 await clickWithin(".readerBottom button", "Edit");
 await clickWithin(".taskComposer button", "Edit body textFormatting, images and Handbook links");
 await act(async () => { taskHost.querySelector(".tiptap").editor.commands.clearContent(); });
@@ -411,4 +424,16 @@ const emptyHandbook = handbookMarkup([]);
 assert.equal(emptyHandbook.querySelectorAll("section").length, 0);
 assert.ok(emptyHandbook.body.textContent.includes("No handbook articles found."));
 console.log("PASS Handbook groups interleaved categories once, preserves card order and handles filtered/empty results");
+const { operationDateNow: taskDay } = loadSource("features/operation/date.ts");
+for (const [instant, expected] of [
+  ["2026-10-21T03:59:59+02:00", "2026-10-20"],
+  ["2026-10-21T04:00:00+02:00", "2026-10-21"],
+  ["2026-10-21T00:00:00+02:00", "2026-10-20"],
+  ["2026-10-25T03:59:59+01:00", "2026-10-24"],
+  ["2026-10-25T04:00:00+01:00", "2026-10-25"],
+  ["2026-03-29T03:59:59+02:00", "2026-03-28"],
+  ["2026-03-29T04:00:00+02:00", "2026-03-29"],
+  ["2027-01-01T03:59:59+01:00", "2026-12-31"],
+]) assert.equal(taskDay(new Date(instant)), expected);
+console.log("PASS task day switches at 04:00 Copenhagen, including DST and year boundaries");
 dom.window.close();

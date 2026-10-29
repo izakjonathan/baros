@@ -1,5 +1,10 @@
 # Operation verification
 
+## Home daily tasks (rc.139)
+
+Component tests open a task from Home and check/uncheck it through the existing API callbacks. Date tests cover midnight, just before/at 04:00 Copenhagen, both DST transition dates and the year boundary. Home reuses the same task-list renderer as Tasks, without date controls; empty days use the requested pending-task message. Native-device acceptance should include leaving Home open through 04:00 and returning from browsing another date.
+
+
 ## Handbook categories (rc.138)
 
 The real Handbook component is rendered with interleaved category fixtures to verify a single labelled section per category, preserved article order, filtered results without empty headings, and the existing empty state. The shared responsive article grid is reused inside each section. Physical device layout remains a manual acceptance check.

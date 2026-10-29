@@ -308,6 +308,7 @@
   .articleGroups .articleCardOpen{display:flex;flex-direction:column;align-items:flex-start;gap:.5rem}
   .articleGroups .articleCategoryPill{order:-1;max-width:100%;box-sizing:border-box;white-space:normal;overflow-wrap:anywhere;text-align:left}
   .articleGroups .articleCardActions{justify-content:flex-end}
+  .splitColumn .taskGroup{grid-template-columns:minmax(0,1fr)}
   .taskGroup{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:.6rem .75rem}
   .taskGroup>h3{grid-column:1/-1}
   .taskGroup>.taskRow:only-of-type{grid-column:1/-1;max-width:35rem}

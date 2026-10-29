@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.19.0-rc.139
+
+- Added Home daily tasks using the existing task cards, readers and completion controls, including shared staff access.
+- Added the empty-day message without a Home date picker.
+- Unified default task dates with the 04:00 Copenhagen bar-day cutoff and aligned open-page rollover checks to minute boundaries.
+- Separated Home’s current day from browsed task dates and protected against aborted stale responses.
+
 ## v0.19.0-rc.138
 
 - Divided Handbook cards into labelled category sections with a separate responsive grid for each category.

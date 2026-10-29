@@ -247,9 +247,11 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   const refreshArticlesRef = useRef<(() => Promise<void>) | null>(null);
   const readerArticleId = readerStack.at(-1)?.id;
   const currentArticle = state.handbook.find(article => article.id === readerArticleId) || state.news.find(article => article.id === readerArticleId) || null;
+  const homeTaskDate = operationDateNow(new Date(clockTick));
+  const activeTaskDate = view === "tasks" ? selectedTaskDate : homeTaskDate;
   const currentTask = selectedTaskId ? state.dailyTasks.find(task => task.id === selectedTaskId) || null : null;
   const dueSoonTasks = state.dailyTasks.filter(task => {
-    if (selectedTaskDate !== state.today || task.completed || !task.dueTime || task.reminderMinutes == null) return false;
+    if (activeTaskDate !== homeTaskDate || task.completed || !task.dueTime || task.reminderMinutes == null) return false;
     const now = new Date(clockTick);
     const [hours, minutes] = task.dueTime.split(":").map(Number);
     const due = new Date();
@@ -292,7 +294,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     refreshAbort.current = controller;
     const response = await fetch(`${operationEndpoint}${operationEndpoint.includes("?") ? "&" : "?"}date=${encodeURIComponent(date)}`, { cache: "no-store", signal: controller.signal });
     const next = await response.json();
-    if (response.ok) { setState(next as OperationModuleState); }
+    if (!controller.signal.aborted && response.ok) { setState({ ...next, today: date } as OperationModuleState); }
   }, [devMode, operationEndpoint]);
 
   const refreshTasks = useCallback(async (date: string) => {
@@ -303,7 +305,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     const separator = operationEndpoint.includes("?") ? "&" : "?";
     const response = await fetch(`${operationEndpoint}${separator}scope=tasks&date=${encodeURIComponent(date)}`, { cache: "no-store", signal: controller.signal });
     const next = await response.json() as { dailyTasks?: OperationDailyTask[] };
-    if (response.ok && Array.isArray(next.dailyTasks)) { setState(current => ({ ...current, dailyTasks: next.dailyTasks! })); }
+    if (!controller.signal.aborted && response.ok && Array.isArray(next.dailyTasks)) { setState(current => ({ ...current, today: date, dailyTasks: next.dailyTasks! })); }
   }, [devMode, operationEndpoint]);
 
   const selectTaskDate = useCallback((date: string) => {
@@ -313,9 +315,9 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
 
   useEffect(() => {
     if (firstTaskDateRender.current) { firstTaskDateRender.current = false; return; }
-    const timer = window.setTimeout(() => { void refreshTasks(selectedTaskDate).catch(() => undefined); }, 0);
+    const timer = window.setTimeout(() => { void refreshTasks(activeTaskDate).catch(() => undefined); }, 0);
     return () => window.clearTimeout(timer);
-  }, [refreshTasks, selectedTaskDate]);
+  }, [refreshTasks, activeTaskDate]);
 
   useEffect(() => {
     if (devMode) return;
@@ -341,18 +343,23 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   }, [devMode, publicMode, themeRefreshUrl]);
 
   useEffect(() => {
-    const online = () => { setIsOnline(true); void refresh(selectedTaskDate).catch(() => undefined); };
+    const online = () => { setClockTick(Date.now()); setIsOnline(true); void refresh(activeTaskDate).catch(() => undefined); };
     const offline = () => setIsOnline(false);
-    const visible = () => { if (document.visibilityState === "visible" && navigator.onLine) void refresh(selectedTaskDate).catch(() => undefined); };
+    const visible = () => { setClockTick(Date.now()); if (document.visibilityState === "visible" && navigator.onLine) void refresh(view === "tasks" ? selectedTaskDate : operationDateNow()).catch(() => undefined); };
     window.addEventListener("online", online);
     window.addEventListener("offline", offline);
     document.addEventListener("visibilitychange", visible);
     return () => { window.removeEventListener("online", online); window.removeEventListener("offline", offline); document.removeEventListener("visibilitychange", visible); refreshAbort.current?.abort(); };
-  }, [refresh, selectedTaskDate]);
+  }, [refresh, activeTaskDate, view, selectedTaskDate]);
 
   useEffect(() => {
-    const timer = window.setInterval(() => setClockTick(Date.now()), 60_000);
-    return () => window.clearInterval(timer);
+    let timer: number;
+    const tick = () => {
+      setClockTick(Date.now());
+      timer = window.setTimeout(tick, 60_000 - Date.now() % 60_000);
+    };
+    timer = window.setTimeout(tick, 60_000 - Date.now() % 60_000);
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -507,7 +514,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
       } else if (editingTaskId) {
         const response = await fetch(operationEndpoint, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", action: "edit", id: editingTaskId, title: task.title, description: task.description, dueDate: task.dueDate, repeatUnit: task.repeatUnit, repeatInterval: task.repeatInterval, repeatEndDate: task.repeatEndDate, dueTime: task.dueTime, reminderMinutes: task.reminderMinutes, priority: task.priority, taskType: task.taskType, assignmentScope: task.assignmentScope, assignedEmployeeId: task.assignedEmployeeId, checklist: task.checklist, images: task.images }) });
         if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not update task.")); return; }
-        await refreshTasks(selectedTaskDate);
+        await refreshTasks(activeTaskDate);
         setTaskMessage("Task updated.");
       } else {
         const response = await fetch(operationEndpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", idempotencyKey: task.id, title: task.title, description: task.description, dueDate: task.dueDate, repeatUnit: task.repeatUnit, repeatInterval: task.repeatInterval, repeatEndDate: task.repeatEndDate, dueTime: task.dueTime, reminderMinutes: task.reminderMinutes, priority: task.priority, taskType: task.taskType, assignmentScope: task.assignmentScope, assignedEmployeeId: task.assignedEmployeeId, checklist: task.checklist, images: task.images }) });
@@ -515,12 +522,12 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
         const saved: unknown = await response.json().catch(() => null);
         if (!saved || typeof saved !== "object" || !("id" in saved) || typeof saved.id !== "string" || !("checklist" in saved) || !Array.isArray(saved.checklist) || !("images" in saved) || !Array.isArray(saved.images)) {
           setTaskMessage("The task was saved, but its details could not be confirmed. Reload Tasks before trying again.");
-          await refreshTasks(selectedTaskDate); return;
+          await refreshTasks(activeTaskDate); return;
         }
         const savedTask = saved as OperationDailyTask;
         if (savedTask.checklist.length !== checklist.length || savedTask.images.length !== taskImages.length) {
           setTaskMessage("The task was not accepted because every step and image could not be confirmed. Try again.");
-          await refreshTasks(selectedTaskDate); return;
+          await refreshTasks(activeTaskDate); return;
         }
         setState(current => ({ ...current, dailyTasks: [...current.dailyTasks.filter(item => item.id !== savedTask.id), { ...savedTask, assignedEmployeeName: assignee?.name || savedTask.assignedEmployeeName }] }));
         setSelectedTaskId(savedTask.id);
@@ -537,8 +544,8 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     const completed = !item.completed;
     setState(current => ({ ...current, dailyTasks: current.dailyTasks.map(currentTask => currentTask.id === task.id ? { ...currentTask, checklist: currentTask.checklist.map(checklistItem => checklistItem.id === itemId ? { ...checklistItem, completed } : checklistItem) } : currentTask) }));
     if (!devMode) {
-      const response = await fetch(operationEndpoint, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", action: "checklist", id: task.id, itemId, date: selectedTaskDate, completed }) });
-      if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not update checklist.")); await refreshTasks(selectedTaskDate); }
+      const response = await fetch(operationEndpoint, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", action: "checklist", id: task.id, itemId, date: activeTaskDate, completed }) });
+      if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not update checklist.")); await refreshTasks(activeTaskDate); }
     }
   }
 
@@ -547,14 +554,14 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     const checklist = taskChecklistText.split("\n").map(label => label.trim()).filter(Boolean).slice(0, 30).map((label, index) => ({ id: `item-${index + 1}`, label }));
     const response = await fetch(operationEndpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "taskTemplate", title: taskTitle.trim(), description: taskDescription.trim(), taskType, priority: taskPriority, dueTime: taskDueTime || null, reminderMinutes: taskReminderMinutes === "" ? null : Number(taskReminderMinutes), checklist }) });
     if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not save task template.")); return; }
-    setTaskMessage("Template saved."); await refresh(selectedTaskDate);
+    setTaskMessage("Template saved."); await refresh(activeTaskDate);
   }
 
   async function toggleTask(task: OperationDailyTask) {
     setState(current => ({ ...current, dailyTasks: current.dailyTasks.map(item => item.id === task.id ? { ...item, completed: !item.completed } : item) }));
     if (!devMode) {
-      const response = await fetch(operationEndpoint, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", id: task.id, date: selectedTaskDate, completed: !task.completed }) });
-      if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not update task.")); await refreshTasks(selectedTaskDate); }
+      const response = await fetch(operationEndpoint, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "dailyTask", id: task.id, date: activeTaskDate, completed: !task.completed }) });
+      if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not update task.")); await refreshTasks(activeTaskDate); }
     }
   }
 
@@ -589,7 +596,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     setState(current => ({ ...current, needs: current.needs.map(item => item.id === need.id ? { ...item, status, updatedAt } : item) }));
     if (!devMode) {
       const response = await fetch(operationEndpoint, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "need", id: need.id, status }) });
-      if (!response.ok) { setNeedMessage(await responseMessage(response, "Could not update reminder.")); await refresh(selectedTaskDate); }
+      if (!response.ok) { setNeedMessage(await responseMessage(response, "Could not update reminder.")); await refresh(activeTaskDate); }
     }
     if (undoNeed) window.clearTimeout(undoNeed.timer);
     const timer = window.setTimeout(() => setUndoNeed(null), 7000);
@@ -604,7 +611,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     setState(current => ({ ...current, needs: current.needs.map(item => item.id === previous.id ? previous : item) }));
     if (!devMode) {
       const response = await fetch(operationEndpoint, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ entity: "need", action: "undo", id: previous.id, status: "NEEDED" }) });
-      if (!response.ok) { setNeedMessage(await responseMessage(response, "Could not undo reminder action.")); await refresh(selectedTaskDate); }
+      if (!response.ok) { setNeedMessage(await responseMessage(response, "Could not undo reminder action.")); await refresh(activeTaskDate); }
     }
   }
 
@@ -686,7 +693,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
       {!isOnline && <div className={styles.connectionBanner} role="status"><strong>Offline</strong><span>Your drafts stay on this device. Saved information will refresh when the connection returns.</span></div>}
       {storageUnavailable && <StorageNotice />}
       {dueSoonTasks.length > 0 && <section className={styles.duePrompt} role="status"><Clock3 size={18} /><div><strong>{dueSoonTasks.length === 1 ? "Task due soon" : `${dueSoonTasks.length} tasks due soon`}</strong><p>{dueSoonTasks.map(task => `${task.title} · ${task.dueTime}`).join(" · ")}</p></div></section>}
-      {view === "home" && (publicMode ? <PublicHomeView handbook={state.handbook} news={state.news} openArticle={(article) => setReaderStack([article])} openHandbook={() => setView("handbook")} /> : <HomeView handbook={state.handbook} news={state.news} tasks={state.dailyTasks} needs={state.needs} openArticle={(article) => setReaderStack([article])} openView={setView} canManageContent={state.canManageContent} disabled={storageUnavailable} editArticle={(article) => { setDraft(draftFromArticle(article, article.kind)); setEditorMessage(storageUnavailable ? migrationMessage : ""); setEditorOpen(!storageUnavailable); }} deleteArticle={deleteArticle} />)}
+      {view === "home" && <HomeView handbook={state.handbook} news={state.news} tasks={state.today === homeTaskDate ? state.dailyTasks : []} tasksLoading={state.today !== homeTaskDate} openTask={task => setSelectedTaskId(task.id)} toggleTask={toggleTask} needs={state.needs} openArticle={(article) => setReaderStack([article])} openView={setView} canManageContent={state.canManageContent} disabled={storageUnavailable} editArticle={(article) => { setDraft(draftFromArticle(article, article.kind)); setEditorMessage(storageUnavailable ? migrationMessage : ""); setEditorOpen(!storageUnavailable); }} deleteArticle={deleteArticle} />}
       {editorMessage && !editorOpen && <p className={styles.editorMessage} role="status">{editorMessage}</p>}
       {view === "handbook" && <HandbookView articles={filteredHandbook} categories={handbookCategories} query={query} category={category} setQuery={setQuery} setCategory={setCategory} openArticle={(article) => setReaderStack([article])} canManageContent={state.canManageContent} disabled={storageUnavailable} editArticle={(article) => { setDraft(draftFromArticle(article, article.kind)); setEditorMessage(storageUnavailable ? migrationMessage : ""); setEditorOpen(!storageUnavailable); }} deleteArticle={deleteArticle} />}
       {view === "tasks" && <TasksView linkableArticles={state.handbook} tasks={state.dailyTasks} taskTemplates={state.taskTemplates} assignees={state.assignees} selectedDate={selectedTaskDate} setSelectedDate={selectTaskDate} canManage={state.canManageTasks} taskTitle={taskTitle} taskDescription={taskDescription} taskDueDate={taskDueDate} taskRepeatUnit={taskRepeatUnit} taskRepeatInterval={taskRepeatInterval} taskRepeatEndDate={taskRepeatEndDate} taskType={taskType} taskPriority={taskPriority} taskDueTime={taskDueTime} taskReminderMinutes={taskReminderMinutes} taskAssignmentScope={taskAssignmentScope} taskAssigneeId={taskAssigneeId} taskChecklistText={taskChecklistText} taskImages={taskImages} taskImageUploading={taskImageUploading} taskSaving={taskSaving} editingTaskId={editingTaskId} setTaskTitle={setTaskTitle} setTaskDescription={setTaskDescription} setTaskDueDate={setTaskDueDate} setTaskRepeatUnit={setTaskRepeatUnit} setTaskRepeatInterval={setTaskRepeatInterval} setTaskRepeatEndDate={setTaskRepeatEndDate} setTaskType={setTaskType} setTaskPriority={setTaskPriority} setTaskDueTime={setTaskDueTime} setTaskReminderMinutes={setTaskReminderMinutes} setTaskAssignmentScope={setTaskAssignmentScope} setTaskAssigneeId={setTaskAssigneeId} setTaskChecklistText={setTaskChecklistText} addTaskImages={addTaskImages} removeTaskImage={(index) => setTaskImages(current => current.filter((_, itemIndex) => itemIndex !== index))} saveTaskTemplate={saveTaskTemplate} addTask={addTask} cancelEdit={resetTaskComposer} openTask={(task) => setSelectedTaskId(task.id)} toggleTask={toggleTask} toggleTaskChecklist={toggleTaskChecklist} deleteTask={deleteTask} disabled={storageUnavailable} message={taskMessage} />}
@@ -797,21 +804,18 @@ function OperationSettings({ theme, saving, close, preview, save, resetHistory, 
   </div>{pendingAction && <ConfirmDialog title={pendingAction.title} message={pendingAction.message} confirmLabel={pendingAction.label} close={() => setPendingAction(null)} confirm={async () => { const run = pendingAction.run; setPendingAction(null); await run(); }} />}</>;
 }
 
-function HomeView({ handbook, news, tasks, needs, openArticle, openView, canManageContent, disabled, editArticle, deleteArticle }: { handbook: OperationArticle[]; news: OperationArticle[]; tasks: OperationDailyTask[]; needs: OperationNeed[]; openArticle: (article: OperationArticle) => void; openView: (view: View) => void; canManageContent: boolean; disabled: boolean; editArticle: (article: OperationArticle) => void; deleteArticle: (article: OperationArticle) => void }) {
+function HomeView({ openTask, toggleTask, tasksLoading = false, handbook, news, tasks, needs, openArticle, openView, canManageContent, disabled, editArticle, deleteArticle }: { openTask: (task: OperationDailyTask) => void; toggleTask: (task: OperationDailyTask) => void; tasksLoading?: boolean; handbook: OperationArticle[]; news: OperationArticle[]; tasks: OperationDailyTask[]; needs: OperationNeed[]; openArticle: (article: OperationArticle) => void; openView: (view: View) => void; canManageContent: boolean; disabled: boolean; editArticle: (article: OperationArticle) => void; deleteArticle: (article: OperationArticle) => void }) {
   const outstanding = tasks.filter(task => !task.completed);
   const openNeeds = needs.filter(need => need.status === "NEEDED");
   return <div className={styles.splitLayout}><section className={styles.splitColumn} aria-label="Home overview">
     <section className={styles.todayPanel}><h1>Blågårds Apotek</h1></section>
+    <section className={styles.splitColumn} aria-label="Daily tasks"><SectionHeader title="Daily tasks" />{tasksLoading ? <p role="status">Loading today’s tasks…</p> : <TaskList tasks={tasks} openTask={openTask} toggleTask={toggleTask} disabled={disabled} emptyMessage="No pending tasks for today." />}</section>
     <section className={styles.homeShortcuts} aria-label="Today’s shortcuts">
       <button type="button" onClick={() => openView("tasks")}><CheckSquare size={18} /><span><strong>{outstanding.length}</strong><small>{outstanding.length === 1 ? "task left" : "tasks left"}</small></span><ChevronRight size={17} /></button>
       <button type="button" onClick={() => openView("needs")}><ShoppingBasket size={18} /><span><strong>{openNeeds.length}</strong><small>{openNeeds.length === 1 ? "reminder open" : "reminders open"}</small></span><ChevronRight size={17} /></button>
     </section>
     </section><section className={styles.splitColumn} aria-label="News"><NewsFeed handbook={handbook} news={news} openArticle={openArticle} canManageContent={canManageContent} disabled={disabled} editArticle={editArticle} deleteArticle={deleteArticle} />
   </section></div>;
-}
-
-function PublicHomeView({ handbook, news, openArticle, openHandbook }: { handbook: OperationArticle[]; news: OperationArticle[]; openArticle: (article: OperationArticle) => void; openHandbook: () => void }) {
-  return <div className={styles.splitLayout}><section className={styles.splitColumn} aria-label="Handbook overview"><section className={styles.todayPanel}><div><h1>Blågårds Apotek</h1></div><button type="button" onClick={openHandbook}>Open handbook <ChevronRight size={17} /></button></section></section><section className={styles.splitColumn} aria-label="News"><NewsFeed handbook={handbook} news={news} openArticle={openArticle} /></section></div>;
 }
 
 function NewsFeed({ handbook, news, openArticle, canManageContent = false, disabled = false, editArticle, deleteArticle }: { handbook: OperationArticle[]; news: OperationArticle[]; openArticle: (article: OperationArticle) => void; canManageContent?: boolean; disabled?: boolean; editArticle?: (article: OperationArticle) => void; deleteArticle?: (article: OperationArticle) => void }) {
@@ -846,7 +850,6 @@ function TasksView({ linkableArticles, tasks, taskTemplates, assignees, selected
   const formattedDate = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(current);
   const [taskBodyOpen, setTaskBodyOpen] = useState(false);
   const shiftDate = (days: number) => setSelectedDate(new Date(current.valueOf() + days * 86_400_000).toISOString().slice(0, 10));
-  const grouped = (["OPENING", "SERVICE", "CLOSING", "MAINTENANCE", "ADMIN"] as OperationTaskType[]).map(type => [type, tasks.filter(task => task.taskType === type)] as const).filter(([, items]) => items.length);
   function applyTemplate(templateId: string) {
     const template = taskTemplates.find(item => item.id === templateId);
     if (!template) return;
@@ -865,8 +868,13 @@ function TasksView({ linkableArticles, tasks, taskTemplates, assignees, selected
       <div className={styles.adminActions}><button className={styles.composerSubmit} type="button" onClick={addTask} disabled={disabled || taskImageUploading || taskSaving}>{taskSaving ? <LoaderCircle className={styles.saveSpinner} size={16} /> : null}{editingTaskId ? "Save changes" : "Create task"}</button>{editingTaskId ? <button type="button" onClick={cancelEdit} disabled={taskSaving}>Cancel</button> : <button type="button" onClick={saveTaskTemplate} disabled={disabled || !taskTitle.trim()}>Save template</button>}</div>{message && <p className={styles.editorMessage} role="status">{message}</p>}
     </div></details>}
     {taskBodyOpen && <ArticleEditor taskBody draft={{ kind: "HANDBOOK", category: "", title: "", description: "", document: documentFromBlocks(readOperationTaskBody(taskDescription)) }} categories={[]} linkableArticles={linkableArticles} setDraft={next => setTaskDescription(writeOperationTaskBody([{ type: "tiptap", document: next.document }]))} saveArticle={async () => { setTaskBodyOpen(false); return true; }} saving={false} message="" close={() => setTaskBodyOpen(false)} />}
-    <div className={styles.taskList}>{grouped.map(([type, items]) => <section className={styles.taskGroup} key={type}><h3>{type.toLowerCase()}</h3>{items.map(task => <article className={styles.taskRow} key={task.id} data-complete={task.completed}><input type="checkbox" checked={task.completed} onChange={() => toggleTask(task)} aria-label={`Mark ${task.title} complete`} disabled={disabled} /><button type="button" className={styles.taskRowOpen} onClick={() => openTask(task)} aria-label={`Open task: ${task.title}`}><div className={styles.taskRowTitle}><h4>{task.title}</h4><span data-priority={task.priority}>{task.priority.toLowerCase()}</span></div>{taskBodyPreview(task.description) && <p>{taskBodyPreview(task.description)}</p>}<div className={styles.taskMeta}>{task.checklist.length > 0 && <span><CheckSquare size={13} />{task.checklist.filter(item => item.completed).length} of {task.checklist.length} steps</span>}{task.images.length > 0 && <span><ImagePlus size={13} />{task.images.length} {task.images.length === 1 ? "image" : "images"}</span>}{task.dueTime && <span><Clock3 size={13} />{task.dueTime}</span>}{task.assignedEmployeeName && <span><UserRound size={13} />{task.assignedEmployeeName}</span>}{task.completed && task.completedByName && <span>Completed by {task.completedByName}</span>}</div></button>{canManage ? <button type="button" className={styles.rowDelete} onClick={() => deleteTask(task)} aria-label={`Delete ${task.title}`} disabled={disabled}><Trash2 size={16} /></button> : <ChevronRight className={styles.taskRowChevron} size={18} aria-hidden="true" />}</article>)}</section>)}{!tasks.length && <div className={styles.empty}>No tasks scheduled for this date.</div>}</div>
+    <TaskList tasks={tasks} openTask={openTask} toggleTask={toggleTask} canManage={canManage} deleteTask={deleteTask} disabled={disabled} />
   </>;
+}
+
+function TaskList({ tasks, openTask, toggleTask, canManage = false, deleteTask, disabled, emptyMessage = "No tasks scheduled for this date." }: { tasks: OperationDailyTask[]; openTask: (task: OperationDailyTask) => void; toggleTask: (task: OperationDailyTask) => void; canManage?: boolean; deleteTask?: (task: OperationDailyTask) => void; disabled: boolean; emptyMessage?: string }) {
+  const grouped = (["OPENING", "SERVICE", "CLOSING", "MAINTENANCE", "ADMIN"] as OperationTaskType[]).map(type => [type, tasks.filter(task => task.taskType === type)] as const).filter(([, items]) => items.length);
+  return <div className={styles.taskList}>{grouped.map(([type, items]) => <section className={styles.taskGroup} key={type}><h3>{type.toLowerCase()}</h3>{items.map(task => <article className={styles.taskRow} key={task.id} data-complete={task.completed}><input type="checkbox" checked={task.completed} onChange={() => toggleTask(task)} aria-label={`Mark ${task.title} complete`} disabled={disabled} /><button type="button" className={styles.taskRowOpen} onClick={() => openTask(task)} aria-label={`Open task: ${task.title}`}><div className={styles.taskRowTitle}><h4>{task.title}</h4><span data-priority={task.priority}>{task.priority.toLowerCase()}</span></div>{taskBodyPreview(task.description) && <p>{taskBodyPreview(task.description)}</p>}<div className={styles.taskMeta}>{task.checklist.length > 0 && <span><CheckSquare size={13} />{task.checklist.filter(item => item.completed).length} of {task.checklist.length} steps</span>}{task.images.length > 0 && <span><ImagePlus size={13} />{task.images.length} {task.images.length === 1 ? "image" : "images"}</span>}{task.dueTime && <span><Clock3 size={13} />{task.dueTime}</span>}{task.assignedEmployeeName && <span><UserRound size={13} />{task.assignedEmployeeName}</span>}{task.completed && task.completedByName && <span>Completed by {task.completedByName}</span>}</div></button>{canManage ? <button type="button" className={styles.rowDelete} onClick={() => deleteTask?.(task)} aria-label={`Delete ${task.title}`} disabled={disabled}><Trash2 size={16} /></button> : <ChevronRight className={styles.taskRowChevron} size={18} aria-hidden="true" />}</article>)}</section>)}{!tasks.length && <div className={styles.empty}>{emptyMessage}</div>}</div>;
 }
 
 function NeedsView({ needs, needTitle, needType, needStockLevel, needNote, setNeedTitle, setNeedType, setNeedStockLevel, setNeedNote, addNeed, updateNeedStatus, disabled, message }: { needs: OperationNeed[]; needTitle: string; needType: OperationReminderType; needStockLevel: OperationReminderStockLevel; needNote: string; setNeedTitle: (value: string) => void; setNeedType: (value: OperationReminderType) => void; setNeedStockLevel: (value: OperationReminderStockLevel) => void; setNeedNote: (value: string) => void; addNeed: () => void; updateNeedStatus: (need: OperationNeed, status: "ORDERED" | "RESOLVED" | "DISMISSED") => void; disabled: boolean; message: string }) {

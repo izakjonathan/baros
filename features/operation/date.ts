@@ -1,6 +1,6 @@
 const venueTimeZone = "Europe/Copenhagen";
 
-export function operationDateNow(date = new Date()) {
+function calendarDateNow(date = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", { timeZone: venueTimeZone, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(date);
   const value = (type: Intl.DateTimeFormatPartTypes) => parts.find(part => part.type === type)?.value || "";
   return `${value("year")}-${value("month")}-${value("day")}`;
@@ -17,9 +17,12 @@ export function operationCountDateNow(date = new Date()) {
   const month = Number(value("month"));
   const day = Number(value("day"));
   const hour = Number(value("hour"));
-  if (![year, month, day, hour].every(Number.isFinite)) return operationDateNow(date);
+  if (![year, month, day, hour].every(Number.isFinite)) return calendarDateNow(date);
   const operationalDay = new Date(Date.UTC(year, month - 1, day) - (hour < 4 ? 86_400_000 : 0));
   return operationalDay.toISOString().slice(0, 10);
 }
 
 export const operationTimeZone = venueTimeZone;
+
+/** Task days, like cash counts, run from 04:00 to 04:00 in Copenhagen. */
+export function operationDateNow(date = new Date()) { return operationCountDateNow(date); }
