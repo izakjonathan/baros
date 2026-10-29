@@ -1,0 +1,30 @@
+name: Task exception schema
+on:
+  push:
+    branches: [main]
+    paths: [db/migrations/026_operation_task_exceptions.sql]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: baros-database-admin
+  cancel-in-progress: false
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_DIRECT_URL: ${{ secrets.DATABASE_DIRECT_URL }}
+      NODE_ENV: production
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+      - run: npm ci --no-audit --no-fund
+      - run: npm run db:migrate
+      - run: npm run db:verify
