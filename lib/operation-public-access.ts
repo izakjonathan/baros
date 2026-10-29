@@ -26,7 +26,8 @@ export async function loadPublicOperationState(access: PublicOperationAccess, da
              (c.completed_at is not null) completed
       from operation_daily_tasks t
       left join operation_daily_task_completions c on c.task_id=t.id and c.service_date=${date}::date and c.organization_id=t.organization_id
-      where t.organization_id=${access.organizationId} and t.active=true and t.assignment_scope='EVERYONE'
+      where t.organization_id=${access.organizationId} and t.active=true
+      and not exists (select 1 from operation_task_exceptions ex where ex.task_id=t.id and ex.organization_id=t.organization_id and ex.service_date=${date}::date) and t.assignment_scope='EVERYONE'
       order by t.sort_order,t.created_at`,
     db()<Array<Record<string, unknown>>>`
       select id,title,note,status,created_at,updated_at,reminder_type,stock_level

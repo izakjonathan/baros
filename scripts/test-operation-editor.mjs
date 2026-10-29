@@ -280,7 +280,7 @@ console.log("PASS task storage round trip preserves rich formatting and legacy t
 localStorage.clear();
 let savedTask = {
   id: "00000000-0000-4000-8000-000000000004", weekday: 4, title: "Opening checks", description: "Original instruction",
-  dueDate: defaultOperationState.today, repeatUnit: "NONE", repeatInterval: 1, repeatEndDate: null,
+  dueDate: defaultOperationState.today, repeatUnit: "DAY", repeatInterval: 1, repeatEndDate: null,
   dueTime: null, reminderMinutes: null, priority: "NORMAL", taskType: "SERVICE", assignmentScope: "EVERYONE",
   assignedEmployeeId: null, assignedEmployeeName: null, completedByName: null,
   checklist: [{ id: "item-1", label: "Switch on lights", completed: false }], images: [], completed: false,
@@ -288,8 +288,10 @@ let savedTask = {
 const newsFixture = { ...serverArticle, id: "00000000-0000-4000-8000-000000000005", kind: "NEWS", title: "New beers", content: [{ type: "tiptap", document: richBody }] };
 let templates = [{ id: "template-1", title: "Saved opening", description: serializedBody, taskType: "SERVICE", priority: "NORMAL", dueTime: null, reminderMinutes: null, checklist: [] }];
 const taskRequests = [];
+const taskDeletes = [];
 function taskState() { return { ...defaultOperationState, userRole: "OWNER", canManageTasks: true, canManageContent: true, handbook: [serverArticle], news: [newsFixture], dailyTasks: [savedTask], taskTemplates: templates }; }
 globalThis.fetch = async (url, options = {}) => {
+  if (options.method === "DELETE") taskDeletes.push(String(url));
   const body = options.body ? JSON.parse(options.body) : null;
   if (body) taskRequests.push(body);
   if (body?.entity === "dailyTask" && !body.action && options.method === "POST") {
@@ -344,6 +346,13 @@ await clickWithin(".taskDateBar button", "Today");
 assert.equal(dateInput.value, operationDateNow());
 console.log("PASS compact task date navigation changes days and returns to Today");
 
+await act(async () => { taskHost.querySelector('[aria-label="Delete Opening checks"]').click(); });
+assert.ok(taskHost.querySelector('[role="alertdialog"]').textContent.includes("Only this occurrence"));
+assert.ok(taskHost.querySelector('[role="alertdialog"]').textContent.includes("All repeated tasks"));
+await clickWithin('[role="alertdialog"] button', "Cancel");
+assert.ok(taskHost.querySelector('[aria-label="Open task: Opening checks"]'));
+assert.ok(fs.readFileSync("features/operation/OperationModule.module.css", "utf8").includes(".readerEditButton{pointer-events:auto;"));
+console.log("PASS recurring delete offers occurrence/series choices and cancellation keeps the task");
 await act(async () => { taskHost.querySelector('[aria-label="Open task: Opening checks"]').click(); });
 assert.equal(taskHost.querySelector('[aria-label="Task body"]').textContent, "Original instruction");
 await clickWithin(".readerBottom button", "Edit");
@@ -398,6 +407,20 @@ await act(async () => { taskHost.querySelector('[aria-label="Open task: Saved op
 assert.ok(!taskHost.querySelector('[aria-label="Task body"]'), "clearing the body removes the body section");
 await act(async () => { taskApp.unmount(); });
 assert.equal(document.body.style.overflow, "");
+for (const [label, scope] of [["Only this occurrence", "occurrence"], ["All repeated tasks", "series"]]) {
+  savedTask = { ...savedTask, repeatUnit: "DAY" };
+  const app = createRoot(taskHost);
+  await act(async () => { app.render(React.createElement(OperationModule, { initialState: taskState(), initialTheme: defaultTheme, devMode: false })); });
+  await clickWithin(".operationDock button", "Tasks");
+  await act(async () => { taskHost.querySelector('[aria-label="Delete Saved opening"]').click(); });
+  await clickWithin('[role="alertdialog"] button', label);
+  const deleted = new URL(taskDeletes.at(-1), "https://barops.example");
+  assert.equal(deleted.searchParams.get("scope"), scope);
+  assert.equal(deleted.searchParams.get("date"), operationDateNow());
+  assert.ok(!taskHost.querySelector('[aria-label="Open task: Saved opening"]'));
+  await act(async () => { app.unmount(); });
+}
+console.log("PASS occurrence and series deletion submit distinct scopes and the selected bar day");
 console.log("PASS task body creation and edits save and reopen with formatting, Handbook links return to task, and templates preserve bodies");
 
 // Group the actual Handbook view, including already-filtered search results.

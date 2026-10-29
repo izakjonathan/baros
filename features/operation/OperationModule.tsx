@@ -241,7 +241,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   const [clockTick, setClockTick] = useState(() => Date.now());
   const [draftsReady, setDraftsReady] = useState(false);
   const [undoNeed, setUndoNeed] = useState<{ need: OperationNeed; timer: number } | null>(null);
-  const [confirmation, setConfirmation] = useState<{ title: string; message: string; confirmLabel: string; action: () => Promise<void> | void } | null>(null);
+  const [confirmation, setConfirmation] = useState<{ title: string; message: string; confirmLabel: string; action: () => Promise<void> | void; alternateLabel?: string; alternateAction?: () => Promise<void> | void } | null>(null);
   const firstTaskDateRender = useRef(true);
   const refreshAbort = useRef<AbortController | null>(null);
   const refreshArticlesRef = useRef<(() => Promise<void>) | null>(null);
@@ -566,13 +566,16 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
   }
 
   async function deleteTask(task: OperationDailyTask) {
-    setConfirmation({ title: "Remove task?", message: `“${task.title}” will be removed from the task series.`, confirmLabel: "Remove", action: async () => {
+    const remove = async (scope: "series" | "occurrence") => {
       if (!devMode) {
-        const response = await fetch(operationUrl(`entity=dailyTask&id=${encodeURIComponent(task.id)}`), { method: "DELETE" });
+        const response = await fetch(operationUrl(`entity=dailyTask&id=${encodeURIComponent(task.id)}&scope=${scope}&date=${activeTaskDate}`), { method: "DELETE" });
         if (!response.ok) { setTaskMessage(await responseMessage(response, "Could not delete task.")); return; }
       }
+      setSelectedTaskId(null);
       setState(current => ({ ...current, dailyTasks: current.dailyTasks.filter(item => item.id !== task.id) }));
-    } });
+    };
+    const repeated = task.repeatUnit !== "NONE";
+    setConfirmation({ title: repeated ? "Delete repeated task?" : "Delete task?", message: repeated ? `Delete “${task.title}” only for ${activeTaskDate}, or remove the entire repeated series?` : `Delete “${task.title}”?`, confirmLabel: repeated ? "All repeated tasks" : "Delete", action: () => remove("series"), ...(repeated ? { alternateLabel: "Only this occurrence", alternateAction: () => remove("occurrence") } : {}) });
   }
 
   async function addNeed() {
@@ -705,7 +708,7 @@ export function OperationModule({ initialState, initialTheme, devMode, publicMod
     {editorOpen && <ArticleEditor draft={draft} categories={editorCategories} linkableArticles={allArticles} setDraft={setDraft} saveArticle={saveArticle} saving={saving} message={editorMessage} close={() => { setEditorOpen(false); setEditorMessage(""); }} />}
     {studioOpen && <OperationSettings theme={uiTheme} saving={studioSaving} close={() => { setUiTheme(savedUiTheme); setStudioOpen(false); }} preview={setUiTheme} save={saveUiTheme} resetHistory={resetOperationHistory} countHistoryCount={state.cashCounts.length} reminderHistoryCount={state.needs.filter(need => need.status !== "NEEDED").length} publicUrl={publicUrl} />}
     {undoNeed && <div className={styles.undoToast} role="status"><span>Reminder updated.</span><button type="button" onClick={() => void undoNeedStatus()}>Undo</button></div>}
-    {confirmation && <ConfirmDialog title={confirmation.title} message={confirmation.message} confirmLabel={confirmation.confirmLabel} close={() => setConfirmation(null)} confirm={async () => { const action = confirmation.action; setConfirmation(null); await action(); }} />}
+    {confirmation && <ConfirmDialog title={confirmation.title} message={confirmation.message} confirmLabel={confirmation.confirmLabel} alternateLabel={confirmation.alternateLabel} alternate={confirmation.alternateAction ? async () => { const action = confirmation.alternateAction!; setConfirmation(null); await action(); } : undefined} close={() => setConfirmation(null)} confirm={async () => { const action = confirmation.action; setConfirmation(null); await action(); }} />}
   </div>;
 }
 
@@ -713,9 +716,9 @@ function upsertArticle(list: OperationArticle[], article: OperationArticle) {
   return list.some(item => item.id === article.id) ? list.map(item => item.id === article.id ? article : item) : [article, ...list];
 }
 
-function ConfirmDialog({ title, message, confirmLabel, close, confirm }: { title: string; message: string; confirmLabel: string; close: () => void; confirm: () => Promise<void> | void }) {
+function ConfirmDialog({ title, message, confirmLabel, close, confirm, alternateLabel, alternate }: { alternateLabel?: string; alternate?: () => Promise<void> | void; title: string; message: string; confirmLabel: string; close: () => void; confirm: () => Promise<void> | void }) {
   const dialogRef = useDialogFocus(close);
-  return <div className={styles.confirmBackdrop} onMouseDown={event => { if (event.target === event.currentTarget) close(); }}><section ref={dialogRef} className={styles.confirmDialog} role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-message"><h2 id="confirm-title">{title}</h2><p id="confirm-message">{message}</p><div><button type="button" onClick={close}>Cancel</button><button type="button" onClick={() => void confirm()}>{confirmLabel}</button></div></section></div>;
+  return <div className={styles.confirmBackdrop} onMouseDown={event => { if (event.target === event.currentTarget) close(); }}><section ref={dialogRef} className={styles.confirmDialog} role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-message"><h2 id="confirm-title">{title}</h2><p id="confirm-message">{message}</p><div><button type="button" onClick={close}>Cancel</button>{alternate && <button type="button" onClick={() => void alternate()}>{alternateLabel}</button>}<button type="button" onClick={() => void confirm()}>{confirmLabel}</button></div></section></div>;
 }
 
 function OperationSettings({ theme, saving, close, preview, save, resetHistory, countHistoryCount, reminderHistoryCount, publicUrl }: { theme: UiTheme; saving: boolean; close: () => void; preview: (theme: UiTheme) => void; save: (theme: UiTheme) => Promise<void>; resetHistory: (target: "cashCountHistory" | "reminderHistory") => Promise<number>; countHistoryCount: number; reminderHistoryCount: number; publicUrl?: string }) {
@@ -857,7 +860,7 @@ function TasksView({ linkableArticles, tasks, taskTemplates, assignees, selected
   }
   return <>
     <div className={styles.taskDateBar} role="group" aria-label="Task date navigation"><button type="button" onClick={() => shiftDate(-1)} aria-label="Previous day"><ChevronLeft size={20} /></button><label><CalendarDays size={18} aria-hidden="true" /><span aria-hidden="true">{formattedDate}</span><input aria-label="Choose task date" type="date" value={selectedDate} onChange={event => { if (event.target.value) setSelectedDate(event.target.value); }} /></label><button type="button" onClick={() => shiftDate(1)} aria-label="Next day"><ChevronRight size={20} /></button><button type="button" className={styles.taskTodayButton} onClick={() => setSelectedDate(operationDateNow())} disabled={selectedDate === operationDateNow()}>Today</button></div>
-    {canManage && <details key={editingTaskId || "new-task"} className={styles.taskComposer} open={editingTaskId ? true : undefined}><summary><span><Plus size={17} />{editingTaskId ? "Edit task" : "Create task"}</span><small>{editingTaskId ? "Update this task series" : "Title, date, steps and images"}</small></summary><div className={styles.taskComposerBody}>
+    {canManage && <details key={editingTaskId || "new-task"} className={styles.taskComposer} open={editingTaskId ? true : undefined}><summary><span><Plus size={17} />{editingTaskId ? "Edit task" : "Create task"}</span><small>{editingTaskId ? "Changes apply to all repeated tasks" : "Title, date, steps and images"}</small></summary><div className={styles.taskComposerBody}>
       {taskTemplates.length > 0 && <label className={styles.templatePicker}><span>Start from template</span><select defaultValue="" onChange={event => applyTemplate(event.target.value)}><option value="" disabled>Choose a saved task</option>{taskTemplates.map(template => <option key={template.id} value={template.id}>{template.title}</option>)}</select></label>}
       <input value={taskTitle} onChange={event => setTaskTitle(event.target.value)} placeholder="Task title" aria-label="Task title" disabled={disabled} /><button type="button" className={styles.taskBodyButton} onClick={() => setTaskBodyOpen(true)} disabled={disabled}><BookOpen size={18} /><span>{hasRichTextContent(documentFromBlocks(readOperationTaskBody(taskDescription))) ? "Edit body text" : "Add body text"}<small>Formatting, images and Handbook links</small></span><ChevronRight size={18} /></button>
       <div className={styles.taskSettings}><label><span className={styles.taskSettingLabel}><CalendarDays size={15} />First date</span><input type="date" value={taskDueDate} onChange={event => setTaskDueDate(event.target.value)} disabled={disabled} /></label><label><span className={styles.taskSettingLabel}>Section</span><select value={taskType} onChange={event => setTaskType(event.target.value as OperationTaskType)} disabled={disabled}><option value="OPENING">Opening</option><option value="SERVICE">Service</option><option value="CLOSING">Closing</option><option value="MAINTENANCE">Maintenance</option><option value="ADMIN">Admin</option></select></label></div>

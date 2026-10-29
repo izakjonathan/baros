@@ -118,6 +118,7 @@ export async function loadOperationTasks(user: OperationUserScope, date: string)
     where t.organization_id=${user.organizationId}
       and (${user.locationId}::uuid is null or t.location_id is null or t.location_id=${user.locationId})
       and t.active=true
+      and not exists (select 1 from operation_task_exceptions ex where ex.task_id=t.id and ex.organization_id=t.organization_id and ex.service_date=${date}::date)
       and (${canManageOperationTasks(user.role)}
         or t.assignment_scope='EVERYONE'
         or (t.assignment_scope='EMPLOYEE' and t.assigned_employee_id=${user.employeeId}::uuid)

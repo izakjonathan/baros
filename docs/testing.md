@@ -1,5 +1,10 @@
 # Operation verification
 
+## Recurring task management (rc.140)
+
+Real component coverage exercises recurring task editing and the occurrence/series deletion chooser including cancellation. The Edit button explicitly restores pointer events over its non-interactive footer. Migration 026 stores date exceptions independently of completion history; all three authenticated/shared task queries exclude matching task/date/organization exceptions. The occurrence DELETE validates the date against the recurrence and requires task-manager permission. Physical touch interaction remains device acceptance.
+
+
 ## Home daily tasks (rc.139)
 
 Component tests open a task from Home and check/uncheck it through the existing API callbacks. Date tests cover midnight, just before/at 04:00 Copenhagen, both DST transition dates and the year boundary. Home reuses the same task-list renderer as Tasks, without date controls; empty days use the requested pending-task message. Native-device acceptance should include leaving Home open through 04:00 and returning from browsing another date.

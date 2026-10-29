@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.19.0-rc.140
+
+- Restored pointer interaction on the task reader Edit button.
+- Clarified that recurring task edits apply to the complete series.
+- Added occurrence/series deletion choices with persistent date exceptions across authenticated and shared views.
+- Added migration 026 and a scoped production migration workflow.
+
 ## v0.19.0-rc.139
 
 - Added Home daily tasks using the existing task cards, readers and completion controls, including shared staff access.

@@ -95,6 +95,7 @@ export async function GET(request: Request) {
         where t.organization_id=${user.organizationId}
           and (${user.locationId}::uuid is null or t.location_id is null or t.location_id=${user.locationId})
           and t.active=true
+      and not exists (select 1 from operation_task_exceptions ex where ex.task_id=t.id and ex.organization_id=t.organization_id and ex.service_date=${today}::date)
           and (${canManageTasks(user.role)}
             or t.assignment_scope='EVERYONE'
             or (t.assignment_scope='EMPLOYEE' and t.assigned_employee_id=${user.employeeId}::uuid)
@@ -501,6 +502,15 @@ export async function DELETE(request: Request) {
       if (!row) throw new ApiError(404, "Article not found");
     } else if (entity === "dailyTask") {
       requireTaskManager(user.role);
+      const scope = enumValue(params.get("scope") || "series", "scope", ["series", "occurrence"] as const);
+      if (scope === "occurrence") {
+        const date = isoDate(params.get("date"), "date");
+        const [task] = await db()<Array<Record<string, unknown>>>`select id,due_date::text due_date,repeat_unit,repeat_interval,repeat_end_date::text repeat_end_date from operation_daily_tasks where id=${id} and organization_id=${user.organizationId} and active=true`;
+        if (!task) throw new ApiError(404, "Daily task not found");
+        if (!isOperationTaskDue({ dueDate: String(task.due_date), repeatUnit: String(task.repeat_unit) as OperationDailyTask["repeatUnit"], repeatInterval: Number(task.repeat_interval), repeatEndDate: task.repeat_end_date == null ? null : String(task.repeat_end_date) }, date)) throw new ApiError(400, "Task is not scheduled for this date");
+        await db()`insert into operation_task_exceptions(task_id,organization_id,service_date,deleted_by) values(${id},${user.organizationId},${date}::date,${user.userId}) on conflict(task_id,service_date) do nothing`;
+        return NextResponse.json({ ok: true, scope, date });
+      }
       const [row] = await db()`update operation_daily_tasks set active=false,updated_by=${user.userId},updated_at=now() where id=${id} and organization_id=${user.organizationId} returning id`;
       if (!row) throw new ApiError(404, "Daily task not found");
     } else if (entity === "taskTemplate") {
